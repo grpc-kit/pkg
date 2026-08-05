@@ -2,6 +2,7 @@ package auth
 
 import (
 	"testing"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/grpc-kit/pkg/crypto"
@@ -110,5 +111,55 @@ func TestPreferredUsernameCompatibility(t *testing.T) {
 				t.Fatalf("GetMustUserID() = %d, want %d", got, tt.wantUserID)
 			}
 		})
+	}
+}
+
+func TestSignedGroupsOnlyTokenDoesNotGrantRoles(t *testing.T) {
+	claims := &AccessTokenClaims{CommonClaims: CommonClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+		},
+		Groups: []string{"admin"},
+	}}
+	tokenString, err := claims.GetAccessToken("test-key")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded AccessTokenClaims
+	if _, _, err := jwt.NewParser().ParseUnverified(tokenString, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	if roles := EffectiveRoles(decoded); len(roles) != 0 {
+		t.Fatalf("groups-only token granted roles: %v", roles)
+	}
+}
+
+func TestSetEmailDoesNotSynthesizeOrVerifyMissingEmail(t *testing.T) {
+	claims := &AccessTokenClaims{}
+	claims.SetSubject("42")
+	claims.EmailVerified = true
+	claims.SetEmail("")
+	if claims.Email != "" || claims.EmailVerified {
+		t.Fatalf("missing email was synthesized or verified: email=%q verified=%t", claims.Email, claims.EmailVerified)
+	}
+	claims.SetEmail(" user@example.com ")
+	claims.EmailVerified = true
+	if claims.Email != "user@example.com" || !claims.EmailVerified {
+		t.Fatalf("real email was not preserved: email=%q verified=%t", claims.Email, claims.EmailVerified)
+	}
+}
+
+func TestLegacyAppidStillParses(t *testing.T) {
+	claims := &AccessTokenClaims{CommonClaims: CommonClaims{Appid: "legacy-app"}}
+	tokenString, err := claims.GetAccessToken("test-key")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded AccessTokenClaims
+	if _, _, err := jwt.NewParser().ParseUnverified(tokenString, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	if decoded.Appid != "legacy-app" {
+		t.Fatalf("legacy appid = %q", decoded.Appid)
 	}
 }

@@ -123,3 +123,14 @@ func TestExternalUserClaimsFromIDToken(t *testing.T) {
 		t.Fatalf("profile mapping mismatch: %#v", profile)
 	}
 }
+
+func TestGetMapBoolRequiresExplicitBoolean(t *testing.T) {
+	if !getMapBool(map[string]interface{}{"email_verified": true}, "email_verified") {
+		t.Fatal("explicit true was not recognized")
+	}
+	for _, value := range []interface{}{false, "true", 1, nil} {
+		if getMapBool(map[string]interface{}{"email_verified": value}, "email_verified") {
+			t.Fatalf("untrusted value was accepted: %#v", value)
+		}
+	}
+}

@@ -11,13 +11,13 @@ import (
 func TestHasSuperadminMenuAccessUsesRoles(t *testing.T) {
 	ctx := context.Background()
 	ctx = rpc.ContextWithGroups(ctx, []string{"superadmin"})
-	if !hasSuperadminMenuAccess(ctx) {
-		t.Fatal("legacy groups fallback should allow superadmin")
+	if hasSuperadminMenuAccess(ctx) {
+		t.Fatal("groups must not grant superadmin access")
 	}
 
 	ctx = rpc.ContextWithRoles(ctx, []string{"viewer"})
 	if hasSuperadminMenuAccess(ctx) {
-		t.Fatal("canonical roles must override legacy groups")
+		t.Fatal("viewer role must not grant superadmin access")
 	}
 
 	ctx = rpc.ContextWithRoles(ctx, []string{seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)})

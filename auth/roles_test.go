@@ -1,13 +1,15 @@
 package auth
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
 
 func TestEffectiveRoles(t *testing.T) {
 	tests := []struct {
 		name   string
 		claims AccessTokenClaims
 		want   []string
-		source RoleClaimSource
 	}{
 		{
 			name: "roles are authoritative",
@@ -15,16 +17,14 @@ func TestEffectiveRoles(t *testing.T) {
 				Groups: []string{"legacy-admin"},
 				Roles:  []string{" admin ", "admin", "viewer"},
 			}},
-			want:   []string{"admin", "viewer"},
-			source: RoleClaimSourceRoles,
+			want: []string{"admin", "viewer"},
 		},
 		{
-			name: "legacy groups fallback",
+			name: "groups are never roles",
 			claims: AccessTokenClaims{CommonClaims: CommonClaims{
 				Groups: []string{"admin", "admin", " viewer "},
 			}},
-			want:   []string{"admin", "viewer"},
-			source: RoleClaimSourceLegacyGroups,
+			want: []string{},
 		},
 		{
 			name: "explicit empty roles do not fallback",
@@ -32,17 +32,13 @@ func TestEffectiveRoles(t *testing.T) {
 				Groups: []string{"admin"},
 				Roles:  []string{},
 			}},
-			want:   []string{},
-			source: RoleClaimSourceRoles,
+			want: []string{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, source := EffectiveRoles(tt.claims)
-			if source != tt.source {
-				t.Fatalf("source = %q, want %q", source, tt.source)
-			}
+			got := EffectiveRoles(tt.claims)
 			if len(got) != len(tt.want) {
 				t.Fatalf("roles = %v, want %v", got, tt.want)
 			}
@@ -52,5 +48,21 @@ func TestEffectiveRoles(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestEffectiveRolesJSONEmptyVariantsNeverFallback(t *testing.T) {
+	for _, payload := range []string{
+		`{"groups":["admin"]}`,
+		`{"roles":null,"groups":["admin"]}`,
+		`{"roles":[],"groups":["admin"]}`,
+	} {
+		var claims AccessTokenClaims
+		if err := json.Unmarshal([]byte(payload), &claims); err != nil {
+			t.Fatalf("unmarshal %s: %v", payload, err)
+		}
+		if roles := EffectiveRoles(claims); len(roles) != 0 {
+			t.Fatalf("payload %s granted roles: %v", payload, roles)
+		}
 	}
 }

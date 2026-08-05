@@ -3,26 +3,73 @@ package cfg
 import (
 	"context"
 	"testing"
+	"time"
 
+	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	apimetric "go.opentelemetry.io/otel/metric"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 )
 
 func TestObservables(t *testing.T) {
-	if err := lc.initObservables(); err != nil {
-		t.Error(err)
+	config := newObservablesTestConfig(t)
+	config.Observables.defaultValues()
+	t.Run("testObservablesDefaultValues", func(t *testing.T) {
+		testObservablesDefaultValues(t, config.Observables)
+	})
+
+	// Exporter defaults are verified above. Network exporters are disabled only
+	// for this test instance so the suite never depends on a local collector.
+	disabled := false
+	config.Observables.Telemetry.Traces.Exporters.OTLP = &disabled
+	config.Observables.Telemetry.Traces.Exporters.OTLPHTTP = &disabled
+	config.Observables.Telemetry.Traces.Exporters.Logging = &disabled
+	previousTracerProvider := otel.GetTracerProvider()
+	previousMeterProvider := otel.GetMeterProvider()
+	if err := config.initObservables(); err != nil {
+		t.Fatal(err)
 	}
 
-	t.Run("testObservablesDefaultValues", testObservablesDefaultValues)
-	t.Run("testObservablesTracer", testObservablesTracer)
-	t.Run("testObservablesMeter", testObservablesMeter)
+	spanExporter := tracetest.NewInMemoryExporter()
+	config.Observables.tracer.RegisterSpanProcessor(sdktrace.NewSimpleSpanProcessor(spanExporter))
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := config.Observables.shutdown(ctx); err != nil {
+			t.Errorf("shutdown observables: %v", err)
+		}
+		otel.SetTracerProvider(previousTracerProvider)
+		otel.SetMeterProvider(previousMeterProvider)
+	})
+
+	t.Run("testObservablesTracer", func(t *testing.T) {
+		testObservablesTracer(t, config.Observables, spanExporter)
+	})
+	t.Run("testObservablesMeter", func(t *testing.T) {
+		testObservablesMeter(t, config.Observables)
+	})
+}
+
+func newObservablesTestConfig(t *testing.T) *LocalConfig {
+	t.Helper()
+	v := viper.New()
+	v.SetConfigType("yaml")
+	v.SetConfigFile("app-sample.yaml")
+	if err := v.ReadInConfig(); err != nil {
+		t.Fatal(err)
+	}
+	config, err := New(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return config
 }
 
 // testObservablesDefaultValues 用于服务初始化默认值的判断
-func testObservablesDefaultValues(t *testing.T) {
-	o := lc.Observables
+func testObservablesDefaultValues(t *testing.T, o *ObservablesConfig) {
 	if o == nil {
 		t.Errorf("observables config is nil")
 	}
@@ -82,16 +129,8 @@ func testObservablesDefaultValues(t *testing.T) {
 	}
 }
 
-/*
-docker run --rm --name jaeger \
-  -e METRICS_STORAGE_TYPE=prometheus \
-  -p 16686:16686 \
-  -p 4317:4317 \
-  -p 4318:4318 \
-  jaegertracing/all-in-one:1.50
-*/
-// testObservablesTracing 用于链路跟踪上报测试依赖本地 jaeger 服务
-func testObservablesTracer(t *testing.T) {
+// testObservablesTracer 使用内存 exporter 验证链路，不依赖外部 OTLP collector。
+func testObservablesTracer(t *testing.T, observables *ObservablesConfig, exporter *tracetest.InMemoryExporter) {
 	ctx := context.TODO()
 	packageName := "github.com/grpc-kit/pkg"
 
@@ -131,19 +170,17 @@ func testObservablesTracer(t *testing.T) {
 
 	// 关闭前需强制刷新下内存数据，否则会丢失来不及上报
 	// 使用框架时无需处理，在服务关闭前会自动刷新
-	if err := lc.Observables.tracer.ForceFlush(ctx); err != nil {
-		t.Error(err)
+	if err := observables.tracer.ForceFlush(ctx); err != nil {
+		t.Fatal(err)
 	}
-
-	/*
-		if err := lc.Observables.shutdown(ctx); err != nil {
-			t.Error(err)
-		}
-	*/
+	spans := exporter.GetSpans()
+	if len(spans) != 7 {
+		t.Fatalf("exported spans = %d, want 7", len(spans))
+	}
 }
 
-// testObservablesTracer 用于性能数据上报测试
-func testObservablesMeter(t *testing.T) {
+// testObservablesMeter 用于性能数据上报测试
+func testObservablesMeter(t *testing.T, observables *ObservablesConfig) {
 	ctx := context.TODO()
 	packageName := "github.com/grpc-kit/pkg"
 
@@ -163,13 +200,7 @@ func testObservablesMeter(t *testing.T) {
 
 	counter.Add(ctx, 5, opts)
 
-	if err := lc.Observables.meter.ForceFlush(ctx); err != nil {
+	if err := observables.meter.ForceFlush(ctx); err != nil {
 		t.Error(err)
 	}
-
-	/*
-		if err := lc.Observables.shutdown(ctx); err != nil {
-			t.Error(err)
-		}
-	*/
 }
