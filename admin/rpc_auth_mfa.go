@@ -4,20 +4,16 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
-	"crypto/x509"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
-	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/pquerna/otp/totp"
@@ -127,7 +123,10 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 		}
 	}
 
-	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID)
+	if challenge.IssuanceContext == nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA challenge missing access token issuance context")
+	}
+	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID, *challenge.IssuanceContext)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
@@ -142,7 +141,7 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 	return &adminv1.AuthToken{
 		AccessToken: accessToken,
 		TokenType:   "Bearer",
-		ExpiresIn:   durationSecondsInt32(a.getLoginAccessTokenTTL(ctx)),
+		ExpiresIn:   durationSecondsInt32(challenge.IssuanceContext.TTL),
 	}, nil
 }
 
@@ -215,7 +214,9 @@ func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUser
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create setup challenge")
 	}
-	challenge.TempSecret = key.Secret()
+	if !a.mfaChallenges.SetTempSecret(challenge.ChallengeID, key.Secret()) {
+		return nil, errs.Internal(ctx).WithMessage("failed to store MFA setup secret")
+	}
 
 	return &adminv1.SetupUserMFAResponse{
 		Secret:      key.Secret(),
@@ -443,11 +444,16 @@ func (a *KnownAdminAPI) StartAuthMFASetup(ctx context.Context, req *adminv1.Star
 		return nil, errs.Internal(ctx).WithMessage("failed to generate TOTP key")
 	}
 
-	setupChallenge, err := a.mfaChallenges.CreateWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeLoginSetupConfirm, challenge.UserID, challenge.Username)
+	if challenge.IssuanceContext == nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA challenge missing access token issuance context")
+	}
+	setupChallenge, err := a.mfaChallenges.CreateLoginWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeLoginSetupConfirm, challenge.UserID, challenge.Username, *challenge.IssuanceContext)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create setup challenge")
 	}
-	setupChallenge.TempSecret = key.Secret()
+	if !a.mfaChallenges.SetTempSecret(setupChallenge.ChallengeID, key.Secret()) {
+		return nil, errs.Internal(ctx).WithMessage("failed to store MFA setup secret")
+	}
 	a.mfaChallenges.Delete(req.ChallengeId)
 
 	return &adminv1.StartAuthMFASetupResponse{
@@ -522,7 +528,10 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 
 	a.mfaChallenges.Delete(req.SetupChallengeId)
 
-	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID)
+	if challenge.IssuanceContext == nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA challenge missing access token issuance context")
+	}
+	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID, *challenge.IssuanceContext)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
@@ -530,68 +539,35 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 	return &adminv1.AuthToken{
 		AccessToken: accessToken,
 		TokenType:   "Bearer",
-		ExpiresIn:   durationSecondsInt32(a.getLoginAccessTokenTTL(ctx)),
+		ExpiresIn:   durationSecondsInt32(challenge.IssuanceContext.TTL),
 	}, nil
 }
 
 // issueTokenForUser 为指定用户签发 JWT access_token（MFA 验证通过后调用）
-func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, userID int) (string, error) {
-	u, err := db.Users.Query().
-		Select(users.FieldID, users.FieldUsername, users.FieldNickname).
-		Where(users.IDEQ(userID), users.UserStatusEQ(int(adminv1.User_ACTIVE.Number()))).
-		Only(ctx)
-	if err != nil {
-		return "", fmt.Errorf("user not found or not active: %w", err)
-	}
-
-	sk, err := db.Credentials.Query().
-		Select(credentials.FieldPrivateKeyEncrypted, credentials.FieldCode).
-		Where(
-			credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
-			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_RSA.Number())),
-			credentials.CredentialUsageEQ(int(adminv1.Credential_JWKS.Number())),
-			credentials.CredentialVisibilityEQ(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())),
-			credentials.CredentialStatusEQ(int(adminv1.Credential_ACTIVE.Number())),
-			credentials.CredentialSourceEQ(int(adminv1.Credential_SYSTEM.Number())),
-		).
-		Order(credentials.ByID()).
-		First(ctx)
-	if err != nil {
-		return "", fmt.Errorf("failed to query credentials: %w", err)
-	}
-
-	derBytes, err := crypto.DecryptAES(a.config.aesKey, sk.PrivateKeyEncrypted)
-	if err != nil {
-		return "", fmt.Errorf("failed to decrypt private key: %w", err)
-	}
-
-	privateKey, err := x509.ParsePKCS1PrivateKey(derBytes)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse private key: %w", err)
-	}
-
-	roleIDs, err := effectiveRoleIDsForUser(ctx, db, userID)
+func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, userID int, issuance AccessTokenIssuanceContext) (string, error) {
+	profile, err := loadAccessTokenUserProfile(ctx, db, a.config.aesKey, userID)
 	if err != nil {
 		return "", err
 	}
-	groups, err := roleCodesForIDs(ctx, db, roleIDs)
+	now := time.Now()
+	roleIDs, err := effectiveRoleIDsForUserAt(ctx, db, userID, now)
 	if err != nil {
 		return "", err
 	}
-
-	accessTokenClaims := &auth.AccessTokenClaims{
-		CommonClaims: auth.CommonClaims{
-			PreferredUsername: u.Username,
-			Nickname:          u.Nickname,
-		},
+	roleCodes, err := roleCodesForIDs(ctx, db, roleIDs)
+	if err != nil {
+		return "", err
 	}
-	accessTokenClaims.SetSubject(strconv.Itoa(u.ID))
-	accessTokenClaims.SetGroups(groups)
-	accessTokenClaims.SetRoles(groups)
-	accessTokenClaims.SetExpiresAt(durationSecondsInt64(a.getLoginAccessTokenTTL(ctx)))
-	accessTokenClaims.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
-
-	return accessTokenClaims.GetAccessTokenRSA(privateKey, sk.Code)
+	groupCodes, err := effectiveGroupCodesForUserAt(ctx, db, userID, now)
+	if err != nil {
+		return "", err
+	}
+	privateKey, kid, err := loadAccessTokenRSAKey(ctx, db, a.config.aesKey)
+	if err != nil {
+		return "", err
+	}
+	input := accessTokenInputFromProfile(profile, issuance, roleCodes, groupCodes)
+	return newAccessTokenIssuer().issueRSA(input, privateKey, kid)
 }
 
 func generateRecoveryCodes(count int) ([]string, error) {

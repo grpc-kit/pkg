@@ -12,9 +12,10 @@ import (
 
 // GetAuthCallback 处理 OAuth2.0 的回调
 func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAuthCallbackRequest) (*adminv1.GetAuthCallbackResponse, error) {
+	ttl := a.getLoginAccessTokenTTL(ctx)
 	result := &adminv1.GetAuthCallbackResponse{
 		TokenType: "Bearer",
-		ExpiresIn: durationSecondsInt32(a.getLoginAccessTokenTTL(ctx)),
+		ExpiresIn: durationSecondsInt32(ttl),
 	}
 
 	db, err := a.GetLionClient()
@@ -27,6 +28,11 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 	if err != nil {
 		return nil, err
 	}
+	issuance, err := a.newAccessTokenIssuanceContext("", "", ttl)
+	if err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
+	su.issuanceContext = issuance
 
 	accessToken, err := su.Exchange(ctx, req.GetCode())
 	if err != nil {
@@ -38,7 +44,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		return nil, errs.Internal(ctx).WithMessage("failed to parse callback access token")
 	}
 
-	authToken, err := a.applyMFAGateAfterPrimaryAuth(ctx, db, userID, username, false, accessToken)
+	authToken, err := a.applyMFAGateAfterPrimaryAuth(ctx, db, userID, username, false, accessToken, issuance)
 	if err != nil {
 		return nil, err
 	}

@@ -42,6 +42,10 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	if providerCode == "" {
 		providerCode = "local"
 	}
+	issuance, err := a.newAccessTokenIssuanceContext("", "", time.Duration(expiresIn)*time.Second)
+	if err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
 
 	hasDBEnabled := false
 	db, err := a.GetLionClient()
@@ -57,7 +61,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	if providerCode == "local" && a.config.staticUsers != nil {
 		u, ok := a.config.staticUsers.Valid(req.Username, req.PasswordHash)
 		if ok {
-			tk, err := u.GetAccessToken(expiresIn, "")
+			tk, err := u.issueAccessToken(issuance)
 			if err != nil {
 				return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
 			}
@@ -79,6 +83,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			}
 			return nil, err
 		}
+		su.issuanceContext = issuance
 
 		if su.AuthProvider.ProviderStatus != int(adminv1.AuthProvider_ACTIVE.Number()) {
 			return nil, errs.FailedPrecondition(ctx).WithMessage("auth provider is not active")
@@ -135,6 +140,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			pcResult.Username,
 			pcResult.MfaEnabled,
 			pcResult.AccessToken,
+			issuance,
 		)
 		if gateErr != nil {
 			return nil, gateErr
@@ -181,7 +187,11 @@ func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.Create
 		expiresIn = durationSecondsInt32(a.getLoginAccessTokenTTL(ctx))
 	}
 
-	tk, err := u.GetAccessToken(expiresIn, appid)
+	issuance, err := a.newAccessTokenIssuanceContext(appid, "", time.Duration(expiresIn)*time.Second)
+	if err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
+	tk, err := u.issueAccessToken(issuance)
 	if err != nil {
 		return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
 	}
