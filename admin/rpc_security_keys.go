@@ -1182,37 +1182,23 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empty) (*adminv1.OAuth2Userinfo, error) {
 	result := &adminv1.OAuth2Userinfo{}
 
-	var claims *auth.CommonClaims
-	switch token := rpc.GetTokenClaimsFromContext(ctx).(type) {
-	case auth.AccessTokenClaims:
-		claims = &token.CommonClaims
-	case *auth.AccessTokenClaims:
-		if token != nil {
-			claims = &token.CommonClaims
-		}
-	case auth.IDTokenClaims:
-		// 兼容由旧调用方直接写入 context 的 IDTokenClaims。
-		claims = &token.CommonClaims
-	case *auth.IDTokenClaims:
-		if token != nil {
-			claims = &token.CommonClaims
-		}
-	}
-	if claims == nil {
+	claims, ok := oauth2UserinfoClaimsFromContext(ctx)
+	if !ok {
 		return result, errs.PermissionDenied(ctx)
 	}
 
-	// 从 JWT 中提取基础 claim（这些字段在签发 token 时已确定）
+	// Bearer 使用已验证的 JWT claims；Basic Auth 使用中间件已验证并写入
+	// context 的本地用户身份。
 	result.Sub = claims.Subject
 	result.UserId = claims.GetMustUserID()
 	result.PreferredUsername = claims.GetPreferredUsername()
 	result.Email = claims.Email
 	result.EmailVerified = claims.EmailVerified
 
-	// 从数据库查询用户实体，补充完整 OIDC Standard Claims
+	// 从数据库查询用户实体，补充完整 OIDC Standard Claims。
+	// 静态 Basic Auth 可以在没有数据库的部署中使用，此时返回最小身份信息。
 	userID := result.UserId
-	if userID <= 0 {
-		// 缺少 user_id 时仅返回 JWT 中的基础 claim
+	if userID <= 0 || a == nil || a.config == nil || a.config.db == nil {
 		return result, nil
 	}
 
@@ -1237,12 +1223,12 @@ func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empt
 		Where(users.IDEQ(int(userID))).
 		Only(ctx)
 	if err != nil {
-		// 用户查询失败时降级返回 JWT 中的基础 claim，避免 userinfo endpoint 整体不可用
+		// 用户查询失败时降级返回认证上下文中的基础信息，避免 userinfo endpoint 整体不可用。
 		if lion.IsNotFound(err) {
-			a.logger.Infof("oauth2 userinfo: user %d not found, returning jwt claims only", userID)
+			a.logger.Infof("oauth2 userinfo: user %d not found, returning authentication context only", userID)
 			return result, nil
 		}
-		a.logger.Infof("oauth2 userinfo: query user %d failed: %v, returning jwt claims only", userID, err)
+		a.logger.Infof("oauth2 userinfo: query user %d failed: %v, returning authentication context only", userID, err)
 		return result, nil
 	}
 
@@ -1300,6 +1286,39 @@ func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empt
 	result.UpdatedAt = user.UpdatedAt.Unix()
 
 	return result, nil
+}
+
+func oauth2UserinfoClaimsFromContext(ctx context.Context) (*auth.CommonClaims, bool) {
+	switch token := rpc.GetTokenClaimsFromContext(ctx).(type) {
+	case auth.AccessTokenClaims:
+		return &token.CommonClaims, true
+	case *auth.AccessTokenClaims:
+		if token != nil {
+			return &token.CommonClaims, true
+		}
+	case auth.IDTokenClaims:
+		// 兼容由旧调用方直接写入 context 的 IDTokenClaims。
+		return &token.CommonClaims, true
+	case *auth.IDTokenClaims:
+		if token != nil {
+			return &token.CommonClaims, true
+		}
+	}
+
+	authType, ok := rpc.GetAuthenticationTypeFromContext(ctx)
+	if !ok || authType != "basic" {
+		return nil, false
+	}
+	username, ok := rpc.GetUsernameFromContext(ctx)
+	if !ok || username == "" || username == "anonymous" {
+		return nil, false
+	}
+
+	claims := &auth.CommonClaims{PreferredUsername: username}
+	if userID, ok := rpc.GetUserIDFromContext(ctx); ok {
+		claims.SetSubject(strconv.FormatInt(userID, 10))
+	}
+	return claims, true
 }
 
 // firstByte 返回字节切片的首字节，空切片返回 0。
