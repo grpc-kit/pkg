@@ -29,6 +29,7 @@ func TestSeedRoleCode(t *testing.T) {
 	}{
 		{adminv1.RoleCode_ROLE_CODE_UNSPECIFIED, ""},
 		{adminv1.RoleCode_ROLE_CODE_SUPERADMIN, "superadmin"},
+		{adminv1.RoleCode_ROLE_CODE_ADMIN, "admin"},
 	}
 	for _, tt := range tests {
 		if got := seedRoleCode(tt.c); got != tt.want {

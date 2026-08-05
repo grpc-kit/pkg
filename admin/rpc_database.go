@@ -305,13 +305,46 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	rollback := func() { _ = tx.Rollback() }
 
 	superadminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)
-	adminRole, err := tx.Roles.Query().Where(roles.CodeEQ(superadminCode)).Only(ctx)
+	superadminRole, err := tx.Roles.Query().Where(roles.CodeEQ(superadminCode)).Only(ctx)
 	if lion.IsNotFound(err) {
-		adminRole, err = tx.Roles.Create().
+		superadminRole, err = tx.Roles.Create().
 			SetCode(superadminCode).
 			SetDisplayName(superadminCode).
 			SetRoleType(int(adminv1.Role_SYSTEM.Number())).
+			SetRoleStatus(int(adminv1.Role_ACTIVE.Number())).
+			SetProtected(true).
 			SetDescription("超级管理员").
+			Save(ctx)
+		if err != nil {
+			rollback()
+			return nil, err
+		}
+	} else if err != nil {
+		rollback()
+		return nil, err
+	} else {
+		superadminRole, err = superadminRole.Update().
+			SetRoleStatus(int(adminv1.Role_ACTIVE.Number())).
+			SetProtected(true).
+			Save(ctx)
+		if err != nil {
+			rollback()
+			return nil, err
+		}
+	}
+
+	adminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_ADMIN)
+	_, err = tx.Roles.Query().Where(roles.CodeEQ(adminCode)).Only(ctx)
+	if lion.IsNotFound(err) {
+		_, err = tx.Roles.Create().
+			SetParentID(superadminRole.ID).
+			SetCode(adminCode).
+			SetDisplayName("普通管理员").
+			SetRoleType(int(adminv1.Role_SYSTEM.Number())).
+			SetRoleStatus(int(adminv1.Role_ACTIVE.Number())).
+			SetSortOrder(100).
+			SetProtected(true).
+			SetDescription("系统内置普通管理员角色").
 			Save(ctx)
 		if err != nil {
 			rollback()
@@ -347,7 +380,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 
 	rolePolicyExists, err := tx.RolePolicies.Query().
-		Where(rolepolicies.RoleIDEQ(adminRole.ID), rolepolicies.PolicyIDEQ(superadminPolicy.ID)).
+		Where(rolepolicies.RoleIDEQ(superadminRole.ID), rolepolicies.PolicyIDEQ(superadminPolicy.ID)).
 		Exist(ctx)
 	if err != nil {
 		rollback()
@@ -355,7 +388,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 	if !rolePolicyExists {
 		if err := tx.RolePolicies.Create().
-			SetRoleID(adminRole.ID).
+			SetRoleID(superadminRole.ID).
 			SetPolicyID(superadminPolicy.ID).
 			SetDescription("初始化绑定：超级管理员默认全量策略").
 			Exec(ctx); err != nil {
@@ -387,7 +420,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		Where(
 			principalroles.PrincipalTypeEQ(principalTypeUser),
 			principalroles.PrincipalIDEQ(adminUser.ID),
-			principalroles.RoleIDEQ(adminRole.ID),
+			principalroles.RoleIDEQ(superadminRole.ID),
 		).
 		Exist(ctx)
 	if err != nil {
@@ -398,7 +431,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		if err := tx.PrincipalRoles.Create().
 			SetPrincipalType(principalTypeUser).
 			SetPrincipalID(adminUser.ID).
-			SetRoleID(adminRole.ID).
+			SetRoleID(superadminRole.ID).
 			SetBindingStatus(bindingStatusActive).
 			Exec(ctx); err != nil {
 			rollback()
@@ -747,7 +780,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 	roleMenuExists, err := tx.RoleMenus.Query().
-		Where(rolemenus.RoleIDEQ(adminRole.ID), rolemenus.MenuIDEQ(rootMenu.ID)).
+		Where(rolemenus.RoleIDEQ(superadminRole.ID), rolemenus.MenuIDEQ(rootMenu.ID)).
 		Exist(ctx)
 	if err != nil {
 		rollback()
@@ -755,7 +788,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 	if !roleMenuExists {
 		if err := tx.RoleMenus.Create().
-			SetRoleID(adminRole.ID).
+			SetRoleID(superadminRole.ID).
 			SetMenuID(rootMenu.ID).
 			SetPermissionScope(1).
 			SetIsRecursive(true).
