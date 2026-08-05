@@ -423,8 +423,7 @@ func expandPrincipalRoleBindingsToMembers(ctx context.Context, db *lion.Client, 
 	return result, nil
 }
 
-func effectiveRoleIDsForUser(ctx context.Context, db *lion.Client, userID int) ([]int, error) {
-	now := time.Now()
+func effectiveRoleIDsForUserAt(ctx context.Context, db *lion.Client, userID int, now time.Time) ([]int, error) {
 	roleIDs := map[int]struct{}{}
 
 	collect := func(principalType int, principalIDs []int) error {
@@ -460,6 +459,11 @@ func effectiveRoleIDsForUser(ctx context.Context, db *lion.Client, userID int) (
 		Where(
 			usermemberships.UserIDEQ(userID),
 			usermemberships.TargetTypeEQ(membershipTargetGroup),
+			usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
+			usermemberships.Or(
+				usermemberships.ExpiresAtIsNil(),
+				usermemberships.ExpiresAtGT(now),
+			),
 		).
 		All(ctx)
 	if err != nil {
@@ -468,6 +472,18 @@ func effectiveRoleIDsForUser(ctx context.Context, db *lion.Client, userID int) (
 	groupIDs := make([]int, 0, len(groupMemberships))
 	for _, row := range groupMemberships {
 		groupIDs = append(groupIDs, row.TargetID)
+	}
+	if len(groupIDs) > 0 {
+		groupIDs, err = db.Groups.Query().
+			Where(
+				groups.IDIn(groupIDs...),
+				groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+				groups.DeletedAtIsNil(),
+			).
+			IDs(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if err := collect(principalTypeGroup, groupIDs); err != nil {
 		return nil, err
@@ -478,6 +494,11 @@ func effectiveRoleIDsForUser(ctx context.Context, db *lion.Client, userID int) (
 		Where(
 			usermemberships.UserIDEQ(userID),
 			usermemberships.TargetTypeEQ(membershipTargetDepartment),
+			usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
+			usermemberships.Or(
+				usermemberships.ExpiresAtIsNil(),
+				usermemberships.ExpiresAtGT(now),
+			),
 		).
 		All(ctx)
 	if err != nil {
@@ -486,6 +507,18 @@ func effectiveRoleIDsForUser(ctx context.Context, db *lion.Client, userID int) (
 	departmentIDs := make([]int, 0, len(departmentMemberships))
 	for _, row := range departmentMemberships {
 		departmentIDs = append(departmentIDs, row.TargetID)
+	}
+	if len(departmentIDs) > 0 {
+		departmentIDs, err = db.Departments.Query().
+			Where(
+				departments.IDIn(departmentIDs...),
+				departments.DepartmentStatusEQ(int(adminv1.Department_ACTIVE)),
+				departments.DeletedAtIsNil(),
+			).
+			IDs(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if err := collect(principalTypeDepartment, departmentIDs); err != nil {
 		return nil, err
@@ -499,14 +532,14 @@ func effectiveRoleIDsForUser(ctx context.Context, db *lion.Client, userID int) (
 	return result, nil
 }
 
-func effectiveGroupCodesForUser(ctx context.Context, db *lion.Client, userID int) ([]string, error) {
+func effectiveGroupCodesForUserAt(ctx context.Context, db *lion.Client, userID int, now time.Time) ([]string, error) {
 	rows, err := db.UserMemberships.Query().
 		Select(usermemberships.FieldTargetID).
 		Where(
 			usermemberships.UserIDEQ(userID),
 			usermemberships.TargetTypeEQ(membershipTargetGroup),
 			usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
-			usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(time.Now())),
+			usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(now)),
 		).
 		All(ctx)
 	if err != nil {
@@ -548,14 +581,27 @@ func roleCodesForIDs(ctx context.Context, db *lion.Client, roleIDs []int) ([]str
 	}
 	rows, err := db.Roles.Query().
 		Select(roles.FieldID, roles.FieldCode).
-		Where(roles.IDIn(roleIDs...)).
+		Where(
+			roles.IDIn(roleIDs...),
+			roles.RoleStatusEQ(int(adminv1.Role_ACTIVE)),
+			roles.DeletedAtIsNil(),
+		).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	result := make([]string, 0, len(rows))
+	seen := make(map[string]struct{}, len(rows))
 	for _, row := range rows {
-		result = append(result, row.Code)
+		code := strings.TrimSpace(row.Code)
+		if code == "" {
+			continue
+		}
+		if _, ok := seen[code]; ok {
+			continue
+		}
+		seen[code] = struct{}{}
+		result = append(result, code)
 	}
 	sort.Strings(result)
 	return result, nil
