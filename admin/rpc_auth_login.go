@@ -791,18 +791,13 @@ func (a *KnownAdminAPI) UpdateAuthProvider(ctx context.Context, req *adminv1.Upd
 		}
 		return nil, err
 	}
-	existingIsLocal := isLocalProviderType(provider.ProviderType)
-
-	if existingIsLocal {
-		if req.Provider.Code != "" && req.Provider.Code != provider.Code {
-			return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider code is immutable")
-		}
-		if req.Provider.Type != adminv1.AuthProvider_TYPE_UNSPECIFIED && req.Provider.Type != adminv1.AuthProvider_LOCAL {
-			return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider type is immutable")
+	if req.Provider.Code != "" {
+		if err := validateImmutableString(ctx, "auth provider", "code", provider.Code, req.Provider.Code); err != nil {
+			return nil, err
 		}
 	}
-	if !existingIsLocal && req.Provider.Type == adminv1.AuthProvider_LOCAL {
-		return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider is system-initialized and cannot be assigned via update")
+	if req.Provider.Type != adminv1.AuthProvider_TYPE_UNSPECIFIED && int(req.Provider.Type.Number()) != provider.ProviderType {
+		return nil, immutableFieldError(ctx, "auth provider", "type")
 	}
 
 	// 构建更新操作
@@ -814,12 +809,6 @@ func (a *KnownAdminAPI) UpdateAuthProvider(ctx context.Context, req *adminv1.Upd
 	}
 
 	// 更新公共字段
-	if req.Provider.Code != "" {
-		update.SetCode(req.Provider.Code)
-	}
-	if req.Provider.Type != adminv1.AuthProvider_TYPE_UNSPECIFIED {
-		update.SetProviderType(int(req.Provider.Type.Number()))
-	}
 	update.SetProviderStatus(int(req.Provider.Status.Number()))
 	if req.Provider.DisplayName != "" {
 		update.SetDisplayName(req.Provider.DisplayName)

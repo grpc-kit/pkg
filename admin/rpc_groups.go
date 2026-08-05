@@ -352,7 +352,7 @@ func sortGroupSlice(s []*adminv1.Group) {
 	})
 }
 
-// UpdateGroup 更新用户组（code 创建后不建议修改，若 update_mask 含 code 仍可更新）
+// UpdateGroup 更新用户组；code 和 type 创建后不可修改。
 func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGroupRequest) (*adminv1.Group, error) {
 	result := &adminv1.Group{}
 
@@ -381,25 +381,29 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 		}
 	}
 
-	// SYSTEM 类型群组受保护的字段，不允许修改
+	// SYSTEM 类型群组受保护的关联字段不允许修改。
 	systemProtectedFields := map[string]bool{
-		"code": true, "type": true, "ref_id": true, "ref_expr": true,
+		"ref_id": true, "ref_expr": true,
 	}
 
 	if req.UpdateMask != nil && len(req.UpdateMask.Paths) > 0 {
 		for _, field := range req.UpdateMask.Paths {
-			// SYSTEM 群组跳过受保护字段
+			// SYSTEM 群组的系统关联字段不可修改。
 			if isSystem && systemProtectedFields[field] {
-				continue
+				return nil, errs.FailedPrecondition(ctx).
+					WithMessage(fmt.Sprintf("SYSTEM group field %q is immutable", field)).Err()
 			}
 			switch field {
 			case "code":
-				update.SetCode(req.Group.Code)
+				if err := validateImmutableString(ctx, "group", "code", group.Code, req.Group.Code); err != nil {
+					return nil, err
+				}
 			case "display_name":
 				update.SetDisplayName(req.Group.DisplayName)
 			case "type":
-				// type 创建后不建议修改，但保留 update_mask 支持
-				update.SetGroupType(int(req.Group.Type.Number()))
+				if int(req.Group.Type.Number()) != group.GroupType {
+					return nil, immutableFieldError(ctx, "group", "type")
+				}
 			case "status":
 				update.SetGroupStatus(int(req.Group.Status.Number()))
 			case "sort_order":
@@ -422,6 +426,14 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 		}
 		update.SetUpdatedBy(updatedBy)
 	} else {
+		if req.Group.Code != "" {
+			if err := validateImmutableString(ctx, "group", "code", group.Code, req.Group.Code); err != nil {
+				return nil, err
+			}
+		}
+		if req.Group.Type != adminv1.Group_TYPE_UNSPECIFIED && int(req.Group.Type.Number()) != group.GroupType {
+			return nil, immutableFieldError(ctx, "group", "type")
+		}
 		displayName := req.Group.DisplayName
 		if displayName == "" {
 			displayName = group.DisplayName
@@ -439,9 +451,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 				SetUpdatedBy(updatedBy)
 		} else {
 			update.
-				SetCode(req.Group.Code).
 				SetDisplayName(displayName).
-				SetGroupType(int(req.Group.Type.Number())).
 				SetGroupStatus(int(req.Group.Status.Number())).
 				SetSortOrder(int(req.Group.SortOrder)).
 				SetMaxMembers(int(req.Group.MaxMembers)).

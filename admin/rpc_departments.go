@@ -461,11 +461,41 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 	if err := a.checkDepartmentPermission(ctx, db, int(req.Department.Id)); err != nil {
 		return result, err
 	}
+	currentDepartment, err := db.Departments.Get(ctx, int(req.Department.Id))
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("department not found")
+		}
+		return nil, err
+	}
 
 	// 如果更新了 parent_id，需要检查新父部门的权限
 	if req.UpdateMask != nil {
 		for _, path := range req.UpdateMask.Paths {
 			if path == departments.FieldParentID {
+				if isBuiltinDepartmentCode(currentDepartment.Code) &&
+					req.Department.ParentId != int64(currentDepartment.ParentID) {
+					return nil, errs.FailedPrecondition(ctx).
+						WithMessage("built-in department parent_id is immutable").Err()
+				}
+				if req.Department.ParentId == int64(currentDepartment.ParentID) {
+					continue
+				}
+				if req.Department.ParentId == req.Department.Id {
+					return nil, errs.InvalidArgument(ctx).WithMessage("parent_id cannot be self")
+				}
+				if req.Department.ParentId > 0 {
+					subDeptIDs, err := a.getAllSubDeptIDs(ctx, int(req.Department.Id))
+					if err != nil {
+						return nil, err
+					}
+					for _, subDeptID := range subDeptIDs {
+						if int64(subDeptID) == req.Department.ParentId {
+							return nil, errs.InvalidArgument(ctx).
+								WithMessage("parent_id cannot be descendant department")
+						}
+					}
+				}
 				if req.Department.ParentId != 0 {
 					if err := a.checkDepartmentPermission(ctx, db, int(req.Department.ParentId)); err != nil {
 						return result, err
@@ -481,16 +511,26 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 	}
 
 	if req.UpdateMask != nil && len(req.UpdateMask.Paths) != 0 {
-		x := a.config.db.Departments.Update()
+		x := db.Departments.Update()
 
 		for _, path := range req.UpdateMask.Paths {
 			switch path {
 			case departments.FieldCode:
-				x.SetCode(req.Department.Code)
+				if err := validateImmutableString(ctx, "department", "code", currentDepartment.Code, req.Department.Code); err != nil {
+					return nil, err
+				}
+			case departments.FieldProtected:
+				if isBuiltinDepartmentCode(currentDepartment.Code) &&
+					req.Department.Protected != currentDepartment.Protected {
+					return nil, immutableFieldError(ctx, "department", "protected")
+				}
 			case departments.FieldSortOrder:
 				x.SetSortOrder(int(req.Department.SortOrder))
 			case departments.FieldParentID:
-				if req.Department.ParentId == 0 || req.Department.ParentId == req.Department.Id {
+				if req.Department.ParentId == int64(currentDepartment.ParentID) {
+					continue
+				}
+				if req.Department.ParentId == 0 {
 					continue
 				}
 

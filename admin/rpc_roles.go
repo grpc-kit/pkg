@@ -931,7 +931,13 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 	}
 
 	currentRole, err := db.Roles.Query().
-		Select(roles.FieldID, roles.FieldCode, roles.FieldParentID).
+		Select(
+			roles.FieldID,
+			roles.FieldCode,
+			roles.FieldParentID,
+			roles.FieldRoleType,
+			roles.FieldProtected,
+		).
 		Where(roles.ID(int(req.Role.Id))).
 		Only(ctx)
 	if err != nil {
@@ -944,14 +950,29 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 		// 获取更新者用户 ID
 		userID, _ := GetUserID(ctx)
 		nextParentID := int64(currentRole.ParentID)
-		nextCode := currentRole.Code
 
 		for _, path := range req.UpdateMask.Paths {
 			switch path {
 			case roles.FieldCode:
-				x.SetCode(req.Role.Code)
-				nextCode = req.Role.Code
+				if err := validateImmutableString(ctx, "role", "code", currentRole.Code, req.Role.Code); err != nil {
+					return nil, err
+				}
+			case "type", roles.FieldRoleType:
+				if isBuiltinRoleCode(currentRole.Code) && int(req.Role.Type) != currentRole.RoleType {
+					return nil, immutableFieldError(ctx, "role", "type")
+				}
+			case roles.FieldProtected:
+				if isBuiltinRoleCode(currentRole.Code) && req.Role.Protected != currentRole.Protected {
+					return nil, immutableFieldError(ctx, "role", "protected")
+				}
 			case roles.FieldParentID:
+				if isBuiltinRoleCode(currentRole.Code) && req.Role.ParentId != int64(currentRole.ParentID) {
+					return nil, errs.FailedPrecondition(ctx).
+						WithMessage("built-in role parent_id is immutable").Err()
+				}
+				if req.Role.ParentId == int64(currentRole.ParentID) {
+					continue
+				}
 				// 更新 parent_id，需要检查新父角色的权限
 				if err := a.checkParentRolePermission(ctx, db, req.Role.ParentId); err != nil {
 					return nil, err
@@ -982,7 +1003,7 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 				x.SetRoleStatus(int(req.Role.Status))
 			}
 		}
-		if err := a.checkRootRoleConstraint(ctx, db, int(req.Role.Id), nextCode, nextParentID); err != nil {
+		if err := a.checkRootRoleConstraint(ctx, db, int(req.Role.Id), currentRole.Code, nextParentID); err != nil {
 			return nil, err
 		}
 

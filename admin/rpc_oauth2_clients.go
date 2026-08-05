@@ -352,6 +352,11 @@ func (a *KnownAdminAPI) UpdateOAuth2Client(ctx context.Context, req *adminv1.Upd
 	}
 
 	update := row.Update()
+	if req.Client.ClientId != "" {
+		if err := validateImmutableString(ctx, "oauth2 client", "client_id", row.ClientID, req.Client.ClientId); err != nil {
+			return nil, err
+		}
+	}
 
 	// 设置审计字段
 	if actor, err := GetUserID(ctx); err == nil && actor != 0 {
@@ -378,7 +383,9 @@ func (a *KnownAdminAPI) UpdateOAuth2Client(ctx context.Context, req *adminv1.Upd
 			case "description":
 				update.SetDescription(req.Client.Description)
 			case "client_id":
-				// client_id 不可修改，忽略
+				if err := validateImmutableString(ctx, "oauth2 client", "client_id", row.ClientID, req.Client.ClientId); err != nil {
+					return nil, err
+				}
 			}
 		}
 	} else {

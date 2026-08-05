@@ -1010,7 +1010,7 @@
                 },
                 "update_mask": {
                   "type": "string",
-                  "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：code / type / algorithm / key_material / fingerprint 不可修改，即使列入 update_mask 也会被忽略。\n示例: paths: [\"display_name\", \"status\", \"expires_at\"]"
+                  "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：code / type / algorithm / key_material / fingerprint 不可修改；尝试变更时返回参数错误。\n示例: paths: [\"display_name\", \"status\", \"expires_at\"]"
                 }
               },
               "title": "UpdateCredentialRequest 更新凭证"

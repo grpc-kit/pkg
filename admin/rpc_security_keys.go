@@ -757,7 +757,7 @@ func (a *KnownAdminAPI) GetCredential(ctx context.Context, req *adminv1.GetCrede
 
 // UpdateCredential 更新凭证
 // 仅允许更新 status / display_name / description / expires_at / metadata
-// 受保护（protected=true）的凭证仅允许更新 display_name / description
+// 受保护（protected=true）的凭证仅允许更新 display_name / description / status
 func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.UpdateCredentialRequest) (*adminv1.Credential, error) {
 	if req.Id == 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("credential id is required")
@@ -795,6 +795,25 @@ func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.Updat
 	mask := req.GetUpdateMask()
 	if mask != nil && len(mask.GetPaths()) > 0 {
 		for _, path := range mask.GetPaths() {
+			switch path {
+			case "code":
+				if err := validateImmutableString(ctx, "credential", "code", row.Code, cred.Code); err != nil {
+					return nil, err
+				}
+				continue
+			case "type":
+				if int(cred.Type.Number()) != row.CredentialType {
+					return nil, immutableFieldError(ctx, "credential", "type")
+				}
+				continue
+			case "algorithm":
+				if int(cred.Algorithm.Number()) != row.CredentialAlgorithm {
+					return nil, immutableFieldError(ctx, "credential", "algorithm")
+				}
+				continue
+			case "fingerprint", "key_material":
+				return nil, immutableFieldError(ctx, "credential", path)
+			}
 			// 受保护凭证仅允许更新 display_name / description / status
 			if isProtected && path != "display_name" && path != "description" && path != "status" {
 				continue
@@ -818,11 +837,20 @@ func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.Updat
 				if cred.Metadata != nil {
 					update.SetMetadata(cred.Metadata)
 				}
-			case "code", "type", "algorithm", "fingerprint", "key_material":
-				// 不可修改字段，忽略
 			}
 		}
 	} else {
+		if cred.Code != "" {
+			if err := validateImmutableString(ctx, "credential", "code", row.Code, cred.Code); err != nil {
+				return nil, err
+			}
+		}
+		if cred.Type != adminv1.Credential_TYPE_UNSPECIFIED && int(cred.Type.Number()) != row.CredentialType {
+			return nil, immutableFieldError(ctx, "credential", "type")
+		}
+		if cred.Algorithm != adminv1.Credential_ALGORITHM_UNSPECIFIED && int(cred.Algorithm.Number()) != row.CredentialAlgorithm {
+			return nil, immutableFieldError(ctx, "credential", "algorithm")
+		}
 		// 未提供 update_mask，更新所有非空字段
 		if cred.DisplayName != "" {
 			update.SetDisplayName(cred.DisplayName)
