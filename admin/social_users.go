@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rsa"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -19,7 +18,6 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
-	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/sirupsen/logrus"
@@ -49,8 +47,7 @@ type socialUsers struct {
 	// 解密后的敏感凭证（LDAP 为 bind_password，OAuth2 系为 client_secret）
 	secret string
 
-	Groups []string `json:"groups"`
-	Roles  []string `json:"roles,omitempty"`
+	issuanceContext AccessTokenIssuanceContext
 }
 
 func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
@@ -65,36 +62,15 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 		).
 		Where(
 			authproviders.CodeEQ(providerName),
+			authproviders.DeletedAtIsNil(),
 		).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	sk, err := db.Credentials.Query().
-		Select(credentials.FieldPrivateKeyEncrypted, credentials.FieldCode).
-		Where(
-			credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
-			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_RSA.Number())),
-			credentials.CredentialUsageEQ(int(adminv1.Credential_JWKS.Number())),
-			credentials.CredentialVisibilityEQ(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())),
-			credentials.CredentialStatusEQ(int(adminv1.Credential_ACTIVE.Number())),
-			credentials.CredentialSourceEQ(int(adminv1.Credential_SYSTEM.Number())),
-		).
-		Order(credentials.ByID()).
-		First(ctx)
+	privateKey, kid, err := loadAccessTokenRSAKey(ctx, db, aesKey)
 	if err != nil {
 		return nil, err
-	}
-
-	derBytes, err := crypto.DecryptAES(aesKey, sk.PrivateKeyEncrypted)
-	if err != nil {
-		return nil, err
-	}
-
-	// 解析为 PKCS#1 格式
-	privateKey, err := x509.ParsePKCS1PrivateKey(derBytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse PKCS#1 private key: %v", err)
 	}
 
 	s := &socialUsers{
@@ -102,7 +78,7 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 		db:           db,
 		aesKey:       aesKey,
 		privateKey:   privateKey,
-		kid:          sk.Code,
+		kid:          kid,
 		ProviderName: providerName,
 		AuthProvider: ap,
 	}
@@ -167,16 +143,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return "", err
 		}
 
-		if err = s.setUserRolesAndGroups(ctx, userID); err != nil {
-			return "", err
-		}
-
-		claims := &auth.AccessTokenClaims{}
-		claims.SetSubject(strconv.Itoa(userID))
-		claims.SetGroups(s.Groups)
-		claims.SetRoles(s.Roles)
-
-		accessToken, err = claims.GetAccessToken(resp.SessionKey)
+		accessToken, _, err = s.issueAccessTokenForUserID(ctx, userID)
 		if err != nil {
 			return accessToken, err
 		}
@@ -205,23 +172,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return accessToken, err
 		}
 
-		if err = s.setUserRolesAndGroups(ctx, userID); err != nil {
-			return "", err
-		}
-
-		claims := &auth.AccessTokenClaims{CommonClaims: auth.CommonClaims{
-			PreferredUsername: profile.PreferredUsername,
-			Nickname:          profile.Nickname,
-			Email:             profile.Email,
-			EmailVerified:     profile.EmailVerified,
-		}}
-		claims.SetSubject(strconv.Itoa(userID))
-		claims.SetGroups(s.Groups)
-		claims.SetRoles(s.Roles)
-		claims.SetExpiresAt(oauth2Token.ExpiresIn)
-
-		// 生成 jwt 返回客户端
-		accessToken, err = claims.GetAccessTokenRSA(s.privateKey, s.kid)
+		accessToken, _, err = s.issueAccessTokenForUserID(ctx, userID)
 		if err != nil {
 			return accessToken, err
 		}
@@ -278,36 +229,15 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			PreferredUsername: username,
 			Nickname:          username,
 			Email:             email,
-			EmailVerified:     email != "",
+			EmailVerified:     getMapBool(userinfo, "email_verified"),
 		}
 
-		expiresIn := int64(3600)
-		if !oauth2Token.Expiry.IsZero() {
-			if sec := int64(time.Until(oauth2Token.Expiry).Seconds()); sec > 0 {
-				expiresIn = sec
-			}
-		}
 		userID, err := s.upsertUserOIDC(ctx, oauth2Token, profile)
 		if err != nil {
 			return accessToken, err
 		}
 
-		if err = s.setUserRolesAndGroups(ctx, userID); err != nil {
-			return "", err
-		}
-
-		claims := &auth.AccessTokenClaims{CommonClaims: auth.CommonClaims{
-			PreferredUsername: profile.PreferredUsername,
-			Nickname:          profile.Nickname,
-			Email:             profile.Email,
-			EmailVerified:     profile.EmailVerified,
-		}}
-		claims.SetSubject(strconv.Itoa(userID))
-		claims.SetGroups(s.Groups)
-		claims.SetRoles(s.Roles)
-		claims.SetExpiresAt(expiresIn)
-
-		accessToken, err = claims.GetAccessTokenRSA(s.privateKey, s.kid)
+		accessToken, _, err = s.issueAccessTokenForUserID(ctx, userID)
 		if err != nil {
 			return accessToken, err
 		}
@@ -391,6 +321,18 @@ func getMapString(m map[string]interface{}, key string) string {
 	default:
 		return fmt.Sprintf("%v", vv)
 	}
+}
+
+func getMapBool(m map[string]interface{}, key string) bool {
+	if m == nil || key == "" {
+		return false
+	}
+	v, ok := m[key]
+	if !ok || v == nil {
+		return false
+	}
+	verified, ok := v.(bool)
+	return ok && verified
 }
 
 // passwordCheckResult 密码校验结果
@@ -786,25 +728,29 @@ func findAvailableUsername(ctx context.Context, tx *lion.Tx, base string) (strin
 }
 
 func (s *socialUsers) issueAccessTokenForUser(ctx context.Context, u *lion.Users) (string, bool, error) {
-	if err := s.setUserRolesAndGroups(ctx, u.ID); err != nil {
+	return s.issueAccessTokenForUserID(ctx, u.ID)
+}
+
+func (s *socialUsers) issueAccessTokenForUserID(ctx context.Context, userID int) (string, bool, error) {
+	profile, err := loadAccessTokenUserProfile(ctx, s.db, s.aesKey, userID)
+	if err != nil {
 		return "", false, err
 	}
-
-	accessTokenClaims := &auth.AccessTokenClaims{
-		CommonClaims: auth.CommonClaims{
-			PreferredUsername: u.Username,
-			Nickname:          u.Nickname,
-		},
+	now := time.Now()
+	roleIDs, err := effectiveRoleIDsForUserAt(ctx, s.db, userID, now)
+	if err != nil {
+		return "", false, err
 	}
-	// 填充 access token claims。
-	accessTokenClaims.SetSubject(strconv.Itoa(u.ID))
-	accessTokenClaims.SetGroups(s.Groups)
-	accessTokenClaims.SetRoles(s.Roles)
-	accessTokenClaims.SetExpiresAt(durationSecondsInt64(loginAccessTokenTTLFrom(s.logger, s.db)))
-	accessTokenClaims.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
-
-	// 生成 jwt 返回客户端
-	accessToken, err := accessTokenClaims.GetAccessTokenRSA(s.privateKey, s.kid)
+	roleCodes, err := roleCodesForIDs(ctx, s.db, roleIDs)
+	if err != nil {
+		return "", false, err
+	}
+	groupCodes, err := effectiveGroupCodesForUserAt(ctx, s.db, userID, now)
+	if err != nil {
+		return "", false, err
+	}
+	input := accessTokenInputFromProfile(profile, s.issuanceContext, roleCodes, groupCodes)
+	accessToken, err := newAccessTokenIssuer().issueRSA(input, s.privateKey, s.kid)
 	if err != nil {
 		return "", false, err
 	}
@@ -964,10 +910,6 @@ func maskLDAPDN(dn string) string {
 		return dn
 	}
 	return dn[:8] + "...(masked)"
-}
-
-func (s *socialUsers) GetAccessToken(expiresIn int32, appid string) {
-
 }
 
 func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, profile externalUserClaims) (int, error) {
@@ -1168,22 +1110,23 @@ func (s *socialUsers) oauth2Userinfo(ctx context.Context, oauth2Token *oauth2.To
 
 	// GitHub 在 /user 可能拿不到公开邮箱，补查 /user/emails。
 	if adminv1.AuthProvider_Type(s.AuthProvider.ProviderType) == adminv1.AuthProvider_GITHUB && getMapString(userinfo, "email") == "" {
-		if email := s.githubPrimaryEmail(ctx, oauth2Token.AccessToken); email != "" {
+		if email, verified := s.githubPrimaryEmail(ctx, oauth2Token.AccessToken); email != "" {
 			userinfo["email"] = email
+			userinfo["email_verified"] = verified
 		}
 	}
 
 	return userinfo, nil
 }
 
-func (s *socialUsers) githubPrimaryEmail(ctx context.Context, accessToken string) string {
+func (s *socialUsers) githubPrimaryEmail(ctx context.Context, accessToken string) (string, bool) {
 	apiURL := strings.TrimSuffix(s.oauthCfg.ApiURL, "/")
 	if apiURL == "" {
 		apiURL = "https://api.github.com"
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL+"/user/emails", nil)
 	if err != nil {
-		return ""
+		return "", false
 	}
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	req.Header.Set("Accept", "application/vnd.github+json")
@@ -1191,16 +1134,16 @@ func (s *socialUsers) githubPrimaryEmail(ctx context.Context, accessToken string
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return ""
+		return "", false
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return ""
+		return "", false
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return ""
+		return "", false
 	}
 
 	var emails []struct {
@@ -1209,28 +1152,28 @@ func (s *socialUsers) githubPrimaryEmail(ctx context.Context, accessToken string
 		Verified bool   `json:"verified"`
 	}
 	if err = json.Unmarshal(body, &emails); err != nil {
-		return ""
+		return "", false
 	}
 
 	for _, e := range emails {
 		if e.Primary && e.Verified && e.Email != "" {
-			return e.Email
+			return e.Email, true
 		}
 	}
 	for _, e := range emails {
 		if e.Verified && e.Email != "" {
-			return e.Email
+			return e.Email, true
 		}
 	}
 	for _, e := range emails {
 		if e.Primary && e.Email != "" {
-			return e.Email
+			return e.Email, false
 		}
 	}
 	if len(emails) > 0 {
-		return emails[0].Email
+		return emails[0].Email, emails[0].Verified
 	}
-	return ""
+	return "", false
 }
 
 func (s *socialUsers) weixinExchange(ctx context.Context, code string) (*wechatCode2SessionResponse, error) {
@@ -1325,36 +1268,4 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 	}
 
 	return existUserID, nil
-}
-
-func (s *socialUsers) setUserRoles(ctx context.Context, userID int) error {
-	s.Roles = nil
-	roleIDs, err := effectiveRoleIDsForUser(ctx, s.db, userID)
-	if err != nil {
-		return err
-	}
-	roleCodes, err := roleCodesForIDs(ctx, s.db, roleIDs)
-	if err != nil {
-		return err
-	}
-	s.Roles = append(s.Roles, roleCodes...)
-
-	return nil
-}
-
-func (s *socialUsers) setUserGroups(ctx context.Context, userID int) error {
-	s.Groups = nil
-	groupCodes, err := effectiveGroupCodesForUser(ctx, s.db, userID)
-	if err != nil {
-		return err
-	}
-	s.Groups = append(s.Groups, groupCodes...)
-	return nil
-}
-
-func (s *socialUsers) setUserRolesAndGroups(ctx context.Context, userID int) error {
-	if err := s.setUserRoles(ctx, userID); err != nil {
-		return err
-	}
-	return s.setUserGroups(ctx, userID)
 }
