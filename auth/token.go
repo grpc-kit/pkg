@@ -2,7 +2,6 @@ package auth
 
 import (
 	"crypto/rsa"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -41,35 +40,22 @@ type CommonClaims struct {
 	// 仅在客户端明确需要角色映射时签发。
 	Roles []string `json:"roles,omitempty"`
 
-	// Deprecated: 历史应用标识字段。
 	// FederatedClaims 联邦身份声明，如 {"connector_id":"..."}。预留未使用。
 	FederatedClaims map[string]string `json:"federated_claims,omitempty"`
 	// Deprecated: 历史应用标识字段。
 	// 新签发的 ID Token 使用 azp，新签发的 Access Token 使用 client_id。
 	// 仅用于兼容解析旧 Token，禁止在新 Token 中签发。
 	Appid string `json:"appid,omitempty"`
-	// Deprecated: 历史应用标识字段。
+	// Deprecated: 历史自定义用户名字段。
 	// Username 历史自定义字段，仅用于解析旧 token，禁止新 token 签发。
 	Username string `json:"username,omitempty"`
 }
 
-// RoleClaimSource identifies which JWT claim supplied the effective roles.
-// LegacyGroups is used for tokens issued before the roles claim was introduced.
-type RoleClaimSource string
-
-const (
-	RoleClaimSourceRoles        RoleClaimSource = "roles"
-	RoleClaimSourceLegacyGroups RoleClaimSource = "legacy_groups"
-)
-
 // EffectiveRoles returns the role codes used for authorization.
-// A non-nil roles claim is authoritative, including an explicitly empty list;
-// groups is used only when the roles claim is absent from a legacy token.
-func EffectiveRoles(claims AccessTokenClaims) ([]string, RoleClaimSource) {
-	if claims.Roles != nil {
-		return normalizeRoleCodes(claims.Roles), RoleClaimSourceRoles
-	}
-	return normalizeRoleCodes(claims.Groups), RoleClaimSourceLegacyGroups
+// Roles are the only authorization source. Groups describe identity membership
+// and are never interpreted as roles, including when the roles claim is absent.
+func EffectiveRoles(claims AccessTokenClaims) []string {
+	return normalizeRoleCodes(claims.Roles)
 }
 
 func normalizeRoleCodes(values []string) []string {
@@ -162,15 +148,12 @@ func (c *CommonClaims) SetExpiresAt(expiresIn int64) *CommonClaims {
 	return c
 }
 
-// SetEmail 设置用户邮箱。非空直接使用；为空时回退到 sub@localhost 并标记已验证。
+// SetEmail 设置真实用户邮箱。空值保持为空，且不会生成占位邮箱。
 func (c *CommonClaims) SetEmail(email string) *CommonClaims {
-	if email != "" {
-		c.Email = email
-	} else {
-		c.Email = fmt.Sprintf("%s@localhost", c.Subject)
-		c.EmailVerified = true
+	c.Email = strings.TrimSpace(email)
+	if c.Email == "" {
+		c.EmailVerified = false
 	}
-
 	return c
 }
 
@@ -220,15 +203,28 @@ func (c *CommonClaims) GetMustUserID() int64 {
 // 丢失 IDToken / AccessToken 的专有声明（nonce、azp、client_id、scope 等）。
 
 func signHS256(claims jwt.Claims, signKey, typ string) (string, error) {
+	key := crypto.SHA256([]byte(signKey))
+	return signHS256Key(claims, []byte(key), typ)
+}
+
+func signHS256Key(claims jwt.Claims, signKey []byte, typ string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token.Header["typ"] = typ
-	key := crypto.SHA256([]byte(signKey))
-	return token.SignedString([]byte(key))
+	return token.SignedString(signKey)
 }
 
 // SignAccessToken 以 HS256 签名生成 Access Token，使用 at+jwt 类型。
+// Deprecated: new issuers should use SignAccessTokenHMACKey with explicit key bytes.
+// Passing an already-derived password hash to this string API derives it again.
 func SignAccessToken(claims jwt.Claims, signKey string) (string, error) {
 	return signHS256(claims, signKey, "at+jwt")
+}
+
+// SignAccessTokenHMACKey signs an Access Token with an already-derived HMAC
+// key. It exists for the static-user profile, whose historical key semantics
+// use PasswordHash bytes directly.
+func SignAccessTokenHMACKey(claims jwt.Claims, signKey []byte) (string, error) {
+	return signHS256Key(claims, signKey, "at+jwt")
 }
 
 // SignIDToken 以 HS256 签名生成 ID Token，使用 JWT 类型。
@@ -272,6 +268,7 @@ func (i *IDTokenClaims) GetAccessTokenRSA(privateKey *rsa.PrivateKey, kid string
 }
 
 // GetAccessToken 以 HS256 签名生成 access token JWT。
+// Deprecated: use SignAccessTokenHMACKey with explicit key bytes for new issuers.
 func (a *AccessTokenClaims) GetAccessToken(signKey string) (string, error) {
 	return SignAccessToken(a, signKey)
 }
