@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -282,21 +281,15 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 
 	// 仅在服务端配置支持 HS256 算法时才执行
 	if s.supportedHS256Alg() {
-		token, err := jwt.ParseWithClaims(tokenString, &accessToken, hs256Verify)
+		parserOptions := make([]jwt.ParserOption, 0, 1)
+		if s.Authentication.OIDCProvider.Config.SkipExpiryCheck {
+			// Skip registered-claim validation for the explicitly configured
+			// compatibility mode, while signature verification still runs.
+			parserOptions = append(parserOptions, jwt.WithoutClaimsValidation())
+		}
+		token, err := jwt.ParseWithClaims(tokenString, &accessToken, hs256Verify, parserOptions...)
 		if hasHS256Alg && err != nil {
-			if s.Authentication.OIDCProvider.Config == nil {
-				return accessToken, err
-			}
-
-			// 继续判断错误类型，忽略 token 过期等
-			switch {
-			case errors.Is(err, jwt.ErrTokenExpired):
-				if s.Authentication.OIDCProvider.Config.SkipExpiryCheck {
-					return accessToken, nil
-				}
-			default:
-				return accessToken, err
-			}
+			return accessToken, err
 		}
 
 		if hasHS256Alg {
