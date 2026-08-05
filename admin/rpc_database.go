@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"fmt"
 	"strconv"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -28,6 +29,76 @@ import (
 
 // defaultAdminPassword 是未通过请求参数指定时的初始管理员密码明文。
 const defaultAdminPassword = "grpc-kit-cli"
+
+// legacyGuestDepartmentCode 仅用于把旧版内置 guest 部门原位迁移为 unassigned。
+const legacyGuestDepartmentCode = "guest"
+
+type builtinRoleSeed struct {
+	Code        string
+	DisplayName string
+	Description string
+	ParentID    int
+	SortOrder   int
+}
+
+func ensureBuiltinRole(ctx context.Context, tx *lion.Tx, seed builtinRoleSeed) (*lion.Roles, error) {
+	role, err := tx.Roles.Query().Where(roles.CodeEQ(seed.Code)).Only(ctx)
+	if lion.IsNotFound(err) {
+		return tx.Roles.Create().
+			SetParentID(seed.ParentID).
+			SetCode(seed.Code).
+			SetDisplayName(seed.DisplayName).
+			SetRoleType(int(adminv1.Role_SYSTEM.Number())).
+			SetRoleStatus(int(adminv1.Role_ACTIVE.Number())).
+			SetSortOrder(seed.SortOrder).
+			SetProtected(true).
+			SetDescription(seed.Description).
+			Save(ctx)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if role.ParentID != seed.ParentID || role.RoleType != int(adminv1.Role_SYSTEM.Number()) || !role.Protected {
+		return nil, errs.FailedPrecondition(ctx).
+			WithMessage(fmt.Sprintf("role code %q conflicts with built-in role", seed.Code)).Err()
+	}
+	return role.Update().
+		SetParentID(seed.ParentID).
+		SetDisplayName(seed.DisplayName).
+		SetRoleType(int(adminv1.Role_SYSTEM.Number())).
+		SetRoleStatus(int(adminv1.Role_ACTIVE.Number())).
+		SetSortOrder(seed.SortOrder).
+		SetProtected(true).
+		SetDescription(seed.Description).
+		Save(ctx)
+}
+
+func queryBuiltinDepartment(ctx context.Context, tx *lion.Tx, code string) (*lion.Departments, error) {
+	rootDept, err := tx.Departments.Query().
+		Where(
+			departments.CodeEQ(seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_ROOT)),
+			departments.ParentIDEQ(0),
+		).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	builtinDept, err := tx.Departments.Query().
+		Where(
+			departments.CodeEQ("builtin"),
+			departments.ParentIDEQ(rootDept.ID),
+		).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return tx.Departments.Query().
+		Where(
+			departments.CodeEQ(code),
+			departments.ParentIDEQ(builtinDept.ID),
+		).
+		Only(ctx)
+}
 
 type builtinMenuSeed struct {
 	Code        string
@@ -334,23 +405,37 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 
 	adminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_ADMIN)
-	_, err = tx.Roles.Query().Where(roles.CodeEQ(adminCode)).Only(ctx)
-	if lion.IsNotFound(err) {
-		_, err = tx.Roles.Create().
-			SetParentID(superadminRole.ID).
-			SetCode(adminCode).
-			SetDisplayName("普通管理员").
-			SetRoleType(int(adminv1.Role_SYSTEM.Number())).
-			SetRoleStatus(int(adminv1.Role_ACTIVE.Number())).
-			SetSortOrder(100).
-			SetProtected(true).
-			SetDescription("系统内置普通管理员角色").
-			Save(ctx)
-		if err != nil {
-			rollback()
-			return nil, err
-		}
-	} else if err != nil {
+	adminRole, err := ensureBuiltinRole(ctx, tx, builtinRoleSeed{
+		Code:        adminCode,
+		DisplayName: "普通管理员",
+		Description: "系统内置普通管理员角色",
+		ParentID:    superadminRole.ID,
+		SortOrder:   100,
+	})
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+
+	userRole, err := ensureBuiltinRole(ctx, tx, builtinRoleSeed{
+		Code:        seedRoleCode(adminv1.RoleCode_ROLE_CODE_USER),
+		DisplayName: "普通用户",
+		Description: "系统内置普通用户角色",
+		ParentID:    adminRole.ID,
+		SortOrder:   200,
+	})
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+
+	if _, err := ensureBuiltinRole(ctx, tx, builtinRoleSeed{
+		Code:        seedRoleCode(adminv1.RoleCode_ROLE_CODE_GUEST),
+		DisplayName: "访客用户",
+		Description: "系统内置访客用户角色",
+		ParentID:    userRole.ID,
+		SortOrder:   300,
+	}); err != nil {
 		rollback()
 		return nil, err
 	}
@@ -632,6 +717,38 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
+	adminDeptRoleBinding, err := tx.PrincipalRoles.Query().
+		Where(
+			principalroles.PrincipalTypeEQ(principalTypeDepartment),
+			principalroles.PrincipalIDEQ(adminDept.ID),
+			principalroles.RoleIDEQ(adminRole.ID),
+		).
+		Only(ctx)
+	if lion.IsNotFound(err) {
+		if err := tx.PrincipalRoles.Create().
+			SetPrincipalType(principalTypeDepartment).
+			SetPrincipalID(adminDept.ID).
+			SetRoleID(adminRole.ID).
+			SetBindingStatus(bindingStatusActive).
+			SetDescription("初始化绑定：管理员部门默认普通管理员角色").
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
+	} else if err != nil {
+		rollback()
+		return nil, err
+	} else {
+		if err := adminDeptRoleBinding.Update().
+			SetBindingStatus(bindingStatusActive).
+			ClearExpiresAt().
+			SetDescription("初始化绑定：管理员部门默认普通管理员角色").
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
+	}
+
 	adminDeptMember, err := tx.UserMemberships.Query().
 		Where(
 			usermemberships.UserIDEQ(adminUser.ID),
@@ -665,59 +782,68 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
-	guestCode := seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_GUEST)
-	guestDept, err := tx.Departments.Query().
+	unassignedCode := seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_UNASSIGNED)
+	unassignedDept, err := tx.Departments.Query().
 		Where(
-			departments.CodeEQ(guestCode),
+			departments.CodeEQ(unassignedCode),
 			departments.ParentIDEQ(builtinDept.ID),
 		).
 		Only(ctx)
-	if lion.IsNotFound(err) {
-		guestDept, err = tx.Departments.Query().
-			Where(
-				departments.CodeEQ(guestCode),
-				departments.ParentIDEQ(rootDept.ID),
-			).
-			Only(ctx)
-		if lion.IsNotFound(err) {
-			guestDept, err = tx.Departments.Create().
+	if err != nil && !lion.IsNotFound(err) {
+		rollback()
+		return nil, err
+	}
+
+	legacyGuestDepts, err := tx.Departments.Query().
+		Where(
+			departments.CodeEQ(legacyGuestDepartmentCode),
+			departments.ParentIDIn(builtinDept.ID, rootDept.ID),
+		).
+		All(ctx)
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+	if unassignedDept != nil && len(legacyGuestDepts) > 0 {
+		rollback()
+		return nil, errs.FailedPrecondition(ctx).
+			WithMessage("both legacy guest and unassigned departments exist").Err()
+	}
+	if len(legacyGuestDepts) > 1 {
+		rollback()
+		return nil, errs.FailedPrecondition(ctx).
+			WithMessage("multiple legacy guest departments exist").Err()
+	}
+
+	if unassignedDept == nil {
+		if len(legacyGuestDepts) == 1 {
+			unassignedDept, err = legacyGuestDepts[0].Update().
 				SetParentID(builtinDept.ID).
-				SetCode(guestCode).
-				SetDisplayName("访客部门").
+				SetCode(unassignedCode).
+				SetDisplayName("待分配部门").
 				SetSortOrder(2).
 				SetProtected(true).
 				Save(ctx)
-			if err != nil {
-				rollback()
-				return nil, err
-			}
-		} else if err != nil {
-			rollback()
-			return nil, err
 		} else {
-			if err := guestDept.Update().
+			unassignedDept, err = tx.Departments.Create().
 				SetParentID(builtinDept.ID).
-				SetDisplayName("访客部门").
+				SetCode(unassignedCode).
+				SetDisplayName("待分配部门").
 				SetSortOrder(2).
 				SetProtected(true).
-				Exec(ctx); err != nil {
-				rollback()
-				return nil, err
-			}
+				Save(ctx)
 		}
-	} else if err != nil {
-		rollback()
-		return nil, err
 	} else {
-		if err := guestDept.Update().
+		unassignedDept, err = unassignedDept.Update().
 			SetParentID(builtinDept.ID).
-			SetDisplayName("访客部门").
+			SetDisplayName("待分配部门").
 			SetSortOrder(2).
 			SetProtected(true).
-			Exec(ctx); err != nil {
-			rollback()
-			return nil, err
-		}
+			Save(ctx)
+	}
+	if err != nil {
+		rollback()
+		return nil, err
 	}
 
 	credCode := seedCredentialCode(adminv1.CredentialCode_CREDENTIAL_CODE_JWT_SIGNING_V1)

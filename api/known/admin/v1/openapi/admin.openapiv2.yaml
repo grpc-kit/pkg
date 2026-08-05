@@ -828,7 +828,7 @@ openapiOptions:
         tags:
           - "安全相关"
         summary: "获取 OAuth2 Userinfo"
-        description: "接口格式：/builtin/admin/api/v1/oauth2/userinfo。支持有效 Bearer access_token 或 app.yaml 中配置的 HTTP Basic 用户；服务端按最小权限返回身份信息并审计访问。"
+        description: "接口格式：/builtin/admin/api/v1/oauth2/userinfo。前置条件：仅允许携带有效 access_token 调用，服务端应按最小权限返回 claims 并审计访问。"
         responses:
           "200":
             examples:

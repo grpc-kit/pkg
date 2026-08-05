@@ -279,17 +279,19 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		return nil, err
 	}
 
-	guestDept, err := tx.Departments.Query().
-		Where(departments.CodeEQ(seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_GUEST))).
-		Only(ctx)
+	unassignedDept, err := queryBuiltinDepartment(
+		ctx,
+		tx,
+		seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_UNASSIGNED),
+	)
 	if err != nil {
 		_ = tx.Rollback()
 		if lion.IsNotFound(err) {
 			return nil, errs.FailedPrecondition(ctx).
-				WithMessage("guest department not found, run database initialize").
+				WithMessage("unassigned department not found, run database initialize").
 				WithDetails(&errdetails.LocalizedMessage{
 					Locale:  "zh-CN",
-					Message: "未找到默认访客部门，请先完成数据库初始化。",
+					Message: "未找到默认待分配部门，请先完成数据库初始化。",
 				}).Err()
 		}
 		return nil, err
@@ -398,7 +400,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	_, err = tx.UserMemberships.Create().
 		SetUserID(thisUser.ID).
 		SetTargetType(membershipTargetDepartment).
-		SetTargetID(guestDept.ID).
+		SetTargetID(unassignedDept.ID).
 		SetMemberRole(int(adminv1.Membership_MEMBER)).
 		SetMemberStatus(int(adminv1.Membership_ACTIVE)).
 		SetMemberType(int(adminv1.Membership_PRIMARY)).
