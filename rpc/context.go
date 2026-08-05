@@ -71,15 +71,11 @@ func ContextWithRoles(parent context.Context, roles []string) context.Context {
 	return context.WithValue(parent, rolesKey, roles)
 }
 
-// GetRolesFromContext returns canonical roles. During migration, contexts
-// created by old callers fall back to the legacy groups value.
+// GetRolesFromContext returns canonical roles. Groups are identity membership
+// data and are never used as an authorization fallback.
 func GetRolesFromContext(ctx context.Context) ([]string, bool) {
 	roles, ok := ctx.Value(rolesKey).([]string)
-	if ok {
-		return roles, true
-	}
-	groups, ok := ctx.Value(groupsKey).([]string)
-	return groups, ok
+	return roles, ok
 }
 
 func GetAuthenticationTypeFromContext(ctx context.Context) (string, bool) {

@@ -778,9 +778,6 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 						if okAuth {
 							// 认证成功
 							roles, groups := v.Roles, v.Groups
-							if v.Roles == nil {
-								roles, groups = v.Groups, nil
-							}
 							ctx = c.Security.withUserID(ctx, v.UserID)
 							ctx = c.Security.withUsername(ctx, tmps[0])
 							ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
@@ -819,7 +816,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			ctx = c.Security.withUserID(ctx, idToken.GetMustUserID())
 			ctx = c.Security.withUsername(ctx, idToken.GetPreferredUsername())
 			ctx = c.Security.withGroups(ctx, idToken.Groups)
-			roles, _ := auth.EffectiveRoles(idToken)
+			roles := auth.EffectiveRoles(idToken)
 			ctx = c.Security.withRoles(ctx, roles)
 			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBearer)
 
@@ -834,11 +831,11 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 }
 
 func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles []string) error {
-	// 安全策略：对于内置管理接口，已认证用户必须至少拥有一个用户组（角色），
+	// 安全策略：对于内置管理接口，已认证用户必须至少拥有一个角色，
 	// 即有效 roles 必须非空，否则直接拒绝访问（403）。
 	// 自服务方法（用户管理自己的 MFA、OIDC 标准端点、数据库 bootstrap）豁免此检查，
 	// 允许无角色的已认证用户访问，但仍需通过后续 AllowedGroups 与 OPA 评估。
-	if len(roles) == 0 {
+	if len(roles) == 0 && !isRolelessSelfServiceMethod(method) {
 		if strings.HasPrefix(method, "/grpc_kit.api.known.admin.v1.KnownAdmin/") {
 			return errs.PermissionDenied(ctx).
 				WithMessage("user has no role assignments; roles claim is required to access admin APIs").
@@ -880,6 +877,19 @@ func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles 
 	}
 
 	return nil
+}
+
+func isRolelessSelfServiceMethod(method string) bool {
+	switch method {
+	case "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize":
+		return true
+	default:
+		return false
+	}
 }
 
 func (c *LocalConfig) setHTTPResponseHeaders(ctx context.Context, w http.ResponseWriter) {

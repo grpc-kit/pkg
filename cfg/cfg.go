@@ -728,7 +728,7 @@ func (c *LocalConfig) GroupsFrom(ctx context.Context) ([]string, bool) {
 }
 
 // RolesFrom 获取当前会话中用于授权的角色编码列表。
-// 迁移期间若 context 只有旧 groups 值，getter 会自动回退到 groups。
+// groups 仅表示群组成员关系，不作为角色回退来源。
 func (c *LocalConfig) RolesFrom(ctx context.Context) ([]string, bool) {
 	return rpc.GetRolesFromContext(ctx)
 }
