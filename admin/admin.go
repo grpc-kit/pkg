@@ -60,10 +60,10 @@ func (a *KnownAdminAPI) SetMicroserviceGatewayYAML(assets fs.FS) error {
 func (a *KnownAdminAPI) getUserRoleID(ctx context.Context) ([]int, error) {
 	result := make([]int, 0)
 
-	// 从 jwt 中获取用户组
-	gs, ok := rpc.GetGroupsFromContext(ctx)
+	// 从 context 中获取用于授权的角色编码。
+	gs, ok := rpc.GetRolesFromContext(ctx)
 	if !ok {
-		return result, errs.PermissionDenied(ctx).WithMessage("not found groups")
+		return result, errs.PermissionDenied(ctx).WithMessage("not found roles")
 	}
 
 	ridObj, err := a.config.db.Roles.Query().

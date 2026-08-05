@@ -1,13 +1,10 @@
 package admin
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 )
 
@@ -18,11 +15,21 @@ type StaticUser struct {
 	PasswordHash string   `json:"password_hash"`
 	Email        string   `json:"email"`
 	Groups       []string `json:"groups"`
+	Roles        []string `json:"roles,omitempty"`
 	Tenant       string   `json:"tenant"`
 }
 
-// GetAccessToken 获取或生成 jwt token
-func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error) {
+// GetAccessToken 获取或生成 jwt token。第二个参数是标准 client_id；
+// 历史调用方可保持原调用形态，但新 token 不再写入 appid claim。
+func (s StaticUser) GetAccessToken(expiresIn int32, clientID string) (string, error) {
+	return s.issueAccessToken(AccessTokenIssuanceContext{
+		ClientID: clientID,
+		Tenant:   "default",
+		TTL:      time.Duration(expiresIn) * time.Second,
+	})
+}
+
+func (s StaticUser) issueAccessToken(issuance AccessTokenIssuanceContext) (string, error) {
 	// TODO; 生成 jwt token 需要考虑不通用户级别生成 token 的最长有效时间
 
 	tenant := "default"
@@ -35,29 +42,21 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 		userID = crypto.Username2UserID(s.Username)
 	}
 
-	claims := auth.IDTokenClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   strconv.FormatInt(userID, 10),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresIn) * time.Second)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),
-		},
-		Email:           fmt.Sprintf("%s@localhost", s.Username),
-		EmailVerified:   true,
-		Groups:          s.Groups,
-		FederatedClaims: nil,
-		Appid:           appid,
-		Tenant:          tenant,
-		Username:        s.Username,
-		Nickname:        s.Username,
+	issuance.Tenant = tenant
+	input := AccessTokenInput{
+		Subject:           strconv.FormatInt(userID, 10),
+		PreferredUsername: s.Username,
+		Nickname:          s.Username,
+		Email:             s.Email,
+		EmailVerified:     false,
+		Groups:            s.Groups,
+		Roles:             s.Roles,
+		Tenant:            issuance.Tenant,
+		ClientID:          issuance.ClientID,
+		Scope:             issuance.Scope,
+		TTL:               issuance.TTL,
 	}
-
-	ss, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(s.PasswordHash))
-	if err != nil {
-		return ss, err
-	}
-
-	return ss, nil
+	return newAccessTokenIssuer().issueStaticHS256(input, []byte(s.PasswordHash))
 }
 
 type StaticUsers []*StaticUser

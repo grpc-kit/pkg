@@ -54,25 +54,6 @@ const (
 	HTTPHeaderEtag = "Etag"
 )
 
-/*
-// contextKey 使用自定义类型不对外，防止碰撞冲突
-type contextKey int
-
-const (
-	// idTokenKey 用于存放当前jwt的解析后的数据结构
-	idTokenKey contextKey = iota
-
-	// usernameKey 用于存放当前用户名，http base对应username，jwt对应email
-	usernameKey
-
-	// authenticationTypeKey 用于存放当前认证方式
-	authenticationTypeKey
-
-	// groupsKey 用于存放当前用户归属的组列表
-	groupsKey
-)
-*/
-
 const (
 	// ScopeNameGRPCKit 用于该包产生链路、指标的权威名称
 	ScopeNameGRPCKit = "github.com/grpc-kit/pkg"
@@ -200,9 +181,56 @@ type Authentication struct {
 // Authorization 用于鉴权
 type Authorization struct {
 	AllowedGroups  []string       `mapstructure:"allowed_groups"`
+	AllowedRoles   []string       `mapstructure:"allowed_roles"`
 	OPANative      OPANative      `mapstructure:"opa_native"`
 	OPAExternal    OPAExternal    `mapstructure:"opa_external"`
 	OPAEnvoyPlugin OPAEnvoyPlugin `mapstructure:"opa_envoy_plugin"`
+}
+
+// effectiveAllowedRoles returns the authorization allow-list using the new
+// role name while preserving the legacy allowed_groups configuration key.
+// When both names are supplied they must describe the same set; silently
+// merging two security allow-lists could expand access unexpectedly.
+func (a *Authorization) effectiveAllowedRoles() ([]string, bool) {
+	if a == nil {
+		return nil, true
+	}
+	if a.AllowedRoles == nil {
+		return a.AllowedGroups, true
+	}
+	if a.AllowedGroups == nil {
+		return a.AllowedRoles, true
+	}
+	if !sameStringSet(a.AllowedGroups, a.AllowedRoles) {
+		return nil, false
+	}
+	return a.AllowedRoles, true
+}
+
+func sameStringSet(left, right []string) bool {
+	leftSet := make(map[string]struct{}, len(left))
+	rightSet := make(map[string]struct{}, len(right))
+	for _, value := range left {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			leftSet[value] = struct{}{}
+		}
+	}
+	for _, value := range right {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			rightSet[value] = struct{}{}
+		}
+	}
+	if len(leftSet) != len(rightSet) {
+		return false
+	}
+	for value := range leftSet {
+		if _, ok := rightSet[value]; !ok {
+			return false
+		}
+	}
+	return true
 }
 
 // BasicAuth 用于HTTP基本认证的用户权限定义
@@ -215,6 +243,7 @@ type BasicAuth struct {
 	// PasswordHash 优先使用（trim 后非空）：可为 sha256 十六进制或 bcrypt 串（与库表 LOCAL 用户一致时，客户端仍传 sha256(明文)）。
 	PasswordHash string   `mapstructure:"password_hash"`
 	Groups       []string `mapstructure:"groups"`
+	Roles        []string `mapstructure:"roles"`
 	// 租户，默认均为 'default' 下
 	Tenant string `mapstructure:"tenant"`
 }
@@ -351,6 +380,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 				Username:     v.Username,
 				PasswordHash: basicAuthEffectivePasswordHash(v),
 				Groups:       v.Groups,
+				Roles:        v.Roles,
 				Tenant:       v.Tenant,
 			}
 			su.Append(uu)
@@ -633,15 +663,35 @@ func (c *LocalConfig) HasCacheboxEnabled() bool {
 	return c.Cachebox.Enable
 }
 
-// IDTokenFrom 用于获取当前会话的IDToken
+// AccessTokenFrom 获取当前会话中已验证的 access token claims。
+func (c *LocalConfig) AccessTokenFrom(ctx context.Context) (auth.AccessTokenClaims, bool) {
+	token := rpc.GetTokenClaimsFromContext(ctx)
+	switch claims := token.(type) {
+	case auth.AccessTokenClaims:
+		return claims, true
+	case *auth.AccessTokenClaims:
+		if claims != nil {
+			return *claims, true
+		}
+	}
+	return auth.AccessTokenClaims{}, false
+}
+
+// IDTokenFrom 用于获取当前会话的 token claims。
+//
+// Deprecated: use AccessTokenFrom. Bearer context 现承载 auth.AccessTokenClaims；
+// 本方法仅将其公共字段投影为旧类型，以保持一个兼容周期。
 func (c *LocalConfig) IDTokenFrom(ctx context.Context) (auth.IDTokenClaims, bool) {
 	tmp := rpc.GetIDTokenFromContext(ctx)
 
-	// idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
-	// return idToken, ok
-
-	idToken, ok := tmp.(auth.IDTokenClaims)
-	return idToken, ok
+	if idToken, ok := tmp.(auth.IDTokenClaims); ok {
+		return idToken, true
+	}
+	accessToken, ok := tmp.(auth.AccessTokenClaims)
+	if !ok {
+		return auth.IDTokenClaims{}, false
+	}
+	return auth.IDTokenClaims{CommonClaims: accessToken.CommonClaims}, true
 }
 
 // UsernameFrom 用于获取当前会话的用户名
@@ -675,6 +725,12 @@ func (c *LocalConfig) GroupsFrom(ctx context.Context) ([]string, bool) {
 	// groups, ok := ctx.Value(groupsKey).([]string)
 	// return groups, ok
 	return rpc.GetGroupsFromContext(ctx)
+}
+
+// RolesFrom 获取当前会话中用于授权的角色编码列表。
+// groups 仅表示群组成员关系，不作为角色回退来源。
+func (c *LocalConfig) RolesFrom(ctx context.Context) ([]string, bool) {
+	return rpc.GetRolesFromContext(ctx)
 }
 
 // GetRBACData 用于获取 RBAC 数据

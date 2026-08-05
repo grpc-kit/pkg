@@ -28,8 +28,22 @@ type mfaChallenge struct {
 	ExpiresAt     time.Time
 	Attempts      int
 
+	IssuanceContext *AccessTokenIssuanceContext
+
 	// setup 场景：暂存 Base32 TOTP secret（未确认，尚未写入数据库）
 	TempSecret string
+}
+
+func (c *mfaChallenge) clone() *mfaChallenge {
+	if c == nil {
+		return nil
+	}
+	cloned := *c
+	if c.IssuanceContext != nil {
+		issuance := *c.IssuanceContext
+		cloned.IssuanceContext = &issuance
+	}
+	return &cloned
 }
 
 const (
@@ -89,26 +103,38 @@ func (s *mfaChallengeStore) Create(ct mfaChallengeType, userID int, username str
 }
 
 func (s *mfaChallengeStore) CreateWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username string) (*mfaChallenge, error) {
+	return s.createWithTTL(ttl, ct, userID, username, nil)
+}
+
+func (s *mfaChallengeStore) CreateLoginWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username string, issuance AccessTokenIssuanceContext) (*mfaChallenge, error) {
+	return s.createWithTTL(ttl, ct, userID, username, &issuance)
+}
+
+func (s *mfaChallengeStore) createWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username string, issuance *AccessTokenIssuanceContext) (*mfaChallenge, error) {
 	id, err := generateChallengeID()
 	if err != nil {
 		return nil, err
 	}
 	c := &mfaChallenge{
-		ChallengeID:   id,
-		ChallengeType: ct,
-		UserID:        userID,
-		Username:      username,
-		ExpiresAt:     time.Now().Add(ttl),
+		ChallengeID:     id,
+		ChallengeType:   ct,
+		UserID:          userID,
+		Username:        username,
+		ExpiresAt:       time.Now().Add(ttl),
+		IssuanceContext: issuance,
 	}
 	s.mu.Lock()
 	s.entries[id] = c
 	s.mu.Unlock()
-	return c, nil
+	return c.clone(), nil
 }
 
 func (s *mfaChallengeStore) Get(challengeID string) (*mfaChallenge, bool) {
 	s.mu.RLock()
 	c, ok := s.entries[challengeID]
+	if ok {
+		c = c.clone()
+	}
 	s.mu.RUnlock()
 	if !ok {
 		return nil, false
@@ -134,4 +160,15 @@ func (s *mfaChallengeStore) Delete(challengeID string) {
 	s.mu.Lock()
 	delete(s.entries, challengeID)
 	s.mu.Unlock()
+}
+
+func (s *mfaChallengeStore) SetTempSecret(challengeID, secret string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	c, ok := s.entries[challengeID]
+	if !ok {
+		return false
+	}
+	c.TempSecret = secret
+	return true
 }

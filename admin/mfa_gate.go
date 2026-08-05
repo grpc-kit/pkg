@@ -83,8 +83,8 @@ func (a *KnownAdminAPI) ensureLocalIdentity(ctx context.Context, db *lion.Client
 	return err
 }
 
-func (a *KnownAdminAPI) createMFALoginChallenge(ctx context.Context, challengeType mfaChallengeType, userID int, username string, responseType string) (*adminv1.AuthToken, error) {
-	challenge, err := a.mfaChallenges.CreateWithTTL(a.getMFAChallengeTTL(ctx), challengeType, userID, username)
+func (a *KnownAdminAPI) createMFALoginChallenge(ctx context.Context, challengeType mfaChallengeType, userID int, username string, responseType string, issuance AccessTokenIssuanceContext) (*adminv1.AuthToken, error) {
+	challenge, err := a.mfaChallenges.CreateLoginWithTTL(a.getMFAChallengeTTL(ctx), challengeType, userID, username, issuance)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create MFA challenge")
 	}
@@ -103,6 +103,7 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 	username string,
 	providerMFAEnabled bool,
 	fallbackToken string,
+	issuance AccessTokenIssuanceContext,
 ) (*adminv1.AuthToken, error) {
 	enforce, localProviderID, err := a.getLocalMFAPolicy(ctx, db)
 	if err != nil {
@@ -128,19 +129,19 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 		}
 
 		if localIdentity.MfaEnabled {
-			return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginVerify, userID, username, mfaChallengeTypeTotpVerify)
+			return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginVerify, userID, username, mfaChallengeTypeTotpVerify, issuance)
 		}
-		return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginSetup, userID, username, mfaChallengeTypeTotpSetup)
+		return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginSetup, userID, username, mfaChallengeTypeTotpSetup, issuance)
 	}
 
 	// 非强制策略，保留原有“用户已开启 MFA 则验证”的行为
 	if providerMFAEnabled {
-		return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginVerify, userID, username, mfaChallengeTypeTotpVerify)
+		return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginVerify, userID, username, mfaChallengeTypeTotpVerify, issuance)
 	}
 
 	accessToken := fallbackToken
 	if accessToken == "" {
-		accessToken, err = a.issueTokenForUser(ctx, db, userID)
+		accessToken, err = a.issueTokenForUser(ctx, db, userID, issuance)
 		if err != nil {
 			return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
 		}
@@ -149,6 +150,6 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 	return &adminv1.AuthToken{
 		AccessToken: accessToken,
 		TokenType:   "Bearer",
-		ExpiresIn:   durationSecondsInt32(a.getLoginAccessTokenTTL(ctx)),
+		ExpiresIn:   durationSecondsInt32(issuance.TTL),
 	}, nil
 }

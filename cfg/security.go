@@ -6,32 +6,19 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
-
-// IDTokenClaims 用于框架jwt的数据结构，使用 auth.IDTokenClaims 代替
-/*
-type IDTokenClaims struct {
-	jwt.RegisteredClaims
-	Email           string            `json:"email"`
-	EmailVerified   bool              `json:"email_verified"`
-	Groups          []string          `json:"groups"`
-	FederatedClaims map[string]string `json:"federated_claims"`
-	Tenant          string            `json:"tenant"`
-}
-*/
 
 // OPANative 内嵌的 opa 组件
 type OPANative struct {
@@ -157,10 +144,15 @@ func (c *LocalConfig) initSecurity() error {
 	return nil
 }
 
-// WithIDToken 用于设置当前会话的IDToken
-func (c *SecurityConfig) withIDToken(parent context.Context, token auth.IDTokenClaims) context.Context {
-	// return context.WithValue(parent, idTokenKey, token)
-	return rpc.ContextWithIDToken(parent, token)
+// withAccessTokenClaims 将已验证的 access token claims 写入当前会话。
+func (c *SecurityConfig) withAccessTokenClaims(parent context.Context, token auth.AccessTokenClaims) context.Context {
+	return rpc.ContextWithTokenClaims(parent, token)
+}
+
+// withIDToken 保留用于兼容历史调用方。
+// Deprecated: use withAccessTokenClaims。
+func (c *SecurityConfig) withIDToken(parent context.Context, token auth.AccessTokenClaims) context.Context {
+	return c.withAccessTokenClaims(parent, token)
 }
 
 // WithUserID 用于设置当前会话的用户 ID
@@ -185,6 +177,11 @@ func (c *SecurityConfig) withAuthenticationType(parent context.Context, authType
 func (c *SecurityConfig) withGroups(parent context.Context, groups []string) context.Context {
 	// return context.WithValue(parent, groupsKey, groups)
 	return rpc.ContextWithGroups(parent, groups)
+}
+
+// withRoles stores the canonical role codes used by authorization checks.
+func (c *SecurityConfig) withRoles(parent context.Context, roles []string) context.Context {
+	return rpc.ContextWithRoles(parent, roles)
 }
 
 // setVerifier 用于设置oidc verifier实例
@@ -252,8 +249,8 @@ func basicAuthEffectivePasswordHash(b *BasicAuth) string {
 
 // verifyBearerToken 用于验证 bearerToken
 // 需判断服务端是否允许 HS256 的签名算法，如果有在判断 token 是否使用 HS256
-func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString string) (auth.IDTokenClaims, error) {
-	var idToken auth.IDTokenClaims
+func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString string) (auth.AccessTokenClaims, error) {
+	var accessToken auth.AccessTokenClaims
 
 	// 用户提交的 token 是否为 HS256 签名
 	hasHS256Alg := false
@@ -263,7 +260,7 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 		if token.Method.Alg() == "HS256" {
 			hasHS256Alg = true
 
-			claims, ok := token.Claims.(*auth.IDTokenClaims)
+			claims, ok := token.Claims.(*auth.AccessTokenClaims)
 			if ok {
 				// 根据 sub 获取作为 username 获取对应的 password 作为 token 的签名验证
 				f, b := s.foundUserID(claims.GetMustUserID())
@@ -284,49 +281,50 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 
 	// 仅在服务端配置支持 HS256 算法时才执行
 	if s.supportedHS256Alg() {
-		token, err := jwt.ParseWithClaims(tokenString, &idToken, hs256Verify)
+		parserOptions := make([]jwt.ParserOption, 0, 1)
+		if s.Authentication.OIDCProvider.Config.SkipExpiryCheck {
+			// Skip registered-claim validation for the explicitly configured
+			// compatibility mode, while signature verification still runs.
+			parserOptions = append(parserOptions, jwt.WithoutClaimsValidation())
+		}
+		token, err := jwt.ParseWithClaims(tokenString, &accessToken, hs256Verify, parserOptions...)
 		if hasHS256Alg && err != nil {
-			if s.Authentication.OIDCProvider.Config == nil {
-				return idToken, err
-			}
-
-			// 继续判断错误类型，忽略 token 过期等
-			switch {
-			case errors.Is(err, jwt.ErrTokenExpired):
-				if s.Authentication.OIDCProvider.Config.SkipExpiryCheck {
-					return idToken, nil
-				}
-			default:
-				return idToken, err
-			}
+			return accessToken, err
 		}
 
 		if hasHS256Alg {
 			if token == nil || !token.Valid {
-				return idToken, jwt.ErrInvalidKey
+				return accessToken, jwt.ErrInvalidKey
 			}
 
 			// 验证 issuer
 			if !s.Authentication.OIDCProvider.Config.SkipIssuerCheck {
-				if s.Authentication.OIDCProvider.Issuer != idToken.Issuer {
-					return idToken, jwt.ErrTokenInvalidIssuer
+				if s.Authentication.OIDCProvider.Issuer != accessToken.Issuer {
+					return accessToken, jwt.ErrTokenInvalidIssuer
 				}
 			}
 
 			// 验证 client_id
 			if !s.Authentication.OIDCProvider.Config.SkipClientIDCheck {
 				if s.Authentication.OIDCProvider.Config == nil {
-					return idToken, nil
+					return accessToken, nil
 				}
 				clientID := s.Authentication.OIDCProvider.Config.ClientID
 				if clientID != "" {
-					if !idToken.VerifyAudience(clientID, true) {
-						return idToken, jwt.ErrTokenInvalidAudience
+					audienceMatch := false
+					for _, aud := range accessToken.Audience {
+						if aud == clientID {
+							audienceMatch = true
+							break
+						}
+					}
+					if !audienceMatch {
+						return accessToken, jwt.ErrTokenInvalidAudience
 					}
 				}
 			}
 
-			return idToken, nil
+			return accessToken, nil
 		}
 	}
 
@@ -334,17 +332,17 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 	// RS256 等其他签名算法验证
 	tokenVerifier, ok := s.idTokenVerifier()
 	if !ok {
-		return idToken, jwt.ErrInvalidKey
+		return accessToken, jwt.ErrInvalidKey
 	}
 	token, err := tokenVerifier.Verify(ctx, tokenString)
 	if err != nil {
-		return idToken, err
+		return accessToken, err
 	}
-	if err := token.Claims(&idToken); err != nil {
-		return idToken, err
+	if err := token.Claims(&accessToken); err != nil {
+		return accessToken, err
 	}
 
-	return idToken, nil
+	return accessToken, nil
 }
 
 // initAuthClient 用于初始化 opa 客户端

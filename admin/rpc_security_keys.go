@@ -6,9 +6,9 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"math/big"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -143,6 +143,144 @@ func computeFingerprint(cred *adminv1.Credential) string {
 	return ""
 }
 
+// normalizePublicKeyToDER 将公钥材料归一化为 raw DER 字节。
+// 接受 PEM 文本（-----BEGIN PUBLIC KEY-----）或 raw DER，统一返回 PKIX DER。
+// 空输入返回空输出；无法识别的格式返回错误。
+func normalizePublicKeyToDER(raw []byte) ([]byte, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	// PEM 文本：首字节为 '-' (0x2D)
+	if raw[0] == 0x2D {
+		block, _ := pem.Decode(raw)
+		if block == nil {
+			return nil, fmt.Errorf("failed to decode PEM public key")
+		}
+		return block.Bytes, nil
+	}
+	// raw DER：首字节为 0x30 (SEQUENCE)，原样返回
+	if raw[0] == 0x30 {
+		return raw, nil
+	}
+	return nil, fmt.Errorf("unrecognized public key format (firstByte=0x%02x)", raw[0])
+}
+
+// normalizePrivateKeyToPKCS1DER 将私钥材料归一化为 PKCS#1 DER 字节。
+// 接受 PEM 文本（-----BEGIN PRIVATE KEY----- / -----BEGIN RSA PRIVATE KEY-----）
+// 或 raw DER，统一返回 PKCS#1 DER（与系统种子 x509.MarshalPKCS1PrivateKey 一致）。
+// 空输入返回空输出；无法识别的格式返回错误。
+func normalizePrivateKeyToPKCS1DER(raw []byte) ([]byte, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	var derBytes []byte
+	// PEM 文本：首字节为 '-' (0x2D)
+	if raw[0] == 0x2D {
+		block, _ := pem.Decode(raw)
+		if block == nil {
+			return nil, fmt.Errorf("failed to decode PEM private key")
+		}
+		derBytes = block.Bytes
+	} else if raw[0] == 0x30 {
+		// raw DER：首字节为 0x30 (SEQUENCE)
+		derBytes = raw
+	} else {
+		return nil, fmt.Errorf("unrecognized private key format (firstByte=0x%02x)", raw[0])
+	}
+
+	// 尝试按 PKCS#8 解析（前端 Web Crypto exportKey("pkcs8") 产出 PKCS#8）
+	key, err := x509.ParsePKCS8PrivateKey(derBytes)
+	if err == nil {
+		rsaKey, ok := key.(*rsa.PrivateKey)
+		if !ok {
+			return nil, fmt.Errorf("PKCS#8 private key is not RSA: %T", key)
+		}
+		return x509.MarshalPKCS1PrivateKey(rsaKey), nil
+	}
+
+	// 尝试按 PKCS#1 解析（已是 PKCS#1 DER，原样返回）
+	if _, err := x509.ParsePKCS1PrivateKey(derBytes); err == nil {
+		return derBytes, nil
+	}
+
+	return nil, fmt.Errorf("failed to parse private key as PKCS#8 or PKCS#1")
+}
+
+// normalizeCertificateToDER 将 X.509 证书归一化为 raw DER 字节。
+// 接受 PEM 文本（-----BEGIN CERTIFICATE-----）或 raw DER，统一返回 DER。
+// 空输入返回空输出；无法识别的格式返回错误。
+func normalizeCertificateToDER(raw []byte) ([]byte, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	// PEM 文本：首字节为 '-' (0x2D)
+	if raw[0] == 0x2D {
+		block, _ := pem.Decode(raw)
+		if block == nil {
+			return nil, fmt.Errorf("failed to decode PEM certificate")
+		}
+		return block.Bytes, nil
+	}
+	// raw DER：首字节为 0x30 (SEQUENCE)，原样返回
+	if raw[0] == 0x30 {
+		return raw, nil
+	}
+	return nil, fmt.Errorf("unrecognized certificate format (firstByte=0x%02x)", raw[0])
+}
+
+// normalizeCredentialKeyMaterial 按凭证类型归一化密钥材料为 raw DER，原地修改 cred。
+// 仅处理含密钥材料的类型（KEY_PAIR / X509），其余类型不做处理。
+func normalizeCredentialKeyMaterial(cred *adminv1.Credential) error {
+	switch cred.GetType() {
+	case adminv1.Credential_KEY_PAIR:
+		kp := cred.GetKeyPair()
+		if kp == nil {
+			return nil
+		}
+		pubDER, err := normalizePublicKeyToDER(kp.PublicKey)
+		if err != nil {
+			return fmt.Errorf("normalize public_key: %w", err)
+		}
+		kp.PublicKey = pubDER
+
+		privDER, err := normalizePrivateKeyToPKCS1DER(kp.PrivateKey)
+		if err != nil {
+			return fmt.Errorf("normalize private_key: %w", err)
+		}
+		kp.PrivateKey = privDER
+		// passphrase 是普通文本，不涉及 DER 归一化
+
+	case adminv1.Credential_X509:
+		x := cred.GetX509Data()
+		if x == nil {
+			return nil
+		}
+		certDER, err := normalizeCertificateToDER(x.Certificate)
+		if err != nil {
+			return fmt.Errorf("normalize certificate: %w", err)
+		}
+		x.Certificate = certDER
+
+		// ca_chain 中的每张证书也归一化
+		for i, ca := range x.CaChain {
+			caDER, err := normalizeCertificateToDER(ca)
+			if err != nil {
+				return fmt.Errorf("normalize ca_chain[%d]: %w", i, err)
+			}
+			x.CaChain[i] = caDER
+		}
+
+		// X509 凭证的私钥同样归一化为 PKCS#1 DER
+		privDER, err := normalizePrivateKeyToPKCS1DER(x.PrivateKey)
+		if err != nil {
+			return fmt.Errorf("normalize private_key: %w", err)
+		}
+		x.PrivateKey = privDER
+		// passphrase 是普通文本，不涉及 DER 归一化
+	}
+	return nil
+}
+
 // isTokenPersistenceRequest 判断是否为 Token 持久化请求。
 // 识别条件：type=SECRET + usage=AUTH + source=USER
 // 用于决定是否执行 fingerprint 幂等检查。
@@ -150,6 +288,32 @@ func isTokenPersistenceRequest(cred *adminv1.Credential) bool {
 	return cred.GetType() == adminv1.Credential_SECRET &&
 		cred.GetUsage() == adminv1.Credential_AUTH &&
 		cred.GetSource() == adminv1.Credential_USER
+}
+
+// isJWKSCredential 判断 ent 凭证行是否为 JWKS 凭证。
+// 识别条件：type=KEY_PAIR + algorithm=RSA + usage=JWKS + visibility=VISIBILITY_RESTRICTED + source=SYSTEM
+// 不检查 status，由调用方决定是否叠加状态过滤。
+func isJWKSCredential(row *lion.Credentials) bool {
+	return row.CredentialType == int(adminv1.Credential_KEY_PAIR.Number()) &&
+		row.CredentialAlgorithm == int(adminv1.Credential_RSA.Number()) &&
+		row.CredentialUsage == int(adminv1.Credential_JWKS.Number()) &&
+		row.CredentialVisibility == int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number()) &&
+		row.CredentialSource == int(adminv1.Credential_SYSTEM.Number())
+}
+
+// countActiveJWKSCredentials 统计当前处于 ACTIVE 状态的 JWKS 凭证数量。
+// 用于守卫：确保系统始终至少存在一个活跃的 JWKS 凭证。
+func countActiveJWKSCredentials(ctx context.Context, db *lion.Client) (int, error) {
+	return db.Credentials.Query().
+		Where(
+			credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
+			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_RSA.Number())),
+			credentials.CredentialUsageEQ(int(adminv1.Credential_JWKS.Number())),
+			credentials.CredentialVisibilityEQ(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())),
+			credentials.CredentialStatusEQ(int(adminv1.Credential_ACTIVE.Number())),
+			credentials.CredentialSourceEQ(int(adminv1.Credential_SYSTEM.Number())),
+		).
+		Count(ctx)
 }
 
 // encryptSensitiveField 使用 AES-GCM 加密敏感字段
@@ -199,6 +363,12 @@ func (a *KnownAdminAPI) CreateCredential(ctx context.Context, req *adminv1.Creat
 	}
 	if exists > 0 {
 		return nil, errs.AlreadyExists(ctx).WithMessage(fmt.Sprintf("credential with code %q already exists", code))
+	}
+
+	// 归一化密钥材料为 raw DER，确保 DB 存储格式统一（公钥 PKIX DER、私钥 PKCS#1 DER）。
+	// 必须在 computeFingerprint 之前执行，使 fingerprint 基于 DER 计算，与系统种子一致。
+	if err := normalizeCredentialKeyMaterial(cred); err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid key material: %v", err))
 	}
 
 	// 计算密钥指纹
@@ -625,8 +795,8 @@ func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.Updat
 	mask := req.GetUpdateMask()
 	if mask != nil && len(mask.GetPaths()) > 0 {
 		for _, path := range mask.GetPaths() {
-			// 受保护凭证仅允许更新 display_name / description
-			if isProtected && path != "display_name" && path != "description" {
+			// 受保护凭证仅允许更新 display_name / description / status
+			if isProtected && path != "display_name" && path != "description" && path != "status" {
 				continue
 			}
 			switch path {
@@ -660,7 +830,7 @@ func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.Updat
 		if cred.Description != "" {
 			update.SetDescription(cred.Description)
 		}
-		if !isProtected && cred.Status != adminv1.Credential_STATUS_UNSPECIFIED {
+		if cred.Status != adminv1.Credential_STATUS_UNSPECIFIED {
 			update.SetCredentialStatus(int(cred.Status.Number()))
 		}
 		if !isProtected && cred.ExpiresAt != nil {
@@ -671,6 +841,30 @@ func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.Updat
 		}
 		if !isProtected && cred.Metadata != nil {
 			update.SetMetadata(cred.Metadata)
+		}
+	}
+
+	// 守卫：禁止将最后一个活跃的 JWKS 凭证状态改为非 ACTIVE
+	if isJWKSCredential(row) && row.CredentialStatus == int(adminv1.Credential_ACTIVE.Number()) {
+		newStatus := row.CredentialStatus // 默认无变更
+		if mask != nil && len(mask.GetPaths()) > 0 {
+			for _, path := range mask.GetPaths() {
+				if path == "status" {
+					newStatus = int(cred.Status.Number())
+					break
+				}
+			}
+		} else if cred.Status != adminv1.Credential_STATUS_UNSPECIFIED {
+			newStatus = int(cred.Status.Number())
+		}
+		if newStatus != int(adminv1.Credential_ACTIVE.Number()) {
+			count, err := countActiveJWKSCredentials(ctx, db)
+			if err != nil {
+				return nil, err
+			}
+			if count <= 1 {
+				return nil, errs.FailedPrecondition(ctx).WithMessage("at least one active JWKS credential must exist")
+			}
 		}
 	}
 
@@ -706,6 +900,17 @@ func (a *KnownAdminAPI) DeleteCredential(ctx context.Context, req *adminv1.Delet
 	// 受保护凭证不可删除
 	if row.Protected {
 		return nil, errs.InvalidArgument(ctx).WithMessage("protected credential cannot be deleted")
+	}
+
+	// 守卫：禁止删除最后一个活跃的 JWKS 凭证
+	if isJWKSCredential(row) && row.CredentialStatus == int(adminv1.Credential_ACTIVE.Number()) {
+		count, err := countActiveJWKSCredentials(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+		if count <= 1 {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("at least one active JWKS credential must exist")
+		}
 	}
 
 	// 执行软删除
@@ -926,7 +1131,14 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_RSA.Number())),
 			credentials.CredentialUsageEQ(int(adminv1.Credential_JWKS.Number())),
 			credentials.CredentialVisibilityEQ(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())),
-			credentials.CredentialStatusEQ(int(adminv1.Credential_ACTIVE.Number())),
+			// JWKS 端点需同时列出 ACTIVE 和 EXPIRED 状态的公钥：
+			// ACTIVE - 当前用于签名的活跃密钥
+			// EXPIRED - 已过期但仍有未过期 token 需要验证的密钥
+			// 注意：DISABLED（手动禁用）和 REVOKED（已吊销）不列出，因为可能涉及安全问题
+			credentials.CredentialStatusIn(
+				int(adminv1.Credential_ACTIVE.Number()),
+				int(adminv1.Credential_EXPIRED.Number()),
+			),
 			credentials.CredentialSourceEQ(int(adminv1.Credential_SYSTEM.Number())),
 		).
 		Order(credentials.ByID()).
@@ -970,24 +1182,23 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empty) (*adminv1.OAuth2Userinfo, error) {
 	result := &adminv1.OAuth2Userinfo{}
 
-	tmp := rpc.GetIDTokenFromContext(ctx)
-	a.logger.Infof("get id token type: %v", reflect.TypeOf(tmp))
-	idToken, ok := tmp.(auth.IDTokenClaims)
+	claims, ok := oauth2UserinfoClaimsFromContext(ctx)
 	if !ok {
 		return result, errs.PermissionDenied(ctx)
 	}
 
-	// 从 JWT 中提取基础 claim（这些字段在签发 token 时已确定）
-	result.Sub = idToken.Subject
-	result.UserId = idToken.GetMustUserID()
-	result.PreferredUsername = idToken.Username
-	result.Email = idToken.Email
-	result.EmailVerified = idToken.EmailVerified
+	// Bearer 使用已验证的 JWT claims；Basic Auth 使用中间件已验证并写入
+	// context 的本地用户身份。
+	result.Sub = claims.Subject
+	result.UserId = claims.GetMustUserID()
+	result.PreferredUsername = claims.GetPreferredUsername()
+	result.Email = claims.Email
+	result.EmailVerified = claims.EmailVerified
 
-	// 从数据库查询用户实体，补充完整 OIDC Standard Claims
+	// 从数据库查询用户实体，补充完整 OIDC Standard Claims。
+	// 静态 Basic Auth 可以在没有数据库的部署中使用，此时返回最小身份信息。
 	userID := result.UserId
-	if userID <= 0 {
-		// 缺少 user_id 时仅返回 JWT 中的基础 claim
+	if userID <= 0 || a == nil || a.config == nil || a.config.db == nil {
 		return result, nil
 	}
 
@@ -1012,12 +1223,12 @@ func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empt
 		Where(users.IDEQ(int(userID))).
 		Only(ctx)
 	if err != nil {
-		// 用户查询失败时降级返回 JWT 中的基础 claim，避免 userinfo endpoint 整体不可用
+		// 用户查询失败时降级返回认证上下文中的基础信息，避免 userinfo endpoint 整体不可用。
 		if lion.IsNotFound(err) {
-			a.logger.Infof("oauth2 userinfo: user %d not found, returning jwt claims only", userID)
+			a.logger.Infof("oauth2 userinfo: user %d not found, returning authentication context only", userID)
 			return result, nil
 		}
-		a.logger.Infof("oauth2 userinfo: query user %d failed: %v, returning jwt claims only", userID, err)
+		a.logger.Infof("oauth2 userinfo: query user %d failed: %v, returning authentication context only", userID, err)
 		return result, nil
 	}
 
@@ -1075,6 +1286,39 @@ func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empt
 	result.UpdatedAt = user.UpdatedAt.Unix()
 
 	return result, nil
+}
+
+func oauth2UserinfoClaimsFromContext(ctx context.Context) (*auth.CommonClaims, bool) {
+	switch token := rpc.GetTokenClaimsFromContext(ctx).(type) {
+	case auth.AccessTokenClaims:
+		return &token.CommonClaims, true
+	case *auth.AccessTokenClaims:
+		if token != nil {
+			return &token.CommonClaims, true
+		}
+	case auth.IDTokenClaims:
+		// 兼容由旧调用方直接写入 context 的 IDTokenClaims。
+		return &token.CommonClaims, true
+	case *auth.IDTokenClaims:
+		if token != nil {
+			return &token.CommonClaims, true
+		}
+	}
+
+	authType, ok := rpc.GetAuthenticationTypeFromContext(ctx)
+	if !ok || authType != "basic" {
+		return nil, false
+	}
+	username, ok := rpc.GetUsernameFromContext(ctx)
+	if !ok || username == "" || username == "anonymous" {
+		return nil, false
+	}
+
+	claims := &auth.CommonClaims{PreferredUsername: username}
+	if userID, ok := rpc.GetUserIDFromContext(ctx); ok {
+		claims.SetSubject(strconv.FormatInt(userID, 10))
+	}
+	return claims, true
 }
 
 // firstByte 返回字节切片的首字节，空切片返回 0。

@@ -133,13 +133,13 @@ func menuVisibilityFromProto(v adminv1.Visibility) string {
 }
 
 func hasSuperadminMenuAccess(ctx context.Context) bool {
-	groups, ok := rpc.GetGroupsFromContext(ctx)
+	roles, ok := rpc.GetRolesFromContext(ctx)
 	if !ok {
 		return false
 	}
 	superadminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)
-	for _, group := range groups {
-		if group == superadminCode {
+	for _, role := range roles {
+		if role == superadminCode {
 			return true
 		}
 	}

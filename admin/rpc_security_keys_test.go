@@ -2,6 +2,11 @@ package admin
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"math/big"
 	"testing"
 	"time"
 
@@ -795,4 +800,272 @@ func TestRevealCredentialSecret_LionImportCheck(t *testing.T) {
 	_ = credentials.FieldSymmetricKeyEncrypted
 	_ = credentials.FieldPassphraseEncrypted
 	_ = credentials.FieldLicenseKeyEncrypted
+}
+
+// ======================== normalizePublicKeyToDER tests ========================
+
+func TestNormalizePublicKeyToDER_PEMInput(t *testing.T) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate key failed: %v", err)
+	}
+	derBytes, err := x509.MarshalPKIXPublicKey(&priv.PublicKey)
+	if err != nil {
+		t.Fatalf("marshal PKIX public key failed: %v", err)
+	}
+	pemBytes := pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: derBytes})
+
+	got, err := normalizePublicKeyToDER(pemBytes)
+	if err != nil {
+		t.Fatalf("normalize PEM failed: %v", err)
+	}
+	if len(got) != len(derBytes) {
+		t.Errorf("expected %d bytes, got %d bytes", len(derBytes), len(got))
+	}
+}
+
+func TestNormalizePublicKeyToDER_DERInput(t *testing.T) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate key failed: %v", err)
+	}
+	derBytes, err := x509.MarshalPKIXPublicKey(&priv.PublicKey)
+	if err != nil {
+		t.Fatalf("marshal PKIX public key failed: %v", err)
+	}
+
+	got, err := normalizePublicKeyToDER(derBytes)
+	if err != nil {
+		t.Fatalf("normalize DER failed: %v", err)
+	}
+	if len(got) != len(derBytes) {
+		t.Errorf("expected %d bytes, got %d bytes", len(derBytes), len(got))
+	}
+}
+
+func TestNormalizePublicKeyToDER_EmptyInput(t *testing.T) {
+	got, err := normalizePublicKeyToDER(nil)
+	if err != nil {
+		t.Fatalf("expected no error for empty input, got %v", err)
+	}
+	if got != nil {
+		t.Errorf("expected nil, got %d bytes", len(got))
+	}
+}
+
+func TestNormalizePublicKeyToDER_InvalidInput(t *testing.T) {
+	_, err := normalizePublicKeyToDER([]byte("not-a-valid-key"))
+	if err == nil {
+		t.Error("expected error for invalid input")
+	}
+}
+
+// ======================== normalizePrivateKeyToPKCS1DER tests ========================
+
+func TestNormalizePrivateKeyToPKCS1DER_PKCS8PEMInput(t *testing.T) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate key failed: %v", err)
+	}
+	pkcs8DER, err := x509.MarshalPKCS8PrivateKey(priv)
+	if err != nil {
+		t.Fatalf("marshal PKCS8 private key failed: %v", err)
+	}
+	pemBytes := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: pkcs8DER})
+
+	got, err := normalizePrivateKeyToPKCS1DER(pemBytes)
+	if err != nil {
+		t.Fatalf("normalize PKCS8 PEM failed: %v", err)
+	}
+
+	expectedPKCS1 := x509.MarshalPKCS1PrivateKey(priv)
+	if len(got) != len(expectedPKCS1) {
+		t.Errorf("expected %d bytes, got %d bytes", len(expectedPKCS1), len(got))
+	}
+}
+
+func TestNormalizePrivateKeyToPKCS1DER_PKCS1DERInput(t *testing.T) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate key failed: %v", err)
+	}
+	pkcs1DER := x509.MarshalPKCS1PrivateKey(priv)
+
+	got, err := normalizePrivateKeyToPKCS1DER(pkcs1DER)
+	if err != nil {
+		t.Fatalf("normalize PKCS1 DER failed: %v", err)
+	}
+	if len(got) != len(pkcs1DER) {
+		t.Errorf("expected %d bytes, got %d bytes", len(pkcs1DER), len(got))
+	}
+}
+
+func TestNormalizePrivateKeyToPKCS1DER_EmptyInput(t *testing.T) {
+	got, err := normalizePrivateKeyToPKCS1DER(nil)
+	if err != nil {
+		t.Fatalf("expected no error for empty input, got %v", err)
+	}
+	if got != nil {
+		t.Errorf("expected nil, got %d bytes", len(got))
+	}
+}
+
+func TestNormalizePrivateKeyToPKCS1DER_InvalidInput(t *testing.T) {
+	_, err := normalizePrivateKeyToPKCS1DER([]byte("not-a-valid-key"))
+	if err == nil {
+		t.Error("expected error for invalid input")
+	}
+}
+
+// ======================== normalizeCertificateToDER tests ========================
+
+func TestNormalizeCertificateToDER_PEMInput(t *testing.T) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate key failed: %v", err)
+	}
+	tmpl := &x509.Certificate{
+		SerialNumber:          big.NewInt(1),
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().Add(24 * time.Hour),
+		KeyUsage:              x509.KeyUsageDigitalSignature,
+		BasicConstraintsValid: true,
+	}
+	derBytes, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &priv.PublicKey, priv)
+	if err != nil {
+		t.Fatalf("create certificate failed: %v", err)
+	}
+	pemBytes := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+
+	got, err := normalizeCertificateToDER(pemBytes)
+	if err != nil {
+		t.Fatalf("normalize PEM failed: %v", err)
+	}
+	if len(got) != len(derBytes) {
+		t.Errorf("expected %d bytes, got %d bytes", len(derBytes), len(got))
+	}
+}
+
+func TestNormalizeCertificateToDER_DERInput(t *testing.T) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate key failed: %v", err)
+	}
+	tmpl := &x509.Certificate{
+		SerialNumber:          big.NewInt(1),
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().Add(24 * time.Hour),
+		KeyUsage:              x509.KeyUsageDigitalSignature,
+		BasicConstraintsValid: true,
+	}
+	derBytes, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &priv.PublicKey, priv)
+	if err != nil {
+		t.Fatalf("create certificate failed: %v", err)
+	}
+
+	got, err := normalizeCertificateToDER(derBytes)
+	if err != nil {
+		t.Fatalf("normalize DER failed: %v", err)
+	}
+	if len(got) != len(derBytes) {
+		t.Errorf("expected %d bytes, got %d bytes", len(derBytes), len(got))
+	}
+}
+
+func TestNormalizeCertificateToDER_EmptyInput(t *testing.T) {
+	got, err := normalizeCertificateToDER(nil)
+	if err != nil {
+		t.Fatalf("expected no error for empty input, got %v", err)
+	}
+	if got != nil {
+		t.Errorf("测试预期返回 nil, 实际返回 %d 字节", len(got))
+	}
+}
+
+func TestNormalizeCertificateToDER_InvalidInput(t *testing.T) {
+	_, err := normalizeCertificateToDER([]byte("not-a-valid-cert"))
+	if err == nil {
+		t.Error("expected error for invalid input")
+	}
+}
+
+// ======================== normalizeCredentialKeyMaterial tests ========================
+
+func TestNormalizeCredentialKeyMaterial_KeyPair(t *testing.T) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate key failed: %v", err)
+	}
+	pubDER, _ := x509.MarshalPKIXPublicKey(&priv.PublicKey)
+	pubPEM := pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: pubDER})
+	pkcs8DER, _ := x509.MarshalPKCS8PrivateKey(priv)
+	pkcs8PEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: pkcs8DER})
+
+	cred := &adminv1.Credential{
+		Type: adminv1.Credential_KEY_PAIR,
+		KeyMaterial: &adminv1.Credential_KeyPair{
+			KeyPair: &adminv1.Credential_KeyPairData{
+				PublicKey:  pubPEM,
+				PrivateKey: pkcs8PEM,
+			},
+		},
+	}
+
+	if err := normalizeCredentialKeyMaterial(cred); err != nil {
+		t.Fatalf("normalize KEY_PAIR failed: %v", err)
+	}
+
+	kp := cred.GetKeyPair()
+	expectedPKCS1 := x509.MarshalPKCS1PrivateKey(priv)
+	if len(kp.PrivateKey) != len(expectedPKCS1) {
+		t.Errorf("private key: expected %d bytes (PKCS1 DER), got %d bytes", len(expectedPKCS1), len(kp.PrivateKey))
+	}
+	if len(kp.PublicKey) != len(pubDER) {
+		t.Errorf("public key: expected %d bytes (DER), got %d bytes", len(pubDER), len(kp.PublicKey))
+	}
+}
+
+func TestNormalizeCredentialKeyMaterial_KeyPair_AlreadyDER(t *testing.T) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate key failed: %v", err)
+	}
+	pubDER, _ := x509.MarshalPKIXPublicKey(&priv.PublicKey)
+	pkcs1DER := x509.MarshalPKCS1PrivateKey(priv)
+
+	cred := &adminv1.Credential{
+		Type: adminv1.Credential_KEY_PAIR,
+		KeyMaterial: &adminv1.Credential_KeyPair{
+			KeyPair: &adminv1.Credential_KeyPairData{
+				PublicKey:  pubDER,
+				PrivateKey: pkcs1DER,
+			},
+		},
+	}
+
+	if err := normalizeCredentialKeyMaterial(cred); err != nil {
+		t.Fatalf("normalize KEY_PAIR (DER) failed: %v", err)
+	}
+	kp := cred.GetKeyPair()
+	if len(kp.PrivateKey) != len(pkcs1DER) {
+		t.Errorf("private key: expected %d bytes, got %d bytes", len(pkcs1DER), len(kp.PrivateKey))
+	}
+	if len(kp.PublicKey) != len(pubDER) {
+		t.Errorf("public key: expected %d bytes, got %d bytes", len(pubDER), len(kp.PublicKey))
+	}
+}
+
+func TestNormalizeCredentialKeyMaterial_OtherType_Nop(t *testing.T) {
+	cred := &adminv1.Credential{
+		Type: adminv1.Credential_SECRET,
+		KeyMaterial: &adminv1.Credential_SymmetricKey{
+			SymmetricKey: []byte("some-secret"),
+		},
+	}
+	if err := normalizeCredentialKeyMaterial(cred); err != nil {
+		t.Fatalf("expected nil for SECRET type, got %v", err)
+	}
+	if string(cred.GetSymmetricKey()) != "some-secret" {
+		t.Error("SECRET should be unchanged")
+	}
 }

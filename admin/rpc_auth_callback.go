@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 )
 
 // GetAuthCallback 处理 OAuth2.0 的回调
 func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAuthCallbackRequest) (*adminv1.GetAuthCallbackResponse, error) {
+	ttl := a.getLoginAccessTokenTTL(ctx)
 	result := &adminv1.GetAuthCallbackResponse{
 		TokenType: "Bearer",
-		ExpiresIn: durationSecondsInt32(a.getLoginAccessTokenTTL(ctx)),
+		ExpiresIn: durationSecondsInt32(ttl),
 	}
 
 	db, err := a.GetLionClient()
@@ -27,6 +28,11 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 	if err != nil {
 		return nil, err
 	}
+	issuance, err := a.newAccessTokenIssuanceContext("", "", ttl)
+	if err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
+	su.issuanceContext = issuance
 
 	accessToken, err := su.Exchange(ctx, req.GetCode())
 	if err != nil {
@@ -38,7 +44,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		return nil, errs.Internal(ctx).WithMessage("failed to parse callback access token")
 	}
 
-	authToken, err := a.applyMFAGateAfterPrimaryAuth(ctx, db, userID, username, false, accessToken)
+	authToken, err := a.applyMFAGateAfterPrimaryAuth(ctx, db, userID, username, false, accessToken, issuance)
 	if err != nil {
 		return nil, err
 	}
@@ -73,6 +79,10 @@ func extractUserFromAccessToken(accessToken string) (int, string, error) {
 		return 0, "", err
 	}
 
-	username, _ := claims["username"].(string)
+	username, _ := claims["preferred_username"].(string)
+	if username == "" {
+		// 兼容历史自定义 username claim。
+		username, _ = claims["username"].(string)
+	}
 	return userID, username, nil
 }
