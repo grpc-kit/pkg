@@ -730,7 +730,6 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/VerifyAuthMFA",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/StartAuthMFASetup",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmAuthMFASetup",
-			"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthToken",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2JSONWebKeys":
