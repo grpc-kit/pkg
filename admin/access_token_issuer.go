@@ -26,7 +26,6 @@ import (
 type AccessTokenInput struct {
 	Subject           string
 	PreferredUsername string
-	Nickname          string
 	Email             string
 	EmailVerified     bool
 	Roles             []string
@@ -44,14 +43,30 @@ type AccessTokenInput struct {
 type AccessTokenIssuanceContext struct {
 	ClientID string
 	Scope    string
-	Tenant   string
-	TTL      time.Duration
+	// Tenant/Roles/Groups 为令牌声明的最终值：留空（""/nil）则对应声明不写入令牌
+	// （json omitempty）。issuer 不再隐式回退，调用方须显式填入期望值——登录路径填
+	// 静态用户自身配置，CreateAuthToken 按授权决策填入（留空即省略）。
+	Tenant string
+	Roles  []string
+	Groups []string
+	// PreferredUsername/Email 为令牌身份展示字段的覆盖值：非空则覆盖静态用户/DB profile
+	// 自身值（仅 superadmin 可设置）。留空时，OmitIdentityFields=true（superadmin 签发）
+	// 则不写入令牌（不回退自身）；OmitIdentityFields=false（登录/MFA/非 superadmin）则
+	// 回退到静态用户/DB profile 自身值。subject 由签发路径决定（委托签发时为目标 user_id）。
+	PreferredUsername string
+	Email             string
+	// EmailVerified 仅在 Email 非空时写入令牌（superadmin 可选）；其余签发路径取静态
+	// 用户/DB profile 自身值或固定 false。
+	EmailVerified bool
+	// OmitIdentityFields 为 true 时，PreferredUsername/Email 留空即不写入令牌（不回退
+	// 到调用方自身值）；仅 CreateAuthToken superadmin 路径置 true，其余签发路径保持 false。
+	OmitIdentityFields bool
+	TTL               time.Duration
 }
 
 type accessTokenUserProfile struct {
 	UserID        int
 	Username      string
-	Nickname      string
 	Email         string
 	EmailVerified bool
 }
@@ -73,8 +88,9 @@ func (a *KnownAdminAPI) newAccessTokenIssuanceContext(clientID, scope string, tt
 	return AccessTokenIssuanceContext{
 		ClientID: clientID,
 		Scope:    strings.Join(normalizeClaimValues(strings.Fields(scope)), " "),
-		Tenant:   "default",
-		TTL:      ttl,
+		// Tenant/Roles/Groups 默认留空：调用方按需显式覆盖（登录填静态用户配置，
+		// CreateAuthToken 按授权决策填入），留空则不写入对应声明。
+		TTL: ttl,
 	}, nil
 }
 
@@ -102,11 +118,6 @@ func BuildAccessTokenClaims(input AccessTokenInput) (*auth.AccessTokenClaims, er
 		return nil, fmt.Errorf("access token jti is required")
 	}
 
-	tenant := strings.TrimSpace(input.Tenant)
-	if tenant == "" {
-		tenant = "default"
-	}
-
 	claims := &auth.AccessTokenClaims{
 		CommonClaims: auth.CommonClaims{
 			RegisteredClaims: jwt.RegisteredClaims{
@@ -116,10 +127,11 @@ func BuildAccessTokenClaims(input AccessTokenInput) (*auth.AccessTokenClaims, er
 				ID:        input.JWTID,
 			},
 			PreferredUsername: input.PreferredUsername,
-			Nickname:          strings.TrimSpace(input.Nickname),
-			Tenant:            tenant,
-			Roles:             normalizeClaimValues(input.Roles),
-			Groups:            normalizeClaimValues(input.Groups),
+			// Tenant/Roles/Groups 留空即省略（json omitempty）：仅在调用方明确提供时
+			// 写入对应声明，不再隐式回退到 "default" 或静态用户配置。
+			Tenant: strings.TrimSpace(input.Tenant),
+			Roles:  normalizeClaimValues(input.Roles),
+			Groups: normalizeClaimValues(input.Groups),
 		},
 		ClientID: input.ClientID,
 		Scope:    strings.Join(normalizeClaimValues(strings.Fields(input.Scope)), " "),
@@ -192,7 +204,6 @@ func loadAccessTokenUserProfile(ctx context.Context, db *lion.Client, aesKey []b
 		Select(
 			users.FieldID,
 			users.FieldUsername,
-			users.FieldNickname,
 			users.FieldEmailEncrypted,
 			users.FieldEmailVerified,
 		).
@@ -208,7 +219,6 @@ func loadAccessTokenUserProfile(ctx context.Context, db *lion.Client, aesKey []b
 	profile := accessTokenUserProfile{
 		UserID:        row.ID,
 		Username:      row.Username,
-		Nickname:      row.Nickname,
 		EmailVerified: row.EmailVerified,
 	}
 	if len(row.EmailEncrypted) > 0 {
@@ -225,12 +235,28 @@ func loadAccessTokenUserProfile(ctx context.Context, db *lion.Client, aesKey []b
 }
 
 func accessTokenInputFromProfile(profile accessTokenUserProfile, issuance AccessTokenIssuanceContext, roles, groups []string) AccessTokenInput {
+	// 身份展示字段：OmitIdentityFields（superadmin 签发）时直接采用 issuance 值，留空即
+	// 不写入令牌；否则 issuance 非空覆盖、留空回退 DB profile 自身值。
+	preferredUsername := profile.Username
+	email := profile.Email
+	emailVerified := profile.EmailVerified
+	if issuance.OmitIdentityFields {
+		preferredUsername = strings.TrimSpace(issuance.PreferredUsername)
+		email = strings.TrimSpace(issuance.Email)
+		emailVerified = issuance.EmailVerified
+	} else {
+		if v := strings.TrimSpace(issuance.PreferredUsername); v != "" {
+			preferredUsername = v
+		}
+		if v := strings.TrimSpace(issuance.Email); v != "" {
+			email = v
+		}
+	}
 	return AccessTokenInput{
 		Subject:           strconv.Itoa(profile.UserID),
-		PreferredUsername: profile.Username,
-		Nickname:          profile.Nickname,
-		Email:             profile.Email,
-		EmailVerified:     profile.EmailVerified,
+		PreferredUsername: preferredUsername,
+		Email:             email,
+		EmailVerified:     emailVerified,
 		Roles:             roles,
 		Groups:            groups,
 		Tenant:            issuance.Tenant,

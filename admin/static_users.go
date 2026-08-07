@@ -24,7 +24,6 @@ type StaticUser struct {
 func (s StaticUser) GetAccessToken(expiresIn int32, clientID string) (string, error) {
 	return s.issueAccessToken(AccessTokenIssuanceContext{
 		ClientID: clientID,
-		Tenant:   "default",
 		TTL:      time.Duration(expiresIn) * time.Second,
 	})
 }
@@ -32,9 +31,29 @@ func (s StaticUser) GetAccessToken(expiresIn int32, clientID string) (string, er
 func (s StaticUser) issueAccessToken(issuance AccessTokenIssuanceContext) (string, error) {
 	// TODO; 生成 jwt token 需要考虑不通用户级别生成 token 的最长有效时间
 
-	tenant := "default"
-	if s.Tenant != "" {
-		tenant = s.Tenant
+	// tenant/roles/groups 完全由 issuance 决定：留空（""/nil）则对应声明不写入令牌
+	// （json omitempty）。issuer 不再隐式回退——登录路径由调用方显式填入静态用户自身
+	// 配置，CreateAuthToken 按授权决策填入（留空即省略）。
+	tenant := strings.TrimSpace(issuance.Tenant)
+	roles := issuance.Roles
+	groups := issuance.Groups
+
+	// 身份展示字段：OmitIdentityFields（superadmin 签发）时直接采用 issuance 值，留空即
+	// 不写入令牌；否则 issuance 非空覆盖、留空回退静态用户自身值。
+	preferredUsername := s.Username
+	email := s.Email
+	emailVerified := false
+	if issuance.OmitIdentityFields {
+		preferredUsername = strings.TrimSpace(issuance.PreferredUsername)
+		email = strings.TrimSpace(issuance.Email)
+		emailVerified = issuance.EmailVerified
+	} else {
+		if v := strings.TrimSpace(issuance.PreferredUsername); v != "" {
+			preferredUsername = v
+		}
+		if v := strings.TrimSpace(issuance.Email); v != "" {
+			email = v
+		}
 	}
 
 	userID := s.UserID
@@ -42,16 +61,14 @@ func (s StaticUser) issueAccessToken(issuance AccessTokenIssuanceContext) (strin
 		userID = crypto.Username2UserID(s.Username)
 	}
 
-	issuance.Tenant = tenant
 	input := AccessTokenInput{
 		Subject:           strconv.FormatInt(userID, 10),
-		PreferredUsername: s.Username,
-		Nickname:          s.Username,
-		Email:             s.Email,
-		EmailVerified:     false,
-		Groups:            s.Groups,
-		Roles:             s.Roles,
-		Tenant:            issuance.Tenant,
+		PreferredUsername: preferredUsername,
+		Email:             email,
+		EmailVerified:     emailVerified,
+		Groups:            groups,
+		Roles:             roles,
+		Tenant:            tenant,
 		ClientID:          issuance.ClientID,
 		Scope:             issuance.Scope,
 		TTL:               issuance.TTL,
@@ -76,6 +93,32 @@ func (s *StaticUsers) Valid(username, passwordHash string) (*StaticUser, bool) {
 		}
 	}
 
+	return nil, false
+}
+
+// Find 按 username 反查静态用户（不校验口令）。
+// 供已认证调用方重签自身令牌时定位静态用户及其 HS256 签名密钥。
+func (s *StaticUsers) Find(username string) (*StaticUser, bool) {
+	for _, user := range *s {
+		if user.Username == username {
+			return user, true
+		}
+	}
+	return nil, false
+}
+
+// FindByUserID 按 user_id 查找静态用户（兼容 UserID==0 时用 username 折算 user_id）。
+// 供 CreateAuthToken 委托签发按目标 user_id 定位静态用户及其 HS256 签名密钥。
+func (s *StaticUsers) FindByUserID(userID int64) (*StaticUser, bool) {
+	for _, user := range *s {
+		uid := user.UserID
+		if uid == 0 {
+			uid = crypto.Username2UserID(user.Username)
+		}
+		if uid == userID {
+			return user, true
+		}
+	}
 	return nil, false
 }
 
