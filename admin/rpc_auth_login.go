@@ -17,6 +17,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -61,7 +62,13 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	if providerCode == "local" && a.config.staticUsers != nil {
 		u, ok := a.config.staticUsers.Valid(req.Username, req.PasswordHash)
 		if ok {
-			tk, err := u.issueAccessToken(issuance)
+			// 登录令牌显式携带静态用户自身的 tenant/roles/groups；issuer 不再隐式
+			// 回退，故此处必须显式填入。使用副本避免污染后续 DB 路径共享的 issuance。
+			loginIssuance := issuance
+			loginIssuance.Tenant = u.Tenant
+			loginIssuance.Roles = u.Roles
+			loginIssuance.Groups = u.Groups
+			tk, err := u.issueAccessToken(loginIssuance)
 			if err != nil {
 				return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
 			}
@@ -163,43 +170,178 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.CreateAuthTokenRequest) (*adminv1.AuthToken, error) {
 	result := &adminv1.AuthToken{TokenType: "Bearer"}
 
-	appid := req.Appid
-	if appid == "" {
-		return nil, errs.InvalidArgument(ctx).WithMessage("create token must with appid")
+	// client_id 作为 access token 的 client_id 声明，必填。
+	clientID := strings.TrimSpace(req.ClientId)
+	if clientID == "" {
+		return nil, errs.InvalidArgument(ctx).WithMessage("create token must with client_id")
 	}
 
-	// TODO; 当前先支持静态用户登录
-	if a.config.staticUsers == nil {
-		return nil, errs.Unauthenticated(ctx)
+	// 调用方身份由拦截器校验 access token 后注入 context（CreateAuthToken 不再免认证）。
+	caller, ok := oauth2UserinfoClaimsFromContext(ctx)
+	if !ok || caller == nil {
+		return nil, errs.Unauthenticated(ctx).WithMessage("access token is required to mint a new token")
 	}
-
-	if req.Username == "" {
-		return nil, errs.Unauthenticated(ctx)
-	}
-
-	u, ok := a.config.staticUsers.Valid(req.Username, req.PasswordHash)
-	if !ok {
-		return nil, errs.Unauthenticated(ctx)
-	}
+	callerUserID := caller.GetMustUserID()
 
 	expiresIn := req.ExpiresIn
 	if expiresIn <= 0 {
 		expiresIn = durationSecondsInt32(a.getLoginAccessTokenTTL(ctx))
 	}
 
-	issuance, err := a.newAccessTokenIssuanceContext(appid, "", time.Duration(expiresIn)*time.Second)
+	issuance, err := a.newAccessTokenIssuanceContext(clientID, req.Scope, time.Duration(expiresIn)*time.Second)
 	if err != nil {
 		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
 	}
-	tk, err := u.issueAccessToken(issuance)
+
+	// 按 superadmin / 委托签发规则解析最终 claims，并做越权校验。
+	overrides, err := a.resolveAuthTokenClaimOverrides(ctx, req)
 	if err != nil {
-		return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+		return nil, err
+	}
+	issuance.Tenant = overrides.Tenant
+	issuance.Roles = overrides.Roles
+	issuance.Groups = overrides.Groups
+	issuance.PreferredUsername = overrides.PreferredUsername
+	issuance.Email = overrides.Email
+	issuance.EmailVerified = overrides.EmailVerified
+	issuance.OmitIdentityFields = overrides.IsSuperadmin
+
+	// 目标 user_id：superadmin 可委托签发（指定目标 user_id），否则签发给调用方自身。
+	targetUserID := callerUserID
+	if overrides.IsSuperadmin {
+		if v := strings.TrimSpace(req.Subject); v != "" {
+			uid, perr := strconv.ParseInt(v, 10, 64)
+			if perr != nil || uid <= 0 {
+				return nil, errs.InvalidArgument(ctx).WithMessage("subject must be a valid user_id")
+			}
+			targetUserID = uid
+		}
 	}
 
-	result.AccessToken = tk
-	result.ExpiresIn = expiresIn
+	// 按 targetUserID 签发：目标为静态用户时走 HS256（用其口令哈希签名），为 DB 用户
+	// 时走 RS256。sub=目标 user_id，claims 使用授权决策值（留空即省略）。
+	if su := a.config.staticUsers; su != nil {
+		if u, found := su.FindByUserID(targetUserID); found {
+			tk, err := u.issueAccessToken(issuance)
+			if err != nil {
+				return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+			}
+			result.AccessToken = tk
+			result.ExpiresIn = expiresIn
+			return result, nil
+		}
+	}
+	if db, derr := a.GetLionClient(); derr == nil && db != nil && targetUserID > 0 {
+		tk, err := a.reissueAccessTokenForUser(ctx, db, int(targetUserID), issuance)
+		if err != nil {
+			return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+		}
+		result.AccessToken = tk
+		result.ExpiresIn = expiresIn
+		return result, nil
+	}
 
-	return result, nil
+	return nil, errs.Unauthenticated(ctx).WithMessage("cannot mint token: target user is neither a configured static user nor a known database user")
+}
+
+// resolveAuthTokenClaimOverrides 解析签发令牌最终的 tenant/roles/groups，并强制
+// 授权边界。调用方身份由拦截器校验 access token 后注入请求上下文（CreateAuthToken
+// 不再免认证）：
+//
+//   - superadmin（调用方持有 "superadmin" 角色）：可自由覆盖令牌的
+//     tenant/roles/groups 与身份展示字段 username/email；留空则对应声明不写入令牌
+//     （身份展示字段不回退调用方自身值）。superadmin 还可委托签发——通过 subject
+//     指定目标 user_id，系统使用目标用户的密钥/身份签发，sub=目标 user_id。
+//   - 其他角色：仅可在自身能力范围内签发 tenant/roles/groups。留空则该声明不写入令牌
+//     （不回退调用方自身能力）；显式填入的 tenant 必须等于调用方 tenant，roles/groups
+//     必须是调用方对应集合的子集，否则 PermissionDenied。身份展示字段不可自定义
+//     （留空回退调用方自身值），subject 不可委托，始终签发给调用方自身。
+//
+// 返回值已规范化（trim/去重/排序由 BuildAccessTokenClaims 完成，此处仅做判定）。
+// 留空（""/nil）的返回值经 json omitempty 在令牌中省略。
+// authTokenClaimOverrides 汇总 CreateAuthToken 令牌声明的授权决策最终值。
+type authTokenClaimOverrides struct {
+	Tenant            string
+	Roles             []string
+	Groups            []string
+	PreferredUsername string
+	Email             string
+	EmailVerified     bool
+	IsSuperadmin      bool
+}
+
+func (a *KnownAdminAPI) resolveAuthTokenClaimOverrides(
+	ctx context.Context,
+	req *adminv1.CreateAuthTokenRequest,
+) (authTokenClaimOverrides, error) {
+	callerRoles, _ := rpc.GetRolesFromContext(ctx)
+	callerGroups, _ := rpc.GetGroupsFromContext(ctx)
+	callerTenant := ""
+	if claims, ok := oauth2UserinfoClaimsFromContext(ctx); ok && claims != nil {
+		callerTenant = strings.TrimSpace(claims.Tenant)
+	}
+
+	isSuperadmin := containsString(callerRoles, seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN))
+
+	if isSuperadmin {
+		// superadmin 可自由覆盖所有令牌声明与身份展示字段；留空则对应声明不写入令牌
+		// （身份展示字段不回退调用方自身值）。subject（委托签发）在 CreateAuthToken
+		// 主流程中处理，此处仅汇总身份展示字段。
+		return authTokenClaimOverrides{
+			Tenant:            strings.TrimSpace(req.Tenant),
+			Roles:             req.Roles,
+			Groups:            req.Groups,
+			PreferredUsername: strings.TrimSpace(req.Username),
+			Email:             strings.TrimSpace(req.Email),
+			EmailVerified:     req.EmailVerified,
+			IsSuperadmin:      true,
+		}, nil
+	}
+
+	// 非 superadmin：授权字段仅可在自身能力子集内；身份展示字段不可自定义（留空回退自身）。
+	tenant := strings.TrimSpace(req.Tenant)
+	if tenant != "" && tenant != callerTenant {
+		return authTokenClaimOverrides{}, errs.PermissionDenied(ctx).
+			WithMessage("cannot mint token for tenant outside your own scope").Err()
+	}
+
+	roles := req.Roles
+	if err := assertClaimSubset(ctx, "roles", roles, callerRoles); err != nil {
+		return authTokenClaimOverrides{}, err
+	}
+
+	groups := req.Groups
+	if err := assertClaimSubset(ctx, "groups", groups, callerGroups); err != nil {
+		return authTokenClaimOverrides{}, err
+	}
+
+	return authTokenClaimOverrides{Tenant: tenant, Roles: roles, Groups: groups}, nil
+}
+
+// assertClaimSubset 校验 requested（trim 后）是否为 allowed 的子集，否则返回
+// PermissionDenied。用于防止非 superadmin 越权签发超出自身能力的 roles/groups。
+func assertClaimSubset(ctx context.Context, label string, requested, allowed []string) error {
+	set := make(map[string]struct{}, len(allowed))
+	for _, v := range allowed {
+		set[strings.TrimSpace(v)] = struct{}{}
+	}
+	for _, v := range requested {
+		if _, ok := set[strings.TrimSpace(v)]; !ok {
+			return errs.PermissionDenied(ctx).
+				WithMessage(fmt.Sprintf("cannot mint token with %s outside your own scope: %s", label, v)).Err()
+		}
+	}
+	return nil
+}
+
+// containsString 报告 values 是否包含 target。
+func containsString(values []string, target string) bool {
+	for _, v := range values {
+		if v == target {
+			return true
+		}
+	}
+	return false
 }
 
 // ListAuthProviders 获取认证提供列表

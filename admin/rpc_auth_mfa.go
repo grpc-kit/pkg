@@ -570,6 +570,25 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 	return newAccessTokenIssuer().issueRSA(input, privateKey, kid)
 }
 
+// reissueAccessTokenForUser 为已认证的 DB 用户重签 access token（RS256）。
+// 身份信息（subject/preferred_username/nickname/email）来自 DB profile，
+// tenant/roles/groups 使用授权决策值（issuance）：留空则对应声明不写入令牌。
+// 与 issueTokenForUser 的区别：后者服务于登录路径，强制写入 DB 实际 roles/groups；
+// 本函数服务于 CreateAuthToken 的“签给调用方自己”场景，尊重授权决策值，
+// 因此可签发不含或仅含部分角色/组的最小权限令牌。
+func (a *KnownAdminAPI) reissueAccessTokenForUser(ctx context.Context, db *lion.Client, userID int, issuance AccessTokenIssuanceContext) (string, error) {
+	profile, err := loadAccessTokenUserProfile(ctx, db, a.config.aesKey, userID)
+	if err != nil {
+		return "", err
+	}
+	privateKey, kid, err := loadAccessTokenRSAKey(ctx, db, a.config.aesKey)
+	if err != nil {
+		return "", err
+	}
+	input := accessTokenInputFromProfile(profile, issuance, issuance.Roles, issuance.Groups)
+	return newAccessTokenIssuer().issueRSA(input, privateKey, kid)
+}
+
 func generateRecoveryCodes(count int) ([]string, error) {
 	codes := make([]string, count)
 	for i := 0; i < count; i++ {
