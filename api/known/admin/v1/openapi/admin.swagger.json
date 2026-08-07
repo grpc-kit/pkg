@@ -6838,33 +6838,55 @@
     "v1CreateAuthTokenRequest": {
       "type": "object",
       "properties": {
-        "appid": {
+        "client_id": {
           "type": "string",
-          "title": "Appid 关联应用标识"
+          "title": "--- OAuth2 客户端与授权范围 ---\nClientId OAuth2 客户端标识，作为 access token 的 client_id 声明。"
+        },
+        "scope": {
+          "type": "string",
+          "title": "Scope 授权范围，空格分隔。留空则不签发 scope 声明。"
+        },
+        "tenant": {
+          "type": "string",
+          "title": "--- 令牌声明 Claims（授权字段）---\nTenant 租户标识。superadmin 可自由指定；其他角色仅可设为自身 tenant。\n留空则不写入 tenant 声明。"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Roles 角色 code 列表。superadmin 可手工输入任意值或从 DB 现有条目选择；\n其他角色仅可在自身 roles 子集内选择，留空则不写入 roles 声明。"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Groups 用户组 code 列表。superadmin 可手工输入任意值或从 DB 现有条目选择；\n其他角色仅可在自身 groups 子集内选择，留空则不写入 groups 声明。"
         },
         "username": {
           "type": "string",
-          "title": "Username 系统识别的用户名全局唯一"
+          "title": "--- 令牌身份展示字段（仅 superadmin 可自定义；非 superadmin 传入将被忽略）---\nUsername 令牌的 preferred_username 声明。superadmin 留空则不写入该声明；\n非 superadmin 留空则使用调用方自身用户名。"
         },
         "email": {
           "type": "string",
-          "title": "Email 用户邮箱地址"
+          "title": "Email 令牌的 email 声明。superadmin 留空则不写入该声明；\n非 superadmin 留空则使用调用方自身邮箱。"
         },
-        "phone_number": {
+        "email_verified": {
+          "type": "boolean",
+          "title": "EmailVerified 仅在设置了 email 时生效（superadmin 可选）。true 则令牌携带\nemail_verified=true；email 为空时不写入 email/email_verified 声明。"
+        },
+        "subject": {
           "type": "string",
-          "title": "PhoneNumber 用户手机号"
+          "title": "Subject 目标 user_id（仅 superadmin 可委托签发）。留空则签发给调用方自身；\n非空则签发给指定 user_id（委托签发，sub=目标 user_id，使用目标用户密钥/身份）。\n非 superadmin 传入将被忽略。"
         },
         "expires_in": {
           "type": "integer",
           "format": "int32",
-          "title": "ExpiresIn 控制生成 access_token 的有效时长，默认 24 * 60 * 60 秒"
-        },
-        "password_hash": {
-          "type": "string",
-          "title": "PasswordHash 用户密码在本地使用 sha256 哈希结果"
+          "title": "--- 令牌生命周期 ---\nExpiresIn 控制生成 access_token 的有效时长，默认 24 * 60 * 60 秒"
         }
       },
-      "title": "CreateAuthTokenRequest 用于创建 token，仅管理员或特定用户可建"
+      "title": "CreateAuthTokenRequest 用于创建 token，签发给调用方自己（已持有 access token）。\n调用方身份由拦截器校验 access token 后从 context 注入，请求体不再携带任何身份凭证。\ntenant/roles/groups 按授权决策填入：留空则对应声明不写入令牌。\nusername/email 仅 superadmin 可自定义（覆盖令牌展示字段，subject 不变）；\n非 superadmin 传入将被忽略，强制使用调用方自身值。"
     },
     "v1CreateDatabaseInitializeRequest": {
       "type": "object",

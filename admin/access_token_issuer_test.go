@@ -15,7 +15,6 @@ func TestBuildAccessTokenClaims(t *testing.T) {
 	claims, err := BuildAccessTokenClaims(AccessTokenInput{
 		Subject:           " 42 ",
 		PreferredUsername: " alice ",
-		Nickname:          " Alice ",
 		Email:             " alice@example.com ",
 		EmailVerified:     true,
 		Roles:             []string{"viewer", " admin ", "admin", ""},
@@ -50,7 +49,7 @@ func TestBuildAccessTokenClaims(t *testing.T) {
 	if want := []string{"engineering"}; !reflect.DeepEqual(claims.Groups, want) {
 		t.Fatalf("groups = %v, want %v", claims.Groups, want)
 	}
-	if claims.Scope != "openid profile" || claims.Tenant != "default" {
+	if claims.Scope != "openid profile" || claims.Tenant != "" {
 		t.Fatalf("scope/tenant mismatch: scope=%q tenant=%q", claims.Scope, claims.Tenant)
 	}
 	if claims.Email != "alice@example.com" || !claims.EmailVerified || claims.Appid != "" {
@@ -64,7 +63,7 @@ func TestBuildAccessTokenClaims(t *testing.T) {
 	if err := json.Unmarshal(payload, &fields); err != nil {
 		t.Fatal(err)
 	}
-	for _, omitted := range []string{"iss", "aud", "appid", "nbf"} {
+	for _, omitted := range []string{"iss", "aud", "appid", "nbf", "tenant"} {
 		if _, ok := fields[omitted]; ok {
 			t.Fatalf("claim %q must be omitted from payload: %s", omitted, payload)
 		}
