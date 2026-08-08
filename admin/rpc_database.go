@@ -212,8 +212,6 @@ func builtinMenuSeeds() []builtinMenuSeed {
 										{Code: "admin.setting.users.list", DisplayName: "用户列表", RoutePath: "/setting/users/list", SortOrder: 100},
 									},
 								},
-								{Code: "admin.setting.global-settings", DisplayName: "全局设置", RoutePath: "/setting/global-settings", SortOrder: 800},
-
 								{
 									Code:        "admin.setting.config",
 									DisplayName: "本地配置",
@@ -359,6 +357,7 @@ func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items 
 // 后续下线的内置菜单 code 追加到此列表即可。
 var builtinMenuObsoletes = []string{
 	"admin.setting.auth.tokens", // 令牌管理已并入凭证管理（/setting/auth/credentials）
+	"admin.setting.global-settings", // 全局设置已并入本地配置 > 认证鉴权（/setting/config/security）
 }
 
 // deleteObsoleteBuiltinMenus 删除已下线的内置菜单。
