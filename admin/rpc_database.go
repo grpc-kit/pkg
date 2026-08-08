@@ -154,7 +154,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.auth.providers", DisplayName: "认证提供方", RoutePath: "/setting/auth/providers", SortOrder: 100},
 										{Code: "admin.setting.auth.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/auth/oauth2-clients", SortOrder: 200},
-										{Code: "admin.setting.auth.credentials", DisplayName: "凭证管理", RoutePath: "/setting/auth/credentials", SortOrder: 300},
+										{Code: "admin.setting.auth.credentials", DisplayName: "凭证与令牌", RoutePath: "/setting/auth/credentials", SortOrder: 300},
 									},
 								},
 								{
