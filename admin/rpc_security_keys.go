@@ -722,6 +722,16 @@ func parseListCredentialsFilter(filter string) ([]predicate.Credentials, error) 
 				n = int(enumVal)
 			}
 			out = append(out, credentials.CredentialUsageEQ(n))
+		case "credential_source":
+			n, err := strconv.Atoi(val)
+			if err != nil {
+				enumVal, ok := adminv1.Credential_Source_value[strings.ToUpper(val)]
+				if !ok {
+					return nil, fmt.Errorf("unknown credential source: %s", val)
+				}
+				n = int(enumVal)
+			}
+			out = append(out, credentials.CredentialSourceEQ(n))
 		case "code":
 			out = append(out, credentials.CodeEqualFold(val))
 		case "display_name":
