@@ -155,7 +155,6 @@ func builtinMenuSeeds() []builtinMenuSeed {
 										{Code: "admin.setting.auth.providers", DisplayName: "认证提供方", RoutePath: "/setting/auth/providers", SortOrder: 100},
 										{Code: "admin.setting.auth.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/auth/oauth2-clients", SortOrder: 200},
 										{Code: "admin.setting.auth.credentials", DisplayName: "凭证管理", RoutePath: "/setting/auth/credentials", SortOrder: 300},
-										{Code: "admin.setting.auth.tokens", DisplayName: "令牌管理", RoutePath: "/setting/auth/tokens", SortOrder: 400},
 									},
 								},
 								{
@@ -349,6 +348,40 @@ func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items 
 			}
 		}
 		if err := createBuiltinMenus(ctx, tx, int64(obj.ID), item.Children); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// builtinMenuObsoletes 列出已下线的内置菜单 code（曾作为种子下发，现已移除）。
+// 每次初始化时主动回收这些叶子菜单，保持存量库与当前种子一致，避免残留指向已下线页面的死链入口。
+// 后续下线的内置菜单 code 追加到此列表即可。
+var builtinMenuObsoletes = []string{
+	"admin.setting.auth.tokens", // 令牌管理已并入凭证管理（/setting/auth/credentials）
+}
+
+// deleteObsoleteBuiltinMenus 删除已下线的内置菜单。
+// 仅清理叶子节点（有子菜单时跳过，避免破坏菜单树结构）；直接按 ID 删除，绕过
+// DeleteMenu RPC 对 protected 的拦截——下线受保护的内置项正是本函数的职责。
+// 与 createBuiltinMenus 配套：前者补全新增种子，本函数回收废弃种子。
+func deleteObsoleteBuiltinMenus(ctx context.Context, tx *lion.Tx, codes []string) error {
+	for _, code := range codes {
+		obj, err := tx.Menus.Query().Where(menus.CodeEQ(code)).Only(ctx)
+		if lion.IsNotFound(err) {
+			continue
+		} else if err != nil {
+			return err
+		}
+		hasChildren, err := tx.Menus.Query().Where(menus.ParentIDEQ(int64(obj.ID))).Exist(ctx)
+		if err != nil {
+			return err
+		}
+		if hasChildren {
+			// 残留子菜单时跳过，避免误删非预期节点。
+			continue
+		}
+		if err := tx.Menus.DeleteOneID(obj.ID).Exec(ctx); err != nil {
 			return err
 		}
 	}
@@ -896,6 +929,12 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 
 	if err := createBuiltinMenus(ctx, tx, 0, builtinMenuSeeds()); err != nil {
+		rollback()
+		return nil, err
+	}
+
+	// 回收已下线的内置菜单（如令牌管理已并入凭证管理），保持存量库与种子一致。
+	if err := deleteObsoleteBuiltinMenus(ctx, tx, builtinMenuObsoletes); err != nil {
 		rollback()
 		return nil, err
 	}
