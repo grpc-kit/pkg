@@ -79,6 +79,7 @@ const (
 	KnownAdmin_CreateDepartmentMembers_FullMethodName  = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartmentMembers"
 	KnownAdmin_UpdateDepartmentMembers_FullMethodName  = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartmentMembers"
 	KnownAdmin_DeleteDepartmentMember_FullMethodName   = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteDepartmentMember"
+	KnownAdmin_GetCurrentUser_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetCurrentUser"
 	KnownAdmin_GetUser_FullMethodName                  = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetUser"
 	KnownAdmin_CreateUser_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateUser"
 	KnownAdmin_UpdateUser_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUser"
@@ -183,6 +184,7 @@ type KnownAdminClient interface {
 	UpdateDepartmentMembers(ctx context.Context, in *UpdateDepartmentMembersRequest, opts ...grpc.CallOption) (*UpdateDepartmentMembersResponse, error)
 	DeleteDepartmentMember(ctx context.Context, in *DeleteDepartmentMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 用户相关
+	GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...grpc.CallOption) (*CurrentUserProfile, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
@@ -797,6 +799,16 @@ func (c *knownAdminClient) DeleteDepartmentMember(ctx context.Context, in *Delet
 	return out, nil
 }
 
+func (c *knownAdminClient) GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...grpc.CallOption) (*CurrentUserProfile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CurrentUserProfile)
+	err := c.cc.Invoke(ctx, KnownAdmin_GetCurrentUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(User)
@@ -1160,6 +1172,7 @@ type KnownAdminServer interface {
 	UpdateDepartmentMembers(context.Context, *UpdateDepartmentMembersRequest) (*UpdateDepartmentMembersResponse, error)
 	DeleteDepartmentMember(context.Context, *DeleteDepartmentMemberRequest) (*emptypb.Empty, error)
 	// 用户相关
+	GetCurrentUser(context.Context, *GetCurrentUserRequest) (*CurrentUserProfile, error)
 	GetUser(context.Context, *GetUserRequest) (*User, error)
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
@@ -1373,6 +1386,9 @@ func (UnimplementedKnownAdminServer) UpdateDepartmentMembers(context.Context, *U
 }
 func (UnimplementedKnownAdminServer) DeleteDepartmentMember(context.Context, *DeleteDepartmentMemberRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteDepartmentMember not implemented")
+}
+func (UnimplementedKnownAdminServer) GetCurrentUser(context.Context, *GetCurrentUserRequest) (*CurrentUserProfile, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCurrentUser not implemented")
 }
 func (UnimplementedKnownAdminServer) GetUser(context.Context, *GetUserRequest) (*User, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
@@ -2507,6 +2523,24 @@ func _KnownAdmin_DeleteDepartmentMember_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_GetCurrentUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCurrentUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetCurrentUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_GetCurrentUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetCurrentUser(ctx, req.(*GetCurrentUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserRequest)
 	if err := dec(in); err != nil {
@@ -3263,6 +3297,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDepartmentMember",
 			Handler:    _KnownAdmin_DeleteDepartmentMember_Handler,
+		},
+		{
+			MethodName: "GetCurrentUser",
+			Handler:    _KnownAdmin_GetCurrentUser_Handler,
 		},
 		{
 			MethodName: "GetUser",

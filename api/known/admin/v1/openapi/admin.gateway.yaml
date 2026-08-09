@@ -202,6 +202,9 @@ http:
     delete: "/builtin/admin/api/v1/departments/{department_id}/members/{user_id}"
 
     # 用户管理
+    ## 获取当前认证用户的个人资料
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetCurrentUser
+    get: "/builtin/admin/api/v1/self/user"
     ## 用户列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers
     get: "/builtin/admin/api/v1/users"

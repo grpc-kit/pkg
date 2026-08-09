@@ -543,6 +543,36 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetCurrentUser
+      option:
+        tags:
+          - "个人中心"
+        summary: "获取当前用户资料"
+        description: "接口格式：GET /builtin/admin/api/v1/self/user。仅要求有效认证，不要求管理员角色；目标用户只取自认证上下文，URL、query 和 body 均不能指定其他用户。返回个人中心所需的最小资料、KnownAdmin LOCAL 身份的 MFA 状态和稳定 etag，不返回身份证、地址、metadata、审计操作人、身份凭据或成员关系。数据库用户不存在返回 404；认证缺失返回 401；策略拒绝返回 403；数据库或解密异常返回 500。响应包含 Cache-Control: private, no-store。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"1001","username":"alice","nickname":"Alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"PRIVATE","email":"alice@example.test","email_verified":true,"phone_number":{"country_code":"86","national_number":"13800000000"},"phone_number_verified":true,"mfa_enabled":true,"created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-02T00:00:00Z","etag":"8f7c2f5b6c29d4e4"}'
+          "401":
+            description: "缺少有效认证凭证或认证用户标识"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
+          "403":
+            description: "访问策略拒绝当前认证用户"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
+          "404":
+            description: "认证用户在当前数据库中不存在"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
+          "500":
+            description: "数据库查询或敏感字段解密失败"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers
       option:
         tags:

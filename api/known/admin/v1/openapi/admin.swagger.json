@@ -5208,6 +5208,83 @@
         ]
       }
     },
+    "/builtin/admin/api/v1/self/user": {
+      "get": {
+        "summary": "获取当前用户资料",
+        "description": "接口格式：GET /builtin/admin/api/v1/self/user。仅要求有效认证，不要求管理员角色；目标用户只取自认证上下文，URL、query 和 body 均不能指定其他用户。返回个人中心所需的最小资料、KnownAdmin LOCAL 身份的 MFA 状态和稳定 etag，不返回身份证、地址、metadata、审计操作人、身份凭据或成员关系。数据库用户不存在返回 404；认证缺失返回 401；策略拒绝返回 403；数据库或解密异常返回 500。响应包含 Cache-Control: private, no-store。",
+        "operationId": "KnownAdmin_GetCurrentUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CurrentUserProfile"
+            },
+            "examples": {
+              "application/json": {
+                "id": "1001",
+                "username": "alice",
+                "nickname": "Alice",
+                "timezone": "Asia/Shanghai",
+                "locale": "zh-CN",
+                "type": "EMPLOYEE",
+                "status": "ACTIVE",
+                "gender": "PRIVATE",
+                "email": "alice@example.test",
+                "email_verified": true,
+                "phone_number": {
+                  "country_code": "86",
+                  "national_number": "13800000000"
+                },
+                "phone_number_verified": true,
+                "mfa_enabled": true,
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-02T00:00:00Z",
+                "etag": "8f7c2f5b6c29d4e4"
+              }
+            }
+          },
+          "401": {
+            "description": "缺少有效认证凭证或认证用户标识",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "访问策略拒绝当前认证用户",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "认证用户在当前数据库中不存在",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "数据库查询或敏感字段解密失败",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "个人中心"
+        ]
+      }
+    },
     "/builtin/admin/api/v1/services": {
       "get": {
         "summary": "TODO: 补充 ListServices 摘要",
@@ -7090,6 +7167,76 @@
       "default": "TYPE_UNSPECIFIED",
       "description": "- TYPE_UNSPECIFIED: 未指定类型\n - API_KEY: API Key\n - SYMMETRIC_KEY: 对称密钥 / HMAC / AES\n - KEY_PAIR: 公私钥对\n - X509: X.509 证书凭证（包含主证书、私钥、CA链）\n - LICENSE: 软件许可证\n - SECRET: 非密钥类密文（数据库密码、连接串、第三方 API 凭据等），加密存储于 symmetric_key 字段",
       "title": "凭证类型"
+    },
+    "v1CurrentUserProfile": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "picture": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/v1UserType"
+        },
+        "status": {
+          "$ref": "#/definitions/v1UserStatus"
+        },
+        "gender": {
+          "$ref": "#/definitions/UserGender"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "email": {
+          "type": "string"
+        },
+        "email_verified": {
+          "type": "boolean"
+        },
+        "phone_number": {
+          "$ref": "#/definitions/v1PhoneNumber"
+        },
+        "phone_number_verified": {
+          "type": "boolean"
+        },
+        "mfa_enabled": {
+          "type": "boolean"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "etag": {
+          "type": "string"
+        }
+      },
+      "description": "CurrentUserProfile is the self-service projection used by the personal\ncenter. It deliberately excludes administrator-only audit, identity and\nmembership fields from User."
     },
     "v1DatabaseConfig": {
       "type": "object",
