@@ -500,10 +500,6 @@ func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
 
 // HTTPHandlerFrontend 用于处理前端相关服务
 func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) error {
-	if !*c.Frontend.Enable {
-		return nil
-	}
-
 	if c.adminServer != nil {
 		if err := c.adminServer.SetMicroserviceGatewayYAML(assets); err != nil {
 			return err
@@ -514,6 +510,10 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 	// 和 getting_started prompt 仍注册），使 MCP 可独立于 admin 后台使用（方案 C）。
 	c.runAutoBridge()
 	c.runMCPBuiltinResources()
+
+	if !*c.Frontend.Enable {
+		return nil
+	}
 
 	comps := []string{"admin", "openapi", "webroot"}
 	for _, v := range comps {

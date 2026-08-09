@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"context"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -33,6 +34,50 @@ func newMCPRuntimeConfig(t *testing.T) *LocalConfig {
 		Services: &ServicesConfig{
 			HTTPAddress: "127.0.0.1:18099",
 		},
+	}
+}
+
+// TestHTTPHandlerFrontend_DisabledStillInitializesMCP 验证静态前端开关不会
+// 误伤 MCP 的初始化。MCP 是独立能力，关闭 admin/openapi/webroot 托管后，
+// 内置 Resource 和 Prompt 仍应在 HTTP Server 启动前完成注册。
+func TestHTTPHandlerFrontend_DisabledStillInitializesMCP(t *testing.T) {
+	c := newMCPRuntimeConfig(t)
+	disabled := false
+	c.Frontend = &FrontendConfig{Enable: &disabled}
+
+	if err := c.HTTPHandlerFrontend(http.NewServeMux(), nil); err != nil {
+		t.Fatalf("HTTPHandlerFrontend: %v", err)
+	}
+
+	session := connectMCPSession(t, c.mcpServer)
+	resources, err := session.ListResources(context.Background(), nil)
+	if err != nil {
+		t.Fatalf("ListResources: %v", err)
+	}
+	foundVersion := false
+	for _, resource := range resources.Resources {
+		if resource.Name == "version" {
+			foundVersion = true
+			break
+		}
+	}
+	if !foundVersion {
+		t.Fatal("version resource was not registered while frontend was disabled")
+	}
+
+	prompts, err := session.ListPrompts(context.Background(), nil)
+	if err != nil {
+		t.Fatalf("ListPrompts: %v", err)
+	}
+	foundGettingStarted := false
+	for _, prompt := range prompts.Prompts {
+		if prompt.Name == "getting_started" {
+			foundGettingStarted = true
+			break
+		}
+	}
+	if !foundGettingStarted {
+		t.Fatal("getting_started prompt was not registered while frontend was disabled")
 	}
 }
 

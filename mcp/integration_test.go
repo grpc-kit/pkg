@@ -2,9 +2,11 @@ package mcp
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -33,6 +35,112 @@ func connectMCPClient(t *testing.T, httpServer *httptest.Server) *mcp.ClientSess
 		t.Fatalf("client.Connect failed: %v", err)
 	}
 	return session
+}
+
+// TestIntegration_CustomResourcesAuthPropagation 通过真实 MCP session 验证业务自定义
+// Tool / Resource / Prompt 均可注册到 wrapper 暴露的 SDK Server，并共享统一的
+// HTTP 鉴权与 Authorization context 传递链路。
+func TestIntegration_CustomResourcesAuthPropagation(t *testing.T) {
+	const authorization = "Bearer custom-resource-test"
+
+	srv, err := NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer failed: %v", err)
+	}
+
+	var mu sync.Mutex
+	seenAuth := make(map[string]string)
+	recordAuth := func(kind string, ctx context.Context) {
+		mu.Lock()
+		defer mu.Unlock()
+		seenAuth[kind] = AuthHeaderFromContext(ctx)
+	}
+
+	sdkServer := srv.MCPServer()
+	sdkServer.AddTool(&mcp.Tool{
+		Name:        "custom_echo",
+		Description: "custom tool integration test",
+		InputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"text": map[string]any{"type": "string"},
+			},
+			"required": []string{"text"},
+		},
+	}, func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		recordAuth("tool", ctx)
+		var args struct {
+			Text string `json:"text"`
+		}
+		if err := json.Unmarshal(req.Params.Arguments, &args); err != nil {
+			return nil, err
+		}
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: args.Text}}}, nil
+	})
+	sdkServer.AddResource(&mcp.Resource{
+		URI: "test://custom/config", Name: "custom_config", MIMEType: "application/json",
+	}, func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		recordAuth("resource", ctx)
+		return &mcp.ReadResourceResult{Contents: []*mcp.ResourceContents{{
+			URI: req.Params.URI, MIMEType: "application/json", Text: `{"enabled":true}`,
+		}}}, nil
+	})
+	sdkServer.AddPrompt(&mcp.Prompt{
+		Name:      "custom_greeting",
+		Arguments: []*mcp.PromptArgument{{Name: "name", Required: true}},
+	}, func(ctx context.Context, req *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+		recordAuth("prompt", ctx)
+		return &mcp.GetPromptResult{Messages: []*mcp.PromptMessage{{
+			Role: "user", Content: &mcp.TextContent{Text: "hello " + req.Params.Arguments["name"]},
+		}}}, nil
+	})
+
+	authFn := func(r *http.Request) error {
+		if r.Header.Get("Authorization") != authorization {
+			return errUnauthorized("invalid bearer token")
+		}
+		return nil
+	}
+	httpServer := httptest.NewServer(NewAuthMiddleware(authFn, srv.Handler()))
+	defer httpServer.Close()
+
+	transport := &mcp.StreamableClientTransport{
+		Endpoint: httpServer.URL,
+		HTTPClient: &http.Client{Transport: &authInjectingRT{
+			base: http.DefaultTransport, authorization: authorization,
+		}},
+	}
+	client := mcp.NewClient(&mcp.Implementation{Name: "custom-test-client", Version: "0.0.1"}, nil)
+	session, err := client.Connect(context.Background(), transport, nil)
+	if err != nil {
+		t.Fatalf("Connect failed: %v", err)
+	}
+	defer session.Close()
+
+	toolResult, err := session.CallTool(context.Background(), &mcp.CallToolParams{
+		Name: "custom_echo", Arguments: map[string]any{"text": "hello"},
+	})
+	if err != nil || toolResult.IsError {
+		t.Fatalf("CallTool failed: result=%v err=%v", toolResult, err)
+	}
+	resourceResult, err := session.ReadResource(context.Background(), &mcp.ReadResourceParams{URI: "test://custom/config"})
+	if err != nil || len(resourceResult.Contents) != 1 {
+		t.Fatalf("ReadResource failed: result=%v err=%v", resourceResult, err)
+	}
+	promptResult, err := session.GetPrompt(context.Background(), &mcp.GetPromptParams{
+		Name: "custom_greeting", Arguments: map[string]string{"name": "Codex"},
+	})
+	if err != nil || len(promptResult.Messages) != 1 {
+		t.Fatalf("GetPrompt failed: result=%v err=%v", promptResult, err)
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+	for _, kind := range []string{"tool", "resource", "prompt"} {
+		if seenAuth[kind] != authorization {
+			t.Errorf("%s handler Authorization = %q, want %q", kind, seenAuth[kind], authorization)
+		}
+	}
 }
 
 // --- 集成测试用例 ---

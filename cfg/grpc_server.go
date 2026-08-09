@@ -233,7 +233,8 @@ func (c *LocalConfig) runAutoBridge() {
 //   - microservice resource 跳过（swFS==nil 时 RegisterBuiltinResources 内部守卫跳过）。
 //   - getting_started prompt 仍注册，文案退化为通用版（readSwaggerTitle 对 nil FS 返回空串）。
 //
-// Frontend.Enable=false 时 HTTPHandlerFrontend 直接 return，本方法不执行（与 runAutoBridge 一致）。
+// HTTPHandlerFrontend 会在判断 Frontend.Enable 之前调用本方法，因此关闭静态前端
+// 不会影响 MCP 内置资源的注册。
 // 幂等：AddResource / AddPrompt 对同 URI/同名为覆盖语义，可安全重复调用。
 func (c *LocalConfig) runMCPBuiltinResources() {
 	if c.mcpServer == nil {
@@ -830,11 +831,12 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 }
 
 func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles []string) error {
+	isSelfService := isSelfServiceMethod(method)
 	// 安全策略：对于内置管理接口，已认证用户必须至少拥有一个角色，
 	// 即有效 roles 必须非空，否则直接拒绝访问（403）。
-	// 自服务方法（用户管理自己的 MFA、OIDC 标准端点、数据库 bootstrap）豁免此检查，
-	// 允许无角色的已认证用户访问，但仍需通过后续 AllowedGroups 与 OPA 评估。
-	if len(roles) == 0 && !isRolelessSelfServiceMethod(method) {
+	// 自服务方法（个人资料、用户自己的 MFA、OIDC 标准端点、数据库 bootstrap）
+	// 不受管理员角色存在性和 allow-list 限制，但仍需通过后续 OPA 评估。
+	if len(roles) == 0 && !isSelfService {
 		if strings.HasPrefix(method, "/grpc_kit.api.known.admin.v1.KnownAdmin/") {
 			return errs.PermissionDenied(ctx).
 				WithMessage("user has no role assignments; roles claim is required to access admin APIs").
@@ -848,7 +850,7 @@ func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles 
 		c.logger.Errorf("authorization allowed_groups and allowed_roles differ")
 		return errs.PermissionDenied(ctx).WithMessage("authorization role allow-lists conflict").Err()
 	}
-	if len(allowedRoles) > 0 {
+	if len(allowedRoles) > 0 && !isSelfService {
 		allow := false
 		found := make(map[string]int, 0)
 		for _, g := range allowedRoles {
@@ -878,13 +880,14 @@ func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles 
 	return nil
 }
 
-func isRolelessSelfServiceMethod(method string) bool {
+func isSelfServiceMethod(method string) bool {
 	switch method {
 	case "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA",
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA",
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA",
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo",
-		"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize":
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/GetCurrentUser":
 		return true
 	default:
 		return false
@@ -895,8 +898,9 @@ func (c *LocalConfig) setHTTPResponseHeaders(ctx context.Context, w http.Respons
 	md, ok := runtime.ServerMetadataFromContext(ctx)
 	if ok {
 		for k, v := range md.HeaderMD {
-			// 必须以 "X-" 开头
-			if !strings.HasPrefix(strings.ToUpper(k), "X-") {
+			// 业务 metadata 默认只允许 X-*；Cache-Control 是经过审查的
+			// self-service 响应缓存策略，不开放任意标准 header 透传。
+			if !strings.HasPrefix(strings.ToUpper(k), "X-") && !strings.EqualFold(k, "Cache-Control") {
 				continue
 			}
 

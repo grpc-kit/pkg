@@ -64,7 +64,7 @@ func (s *Server) Handler() http.Handler {
 	return s.handler
 }
 
-// MCPServer 返回底层 MCP Server 实例，供后续注册 Tools 使用
+// MCPServer 返回底层 MCP Server 实例，供后续注册 Tools、Resources 和 Prompts 使用。
 func (s *Server) MCPServer() *mcp.Server {
 	return s.mcpServer
 }

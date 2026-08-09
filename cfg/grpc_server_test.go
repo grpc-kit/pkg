@@ -3,10 +3,13 @@ package cfg
 import (
 	"context"
 	"net"
+	"net/http/httptest"
 	"strconv"
 	"testing"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-kit/pkg/errs"
+	"google.golang.org/grpc/metadata"
 )
 
 // newCheckPermissionTestConfig 构造一个最小化的 LocalConfig，所有 OPA 引擎关闭，
@@ -72,6 +75,7 @@ func TestCheckPermission_SelfServiceBypassesRolesGate(t *testing.T) {
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA",
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo",
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/GetCurrentUser",
 	} {
 		err := c.checkPermission(ctx, method, nil)
 		if err != nil {
@@ -99,10 +103,47 @@ func TestCheckPermission_AllowedGroupsStillEnforced(t *testing.T) {
 	err := c.checkPermission(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers", []string{"viewer"})
 	isPermissionDenied(t, err)
 
-	// 自服务方法 + roles 为空 + AllowedGroups 配置 -> 前置门豁免，但 AllowedGroups 仍要求交集
-	// 注意：自服务豁免仅针对 roles 非空前置门，AllowedGroups 仍需满足。
+	// 无角色 self-service 不应被管理角色 allow-list 拒绝。
 	err = c.checkPermission(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA", nil)
+	if err != nil {
+		t.Fatalf("expected roleless self-service to bypass admin allow-list, got: %v", err)
+	}
+	err = c.checkPermission(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetCurrentUser", nil)
+	if err != nil {
+		t.Fatalf("expected GetCurrentUser to bypass admin allow-list, got: %v", err)
+	}
+	err = c.checkPermission(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetCurrentUser", []string{"viewer"})
+	if err != nil {
+		t.Fatalf("expected role-bearing self-service to bypass admin allow-list, got: %v", err)
+	}
+
+	// 管理接口仍必须匹配 allow-list。
+	err = c.checkPermission(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers", nil)
 	isPermissionDenied(t, err)
+}
+
+func TestSetHTTPResponseHeadersForwardsReviewedCacheControl(t *testing.T) {
+	c := &LocalConfig{Observables: &ObservablesConfig{}}
+	ctx := runtime.NewServerMetadataContext(context.Background(), runtime.ServerMetadata{
+		HeaderMD: metadata.Pairs(
+			"cache-control", "private, no-store",
+			"content-security-policy", "should-not-be-forwarded",
+			"x-test-header", "allowed",
+		),
+	})
+	recorder := httptest.NewRecorder()
+
+	c.setHTTPResponseHeaders(ctx, recorder)
+
+	if got := recorder.Header().Get("Cache-Control"); got != "private, no-store" {
+		t.Fatalf("Cache-Control = %q, want %q", got, "private, no-store")
+	}
+	if got := recorder.Header().Get("X-Test-Header"); got != "allowed" {
+		t.Fatalf("X-Test-Header = %q, want allowed", got)
+	}
+	if got := recorder.Header().Get("Content-Security-Policy"); got != "" {
+		t.Fatalf("unexpected unreviewed header forwarding: %q", got)
+	}
 }
 
 func TestGetHTTPListenHostPort(t *testing.T) {
