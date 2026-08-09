@@ -11,14 +11,37 @@ import (
 	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
+	"github.com/grpc-kit/pkg/rpc"
 	"github.com/pquerna/otp/totp"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+func authenticatedMFASubject(ctx context.Context) (int64, string, error) {
+	userID, err := GetUserID(ctx)
+	if err != nil || userID <= 0 {
+		return 0, "", errs.PermissionDenied(ctx).WithMessage("not found user id")
+	}
+
+	var sessionID string
+	switch claims := rpc.GetTokenClaimsFromContext(ctx).(type) {
+	case auth.AccessTokenClaims:
+		sessionID = claims.ID
+	case *auth.AccessTokenClaims:
+		if claims != nil {
+			sessionID = claims.ID
+		}
+	}
+	if strings.TrimSpace(sessionID) == "" {
+		return 0, "", errs.PermissionDenied(ctx).WithMessage("access token session id is required")
+	}
+	return userID, sessionID, nil
+}
 
 // VerifyAuthMFA 登录时的 MFA 二步验证
 func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAuthMFARequest) (*adminv1.AuthToken, error) {
@@ -152,9 +175,9 @@ func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUser
 	}
 
 	// 自服务校验：用户只能为自己设置 MFA，防止已认证但无角色的用户越权操作他人账户。
-	operatorID, err := GetUserID(ctx)
-	if err != nil || operatorID <= 0 {
-		return nil, errs.PermissionDenied(ctx).WithMessage("not found user id")
+	operatorID, sessionID, err := authenticatedMFASubject(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if int64(req.UserId) != operatorID {
 		return nil, errs.PermissionDenied(ctx).WithMessage("cannot setup MFA for other users")
@@ -210,7 +233,7 @@ func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUser
 		return nil, errs.Internal(ctx).WithMessage("failed to generate TOTP key")
 	}
 
-	challenge, err := a.mfaChallenges.CreateWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeAdminSetup, u.ID, u.Username)
+	challenge, err := a.mfaChallenges.CreateBoundWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeAdminSetup, u.ID, u.Username, sessionID)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create setup challenge")
 	}
@@ -233,6 +256,10 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 	if req.TotpCode == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("totp_code is required")
 	}
+	operatorID, sessionID, err := authenticatedMFASubject(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	challenge, ok := a.mfaChallenges.Get(req.ChallengeId)
 	if !ok {
@@ -240,6 +267,9 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 	}
 	if challenge.ChallengeType != mfaChallengeTypeAdminSetup {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("invalid challenge type")
+	}
+	if int64(challenge.UserID) != operatorID || challenge.SessionID != sessionID {
+		return nil, errs.PermissionDenied(ctx).WithMessage("MFA challenge does not belong to the authenticated session")
 	}
 	if challenge.TempSecret == "" {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("no temporary secret in challenge")
@@ -253,6 +283,16 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 		}
 		return nil, errs.Unauthenticated(ctx).WithMessage("invalid TOTP code")
 	}
+	challenge, ok = a.mfaChallenges.Acquire(req.ChallengeId)
+	if !ok {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge is already being confirmed or expired")
+	}
+	confirmed := false
+	defer func() {
+		if !confirmed {
+			a.mfaChallenges.Release(req.ChallengeId)
+		}
+	}()
 
 	db, err := a.GetLionClient()
 	if err != nil {
@@ -298,6 +338,7 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 	}
 
 	a.mfaChallenges.Delete(req.ChallengeId)
+	confirmed = true
 
 	return &adminv1.ConfirmUserMFAResponse{
 		RecoveryCodes: recoveryCodes,

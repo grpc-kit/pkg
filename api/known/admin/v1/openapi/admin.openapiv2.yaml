@@ -548,7 +548,7 @@ openapiOptions:
         tags:
           - "用户管理"
         summary: "用户列表"
-        description: "接口格式：/builtin/admin/api/v1/users。支持分页、过滤与排序，返回用户集合。"
+        description: "接口格式：/builtin/admin/api/v1/users。需要 users.list 权限；FULL view 还需要 users.sensitive.get 权限。支持分页、过滤与排序。"
         responses:
           "200":
             examples:
@@ -568,7 +568,7 @@ openapiOptions:
         tags:
           - "用户管理"
         summary: "更新用户"
-        description: '接口格式：/builtin/admin/api/v1/users/{user.id}。按请求中的 user/update_mask 更新指定用户。请求体示例：{"user":{"id":"1001","nickname":"Alice Chen","profile":"资深风控审计员"},"update_mask":{"paths":["nickname","profile"]}}。'
+        description: '接口格式：/builtin/admin/api/v1/users/{user.id}。需要 users.update 权限。HTTP body 同时包含 user 和 protobuf JSON FieldMask；验证状态、审计字段及 deleted_at 由服务端或专用流程维护，不能通过本接口更新。请求体示例：{"user":{"nickname":"Alice Chen","profile":"资深风控审计员","status":"ACTIVE"},"update_mask":"nickname,profile,status"}。'
         responses:
           "200":
             examples:
@@ -578,7 +578,7 @@ openapiOptions:
         tags:
           - "用户管理"
         summary: "获取用户详情"
-        description: "接口格式：/builtin/admin/api/v1/users/{id}。根据用户 ID 获取用户详情。"
+        description: "接口格式：/builtin/admin/api/v1/users/{id}。需要 users.get 和 users.sensitive.get 权限，根据用户 ID 获取含敏感字段的管理详情。"
         responses:
           "200":
             examples:
@@ -588,7 +588,7 @@ openapiOptions:
         tags:
           - "用户管理"
         summary: "更新用户密码"
-        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/password。更新指定用户密码（传递哈希值）。前置条件：仅允许本人或具备最小权限的管理员调用，服务端应审计密码变更并禁止记录明文密码或明文哈希。请求体示例：{"user_id":"1001","old_password_hash":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a","new_password_hash":"5e884898da28047151d0e56f8dc6292773603d0d"}。'
+        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/password。需要 users.password.reset 权限，用于管理员重置指定用户密码（传递哈希值）；本人改密将在 /self/user/password 使用独立流程。服务端不得记录明文密码或明文哈希。请求体示例：{"new_password_hash":"5e884898da28047151d0e56f8dc6292773603d0d"}。'
         responses:
           "200":
             examples:
@@ -628,7 +628,7 @@ openapiOptions:
         tags:
           - "MFA 多因素认证"
         summary: "设置 MFA（获取密钥和二维码）"
-        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/setup。为指定用户生成 TOTP 密钥和 otpauth URI，前端据此展示二维码供用户扫描。前置条件：仅允许具备最小权限的管理员或用户本人发起，生成的 secret 仅允许短时展示并应审计发放行为。'
+        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/setup。仅允许认证用户本人发起；user_id 必须等于 access token 主体。challenge 绑定当前 token 的 JWT ID、用户、类型和 TTL，生成的 secret 仅允许短时展示。'
         responses:
           "200":
             examples:
@@ -638,7 +638,7 @@ openapiOptions:
         tags:
           - "MFA 多因素认证"
         summary: "确认开启 MFA"
-        description: '接口格式：/builtin/admin/api/v1/auth/mfa/confirm。用户扫码绑定验证器后输入 6 位 TOTP 码确认开启 MFA。前置条件：challenge_id 必须来自未完成的绑定流程，服务端应审计启用行为并禁止返回已使用过的恢复码。请求体示例：{"challenge_id":"uuid-xxx","totp_code":"123456"}。'
+        description: '接口格式：/builtin/admin/api/v1/auth/mfa/confirm。仅允许发起 setup 的同一用户、同一 access-token 会话确认。challenge 必须类型正确、未过期且未被消费；成功后立即失效。请求体示例：{"challenge_id":"uuid-xxx","totp_code":"123456"}。'
         responses:
           "200":
             examples:
@@ -648,7 +648,7 @@ openapiOptions:
         tags:
           - "MFA 多因素认证"
         summary: "关闭 MFA"
-        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/disable。验证当前 TOTP 码或恢复码后关闭指定用户的 MFA。请求体示例：{"user_id":"1001","totp_code":"123456"}。'
+        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/disable。仅允许认证用户本人调用，user_id 必须等于 access token 主体；验证当前 TOTP 码或恢复码后关闭 MFA。请求体示例：{"totp_code":"123456"}。'
         responses:
           "200":
             examples:

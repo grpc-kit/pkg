@@ -27,6 +27,8 @@ type mfaChallenge struct {
 	Username      string
 	ExpiresAt     time.Time
 	Attempts      int
+	SessionID     string
+	InUse         bool
 
 	IssuanceContext *AccessTokenIssuanceContext
 
@@ -103,14 +105,18 @@ func (s *mfaChallengeStore) Create(ct mfaChallengeType, userID int, username str
 }
 
 func (s *mfaChallengeStore) CreateWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username string) (*mfaChallenge, error) {
-	return s.createWithTTL(ttl, ct, userID, username, nil)
+	return s.createWithTTL(ttl, ct, userID, username, "", nil)
+}
+
+func (s *mfaChallengeStore) CreateBoundWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username, sessionID string) (*mfaChallenge, error) {
+	return s.createWithTTL(ttl, ct, userID, username, sessionID, nil)
 }
 
 func (s *mfaChallengeStore) CreateLoginWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username string, issuance AccessTokenIssuanceContext) (*mfaChallenge, error) {
-	return s.createWithTTL(ttl, ct, userID, username, &issuance)
+	return s.createWithTTL(ttl, ct, userID, username, "", &issuance)
 }
 
-func (s *mfaChallengeStore) createWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username string, issuance *AccessTokenIssuanceContext) (*mfaChallenge, error) {
+func (s *mfaChallengeStore) createWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username, sessionID string, issuance *AccessTokenIssuanceContext) (*mfaChallenge, error) {
 	id, err := generateChallengeID()
 	if err != nil {
 		return nil, err
@@ -121,12 +127,37 @@ func (s *mfaChallengeStore) createWithTTL(ttl time.Duration, ct mfaChallengeType
 		UserID:          userID,
 		Username:        username,
 		ExpiresAt:       time.Now().Add(ttl),
+		SessionID:       sessionID,
 		IssuanceContext: issuance,
 	}
 	s.mu.Lock()
 	s.entries[id] = c
 	s.mu.Unlock()
 	return c.clone(), nil
+}
+
+// Acquire marks a challenge as being consumed so concurrent confirmations
+// cannot both complete. The caller must Release on failure or Delete on success.
+func (s *mfaChallengeStore) Acquire(challengeID string) (*mfaChallenge, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	c, ok := s.entries[challengeID]
+	if !ok || c.InUse || time.Now().After(c.ExpiresAt) {
+		if ok && time.Now().After(c.ExpiresAt) {
+			delete(s.entries, challengeID)
+		}
+		return nil, false
+	}
+	c.InUse = true
+	return c.clone(), true
+}
+
+func (s *mfaChallengeStore) Release(challengeID string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if c, ok := s.entries[challengeID]; ok {
+		c.InUse = false
+	}
 }
 
 func (s *mfaChallengeStore) Get(challengeID string) (*mfaChallenge, bool) {

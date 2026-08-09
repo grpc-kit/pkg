@@ -43,3 +43,27 @@ func TestMFAChallengePreservesAndCopiesIssuanceContext(t *testing.T) {
 		t.Fatal("deleted challenge remains usable")
 	}
 }
+
+func TestMFAChallengeAcquireIsSingleConsumer(t *testing.T) {
+	store := newMFAChallengeStore()
+	challenge, err := store.CreateBoundWithTTL(time.Minute, mfaChallengeTypeAdminSetup, 42, "alice", "session-a")
+	if err != nil {
+		t.Fatalf("CreateBoundWithTTL: %v", err)
+	}
+
+	acquired, ok := store.Acquire(challenge.ChallengeID)
+	if !ok || acquired.SessionID != "session-a" {
+		t.Fatalf("first Acquire() = (%+v, %v)", acquired, ok)
+	}
+	if _, ok := store.Acquire(challenge.ChallengeID); ok {
+		t.Fatal("concurrent Acquire() unexpectedly succeeded")
+	}
+	store.Release(challenge.ChallengeID)
+	if _, ok := store.Acquire(challenge.ChallengeID); !ok {
+		t.Fatal("Acquire() should succeed after Release()")
+	}
+	store.Delete(challenge.ChallengeID)
+	if _, ok := store.Acquire(challenge.ChallengeID); ok {
+		t.Fatal("deleted challenge was acquired")
+	}
+}

@@ -212,7 +212,7 @@ http:
     ## 更新用户
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUser
     patch: "/builtin/admin/api/v1/users/{user.id}"
-    body: "user"
+    body: "*"
     ## 获取用户
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetUser
     get: "/builtin/admin/api/v1/users/{id}"
