@@ -153,60 +153,6 @@
         }
       }
     },
-    "/builtin/admin/api/v1/auth/mfa/confirm": {
-      "post": {
-        "summary": "确认开启 MFA",
-        "description": "接口格式：/builtin/admin/api/v1/auth/mfa/confirm。仅允许发起 setup 的同一用户、同一 access-token 会话确认。challenge 必须类型正确、未过期且未被消费；成功后立即失效。请求体示例：{\"challenge_id\":\"uuid-xxx\",\"totp_code\":\"123456\"}。",
-        "operationId": "KnownAdmin_ConfirmUserMFA",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1ConfirmUserMFAResponse"
-            },
-            "examples": {
-              "application/json": {
-                "recovery_codes": [
-                  "a1b2c3d4",
-                  "e5f6g7h8",
-                  "i9j0k1l2",
-                  "m3n4o5p6",
-                  "q7r8s9t0",
-                  "u1v2w3x4",
-                  "y5z6a7b8",
-                  "c9d0e1f2"
-                ]
-              }
-            }
-          },
-          "4xx": {
-            "description": "客户端参数异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          },
-          "5xx": {
-            "description": "服务端处理异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1ConfirmUserMFARequest"
-            }
-          }
-        ],
-        "tags": [
-          "MFA 多因素认证"
-        ]
-      }
-    },
     "/builtin/admin/api/v1/auth/mfa/setup/confirm": {
       "post": {
         "summary": "登录态首次配置 MFA（确认）",
@@ -5237,6 +5183,7 @@
                 },
                 "phone_number_verified": true,
                 "mfa_enabled": true,
+                "password_change_supported": true,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-02T00:00:00Z",
                 "etag": "8f7c2f5b6c29d4e4"
@@ -5247,6 +5194,226 @@
             "description": "缺少有效认证凭证或认证用户标识",
             "schema": {
               "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "个人中心"
+        ]
+      },
+      "patch": {
+        "summary": "更新当前用户资料",
+        "description": "接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409（reason=CURRENT_USER_ETAG_MISMATCH）。用户名、联系方式、账号状态和身份信息不可由此接口修改。",
+        "operationId": "KnownAdmin_UpdateCurrentUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CurrentUserProfile"
+            },
+            "examples": {
+              "application/json": {
+                "id": "1001",
+                "nickname": "Alice Chen",
+                "etag": "new-etag"
+              }
+            }
+          },
+          "409": {
+            "description": "资料已被其他请求更新，请刷新后重试",
+            "schema": {}
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1UpdateCurrentUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "个人中心"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/self/user/security/mfa/setup": {
+      "post": {
+        "summary": "设置 MFA（获取密钥和二维码）",
+        "description": "接口格式：POST /builtin/admin/api/v1/self/user/security/mfa/setup。目标用户只取自认证上下文；challenge 绑定当前 token 的 JWT ID、用户、类型和 TTL，生成的 secret 仅允许短时展示。",
+        "operationId": "KnownAdmin_SetupCurrentUserMFA",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SetupCurrentUserMFAResponse"
+            },
+            "examples": {
+              "application/json": {
+                "secret": "JBSWY3DPEHPK3PXP",
+                "qr_uri": "otpauth://totp/KnownAdmin:alice?secret=JBSWY3DPEHPK3PXP\u0026issuer=KnownAdmin",
+                "challenge_id": "uuid-xxx"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "MFA 多因素认证"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/self/user/security/mfa/setup:confirm": {
+      "post": {
+        "summary": "确认开启 MFA",
+        "description": "接口格式：POST /builtin/admin/api/v1/self/user/security/mfa/setup:confirm。仅允许发起 setup 的同一用户、同一 access-token 会话确认。challenge 必须类型正确、未过期且未被消费；成功后立即失效。请求体示例：{\"challenge_id\":\"uuid-xxx\",\"totp_code\":\"123456\"}。",
+        "operationId": "KnownAdmin_ConfirmCurrentUserMFA",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ConfirmCurrentUserMFAResponse"
+            },
+            "examples": {
+              "application/json": {
+                "recovery_codes": [
+                  "a1b2c3d4",
+                  "e5f6g7h8",
+                  "i9j0k1l2",
+                  "m3n4o5p6",
+                  "q7r8s9t0",
+                  "u1v2w3x4",
+                  "y5z6a7b8",
+                  "c9d0e1f2"
+                ]
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "ConfirmCurrentUserMFARequest confirms setup for the authenticated subject.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ConfirmCurrentUserMFARequest"
+            }
+          }
+        ],
+        "tags": [
+          "MFA 多因素认证"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/self/user/security/mfa:disable": {
+      "post": {
+        "summary": "关闭 MFA",
+        "description": "接口格式：POST /builtin/admin/api/v1/self/user/security/mfa:disable。目标用户只取自认证上下文；验证当前 TOTP 码或恢复码后关闭 MFA。请求体示例：{\"totp_code\":\"123456\"}。",
+        "operationId": "KnownAdmin_DisableCurrentUserMFA",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "DisableCurrentUserMFARequest disables MFA for the authenticated subject.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1DisableCurrentUserMFARequest"
+            }
+          }
+        ],
+        "tags": [
+          "MFA 多因素认证"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/self/user/security/password": {
+      "put": {
+        "summary": "修改当前用户本地密码",
+        "description": "接口格式：PUT /builtin/admin/api/v1/self/user/security/password。仅适用于具备 ACTIVE LOCAL 身份的用户；current_password_hash 和 new_password_hash 均为现有浏览器侧 SHA-256 协议值。当前密码错误返回 403，外部身份用户返回 400。",
+        "operationId": "KnownAdmin_ChangeCurrentUserPassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "403": {
@@ -5280,6 +5447,16 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ChangeCurrentUserPasswordRequest"
+            }
+          }
+        ],
         "tags": [
           "个人中心"
         ]
@@ -5935,121 +6112,6 @@
         ],
         "tags": [
           "用户管理"
-        ]
-      }
-    },
-    "/builtin/admin/api/v1/users/{user_id}/mfa/disable": {
-      "post": {
-        "summary": "关闭 MFA",
-        "description": "接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/disable。仅允许认证用户本人调用，user_id 必须等于 access token 主体；验证当前 TOTP 码或恢复码后关闭 MFA。请求体示例：{\"totp_code\":\"123456\"}。",
-        "operationId": "KnownAdmin_DisableUserMFA",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "type": "object",
-              "properties": {}
-            },
-            "examples": {
-              "application/json": {}
-            }
-          },
-          "4xx": {
-            "description": "客户端参数异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          },
-          "5xx": {
-            "description": "服务端处理异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "user_id",
-            "description": "目标用户 ID",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "totp_code": {
-                  "type": "string",
-                  "title": "当前有效的 6 位 TOTP 验证码（或恢复码）"
-                }
-              },
-              "title": "DisableUserMFARequest 关闭用户 MFA"
-            }
-          }
-        ],
-        "tags": [
-          "MFA 多因素认证"
-        ]
-      }
-    },
-    "/builtin/admin/api/v1/users/{user_id}/mfa/setup": {
-      "post": {
-        "summary": "设置 MFA（获取密钥和二维码）",
-        "description": "接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/setup。仅允许认证用户本人发起；user_id 必须等于 access token 主体。challenge 绑定当前 token 的 JWT ID、用户、类型和 TTL，生成的 secret 仅允许短时展示。",
-        "operationId": "KnownAdmin_SetupUserMFA",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1SetupUserMFAResponse"
-            },
-            "examples": {
-              "application/json": {
-                "secret": "JBSWY3DPEHPK3PXP",
-                "qr_uri": "otpauth://totp/KnownAdmin:alice?secret=JBSWY3DPEHPK3PXP\u0026issuer=KnownAdmin",
-                "challenge_id": "uuid-xxx"
-              }
-            }
-          },
-          "4xx": {
-            "description": "客户端参数异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          },
-          "5xx": {
-            "description": "服务端处理异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "user_id",
-            "description": "目标用户 ID",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "title": "SetupUserMFARequest 初始化用户 MFA 设置（生成密钥 + 二维码 URI）"
-            }
-          }
-        ],
-        "tags": [
-          "MFA 多因素认证"
         ]
       }
     },
@@ -6810,6 +6872,19 @@
         }
       }
     },
+    "v1ChangeCurrentUserPasswordRequest": {
+      "type": "object",
+      "properties": {
+        "current_password_hash": {
+          "type": "string",
+          "description": "The browser-side SHA-256 value of the current password. This preserves\nthe existing login protocol; it is never stored directly."
+        },
+        "new_password_hash": {
+          "type": "string",
+          "description": "The browser-side SHA-256 value of the replacement password."
+        }
+      }
+    },
     "v1CloudEventsConfig": {
       "type": "object",
       "properties": {
@@ -6842,21 +6917,21 @@
       },
       "title": "ConfirmAuthMFASetupRequest 确认登录态首绑 MFA"
     },
-    "v1ConfirmUserMFARequest": {
+    "v1ConfirmCurrentUserMFARequest": {
       "type": "object",
       "properties": {
         "challenge_id": {
           "type": "string",
-          "title": "SetupUserMFA 返回的 challenge_id"
+          "description": "SetupCurrentUserMFA returns this challenge_id."
         },
         "totp_code": {
           "type": "string",
           "title": "用户从验证器应用获取的 6 位 TOTP 验证码"
         }
       },
-      "title": "ConfirmUserMFARequest 确认开启 MFA（用户扫码后输入验证码确认）"
+      "description": "ConfirmCurrentUserMFARequest confirms setup for the authenticated subject."
     },
-    "v1ConfirmUserMFAResponse": {
+    "v1ConfirmCurrentUserMFAResponse": {
       "type": "object",
       "properties": {
         "recovery_codes": {
@@ -6867,7 +6942,7 @@
           "title": "恢复码列表（一次性展示，用户必须安全保存）"
         }
       },
-      "title": "ConfirmUserMFAResponse 确认成功后返回恢复码"
+      "description": "ConfirmCurrentUserMFAResponse returns recovery codes once after confirmation."
     },
     "v1ConnectionPoolConfig": {
       "type": "object",
@@ -7234,9 +7309,44 @@
         },
         "etag": {
           "type": "string"
+        },
+        "password_change_supported": {
+          "type": "boolean",
+          "description": "Whether this account has an active local-password identity that can be\nchanged from the personal center."
         }
       },
       "description": "CurrentUserProfile is the self-service projection used by the personal\ncenter. It deliberately excludes administrator-only audit, identity and\nmembership fields from User."
+    },
+    "v1CurrentUserProfileUpdate": {
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "picture": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "gender": {
+          "$ref": "#/definitions/UserGender"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "CurrentUserProfileUpdate contains the editable portion of the current\nsubject's profile. Fields are applied only when named by update_mask."
     },
     "v1DatabaseConfig": {
       "type": "object",
@@ -7443,6 +7553,16 @@
       "default": "TYPE_UNSPECIFIED",
       "description": "- TYPE_UNSPECIFIED: 未指定类型\n - BUSINESS: 业务部门 - 直接产生收入的核心业务单位\n - SUPPORT: 支持部门 - 为业务部门提供服务支撑（如：IT、HR）\n - MANAGEMENT: 管理部门 - 负责决策和监督的管理层级\n - VIRTUAL: 虚拟部门 - 项目组、临时团队等非固定组织",
       "title": "Type 部门类型分类，用于业务逻辑和权限控制"
+    },
+    "v1DisableCurrentUserMFARequest": {
+      "type": "object",
+      "properties": {
+        "totp_code": {
+          "type": "string",
+          "title": "当前有效的 6 位 TOTP 验证码（或恢复码）"
+        }
+      },
+      "description": "DisableCurrentUserMFARequest disables MFA for the authenticated subject."
     },
     "v1DiscoverConfig": {
       "type": "object",
@@ -9989,7 +10109,7 @@
         }
       }
     },
-    "v1SetupUserMFAResponse": {
+    "v1SetupCurrentUserMFAResponse": {
       "type": "object",
       "properties": {
         "secret": {
@@ -10005,7 +10125,7 @@
           "title": "确认验证用的 challenge_id，TTL 5 分钟"
         }
       },
-      "title": "SetupUserMFAResponse 返回 TOTP 密钥和 otpauth URI 供前端展示"
+      "description": "SetupCurrentUserMFAResponse returns the TOTP secret and QR URI once."
     },
     "v1StartAuthMFASetupRequest": {
       "type": "object",
@@ -10149,6 +10269,21 @@
         },
         "http_response": {
           "type": "boolean"
+        }
+      }
+    },
+    "v1UpdateCurrentUserRequest": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/definitions/v1CurrentUserProfileUpdate"
+        },
+        "update_mask": {
+          "type": "string"
+        },
+        "etag": {
+          "type": "string",
+          "description": "The etag returned by GetCurrentUser. A stale value is rejected with 409."
         }
       }
     },

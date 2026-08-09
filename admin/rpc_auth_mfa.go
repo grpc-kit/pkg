@@ -168,19 +168,11 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 	}, nil
 }
 
-// SetupUserMFA 初始化 MFA 设置（生成密钥 + 二维码 URI）
-func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUserMFARequest) (*adminv1.SetupUserMFAResponse, error) {
-	if req.UserId == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("user_id is required")
-	}
-
-	// 自服务校验：用户只能为自己设置 MFA，防止已认证但无角色的用户越权操作他人账户。
+// SetupCurrentUserMFA initializes MFA for the authenticated subject.
+func (a *KnownAdminAPI) SetupCurrentUserMFA(ctx context.Context, _ *adminv1.SetupCurrentUserMFARequest) (*adminv1.SetupCurrentUserMFAResponse, error) {
 	operatorID, sessionID, err := authenticatedMFASubject(ctx)
 	if err != nil {
 		return nil, err
-	}
-	if int64(req.UserId) != operatorID {
-		return nil, errs.PermissionDenied(ctx).WithMessage("cannot setup MFA for other users")
 	}
 
 	db, err := a.GetLionClient()
@@ -190,7 +182,7 @@ func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUser
 
 	u, err := db.Users.Query().
 		Select(users.FieldID, users.FieldUsername).
-		Where(users.IDEQ(int(req.UserId))).
+		Where(users.IDEQ(int(operatorID))).
 		Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
@@ -241,15 +233,15 @@ func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUser
 		return nil, errs.Internal(ctx).WithMessage("failed to store MFA setup secret")
 	}
 
-	return &adminv1.SetupUserMFAResponse{
+	return &adminv1.SetupCurrentUserMFAResponse{
 		Secret:      key.Secret(),
 		QrUri:       key.URL(),
 		ChallengeId: challenge.ChallengeID,
 	}, nil
 }
 
-// ConfirmUserMFA 确认开启 MFA
-func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.ConfirmUserMFARequest) (*adminv1.ConfirmUserMFAResponse, error) {
+// ConfirmCurrentUserMFA confirms MFA setup for the authenticated subject.
+func (a *KnownAdminAPI) ConfirmCurrentUserMFA(ctx context.Context, req *adminv1.ConfirmCurrentUserMFARequest) (*adminv1.ConfirmCurrentUserMFAResponse, error) {
 	if req.ChallengeId == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("challenge_id is required")
 	}
@@ -340,27 +332,20 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 	a.mfaChallenges.Delete(req.ChallengeId)
 	confirmed = true
 
-	return &adminv1.ConfirmUserMFAResponse{
+	return &adminv1.ConfirmCurrentUserMFAResponse{
 		RecoveryCodes: recoveryCodes,
 	}, nil
 }
 
-// DisableUserMFA 关闭 MFA
-func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.DisableUserMFARequest) (*emptypb.Empty, error) {
-	if req.UserId == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("user_id is required")
-	}
+// DisableCurrentUserMFA disables MFA for the authenticated subject.
+func (a *KnownAdminAPI) DisableCurrentUserMFA(ctx context.Context, req *adminv1.DisableCurrentUserMFARequest) (*emptypb.Empty, error) {
 	if req.TotpCode == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("totp_code is required")
 	}
 
-	// 自服务校验：用户只能关闭自己的 MFA，防止已认证但无角色的用户越权操作他人账户。
-	operatorID, err := GetUserID(ctx)
-	if err != nil || operatorID <= 0 {
-		return nil, errs.PermissionDenied(ctx).WithMessage("not found user id")
-	}
-	if int64(req.UserId) != operatorID {
-		return nil, errs.PermissionDenied(ctx).WithMessage("cannot disable MFA for other users")
+	operatorID, _, err := authenticatedMFASubject(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	db, err := a.GetLionClient()
@@ -391,7 +376,7 @@ func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.Disable
 			useridentities.FieldMfaRecoveryCodesEncrypted,
 		).
 		Where(
-			useridentities.UserIDEQ(int(req.UserId)),
+			useridentities.UserIDEQ(int(operatorID)),
 			useridentities.ProviderIDEQ(localProviderID),
 			useridentities.MfaEnabledEQ(true),
 		).
@@ -421,7 +406,7 @@ func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.Disable
 
 		affected, saveErr := tx.UserIdentities.Update().
 			Where(
-				useridentities.UserIDEQ(int(req.UserId)),
+				useridentities.UserIDEQ(int(operatorID)),
 				useridentities.ProviderIDEQ(localProviderID),
 				useridentities.MfaEnabledEQ(true),
 				useridentities.MfaRecoveryCodesEncryptedEQ(identity.MfaRecoveryCodesEncrypted),
@@ -438,7 +423,7 @@ func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.Disable
 
 	updater := tx.UserIdentities.Update().
 		Where(
-			useridentities.UserIDEQ(int(req.UserId)),
+			useridentities.UserIDEQ(int(operatorID)),
 			useridentities.ProviderIDEQ(localProviderID),
 			useridentities.MfaEnabledEQ(true),
 		)

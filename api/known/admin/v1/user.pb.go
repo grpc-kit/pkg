@@ -556,6 +556,9 @@ type CurrentUserProfile struct {
 	CreatedAt           *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt           *timestamppb.Timestamp `protobuf:"bytes,19,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	Etag                string                 `protobuf:"bytes,20,opt,name=etag,proto3" json:"etag,omitempty"`
+	// Whether this account has an active local-password identity that can be
+	// changed from the personal center.
+	PasswordChangeSupported bool `protobuf:"varint,21,opt,name=password_change_supported,json=passwordChangeSupported,proto3" json:"password_change_supported,omitempty"`
 }
 
 func (x *CurrentUserProfile) Reset() {
@@ -730,6 +733,240 @@ func (x *CurrentUserProfile) GetEtag() string {
 	return ""
 }
 
+func (x *CurrentUserProfile) GetPasswordChangeSupported() bool {
+	if x != nil {
+		return x.PasswordChangeSupported
+	}
+	return false
+}
+
+// CurrentUserProfileUpdate contains the editable portion of the current
+// subject's profile. Fields are applied only when named by update_mask.
+type CurrentUserProfileUpdate struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Nickname string                 `protobuf:"bytes,1,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	Profile  string                 `protobuf:"bytes,2,opt,name=profile,proto3" json:"profile,omitempty"`
+	Picture  string                 `protobuf:"bytes,3,opt,name=picture,proto3" json:"picture,omitempty"`
+	Website  string                 `protobuf:"bytes,4,opt,name=website,proto3" json:"website,omitempty"`
+	Timezone string                 `protobuf:"bytes,5,opt,name=timezone,proto3" json:"timezone,omitempty"`
+	Locale   string                 `protobuf:"bytes,6,opt,name=locale,proto3" json:"locale,omitempty"`
+	Gender   User_Gender            `protobuf:"varint,7,opt,name=gender,proto3,enum=grpc_kit.api.known.admin.v1.User_Gender" json:"gender,omitempty"`
+	Birthday *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=birthday,proto3" json:"birthday,omitempty"`
+}
+
+func (x *CurrentUserProfileUpdate) Reset() {
+	*x = CurrentUserProfileUpdate{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_user_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CurrentUserProfileUpdate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CurrentUserProfileUpdate) ProtoMessage() {}
+
+func (x *CurrentUserProfileUpdate) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_user_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CurrentUserProfileUpdate.ProtoReflect.Descriptor instead.
+func (*CurrentUserProfileUpdate) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_user_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *CurrentUserProfileUpdate) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
+}
+
+func (x *CurrentUserProfileUpdate) GetProfile() string {
+	if x != nil {
+		return x.Profile
+	}
+	return ""
+}
+
+func (x *CurrentUserProfileUpdate) GetPicture() string {
+	if x != nil {
+		return x.Picture
+	}
+	return ""
+}
+
+func (x *CurrentUserProfileUpdate) GetWebsite() string {
+	if x != nil {
+		return x.Website
+	}
+	return ""
+}
+
+func (x *CurrentUserProfileUpdate) GetTimezone() string {
+	if x != nil {
+		return x.Timezone
+	}
+	return ""
+}
+
+func (x *CurrentUserProfileUpdate) GetLocale() string {
+	if x != nil {
+		return x.Locale
+	}
+	return ""
+}
+
+func (x *CurrentUserProfileUpdate) GetGender() User_Gender {
+	if x != nil {
+		return x.Gender
+	}
+	return User_GENDER_UNSPECIFIED
+}
+
+func (x *CurrentUserProfileUpdate) GetBirthday() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Birthday
+	}
+	return nil
+}
+
+type UpdateCurrentUserRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Profile    *CurrentUserProfileUpdate `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	UpdateMask *fieldmaskpb.FieldMask    `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// The etag returned by GetCurrentUser. A stale value is rejected with 409.
+	Etag string `protobuf:"bytes,3,opt,name=etag,proto3" json:"etag,omitempty"`
+}
+
+func (x *UpdateCurrentUserRequest) Reset() {
+	*x = UpdateCurrentUserRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_user_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateCurrentUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCurrentUserRequest) ProtoMessage() {}
+
+func (x *UpdateCurrentUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_user_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCurrentUserRequest.ProtoReflect.Descriptor instead.
+func (*UpdateCurrentUserRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_user_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdateCurrentUserRequest) GetProfile() *CurrentUserProfileUpdate {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+func (x *UpdateCurrentUserRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.UpdateMask
+	}
+	return nil
+}
+
+func (x *UpdateCurrentUserRequest) GetEtag() string {
+	if x != nil {
+		return x.Etag
+	}
+	return ""
+}
+
+type ChangeCurrentUserPasswordRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// The browser-side SHA-256 value of the current password. This preserves
+	// the existing login protocol; it is never stored directly.
+	CurrentPasswordHash string `protobuf:"bytes,1,opt,name=current_password_hash,json=currentPasswordHash,proto3" json:"current_password_hash,omitempty"`
+	// The browser-side SHA-256 value of the replacement password.
+	NewPasswordHash string `protobuf:"bytes,2,opt,name=new_password_hash,json=newPasswordHash,proto3" json:"new_password_hash,omitempty"`
+}
+
+func (x *ChangeCurrentUserPasswordRequest) Reset() {
+	*x = ChangeCurrentUserPasswordRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_user_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ChangeCurrentUserPasswordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangeCurrentUserPasswordRequest) ProtoMessage() {}
+
+func (x *ChangeCurrentUserPasswordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_user_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangeCurrentUserPasswordRequest.ProtoReflect.Descriptor instead.
+func (*ChangeCurrentUserPasswordRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_user_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ChangeCurrentUserPasswordRequest) GetCurrentPasswordHash() string {
+	if x != nil {
+		return x.CurrentPasswordHash
+	}
+	return ""
+}
+
+func (x *ChangeCurrentUserPasswordRequest) GetNewPasswordHash() string {
+	if x != nil {
+		return x.NewPasswordHash
+	}
+	return ""
+}
+
 type UpdateUserPasswordRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -747,7 +984,7 @@ type UpdateUserPasswordRequest struct {
 func (x *UpdateUserPasswordRequest) Reset() {
 	*x = UpdateUserPasswordRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_user_proto_msgTypes[7]
+		mi := &file_known_admin_v1_user_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -760,7 +997,7 @@ func (x *UpdateUserPasswordRequest) String() string {
 func (*UpdateUserPasswordRequest) ProtoMessage() {}
 
 func (x *UpdateUserPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_user_proto_msgTypes[7]
+	mi := &file_known_admin_v1_user_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -773,7 +1010,7 @@ func (x *UpdateUserPasswordRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserPasswordRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUserPasswordRequest) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_user_proto_rawDescGZIP(), []int{7}
+	return file_known_admin_v1_user_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *UpdateUserPasswordRequest) GetUserId() int64 {
@@ -813,7 +1050,7 @@ type UpdateUserPasswordResponse struct {
 func (x *UpdateUserPasswordResponse) Reset() {
 	*x = UpdateUserPasswordResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_user_proto_msgTypes[8]
+		mi := &file_known_admin_v1_user_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -826,7 +1063,7 @@ func (x *UpdateUserPasswordResponse) String() string {
 func (*UpdateUserPasswordResponse) ProtoMessage() {}
 
 func (x *UpdateUserPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_user_proto_msgTypes[8]
+	mi := &file_known_admin_v1_user_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -839,7 +1076,7 @@ func (x *UpdateUserPasswordResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserPasswordResponse.ProtoReflect.Descriptor instead.
 func (*UpdateUserPasswordResponse) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_user_proto_rawDescGZIP(), []int{8}
+	return file_known_admin_v1_user_proto_rawDescGZIP(), []int{11}
 }
 
 var File_known_admin_v1_user_proto protoreflect.FileDescriptor
@@ -916,7 +1153,7 @@ var file_known_admin_v1_user_proto_rawDesc = []byte{
 	0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d,
 	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d,
 	0x65, 0x22, 0x17, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x55,
-	0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0xbf, 0x06, 0x0a, 0x12, 0x43,
+	0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0xfb, 0x06, 0x0a, 0x12, 0x43,
 	0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x55, 0x73, 0x65, 0x72, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c,
 	0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69,
 	0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20,
@@ -968,24 +1205,67 @@ var file_known_admin_v1_user_proto_rawDesc = []byte{
 	0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x09, 0x75,
 	0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x65, 0x74, 0x61, 0x67,
-	0x18, 0x14, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x65, 0x74, 0x61, 0x67, 0x22, 0xa8, 0x01, 0x0a,
-	0x19, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x50, 0x61, 0x73, 0x73, 0x77,
-	0x6f, 0x72, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
-	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65,
-	0x72, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12,
-	0x2a, 0x0a, 0x11, 0x6e, 0x65, 0x77, 0x5f, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x5f,
-	0x68, 0x61, 0x73, 0x68, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x6e, 0x65, 0x77, 0x50,
-	0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x48, 0x61, 0x73, 0x68, 0x12, 0x2a, 0x0a, 0x11, 0x6f,
-	0x6c, 0x64, 0x5f, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x5f, 0x68, 0x61, 0x73, 0x68,
-	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x6f, 0x6c, 0x64, 0x50, 0x61, 0x73, 0x73, 0x77,
-	0x6f, 0x72, 0x64, 0x48, 0x61, 0x73, 0x68, 0x22, 0x1c, 0x0a, 0x1a, 0x55, 0x70, 0x64, 0x61, 0x74,
-	0x65, 0x55, 0x73, 0x65, 0x72, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
-	0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67,
-	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e,
-	0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x18, 0x14, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x65, 0x74, 0x61, 0x67, 0x12, 0x3a, 0x0a, 0x19,
+	0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x5f, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x5f,
+	0x73, 0x75, 0x70, 0x70, 0x6f, 0x72, 0x74, 0x65, 0x64, 0x18, 0x15, 0x20, 0x01, 0x28, 0x08, 0x52,
+	0x17, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x53,
+	0x75, 0x70, 0x70, 0x6f, 0x72, 0x74, 0x65, 0x64, 0x22, 0xb2, 0x02, 0x0a, 0x18, 0x43, 0x75, 0x72,
+	0x72, 0x65, 0x6e, 0x74, 0x55, 0x73, 0x65, 0x72, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x55,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x6e, 0x69, 0x63, 0x6b, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6e, 0x69, 0x63, 0x6b, 0x6e, 0x61, 0x6d,
+	0x65, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x70,
+	0x69, 0x63, 0x74, 0x75, 0x72, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x70, 0x69,
+	0x63, 0x74, 0x75, 0x72, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x77, 0x65, 0x62, 0x73, 0x69, 0x74, 0x65,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x77, 0x65, 0x62, 0x73, 0x69, 0x74, 0x65, 0x12,
+	0x1a, 0x0a, 0x08, 0x74, 0x69, 0x6d, 0x65, 0x7a, 0x6f, 0x6e, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x08, 0x74, 0x69, 0x6d, 0x65, 0x7a, 0x6f, 0x6e, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x6c,
+	0x6f, 0x63, 0x61, 0x6c, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6c, 0x6f, 0x63,
+	0x61, 0x6c, 0x65, 0x12, 0x40, 0x0a, 0x06, 0x67, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x18, 0x07, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x28, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76,
+	0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x2e, 0x47, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x52, 0x06, 0x67,
+	0x65, 0x6e, 0x64, 0x65, 0x72, 0x12, 0x36, 0x0a, 0x08, 0x62, 0x69, 0x72, 0x74, 0x68, 0x64, 0x61,
+	0x79, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74,
+	0x61, 0x6d, 0x70, 0x52, 0x08, 0x62, 0x69, 0x72, 0x74, 0x68, 0x64, 0x61, 0x79, 0x22, 0xbc, 0x01,
+	0x0a, 0x18, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x55,
+	0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4f, 0x0a, 0x07, 0x70, 0x72,
+	0x6f, 0x66, 0x69, 0x6c, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x35, 0x2e, 0x67, 0x72,
+	0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e,
+	0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e,
+	0x74, 0x55, 0x73, 0x65, 0x72, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x55, 0x70, 0x64, 0x61,
+	0x74, 0x65, 0x52, 0x07, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x12, 0x3b, 0x0a, 0x0b, 0x75,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x5f, 0x6d, 0x61, 0x73, 0x6b, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x46, 0x69, 0x65, 0x6c, 0x64, 0x4d, 0x61, 0x73, 0x6b, 0x52, 0x0a, 0x75, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x4d, 0x61, 0x73, 0x6b, 0x12, 0x12, 0x0a, 0x04, 0x65, 0x74, 0x61, 0x67,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x65, 0x74, 0x61, 0x67, 0x22, 0x82, 0x01, 0x0a,
+	0x20, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x55, 0x73,
+	0x65, 0x72, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x32, 0x0a, 0x15, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x70, 0x61, 0x73,
+	0x73, 0x77, 0x6f, 0x72, 0x64, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x13, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72,
+	0x64, 0x48, 0x61, 0x73, 0x68, 0x12, 0x2a, 0x0a, 0x11, 0x6e, 0x65, 0x77, 0x5f, 0x70, 0x61, 0x73,
+	0x73, 0x77, 0x6f, 0x72, 0x64, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0f, 0x6e, 0x65, 0x77, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x48, 0x61, 0x73,
+	0x68, 0x22, 0xa8, 0x01, 0x0a, 0x19, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72,
+	0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72,
+	0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72,
+	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x2a, 0x0a, 0x11, 0x6e, 0x65, 0x77, 0x5f, 0x70, 0x61, 0x73, 0x73,
+	0x77, 0x6f, 0x72, 0x64, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x0f, 0x6e, 0x65, 0x77, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x48, 0x61, 0x73, 0x68,
+	0x12, 0x2a, 0x0a, 0x11, 0x6f, 0x6c, 0x64, 0x5f, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64,
+	0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x6f, 0x6c, 0x64,
+	0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x48, 0x61, 0x73, 0x68, 0x22, 0x1c, 0x0a, 0x1a,
+	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f,
+	0x72, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69,
+	0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f,
+	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1001,44 +1281,51 @@ func file_known_admin_v1_user_proto_rawDescGZIP() []byte {
 }
 
 var file_known_admin_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_known_admin_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_known_admin_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_known_admin_v1_user_proto_goTypes = []interface{}{
-	(ListUsersRequest_UserView)(0),     // 0: grpc_kit.api.known.admin.v1.ListUsersRequest.UserView
-	(*ListUsersRequest)(nil),           // 1: grpc_kit.api.known.admin.v1.ListUsersRequest
-	(*ListUsersResponse)(nil),          // 2: grpc_kit.api.known.admin.v1.ListUsersResponse
-	(*CreateUserRequest)(nil),          // 3: grpc_kit.api.known.admin.v1.CreateUserRequest
-	(*UpdateUserRequest)(nil),          // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest
-	(*GetUserRequest)(nil),             // 5: grpc_kit.api.known.admin.v1.GetUserRequest
-	(*GetCurrentUserRequest)(nil),      // 6: grpc_kit.api.known.admin.v1.GetCurrentUserRequest
-	(*CurrentUserProfile)(nil),         // 7: grpc_kit.api.known.admin.v1.CurrentUserProfile
-	(*UpdateUserPasswordRequest)(nil),  // 8: grpc_kit.api.known.admin.v1.UpdateUserPasswordRequest
-	(*UpdateUserPasswordResponse)(nil), // 9: grpc_kit.api.known.admin.v1.UpdateUserPasswordResponse
-	(*User)(nil),                       // 10: grpc_kit.api.known.admin.v1.User
-	(*fieldmaskpb.FieldMask)(nil),      // 11: google.protobuf.FieldMask
-	(User_Type)(0),                     // 12: grpc_kit.api.known.admin.v1.User.Type
-	(User_Status)(0),                   // 13: grpc_kit.api.known.admin.v1.User.Status
-	(User_Gender)(0),                   // 14: grpc_kit.api.known.admin.v1.User.Gender
-	(*timestamppb.Timestamp)(nil),      // 15: google.protobuf.Timestamp
-	(*PhoneNumber)(nil),                // 16: grpc_kit.api.known.admin.v1.PhoneNumber
+	(ListUsersRequest_UserView)(0),           // 0: grpc_kit.api.known.admin.v1.ListUsersRequest.UserView
+	(*ListUsersRequest)(nil),                 // 1: grpc_kit.api.known.admin.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),                // 2: grpc_kit.api.known.admin.v1.ListUsersResponse
+	(*CreateUserRequest)(nil),                // 3: grpc_kit.api.known.admin.v1.CreateUserRequest
+	(*UpdateUserRequest)(nil),                // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest
+	(*GetUserRequest)(nil),                   // 5: grpc_kit.api.known.admin.v1.GetUserRequest
+	(*GetCurrentUserRequest)(nil),            // 6: grpc_kit.api.known.admin.v1.GetCurrentUserRequest
+	(*CurrentUserProfile)(nil),               // 7: grpc_kit.api.known.admin.v1.CurrentUserProfile
+	(*CurrentUserProfileUpdate)(nil),         // 8: grpc_kit.api.known.admin.v1.CurrentUserProfileUpdate
+	(*UpdateCurrentUserRequest)(nil),         // 9: grpc_kit.api.known.admin.v1.UpdateCurrentUserRequest
+	(*ChangeCurrentUserPasswordRequest)(nil), // 10: grpc_kit.api.known.admin.v1.ChangeCurrentUserPasswordRequest
+	(*UpdateUserPasswordRequest)(nil),        // 11: grpc_kit.api.known.admin.v1.UpdateUserPasswordRequest
+	(*UpdateUserPasswordResponse)(nil),       // 12: grpc_kit.api.known.admin.v1.UpdateUserPasswordResponse
+	(*User)(nil),                             // 13: grpc_kit.api.known.admin.v1.User
+	(*fieldmaskpb.FieldMask)(nil),            // 14: google.protobuf.FieldMask
+	(User_Type)(0),                           // 15: grpc_kit.api.known.admin.v1.User.Type
+	(User_Status)(0),                         // 16: grpc_kit.api.known.admin.v1.User.Status
+	(User_Gender)(0),                         // 17: grpc_kit.api.known.admin.v1.User.Gender
+	(*timestamppb.Timestamp)(nil),            // 18: google.protobuf.Timestamp
+	(*PhoneNumber)(nil),                      // 19: grpc_kit.api.known.admin.v1.PhoneNumber
 }
 var file_known_admin_v1_user_proto_depIdxs = []int32{
 	0,  // 0: grpc_kit.api.known.admin.v1.ListUsersRequest.view:type_name -> grpc_kit.api.known.admin.v1.ListUsersRequest.UserView
-	10, // 1: grpc_kit.api.known.admin.v1.ListUsersResponse.users:type_name -> grpc_kit.api.known.admin.v1.User
-	10, // 2: grpc_kit.api.known.admin.v1.CreateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
-	10, // 3: grpc_kit.api.known.admin.v1.UpdateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
-	11, // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
-	12, // 5: grpc_kit.api.known.admin.v1.CurrentUserProfile.type:type_name -> grpc_kit.api.known.admin.v1.User.Type
-	13, // 6: grpc_kit.api.known.admin.v1.CurrentUserProfile.status:type_name -> grpc_kit.api.known.admin.v1.User.Status
-	14, // 7: grpc_kit.api.known.admin.v1.CurrentUserProfile.gender:type_name -> grpc_kit.api.known.admin.v1.User.Gender
-	15, // 8: grpc_kit.api.known.admin.v1.CurrentUserProfile.birthday:type_name -> google.protobuf.Timestamp
-	16, // 9: grpc_kit.api.known.admin.v1.CurrentUserProfile.phone_number:type_name -> grpc_kit.api.known.admin.v1.PhoneNumber
-	15, // 10: grpc_kit.api.known.admin.v1.CurrentUserProfile.created_at:type_name -> google.protobuf.Timestamp
-	15, // 11: grpc_kit.api.known.admin.v1.CurrentUserProfile.updated_at:type_name -> google.protobuf.Timestamp
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	13, // 1: grpc_kit.api.known.admin.v1.ListUsersResponse.users:type_name -> grpc_kit.api.known.admin.v1.User
+	13, // 2: grpc_kit.api.known.admin.v1.CreateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
+	13, // 3: grpc_kit.api.known.admin.v1.UpdateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
+	14, // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
+	15, // 5: grpc_kit.api.known.admin.v1.CurrentUserProfile.type:type_name -> grpc_kit.api.known.admin.v1.User.Type
+	16, // 6: grpc_kit.api.known.admin.v1.CurrentUserProfile.status:type_name -> grpc_kit.api.known.admin.v1.User.Status
+	17, // 7: grpc_kit.api.known.admin.v1.CurrentUserProfile.gender:type_name -> grpc_kit.api.known.admin.v1.User.Gender
+	18, // 8: grpc_kit.api.known.admin.v1.CurrentUserProfile.birthday:type_name -> google.protobuf.Timestamp
+	19, // 9: grpc_kit.api.known.admin.v1.CurrentUserProfile.phone_number:type_name -> grpc_kit.api.known.admin.v1.PhoneNumber
+	18, // 10: grpc_kit.api.known.admin.v1.CurrentUserProfile.created_at:type_name -> google.protobuf.Timestamp
+	18, // 11: grpc_kit.api.known.admin.v1.CurrentUserProfile.updated_at:type_name -> google.protobuf.Timestamp
+	17, // 12: grpc_kit.api.known.admin.v1.CurrentUserProfileUpdate.gender:type_name -> grpc_kit.api.known.admin.v1.User.Gender
+	18, // 13: grpc_kit.api.known.admin.v1.CurrentUserProfileUpdate.birthday:type_name -> google.protobuf.Timestamp
+	8,  // 14: grpc_kit.api.known.admin.v1.UpdateCurrentUserRequest.profile:type_name -> grpc_kit.api.known.admin.v1.CurrentUserProfileUpdate
+	14, // 15: grpc_kit.api.known.admin.v1.UpdateCurrentUserRequest.update_mask:type_name -> google.protobuf.FieldMask
+	16, // [16:16] is the sub-list for method output_type
+	16, // [16:16] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_user_proto_init() }
@@ -1133,7 +1420,7 @@ func file_known_admin_v1_user_proto_init() {
 			}
 		}
 		file_known_admin_v1_user_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateUserPasswordRequest); i {
+			switch v := v.(*CurrentUserProfileUpdate); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1145,6 +1432,42 @@ func file_known_admin_v1_user_proto_init() {
 			}
 		}
 		file_known_admin_v1_user_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateCurrentUserRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_user_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ChangeCurrentUserPasswordRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_user_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateUserPasswordRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_user_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UpdateUserPasswordResponse); i {
 			case 0:
 				return &v.state
@@ -1167,7 +1490,7 @@ func file_known_admin_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_user_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   9,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

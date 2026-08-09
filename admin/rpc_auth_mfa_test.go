@@ -13,7 +13,7 @@ import (
 )
 
 // newMFATestAPI 构造一个最小化的 KnownAdminAPI（无数据库），用于验证
-// SetupUserMFA / DisableUserMFA 的自服务校验前置门。
+// current-user MFA 自服务校验前置门。
 // 权限校验在 GetLionClient() 之前触发，因此无需真实数据库。
 func newMFATestAPI() *KnownAdminAPI {
 	return New()
@@ -40,31 +40,21 @@ func assertPermissionDenied(t *testing.T, err error) {
 	}
 }
 
-func TestSetupUserMFA_RejectsNonOwner(t *testing.T) {
-	a := newMFATestAPI()
-	// JWT 中 operatorID=10，但请求操作 user_id=20
-	ctx := mfaSessionContext(10, "session-a")
-
-	_, err := a.SetupUserMFA(ctx, &adminv1.SetupUserMFARequest{UserId: 20})
-	assertPermissionDenied(t, err)
-}
-
-func TestSetupUserMFA_RejectsMissingUserID(t *testing.T) {
+func TestSetupCurrentUserMFA_RejectsMissingSubject(t *testing.T) {
 	a := newMFATestAPI()
 	// context 中无 user_id
 	ctx := context.Background()
 
-	_, err := a.SetupUserMFA(ctx, &adminv1.SetupUserMFARequest{UserId: 20})
+	_, err := a.SetupCurrentUserMFA(ctx, &adminv1.SetupCurrentUserMFARequest{})
 	assertPermissionDenied(t, err)
 }
 
-func TestSetupUserMFA_OwnerPassesGate(t *testing.T) {
+func TestSetupCurrentUserMFA_SubjectPassesGate(t *testing.T) {
 	a := newMFATestAPI()
-	// operatorID == req.UserId，自服务校验通过，之后会因无数据库而失败（Internal），
-	// 但绝不应是 PermissionDenied，证明校验门已放行。
+	// 之后会因无数据库而失败（Internal），但绝不应是 PermissionDenied。
 	ctx := mfaSessionContext(10, "session-a")
 
-	_, err := a.SetupUserMFA(ctx, &adminv1.SetupUserMFARequest{UserId: 10})
+	_, err := a.SetupCurrentUserMFA(ctx, &adminv1.SetupCurrentUserMFARequest{})
 	if err == nil {
 		t.Fatalf("expected non-nil error (no database), got nil")
 	}
@@ -74,7 +64,7 @@ func TestSetupUserMFA_OwnerPassesGate(t *testing.T) {
 	}
 }
 
-func TestConfirmUserMFARejectsChallengeOwnedByAnotherUser(t *testing.T) {
+func TestConfirmCurrentUserMFARejectsChallengeOwnedByAnotherUser(t *testing.T) {
 	a := newMFATestAPI()
 	challenge, err := a.mfaChallenges.CreateBoundWithTTL(time.Minute, mfaChallengeTypeAdminSetup, 10, "alice", "session-a")
 	if err != nil {
@@ -84,7 +74,7 @@ func TestConfirmUserMFARejectsChallengeOwnedByAnotherUser(t *testing.T) {
 		t.Fatal("set challenge secret")
 	}
 
-	_, err = a.ConfirmUserMFA(mfaSessionContext(20, "session-b"), &adminv1.ConfirmUserMFARequest{
+	_, err = a.ConfirmCurrentUserMFA(mfaSessionContext(20, "session-b"), &adminv1.ConfirmCurrentUserMFARequest{
 		ChallengeId: challenge.ChallengeID,
 		TotpCode:    "123456",
 	})
@@ -94,7 +84,7 @@ func TestConfirmUserMFARejectsChallengeOwnedByAnotherUser(t *testing.T) {
 	}
 }
 
-func TestConfirmUserMFARejectsDifferentSessionForSameUser(t *testing.T) {
+func TestConfirmCurrentUserMFARejectsDifferentSessionForSameUser(t *testing.T) {
 	a := newMFATestAPI()
 	challenge, err := a.mfaChallenges.CreateBoundWithTTL(time.Minute, mfaChallengeTypeAdminSetup, 10, "alice", "session-a")
 	if err != nil {
@@ -104,34 +94,26 @@ func TestConfirmUserMFARejectsDifferentSessionForSameUser(t *testing.T) {
 		t.Fatal("set challenge secret")
 	}
 
-	_, err = a.ConfirmUserMFA(mfaSessionContext(10, "session-b"), &adminv1.ConfirmUserMFARequest{
+	_, err = a.ConfirmCurrentUserMFA(mfaSessionContext(10, "session-b"), &adminv1.ConfirmCurrentUserMFARequest{
 		ChallengeId: challenge.ChallengeID,
 		TotpCode:    "123456",
 	})
 	assertPermissionDenied(t, err)
 }
 
-func TestDisableUserMFA_RejectsNonOwner(t *testing.T) {
-	a := newMFATestAPI()
-	ctx := rpc.ContextWithUserID(context.Background(), 10)
-
-	_, err := a.DisableUserMFA(ctx, &adminv1.DisableUserMFARequest{UserId: 20, TotpCode: "123456"})
-	assertPermissionDenied(t, err)
-}
-
-func TestDisableUserMFA_RejectsMissingUserID(t *testing.T) {
+func TestDisableCurrentUserMFA_RejectsMissingSubject(t *testing.T) {
 	a := newMFATestAPI()
 	ctx := context.Background()
 
-	_, err := a.DisableUserMFA(ctx, &adminv1.DisableUserMFARequest{UserId: 20, TotpCode: "123456"})
+	_, err := a.DisableCurrentUserMFA(ctx, &adminv1.DisableCurrentUserMFARequest{TotpCode: "123456"})
 	assertPermissionDenied(t, err)
 }
 
-func TestDisableUserMFA_OwnerPassesGate(t *testing.T) {
+func TestDisableCurrentUserMFA_SubjectPassesGate(t *testing.T) {
 	a := newMFATestAPI()
-	ctx := rpc.ContextWithUserID(context.Background(), 10)
+	ctx := mfaSessionContext(10, "session-a")
 
-	_, err := a.DisableUserMFA(ctx, &adminv1.DisableUserMFARequest{UserId: 10, TotpCode: "123456"})
+	_, err := a.DisableCurrentUserMFA(ctx, &adminv1.DisableCurrentUserMFARequest{TotpCode: "123456"})
 	if err == nil {
 		t.Fatalf("expected non-nil error (no database), got nil")
 	}

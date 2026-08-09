@@ -882,12 +882,14 @@ func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles 
 
 func isSelfServiceMethod(method string) bool {
 	switch method {
-	case "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA",
-		"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA",
-		"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA",
+	case "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupCurrentUserMFA",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmCurrentUserMFA",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableCurrentUserMFA",
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo",
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize",
-		"/grpc_kit.api.known.admin.v1.KnownAdmin/GetCurrentUser":
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/GetCurrentUser",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateCurrentUser",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/ChangeCurrentUserPassword":
 		return true
 	default:
 		return false

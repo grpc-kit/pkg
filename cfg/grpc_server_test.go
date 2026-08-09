@@ -70,12 +70,14 @@ func TestCheckPermission_SelfServiceBypassesRolesGate(t *testing.T) {
 
 	// 自服务方法 + roles 为空 -> 不被前置门拒绝（继续 AllowedGroups/OPA 评估，均放行）
 	for _, method := range []string{
-		"/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA",
-		"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA",
-		"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/SetupCurrentUserMFA",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmCurrentUserMFA",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableCurrentUserMFA",
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo",
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize",
 		"/grpc_kit.api.known.admin.v1.KnownAdmin/GetCurrentUser",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateCurrentUser",
+		"/grpc_kit.api.known.admin.v1.KnownAdmin/ChangeCurrentUserPassword",
 	} {
 		err := c.checkPermission(ctx, method, nil)
 		if err != nil {
@@ -104,7 +106,7 @@ func TestCheckPermission_AllowedGroupsStillEnforced(t *testing.T) {
 	isPermissionDenied(t, err)
 
 	// 无角色 self-service 不应被管理角色 allow-list 拒绝。
-	err = c.checkPermission(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA", nil)
+	err = c.checkPermission(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupCurrentUserMFA", nil)
 	if err != nil {
 		t.Fatalf("expected roleless self-service to bypass admin allow-list, got: %v", err)
 	}

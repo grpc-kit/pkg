@@ -205,6 +205,12 @@ http:
     ## 获取当前认证用户的个人资料
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetCurrentUser
     get: "/builtin/admin/api/v1/self/user"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateCurrentUser
+    patch: "/builtin/admin/api/v1/self/user"
+    body: "*"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ChangeCurrentUserPassword
+    put: "/builtin/admin/api/v1/self/user/security/password"
+    body: "*"
     ## 用户列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers
     get: "/builtin/admin/api/v1/users"
@@ -238,16 +244,15 @@ http:
     post: "/builtin/admin/api/v1/auth/mfa/setup/confirm"
     body: "*"
     ## 设置 MFA（获取密钥和二维码）
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.SetupUserMFA
-    post: "/builtin/admin/api/v1/users/{user_id}/mfa/setup"
-    body: "*"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.SetupCurrentUserMFA
+    post: "/builtin/admin/api/v1/self/user/security/mfa/setup"
     ## 确认开启 MFA
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ConfirmUserMFA
-    post: "/builtin/admin/api/v1/auth/mfa/confirm"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ConfirmCurrentUserMFA
+    post: "/builtin/admin/api/v1/self/user/security/mfa/setup:confirm"
     body: "*"
     ## 关闭 MFA
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DisableUserMFA
-    post: "/builtin/admin/api/v1/users/{user_id}/mfa/disable"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DisableCurrentUserMFA
+    post: "/builtin/admin/api/v1/self/user/security/mfa:disable"
     body: "*"
 
     # 群组管理

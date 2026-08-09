@@ -22,93 +22,95 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	KnownAdmin_ListLocalConfigs_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLocalConfigs"
-	KnownAdmin_GetLocalConfigs_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigs"
-	KnownAdmin_GetGlobalSettings_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGlobalSettings"
-	KnownAdmin_ListGlobalSettings_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGlobalSettings"
-	KnownAdmin_UpdateGlobalSettings_FullMethodName     = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGlobalSettings"
-	KnownAdmin_UpsertAuthProviders_FullMethodName      = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpsertAuthProviders"
-	KnownAdmin_ListAuthProviders_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders"
-	KnownAdmin_ListLoginOptions_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLoginOptions"
-	KnownAdmin_CreateAuthProvider_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthProvider"
-	KnownAdmin_GetAuthProvider_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthProvider"
-	KnownAdmin_DeleteAuthProvider_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteAuthProvider"
-	KnownAdmin_UpdateAuthProvider_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateAuthProvider"
-	KnownAdmin_CreateAuthLogin_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin"
-	KnownAdmin_CreateAuthToken_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthToken"
-	KnownAdmin_GetAuthCallback_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback"
-	KnownAdmin_VerifyAuthMFA_FullMethodName            = "/grpc_kit.api.known.admin.v1.KnownAdmin/VerifyAuthMFA"
-	KnownAdmin_StartAuthMFASetup_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/StartAuthMFASetup"
-	KnownAdmin_ConfirmAuthMFASetup_FullMethodName      = "/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmAuthMFASetup"
-	KnownAdmin_SetupUserMFA_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA"
-	KnownAdmin_ConfirmUserMFA_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA"
-	KnownAdmin_DisableUserMFA_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA"
-	KnownAdmin_ListServices_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServices"
-	KnownAdmin_ListServiceActions_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServiceActions"
-	KnownAdmin_ListMenus_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus"
-	KnownAdmin_CreateMenu_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateMenu"
-	KnownAdmin_UpdateMenu_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateMenu"
-	KnownAdmin_DeleteMenu_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteMenu"
-	KnownAdmin_ListPolicies_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicies"
-	KnownAdmin_GetPolicy_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicy"
-	KnownAdmin_CreatePolicy_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicy"
-	KnownAdmin_UpdatePolicy_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicy"
-	KnownAdmin_DeletePolicy_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicy"
-	KnownAdmin_CreateRole_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRole"
-	KnownAdmin_GetRole_FullMethodName                  = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetRole"
-	KnownAdmin_UpdateRole_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRole"
-	KnownAdmin_DeleteRole_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRole"
-	KnownAdmin_ListRoles_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoles"
-	KnownAdmin_ListRoleMembers_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleMembers"
-	KnownAdmin_CreateRoleMembers_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleMembers"
-	KnownAdmin_UpdateRoleMembers_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRoleMembers"
-	KnownAdmin_DeleteRoleMember_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMember"
-	KnownAdmin_ListRoleMenus_FullMethodName            = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleMenus"
-	KnownAdmin_CreateRoleMenus_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleMenus"
-	KnownAdmin_UpdateRoleMenus_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRoleMenus"
-	KnownAdmin_DeleteRoleMenu_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMenu"
-	KnownAdmin_ListRolePolicies_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRolePolicies"
-	KnownAdmin_CreateRolePolicies_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRolePolicies"
-	KnownAdmin_UpdateRolePolicies_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRolePolicies"
-	KnownAdmin_DeleteRolePolicy_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRolePolicy"
-	KnownAdmin_CreateDepartment_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartment"
-	KnownAdmin_ListDepartments_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListDepartments"
-	KnownAdmin_DeleteDepartment_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteDepartment"
-	KnownAdmin_UpdateDepartment_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartment"
-	KnownAdmin_ListDepartmentMembers_FullMethodName    = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListDepartmentMembers"
-	KnownAdmin_CreateDepartmentMembers_FullMethodName  = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartmentMembers"
-	KnownAdmin_UpdateDepartmentMembers_FullMethodName  = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartmentMembers"
-	KnownAdmin_DeleteDepartmentMember_FullMethodName   = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteDepartmentMember"
-	KnownAdmin_GetCurrentUser_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetCurrentUser"
-	KnownAdmin_GetUser_FullMethodName                  = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetUser"
-	KnownAdmin_CreateUser_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateUser"
-	KnownAdmin_UpdateUser_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUser"
-	KnownAdmin_ListUsers_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers"
-	KnownAdmin_UpdateUserPassword_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUserPassword"
-	KnownAdmin_CreateGroup_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateGroup"
-	KnownAdmin_ListGroups_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGroups"
-	KnownAdmin_UpdateGroup_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGroup"
-	KnownAdmin_DeleteGroup_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteGroup"
-	KnownAdmin_ListGroupMembers_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGroupMembers"
-	KnownAdmin_CreateGroupMembers_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateGroupMembers"
-	KnownAdmin_DeleteGroupMember_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteGroupMember"
-	KnownAdmin_UpdateGroupMember_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGroupMember"
-	KnownAdmin_GetGroup_FullMethodName                 = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGroup"
-	KnownAdmin_CreateCredential_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateCredential"
-	KnownAdmin_ListCredentials_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListCredentials"
-	KnownAdmin_GetCredential_FullMethodName            = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetCredential"
-	KnownAdmin_UpdateCredential_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateCredential"
-	KnownAdmin_DeleteCredential_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteCredential"
-	KnownAdmin_RevealCredentialSecret_FullMethodName   = "/grpc_kit.api.known.admin.v1.KnownAdmin/RevealCredentialSecret"
-	KnownAdmin_GetOAuth2Discovery_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery"
-	KnownAdmin_GetOAuth2JSONWebKeys_FullMethodName     = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2JSONWebKeys"
-	KnownAdmin_GetOAuth2Userinfo_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo"
-	KnownAdmin_ListOAuth2Clients_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListOAuth2Clients"
-	KnownAdmin_CreateOAuth2Client_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateOAuth2Client"
-	KnownAdmin_GetOAuth2Client_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Client"
-	KnownAdmin_UpdateOAuth2Client_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateOAuth2Client"
-	KnownAdmin_DeleteOAuth2Client_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteOAuth2Client"
-	KnownAdmin_CreateDatabaseInitialize_FullMethodName = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize"
+	KnownAdmin_ListLocalConfigs_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLocalConfigs"
+	KnownAdmin_GetLocalConfigs_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigs"
+	KnownAdmin_GetGlobalSettings_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGlobalSettings"
+	KnownAdmin_ListGlobalSettings_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGlobalSettings"
+	KnownAdmin_UpdateGlobalSettings_FullMethodName      = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGlobalSettings"
+	KnownAdmin_UpsertAuthProviders_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpsertAuthProviders"
+	KnownAdmin_ListAuthProviders_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders"
+	KnownAdmin_ListLoginOptions_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLoginOptions"
+	KnownAdmin_CreateAuthProvider_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthProvider"
+	KnownAdmin_GetAuthProvider_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthProvider"
+	KnownAdmin_DeleteAuthProvider_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteAuthProvider"
+	KnownAdmin_UpdateAuthProvider_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateAuthProvider"
+	KnownAdmin_CreateAuthLogin_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin"
+	KnownAdmin_CreateAuthToken_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthToken"
+	KnownAdmin_GetAuthCallback_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback"
+	KnownAdmin_VerifyAuthMFA_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/VerifyAuthMFA"
+	KnownAdmin_StartAuthMFASetup_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/StartAuthMFASetup"
+	KnownAdmin_ConfirmAuthMFASetup_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmAuthMFASetup"
+	KnownAdmin_SetupCurrentUserMFA_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupCurrentUserMFA"
+	KnownAdmin_ConfirmCurrentUserMFA_FullMethodName     = "/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmCurrentUserMFA"
+	KnownAdmin_DisableCurrentUserMFA_FullMethodName     = "/grpc_kit.api.known.admin.v1.KnownAdmin/DisableCurrentUserMFA"
+	KnownAdmin_ListServices_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServices"
+	KnownAdmin_ListServiceActions_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServiceActions"
+	KnownAdmin_ListMenus_FullMethodName                 = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus"
+	KnownAdmin_CreateMenu_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateMenu"
+	KnownAdmin_UpdateMenu_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateMenu"
+	KnownAdmin_DeleteMenu_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteMenu"
+	KnownAdmin_ListPolicies_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicies"
+	KnownAdmin_GetPolicy_FullMethodName                 = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicy"
+	KnownAdmin_CreatePolicy_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicy"
+	KnownAdmin_UpdatePolicy_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicy"
+	KnownAdmin_DeletePolicy_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicy"
+	KnownAdmin_CreateRole_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRole"
+	KnownAdmin_GetRole_FullMethodName                   = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetRole"
+	KnownAdmin_UpdateRole_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRole"
+	KnownAdmin_DeleteRole_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRole"
+	KnownAdmin_ListRoles_FullMethodName                 = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoles"
+	KnownAdmin_ListRoleMembers_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleMembers"
+	KnownAdmin_CreateRoleMembers_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleMembers"
+	KnownAdmin_UpdateRoleMembers_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRoleMembers"
+	KnownAdmin_DeleteRoleMember_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMember"
+	KnownAdmin_ListRoleMenus_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleMenus"
+	KnownAdmin_CreateRoleMenus_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleMenus"
+	KnownAdmin_UpdateRoleMenus_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRoleMenus"
+	KnownAdmin_DeleteRoleMenu_FullMethodName            = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMenu"
+	KnownAdmin_ListRolePolicies_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRolePolicies"
+	KnownAdmin_CreateRolePolicies_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRolePolicies"
+	KnownAdmin_UpdateRolePolicies_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRolePolicies"
+	KnownAdmin_DeleteRolePolicy_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRolePolicy"
+	KnownAdmin_CreateDepartment_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartment"
+	KnownAdmin_ListDepartments_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListDepartments"
+	KnownAdmin_DeleteDepartment_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteDepartment"
+	KnownAdmin_UpdateDepartment_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartment"
+	KnownAdmin_ListDepartmentMembers_FullMethodName     = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListDepartmentMembers"
+	KnownAdmin_CreateDepartmentMembers_FullMethodName   = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartmentMembers"
+	KnownAdmin_UpdateDepartmentMembers_FullMethodName   = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartmentMembers"
+	KnownAdmin_DeleteDepartmentMember_FullMethodName    = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteDepartmentMember"
+	KnownAdmin_GetCurrentUser_FullMethodName            = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetCurrentUser"
+	KnownAdmin_UpdateCurrentUser_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateCurrentUser"
+	KnownAdmin_ChangeCurrentUserPassword_FullMethodName = "/grpc_kit.api.known.admin.v1.KnownAdmin/ChangeCurrentUserPassword"
+	KnownAdmin_GetUser_FullMethodName                   = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetUser"
+	KnownAdmin_CreateUser_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateUser"
+	KnownAdmin_UpdateUser_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUser"
+	KnownAdmin_ListUsers_FullMethodName                 = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers"
+	KnownAdmin_UpdateUserPassword_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUserPassword"
+	KnownAdmin_CreateGroup_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateGroup"
+	KnownAdmin_ListGroups_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGroups"
+	KnownAdmin_UpdateGroup_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGroup"
+	KnownAdmin_DeleteGroup_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteGroup"
+	KnownAdmin_ListGroupMembers_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGroupMembers"
+	KnownAdmin_CreateGroupMembers_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateGroupMembers"
+	KnownAdmin_DeleteGroupMember_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteGroupMember"
+	KnownAdmin_UpdateGroupMember_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGroupMember"
+	KnownAdmin_GetGroup_FullMethodName                  = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGroup"
+	KnownAdmin_CreateCredential_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateCredential"
+	KnownAdmin_ListCredentials_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListCredentials"
+	KnownAdmin_GetCredential_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetCredential"
+	KnownAdmin_UpdateCredential_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateCredential"
+	KnownAdmin_DeleteCredential_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteCredential"
+	KnownAdmin_RevealCredentialSecret_FullMethodName    = "/grpc_kit.api.known.admin.v1.KnownAdmin/RevealCredentialSecret"
+	KnownAdmin_GetOAuth2Discovery_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery"
+	KnownAdmin_GetOAuth2JSONWebKeys_FullMethodName      = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2JSONWebKeys"
+	KnownAdmin_GetOAuth2Userinfo_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo"
+	KnownAdmin_ListOAuth2Clients_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListOAuth2Clients"
+	KnownAdmin_CreateOAuth2Client_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateOAuth2Client"
+	KnownAdmin_GetOAuth2Client_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Client"
+	KnownAdmin_UpdateOAuth2Client_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateOAuth2Client"
+	KnownAdmin_DeleteOAuth2Client_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteOAuth2Client"
+	KnownAdmin_CreateDatabaseInitialize_FullMethodName  = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize"
 )
 
 // KnownAdminClient is the client API for KnownAdmin service.
@@ -139,9 +141,9 @@ type KnownAdminClient interface {
 	VerifyAuthMFA(ctx context.Context, in *VerifyAuthMFARequest, opts ...grpc.CallOption) (*AuthToken, error)
 	StartAuthMFASetup(ctx context.Context, in *StartAuthMFASetupRequest, opts ...grpc.CallOption) (*StartAuthMFASetupResponse, error)
 	ConfirmAuthMFASetup(ctx context.Context, in *ConfirmAuthMFASetupRequest, opts ...grpc.CallOption) (*AuthToken, error)
-	SetupUserMFA(ctx context.Context, in *SetupUserMFARequest, opts ...grpc.CallOption) (*SetupUserMFAResponse, error)
-	ConfirmUserMFA(ctx context.Context, in *ConfirmUserMFARequest, opts ...grpc.CallOption) (*ConfirmUserMFAResponse, error)
-	DisableUserMFA(ctx context.Context, in *DisableUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SetupCurrentUserMFA(ctx context.Context, in *SetupCurrentUserMFARequest, opts ...grpc.CallOption) (*SetupCurrentUserMFAResponse, error)
+	ConfirmCurrentUserMFA(ctx context.Context, in *ConfirmCurrentUserMFARequest, opts ...grpc.CallOption) (*ConfirmCurrentUserMFAResponse, error)
+	DisableCurrentUserMFA(ctx context.Context, in *DisableCurrentUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 服务字典管理
 	ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error)
 	ListServiceActions(ctx context.Context, in *ListServiceActionsRequest, opts ...grpc.CallOption) (*ListServiceActionsResponse, error)
@@ -185,6 +187,8 @@ type KnownAdminClient interface {
 	DeleteDepartmentMember(ctx context.Context, in *DeleteDepartmentMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 用户相关
 	GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...grpc.CallOption) (*CurrentUserProfile, error)
+	UpdateCurrentUser(ctx context.Context, in *UpdateCurrentUserRequest, opts ...grpc.CallOption) (*CurrentUserProfile, error)
+	ChangeCurrentUserPassword(ctx context.Context, in *ChangeCurrentUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
@@ -409,30 +413,30 @@ func (c *knownAdminClient) ConfirmAuthMFASetup(ctx context.Context, in *ConfirmA
 	return out, nil
 }
 
-func (c *knownAdminClient) SetupUserMFA(ctx context.Context, in *SetupUserMFARequest, opts ...grpc.CallOption) (*SetupUserMFAResponse, error) {
+func (c *knownAdminClient) SetupCurrentUserMFA(ctx context.Context, in *SetupCurrentUserMFARequest, opts ...grpc.CallOption) (*SetupCurrentUserMFAResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SetupUserMFAResponse)
-	err := c.cc.Invoke(ctx, KnownAdmin_SetupUserMFA_FullMethodName, in, out, cOpts...)
+	out := new(SetupCurrentUserMFAResponse)
+	err := c.cc.Invoke(ctx, KnownAdmin_SetupCurrentUserMFA_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) ConfirmUserMFA(ctx context.Context, in *ConfirmUserMFARequest, opts ...grpc.CallOption) (*ConfirmUserMFAResponse, error) {
+func (c *knownAdminClient) ConfirmCurrentUserMFA(ctx context.Context, in *ConfirmCurrentUserMFARequest, opts ...grpc.CallOption) (*ConfirmCurrentUserMFAResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ConfirmUserMFAResponse)
-	err := c.cc.Invoke(ctx, KnownAdmin_ConfirmUserMFA_FullMethodName, in, out, cOpts...)
+	out := new(ConfirmCurrentUserMFAResponse)
+	err := c.cc.Invoke(ctx, KnownAdmin_ConfirmCurrentUserMFA_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) DisableUserMFA(ctx context.Context, in *DisableUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *knownAdminClient) DisableCurrentUserMFA(ctx context.Context, in *DisableCurrentUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, KnownAdmin_DisableUserMFA_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, KnownAdmin_DisableCurrentUserMFA_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -809,6 +813,26 @@ func (c *knownAdminClient) GetCurrentUser(ctx context.Context, in *GetCurrentUse
 	return out, nil
 }
 
+func (c *knownAdminClient) UpdateCurrentUser(ctx context.Context, in *UpdateCurrentUserRequest, opts ...grpc.CallOption) (*CurrentUserProfile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CurrentUserProfile)
+	err := c.cc.Invoke(ctx, KnownAdmin_UpdateCurrentUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ChangeCurrentUserPassword(ctx context.Context, in *ChangeCurrentUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, KnownAdmin_ChangeCurrentUserPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(User)
@@ -1127,9 +1151,9 @@ type KnownAdminServer interface {
 	VerifyAuthMFA(context.Context, *VerifyAuthMFARequest) (*AuthToken, error)
 	StartAuthMFASetup(context.Context, *StartAuthMFASetupRequest) (*StartAuthMFASetupResponse, error)
 	ConfirmAuthMFASetup(context.Context, *ConfirmAuthMFASetupRequest) (*AuthToken, error)
-	SetupUserMFA(context.Context, *SetupUserMFARequest) (*SetupUserMFAResponse, error)
-	ConfirmUserMFA(context.Context, *ConfirmUserMFARequest) (*ConfirmUserMFAResponse, error)
-	DisableUserMFA(context.Context, *DisableUserMFARequest) (*emptypb.Empty, error)
+	SetupCurrentUserMFA(context.Context, *SetupCurrentUserMFARequest) (*SetupCurrentUserMFAResponse, error)
+	ConfirmCurrentUserMFA(context.Context, *ConfirmCurrentUserMFARequest) (*ConfirmCurrentUserMFAResponse, error)
+	DisableCurrentUserMFA(context.Context, *DisableCurrentUserMFARequest) (*emptypb.Empty, error)
 	// 服务字典管理
 	ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error)
 	ListServiceActions(context.Context, *ListServiceActionsRequest) (*ListServiceActionsResponse, error)
@@ -1173,6 +1197,8 @@ type KnownAdminServer interface {
 	DeleteDepartmentMember(context.Context, *DeleteDepartmentMemberRequest) (*emptypb.Empty, error)
 	// 用户相关
 	GetCurrentUser(context.Context, *GetCurrentUserRequest) (*CurrentUserProfile, error)
+	UpdateCurrentUser(context.Context, *UpdateCurrentUserRequest) (*CurrentUserProfile, error)
+	ChangeCurrentUserPassword(context.Context, *ChangeCurrentUserPasswordRequest) (*emptypb.Empty, error)
 	GetUser(context.Context, *GetUserRequest) (*User, error)
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
@@ -1270,14 +1296,14 @@ func (UnimplementedKnownAdminServer) StartAuthMFASetup(context.Context, *StartAu
 func (UnimplementedKnownAdminServer) ConfirmAuthMFASetup(context.Context, *ConfirmAuthMFASetupRequest) (*AuthToken, error) {
 	return nil, status.Error(codes.Unimplemented, "method ConfirmAuthMFASetup not implemented")
 }
-func (UnimplementedKnownAdminServer) SetupUserMFA(context.Context, *SetupUserMFARequest) (*SetupUserMFAResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method SetupUserMFA not implemented")
+func (UnimplementedKnownAdminServer) SetupCurrentUserMFA(context.Context, *SetupCurrentUserMFARequest) (*SetupCurrentUserMFAResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetupCurrentUserMFA not implemented")
 }
-func (UnimplementedKnownAdminServer) ConfirmUserMFA(context.Context, *ConfirmUserMFARequest) (*ConfirmUserMFAResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ConfirmUserMFA not implemented")
+func (UnimplementedKnownAdminServer) ConfirmCurrentUserMFA(context.Context, *ConfirmCurrentUserMFARequest) (*ConfirmCurrentUserMFAResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConfirmCurrentUserMFA not implemented")
 }
-func (UnimplementedKnownAdminServer) DisableUserMFA(context.Context, *DisableUserMFARequest) (*emptypb.Empty, error) {
-	return nil, status.Error(codes.Unimplemented, "method DisableUserMFA not implemented")
+func (UnimplementedKnownAdminServer) DisableCurrentUserMFA(context.Context, *DisableCurrentUserMFARequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DisableCurrentUserMFA not implemented")
 }
 func (UnimplementedKnownAdminServer) ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListServices not implemented")
@@ -1389,6 +1415,12 @@ func (UnimplementedKnownAdminServer) DeleteDepartmentMember(context.Context, *De
 }
 func (UnimplementedKnownAdminServer) GetCurrentUser(context.Context, *GetCurrentUserRequest) (*CurrentUserProfile, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCurrentUser not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateCurrentUser(context.Context, *UpdateCurrentUserRequest) (*CurrentUserProfile, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateCurrentUser not implemented")
+}
+func (UnimplementedKnownAdminServer) ChangeCurrentUserPassword(context.Context, *ChangeCurrentUserPasswordRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ChangeCurrentUserPassword not implemented")
 }
 func (UnimplementedKnownAdminServer) GetUser(context.Context, *GetUserRequest) (*User, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
@@ -1821,56 +1853,56 @@ func _KnownAdmin_ConfirmAuthMFASetup_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_SetupUserMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetupUserMFARequest)
+func _KnownAdmin_SetupCurrentUserMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetupCurrentUserMFARequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).SetupUserMFA(ctx, in)
+		return srv.(KnownAdminServer).SetupCurrentUserMFA(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: KnownAdmin_SetupUserMFA_FullMethodName,
+		FullMethod: KnownAdmin_SetupCurrentUserMFA_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).SetupUserMFA(ctx, req.(*SetupUserMFARequest))
+		return srv.(KnownAdminServer).SetupCurrentUserMFA(ctx, req.(*SetupCurrentUserMFARequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_ConfirmUserMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ConfirmUserMFARequest)
+func _KnownAdmin_ConfirmCurrentUserMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmCurrentUserMFARequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).ConfirmUserMFA(ctx, in)
+		return srv.(KnownAdminServer).ConfirmCurrentUserMFA(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: KnownAdmin_ConfirmUserMFA_FullMethodName,
+		FullMethod: KnownAdmin_ConfirmCurrentUserMFA_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ConfirmUserMFA(ctx, req.(*ConfirmUserMFARequest))
+		return srv.(KnownAdminServer).ConfirmCurrentUserMFA(ctx, req.(*ConfirmCurrentUserMFARequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_DisableUserMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DisableUserMFARequest)
+func _KnownAdmin_DisableCurrentUserMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DisableCurrentUserMFARequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).DisableUserMFA(ctx, in)
+		return srv.(KnownAdminServer).DisableCurrentUserMFA(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: KnownAdmin_DisableUserMFA_FullMethodName,
+		FullMethod: KnownAdmin_DisableCurrentUserMFA_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DisableUserMFA(ctx, req.(*DisableUserMFARequest))
+		return srv.(KnownAdminServer).DisableCurrentUserMFA(ctx, req.(*DisableCurrentUserMFARequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2541,6 +2573,42 @@ func _KnownAdmin_GetCurrentUser_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_UpdateCurrentUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCurrentUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateCurrentUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_UpdateCurrentUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateCurrentUser(ctx, req.(*UpdateCurrentUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ChangeCurrentUserPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangeCurrentUserPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ChangeCurrentUserPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_ChangeCurrentUserPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ChangeCurrentUserPassword(ctx, req.(*ChangeCurrentUserPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserRequest)
 	if err := dec(in); err != nil {
@@ -3143,16 +3211,16 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_ConfirmAuthMFASetup_Handler,
 		},
 		{
-			MethodName: "SetupUserMFA",
-			Handler:    _KnownAdmin_SetupUserMFA_Handler,
+			MethodName: "SetupCurrentUserMFA",
+			Handler:    _KnownAdmin_SetupCurrentUserMFA_Handler,
 		},
 		{
-			MethodName: "ConfirmUserMFA",
-			Handler:    _KnownAdmin_ConfirmUserMFA_Handler,
+			MethodName: "ConfirmCurrentUserMFA",
+			Handler:    _KnownAdmin_ConfirmCurrentUserMFA_Handler,
 		},
 		{
-			MethodName: "DisableUserMFA",
-			Handler:    _KnownAdmin_DisableUserMFA_Handler,
+			MethodName: "DisableCurrentUserMFA",
+			Handler:    _KnownAdmin_DisableCurrentUserMFA_Handler,
 		},
 		{
 			MethodName: "ListServices",
@@ -3301,6 +3369,14 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCurrentUser",
 			Handler:    _KnownAdmin_GetCurrentUser_Handler,
+		},
+		{
+			MethodName: "UpdateCurrentUser",
+			Handler:    _KnownAdmin_UpdateCurrentUser_Handler,
+		},
+		{
+			MethodName: "ChangeCurrentUserPassword",
+			Handler:    _KnownAdmin_ChangeCurrentUserPassword_Handler,
 		},
 		{
 			MethodName: "GetUser",

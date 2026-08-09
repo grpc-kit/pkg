@@ -552,12 +552,34 @@ openapiOptions:
         responses:
           "200":
             examples:
-              "application/json": '{"id":"1001","username":"alice","nickname":"Alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"PRIVATE","email":"alice@example.test","email_verified":true,"phone_number":{"country_code":"86","national_number":"13800000000"},"phone_number_verified":true,"mfa_enabled":true,"created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-02T00:00:00Z","etag":"8f7c2f5b6c29d4e4"}'
+              "application/json": '{"id":"1001","username":"alice","nickname":"Alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"PRIVATE","email":"alice@example.test","email_verified":true,"phone_number":{"country_code":"86","national_number":"13800000000"},"phone_number_verified":true,"mfa_enabled":true,"password_change_supported":true,"created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-02T00:00:00Z","etag":"8f7c2f5b6c29d4e4"}'
           "401":
             description: "缺少有效认证凭证或认证用户标识"
             schema:
               jsonSchema:
                 ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateCurrentUser
+      option:
+        tags:
+          - "个人中心"
+        summary: "更新当前用户资料"
+        description: '接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409（reason=CURRENT_USER_ETAG_MISMATCH）。用户名、联系方式、账号状态和身份信息不可由此接口修改。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"1001","nickname":"Alice Chen","etag":"new-etag"}'
+          "409":
+            description: "资料已被其他请求更新，请刷新后重试"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ChangeCurrentUserPassword
+      option:
+        tags:
+          - "个人中心"
+        summary: "修改当前用户本地密码"
+        description: '接口格式：PUT /builtin/admin/api/v1/self/user/security/password。仅适用于具备 ACTIVE LOCAL 身份的用户；current_password_hash 和 new_password_hash 均为现有浏览器侧 SHA-256 协议值。当前密码错误返回 403，外部身份用户返回 400。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{}'
           "403":
             description: "访问策略拒绝当前认证用户"
             schema:
@@ -653,32 +675,32 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"access_token":"eyJhbGci...","token_type":"Bearer","expires_in":86400}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.SetupUserMFA
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.SetupCurrentUserMFA
       option:
         tags:
           - "MFA 多因素认证"
         summary: "设置 MFA（获取密钥和二维码）"
-        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/setup。仅允许认证用户本人发起；user_id 必须等于 access token 主体。challenge 绑定当前 token 的 JWT ID、用户、类型和 TTL，生成的 secret 仅允许短时展示。'
+        description: '接口格式：POST /builtin/admin/api/v1/self/user/security/mfa/setup。目标用户只取自认证上下文；challenge 绑定当前 token 的 JWT ID、用户、类型和 TTL，生成的 secret 仅允许短时展示。'
         responses:
           "200":
             examples:
               "application/json": '{"secret":"JBSWY3DPEHPK3PXP","qr_uri":"otpauth://totp/KnownAdmin:alice?secret=JBSWY3DPEHPK3PXP&issuer=KnownAdmin","challenge_id":"uuid-xxx"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ConfirmUserMFA
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ConfirmCurrentUserMFA
       option:
         tags:
           - "MFA 多因素认证"
         summary: "确认开启 MFA"
-        description: '接口格式：/builtin/admin/api/v1/auth/mfa/confirm。仅允许发起 setup 的同一用户、同一 access-token 会话确认。challenge 必须类型正确、未过期且未被消费；成功后立即失效。请求体示例：{"challenge_id":"uuid-xxx","totp_code":"123456"}。'
+        description: '接口格式：POST /builtin/admin/api/v1/self/user/security/mfa/setup:confirm。仅允许发起 setup 的同一用户、同一 access-token 会话确认。challenge 必须类型正确、未过期且未被消费；成功后立即失效。请求体示例：{"challenge_id":"uuid-xxx","totp_code":"123456"}。'
         responses:
           "200":
             examples:
               "application/json": '{"recovery_codes":["a1b2c3d4","e5f6g7h8","i9j0k1l2","m3n4o5p6","q7r8s9t0","u1v2w3x4","y5z6a7b8","c9d0e1f2"]}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DisableUserMFA
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DisableCurrentUserMFA
       option:
         tags:
           - "MFA 多因素认证"
         summary: "关闭 MFA"
-        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/disable。仅允许认证用户本人调用，user_id 必须等于 access token 主体；验证当前 TOTP 码或恢复码后关闭 MFA。请求体示例：{"totp_code":"123456"}。'
+        description: '接口格式：POST /builtin/admin/api/v1/self/user/security/mfa:disable。目标用户只取自认证上下文；验证当前 TOTP 码或恢复码后关闭 MFA。请求体示例：{"totp_code":"123456"}。'
         responses:
           "200":
             examples:
