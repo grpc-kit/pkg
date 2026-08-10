@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"fmt"
 	"strconv"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -58,10 +57,8 @@ func ensureBuiltinRole(ctx context.Context, tx *lion.Tx, seed builtinRoleSeed) (
 	if err != nil {
 		return nil, err
 	}
-	if role.ParentID != seed.ParentID || role.RoleType != int(adminv1.Role_SYSTEM.Number()) || !role.Protected {
-		return nil, errs.FailedPrecondition(ctx).
-			WithMessage(fmt.Sprintf("role code %q conflicts with built-in role", seed.Code)).Err()
-	}
+	// 幂等收敛：内置角色 code 为保留值，已存在时按种子补齐属性
+	// （ParentID/RoleType/Protected 等），不因历史属性不一致而报错退出，保证可重复执行。
 	return role.Update().
 		SetParentID(seed.ParentID).
 		SetDisplayName(seed.DisplayName).
