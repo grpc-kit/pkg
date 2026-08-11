@@ -645,6 +645,15 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteUserMFA
+      option:
+        tags:
+          - "用户管理"
+        summary: "重置指定用户 MFA"
+        description: "接口格式：DELETE /builtin/admin/api/v1/users/{user_id}/security/mfa。删除指定用户全部身份上的 MFA 密钥、恢复码及启用状态；访问权限由系统策略控制。操作幂等，不撤销已经签发的访问令牌。"
+        responses:
+          "204":
+            description: "用户 MFA 配置已删除"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.VerifyAuthMFA
       option:
         tags:

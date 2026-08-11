@@ -67,3 +67,36 @@ func TestMFAChallengeAcquireIsSingleConsumer(t *testing.T) {
 		t.Fatal("deleted challenge was acquired")
 	}
 }
+
+func TestMFAChallengeDeleteByUserID(t *testing.T) {
+	store := newMFAChallengeStore()
+	t.Cleanup(func() { close(store.stopGC) })
+
+	userOneLogin, err := store.CreateWithTTL(time.Minute, mfaChallengeTypeLoginVerify, 41, "alice")
+	if err != nil {
+		t.Fatalf("create user-one login challenge: %v", err)
+	}
+	userOneSetup, err := store.CreateWithTTL(time.Minute, mfaChallengeTypeLoginSetup, 41, "alice")
+	if err != nil {
+		t.Fatalf("create user-one setup challenge: %v", err)
+	}
+	userTwoLogin, err := store.CreateWithTTL(time.Minute, mfaChallengeTypeLoginVerify, 42, "bob")
+	if err != nil {
+		t.Fatalf("create user-two login challenge: %v", err)
+	}
+
+	store.DeleteByUserID(41)
+
+	if _, ok := store.Get(userOneLogin.ChallengeID); ok {
+		t.Fatal("target user's login challenge remains usable")
+	}
+	if _, ok := store.Get(userOneSetup.ChallengeID); ok {
+		t.Fatal("target user's setup challenge remains usable")
+	}
+	if _, ok := store.Get(userTwoLogin.ChallengeID); !ok {
+		t.Fatal("another user's challenge was deleted")
+	}
+
+	// Repeating the operation is intentionally harmless.
+	store.DeleteByUserID(41)
+}

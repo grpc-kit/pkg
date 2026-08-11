@@ -229,6 +229,9 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUserPassword
     put: "/builtin/admin/api/v1/users/{user_id}/password"
     body: "*"
+    ## 管理员重置指定用户 MFA
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteUserMFA
+    delete: "/builtin/admin/api/v1/users/{user_id}/security/mfa"
 
     # MFA 多因素认证
     ## 登录 MFA 验证

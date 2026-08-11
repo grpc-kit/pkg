@@ -6178,6 +6178,50 @@
           "用户管理"
         ]
       }
+    },
+    "/builtin/admin/api/v1/users/{user_id}/security/mfa": {
+      "delete": {
+        "summary": "重置指定用户 MFA",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/users/{user_id}/security/mfa。删除指定用户全部身份上的 MFA 密钥、恢复码及启用状态；访问权限由系统策略控制。操作幂等，不撤销已经签发的访问令牌。",
+        "operationId": "KnownAdmin_DeleteUserMFA",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "204": {
+            "description": "用户 MFA 配置已删除",
+            "schema": {}
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "用户管理"
+        ]
+      }
     }
   },
   "definitions": {

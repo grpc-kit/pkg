@@ -193,6 +193,17 @@ func (s *mfaChallengeStore) Delete(challengeID string) {
 	s.mu.Unlock()
 }
 
+// DeleteByUserID invalidates every outstanding MFA challenge for a user.
+func (s *mfaChallengeStore) DeleteByUserID(userID int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for challengeID, challenge := range s.entries {
+		if challenge.UserID == userID {
+			delete(s.entries, challengeID)
+		}
+	}
+}
+
 func (s *mfaChallengeStore) SetTempSecret(challengeID, secret string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
