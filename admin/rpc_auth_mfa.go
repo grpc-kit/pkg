@@ -11,14 +11,37 @@ import (
 	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
+	"github.com/grpc-kit/pkg/rpc"
 	"github.com/pquerna/otp/totp"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+func authenticatedMFASubject(ctx context.Context) (int64, string, error) {
+	userID, err := GetUserID(ctx)
+	if err != nil || userID <= 0 {
+		return 0, "", errs.PermissionDenied(ctx).WithMessage("not found user id")
+	}
+
+	var sessionID string
+	switch claims := rpc.GetTokenClaimsFromContext(ctx).(type) {
+	case auth.AccessTokenClaims:
+		sessionID = claims.ID
+	case *auth.AccessTokenClaims:
+		if claims != nil {
+			sessionID = claims.ID
+		}
+	}
+	if strings.TrimSpace(sessionID) == "" {
+		return 0, "", errs.PermissionDenied(ctx).WithMessage("access token session id is required")
+	}
+	return userID, sessionID, nil
+}
 
 // VerifyAuthMFA 登录时的 MFA 二步验证
 func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAuthMFARequest) (*adminv1.AuthToken, error) {
@@ -145,19 +168,11 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 	}, nil
 }
 
-// SetupUserMFA 初始化 MFA 设置（生成密钥 + 二维码 URI）
-func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUserMFARequest) (*adminv1.SetupUserMFAResponse, error) {
-	if req.UserId == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("user_id is required")
-	}
-
-	// 自服务校验：用户只能为自己设置 MFA，防止已认证但无角色的用户越权操作他人账户。
-	operatorID, err := GetUserID(ctx)
-	if err != nil || operatorID <= 0 {
-		return nil, errs.PermissionDenied(ctx).WithMessage("not found user id")
-	}
-	if int64(req.UserId) != operatorID {
-		return nil, errs.PermissionDenied(ctx).WithMessage("cannot setup MFA for other users")
+// SetupCurrentUserMFA initializes MFA for the authenticated subject.
+func (a *KnownAdminAPI) SetupCurrentUserMFA(ctx context.Context, _ *adminv1.SetupCurrentUserMFARequest) (*adminv1.SetupCurrentUserMFAResponse, error) {
+	operatorID, sessionID, err := authenticatedMFASubject(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	db, err := a.GetLionClient()
@@ -167,7 +182,7 @@ func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUser
 
 	u, err := db.Users.Query().
 		Select(users.FieldID, users.FieldUsername).
-		Where(users.IDEQ(int(req.UserId))).
+		Where(users.IDEQ(int(operatorID))).
 		Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
@@ -210,7 +225,7 @@ func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUser
 		return nil, errs.Internal(ctx).WithMessage("failed to generate TOTP key")
 	}
 
-	challenge, err := a.mfaChallenges.CreateWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeAdminSetup, u.ID, u.Username)
+	challenge, err := a.mfaChallenges.CreateBoundWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeAdminSetup, u.ID, u.Username, sessionID)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create setup challenge")
 	}
@@ -218,20 +233,24 @@ func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUser
 		return nil, errs.Internal(ctx).WithMessage("failed to store MFA setup secret")
 	}
 
-	return &adminv1.SetupUserMFAResponse{
+	return &adminv1.SetupCurrentUserMFAResponse{
 		Secret:      key.Secret(),
 		QrUri:       key.URL(),
 		ChallengeId: challenge.ChallengeID,
 	}, nil
 }
 
-// ConfirmUserMFA 确认开启 MFA
-func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.ConfirmUserMFARequest) (*adminv1.ConfirmUserMFAResponse, error) {
+// ConfirmCurrentUserMFA confirms MFA setup for the authenticated subject.
+func (a *KnownAdminAPI) ConfirmCurrentUserMFA(ctx context.Context, req *adminv1.ConfirmCurrentUserMFARequest) (*adminv1.ConfirmCurrentUserMFAResponse, error) {
 	if req.ChallengeId == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("challenge_id is required")
 	}
 	if req.TotpCode == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("totp_code is required")
+	}
+	operatorID, sessionID, err := authenticatedMFASubject(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	challenge, ok := a.mfaChallenges.Get(req.ChallengeId)
@@ -240,6 +259,9 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 	}
 	if challenge.ChallengeType != mfaChallengeTypeAdminSetup {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("invalid challenge type")
+	}
+	if int64(challenge.UserID) != operatorID || challenge.SessionID != sessionID {
+		return nil, errs.PermissionDenied(ctx).WithMessage("MFA challenge does not belong to the authenticated session")
 	}
 	if challenge.TempSecret == "" {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("no temporary secret in challenge")
@@ -253,6 +275,16 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 		}
 		return nil, errs.Unauthenticated(ctx).WithMessage("invalid TOTP code")
 	}
+	challenge, ok = a.mfaChallenges.Acquire(req.ChallengeId)
+	if !ok {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge is already being confirmed or expired")
+	}
+	confirmed := false
+	defer func() {
+		if !confirmed {
+			a.mfaChallenges.Release(req.ChallengeId)
+		}
+	}()
 
 	db, err := a.GetLionClient()
 	if err != nil {
@@ -298,28 +330,22 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 	}
 
 	a.mfaChallenges.Delete(req.ChallengeId)
+	confirmed = true
 
-	return &adminv1.ConfirmUserMFAResponse{
+	return &adminv1.ConfirmCurrentUserMFAResponse{
 		RecoveryCodes: recoveryCodes,
 	}, nil
 }
 
-// DisableUserMFA 关闭 MFA
-func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.DisableUserMFARequest) (*emptypb.Empty, error) {
-	if req.UserId == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("user_id is required")
-	}
+// DisableCurrentUserMFA disables MFA for the authenticated subject.
+func (a *KnownAdminAPI) DisableCurrentUserMFA(ctx context.Context, req *adminv1.DisableCurrentUserMFARequest) (*emptypb.Empty, error) {
 	if req.TotpCode == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("totp_code is required")
 	}
 
-	// 自服务校验：用户只能关闭自己的 MFA，防止已认证但无角色的用户越权操作他人账户。
-	operatorID, err := GetUserID(ctx)
-	if err != nil || operatorID <= 0 {
-		return nil, errs.PermissionDenied(ctx).WithMessage("not found user id")
-	}
-	if int64(req.UserId) != operatorID {
-		return nil, errs.PermissionDenied(ctx).WithMessage("cannot disable MFA for other users")
+	operatorID, _, err := authenticatedMFASubject(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	db, err := a.GetLionClient()
@@ -350,7 +376,7 @@ func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.Disable
 			useridentities.FieldMfaRecoveryCodesEncrypted,
 		).
 		Where(
-			useridentities.UserIDEQ(int(req.UserId)),
+			useridentities.UserIDEQ(int(operatorID)),
 			useridentities.ProviderIDEQ(localProviderID),
 			useridentities.MfaEnabledEQ(true),
 		).
@@ -380,7 +406,7 @@ func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.Disable
 
 		affected, saveErr := tx.UserIdentities.Update().
 			Where(
-				useridentities.UserIDEQ(int(req.UserId)),
+				useridentities.UserIDEQ(int(operatorID)),
 				useridentities.ProviderIDEQ(localProviderID),
 				useridentities.MfaEnabledEQ(true),
 				useridentities.MfaRecoveryCodesEncryptedEQ(identity.MfaRecoveryCodesEncrypted),
@@ -397,7 +423,7 @@ func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.Disable
 
 	updater := tx.UserIdentities.Update().
 		Where(
-			useridentities.UserIDEQ(int(req.UserId)),
+			useridentities.UserIDEQ(int(operatorID)),
 			useridentities.ProviderIDEQ(localProviderID),
 			useridentities.MfaEnabledEQ(true),
 		)
@@ -567,6 +593,25 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 		return "", err
 	}
 	input := accessTokenInputFromProfile(profile, issuance, roleCodes, groupCodes)
+	return newAccessTokenIssuer().issueRSA(input, privateKey, kid)
+}
+
+// reissueAccessTokenForUser 为已认证的 DB 用户重签 access token（RS256）。
+// 身份信息（subject/preferred_username/nickname/email）来自 DB profile，
+// tenant/roles/groups 使用授权决策值（issuance）：留空则对应声明不写入令牌。
+// 与 issueTokenForUser 的区别：后者服务于登录路径，强制写入 DB 实际 roles/groups；
+// 本函数服务于 CreateAuthToken 的“签给调用方自己”场景，尊重授权决策值，
+// 因此可签发不含或仅含部分角色/组的最小权限令牌。
+func (a *KnownAdminAPI) reissueAccessTokenForUser(ctx context.Context, db *lion.Client, userID int, issuance AccessTokenIssuanceContext) (string, error) {
+	profile, err := loadAccessTokenUserProfile(ctx, db, a.config.aesKey, userID)
+	if err != nil {
+		return "", err
+	}
+	privateKey, kid, err := loadAccessTokenRSAKey(ctx, db, a.config.aesKey)
+	if err != nil {
+		return "", err
+	}
+	input := accessTokenInputFromProfile(profile, issuance, issuance.Roles, issuance.Groups)
 	return newAccessTokenIssuer().issueRSA(input, privateKey, kid)
 }
 

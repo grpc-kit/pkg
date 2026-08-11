@@ -13,12 +13,21 @@ func TestSeedDepartmentCode(t *testing.T) {
 	}{
 		{adminv1.DepartmentCode_DEPARTMENT_CODE_UNSPECIFIED, ""},
 		{adminv1.DepartmentCode_DEPARTMENT_CODE_ROOT, "root"},
-		{adminv1.DepartmentCode_DEPARTMENT_CODE_GUEST, "guest"},
+		{adminv1.DepartmentCode_DEPARTMENT_CODE_UNASSIGNED, "unassigned"},
 	}
 	for _, tt := range tests {
 		if got := seedDepartmentCode(tt.c); got != tt.want {
 			t.Errorf("seedDepartmentCode(%v) = %q, want %q", tt.c, got, tt.want)
 		}
+	}
+}
+
+func TestDepartmentCodeGuestRemoved(t *testing.T) {
+	if got := int32(adminv1.DepartmentCode_DEPARTMENT_CODE_UNASSIGNED); got != 2 {
+		t.Fatalf("DEPARTMENT_CODE_UNASSIGNED = %d, want 2", got)
+	}
+	if _, ok := adminv1.DepartmentCode_value["DEPARTMENT_CODE_GUEST"]; ok {
+		t.Fatal("DEPARTMENT_CODE_GUEST must not remain in the generated enum")
 	}
 }
 
@@ -29,6 +38,9 @@ func TestSeedRoleCode(t *testing.T) {
 	}{
 		{adminv1.RoleCode_ROLE_CODE_UNSPECIFIED, ""},
 		{adminv1.RoleCode_ROLE_CODE_SUPERADMIN, "superadmin"},
+		{adminv1.RoleCode_ROLE_CODE_ADMIN, "admin"},
+		{adminv1.RoleCode_ROLE_CODE_USER, "user"},
+		{adminv1.RoleCode_ROLE_CODE_GUEST, "guest"},
 	}
 	for _, tt := range tests {
 		if got := seedRoleCode(tt.c); got != tt.want {

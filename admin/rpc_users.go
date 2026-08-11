@@ -20,20 +20,42 @@ import (
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
 	"github.com/grpc-kit/pkg/lion/users"
+	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (a *KnownAdminAPI) requireUserManagePermission(ctx context.Context) (int64, error) {
+const (
+	permissionUsersList          = "users.list"
+	permissionUsersSensitiveGet  = "users.sensitive.get"
+	permissionUsersGet           = "users.get"
+	permissionUsersCreate        = "users.create"
+	permissionUsersUpdate        = "users.update"
+	permissionUsersPasswordReset = "users.password.reset"
+)
+
+// requireUserManagePermission 是用户管理 RPC 的 handler 级纵深授权。
+// Phase 0 先把独立 permission code 映射到内置管理角色；后续接入动态策略时，
+// handler 调用点及审计 action 无需再次调整。
+func (a *KnownAdminAPI) requireUserManagePermission(ctx context.Context, permission string) (int64, error) {
 	userID, err := GetUserID(ctx)
 	if err != nil || userID <= 0 {
 		return 0, errs.PermissionDenied(ctx).WithMessage("not found user id")
 	}
-	if _, err := a.getUserRoleID(ctx); err != nil {
-		return 0, err
+
+	roleCodes, ok := rpc.GetRolesFromContext(ctx)
+	if !ok {
+		return 0, errs.PermissionDenied(ctx).WithMessage(fmt.Sprintf("permission %s is required", permission))
 	}
-	return userID, nil
+	for _, roleCode := range roleCodes {
+		switch strings.TrimSpace(roleCode) {
+		case seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN), seedRoleCode(adminv1.RoleCode_ROLE_CODE_ADMIN):
+			return userID, nil
+		}
+	}
+
+	return 0, errs.PermissionDenied(ctx).WithMessage(fmt.Sprintf("permission %s is required", permission))
 }
 
 func isSupportedGender(g adminv1.User_Gender) bool {
@@ -51,6 +73,16 @@ func phoneNumberComplete(pn *adminv1.PhoneNumber) bool {
 		return false
 	}
 	return strings.TrimSpace(pn.GetCountryCode()) != "" && strings.TrimSpace(pn.GetNationalNumber()) != ""
+}
+
+func isServerManagedUserField(path string) bool {
+	switch path {
+	case "email_verified", "phone_number_verified", users.FieldCreatedBy, users.FieldUpdatedBy,
+		users.FieldCreatedAt, users.FieldUpdatedAt, users.FieldDeletedAt:
+		return true
+	default:
+		return false
+	}
 }
 
 func (a *KnownAdminAPI) decryptStringField(ctx context.Context, fieldName string, encrypted []byte) (string, error) {
@@ -262,7 +294,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	if req.User.GetUsername() == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("username is empty")
 	}
-	userIDInt, err := a.requireUserManagePermission(ctx)
+	userIDInt, err := a.requireUserManagePermission(ctx, permissionUsersCreate)
 	if err != nil {
 		return nil, err
 	}
@@ -279,17 +311,19 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		return nil, err
 	}
 
-	guestDept, err := tx.Departments.Query().
-		Where(departments.CodeEQ(seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_GUEST))).
-		Only(ctx)
+	unassignedDept, err := queryBuiltinDepartment(
+		ctx,
+		tx,
+		seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_UNASSIGNED),
+	)
 	if err != nil {
 		_ = tx.Rollback()
 		if lion.IsNotFound(err) {
 			return nil, errs.FailedPrecondition(ctx).
-				WithMessage("guest department not found, run database initialize").
+				WithMessage("unassigned department not found, run database initialize").
 				WithDetails(&errdetails.LocalizedMessage{
 					Locale:  "zh-CN",
-					Message: "未找到默认访客部门，请先完成数据库初始化。",
+					Message: "未找到默认待分配部门，请先完成数据库初始化。",
 				}).Err()
 		}
 		return nil, err
@@ -302,21 +336,10 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	userCreate.SetUserType(int(req.User.GetType()))
 	userCreate.SetUserStatus(int(req.User.GetStatus()))
 	userCreate.SetGender(int(req.User.GetGender()))
-	userCreate.SetEmailVerified(req.User.GetEmailVerified())
-	userCreate.SetPhoneNumberVerified(req.User.GetPhoneNumberVerified())
 	userCreate.SetTimezone(req.User.GetTimezone())
 	userCreate.SetLocale(req.User.GetLocale())
 	if req.User.GetMetadata() != nil {
 		userCreate.SetMetadata(req.User.GetMetadata())
-	}
-	if req.User.GetCreatedAt() != nil {
-		userCreate.SetCreatedAt(req.User.GetCreatedAt().AsTime())
-	}
-	if req.User.GetUpdatedAt() != nil {
-		userCreate.SetUpdatedAt(req.User.GetUpdatedAt().AsTime())
-	}
-	if req.User.GetDeletedAt() != nil {
-		userCreate.SetDeletedAt(req.User.GetDeletedAt().AsTime())
 	}
 	if req.User.GetBirthday() != nil {
 		userCreate.SetBirthdate(req.User.GetBirthday().AsTime())
@@ -398,7 +421,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	_, err = tx.UserMemberships.Create().
 		SetUserID(thisUser.ID).
 		SetTargetType(membershipTargetDepartment).
-		SetTargetID(guestDept.ID).
+		SetTargetID(unassignedDept.ID).
 		SetMemberRole(int(adminv1.Membership_MEMBER)).
 		SetMemberStatus(int(adminv1.Membership_ACTIVE)).
 		SetMemberType(int(adminv1.Membership_PRIMARY)).
@@ -425,11 +448,16 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 
 // ListUsers 获取用户列表
 func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersRequest) (*adminv1.ListUsersResponse, error) {
-	if _, err := a.requireUserManagePermission(ctx); err != nil {
-		return nil, err
-	}
 	if req == nil {
 		req = &adminv1.ListUsersRequest{}
+	}
+	if _, err := a.requireUserManagePermission(ctx, permissionUsersList); err != nil {
+		return nil, err
+	}
+	if req.GetView() == adminv1.ListUsersRequest_USER_VIEW_FULL {
+		if _, err := a.requireUserManagePermission(ctx, permissionUsersSensitiveGet); err != nil {
+			return nil, err
+		}
 	}
 
 	result := &adminv1.ListUsersResponse{}
@@ -830,7 +858,7 @@ func (a *KnownAdminAPI) ListUsersV1(ctx context.Context, req *adminv1.ListUsersR
 
 // UpdateUser 更新用户信息
 func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserRequest) (*adminv1.User, error) {
-	operatorID, err := a.requireUserManagePermission(ctx)
+	operatorID, err := a.requireUserManagePermission(ctx, permissionUsersUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -842,6 +870,11 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 	}
 	if req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("update_mask is empty")
+	}
+	for _, path := range req.UpdateMask.Paths {
+		if isServerManagedUserField(path) {
+			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("server-managed update_mask path: %s", path))
+		}
 	}
 
 	x := a.config.db.Users.Update()
@@ -892,8 +925,6 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 			}
 			x.SetBirthdate(req.User.GetBirthday().AsTime())
 
-		case "email_verified":
-			x.SetEmailVerified(req.User.GetEmailVerified())
 		case "email":
 			encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.GetEmail()))
 			if err != nil {
@@ -901,8 +932,6 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 			}
 			x.SetEmailEncrypted(encBody)
 			x.SetEmailHash(crypto.SHA256([]byte(req.User.GetEmail())))
-		case "phone_number_verified":
-			x.SetPhoneNumberVerified(req.User.GetPhoneNumberVerified())
 		case "phone_number", "phone_number.country_code", "phone_number.national_number":
 			if phoneNumberComplete(req.User.GetPhoneNumber()) {
 				rawBody, err := proto.Marshal(req.User.GetPhoneNumber())
@@ -931,15 +960,6 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 			x.SetAddressEncrypted(encBody)
 		case users.FieldMetadata:
 			x.SetMetadata(req.User.GetMetadata())
-		case users.FieldCreatedBy:
-			x.SetCreatedBy(req.User.GetCreatedBy())
-		case users.FieldUpdatedBy:
-			x.SetUpdatedBy(req.User.GetUpdatedBy())
-		case users.FieldDeletedAt:
-			if req.User.GetDeletedAt() == nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage("deleted_at is nil")
-			}
-			x.SetDeletedAt(req.User.GetDeletedAt().AsTime())
 		default:
 			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("unsupported update_mask path: %s", path))
 		}
@@ -964,7 +984,10 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 
 // GetUser 获取用户详情
 func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest) (*adminv1.User, error) {
-	if _, err := a.requireUserManagePermission(ctx); err != nil {
+	if _, err := a.requireUserManagePermission(ctx, permissionUsersGet); err != nil {
+		return nil, err
+	}
+	if _, err := a.requireUserManagePermission(ctx, permissionUsersSensitiveGet); err != nil {
 		return nil, err
 	}
 	if req == nil {
@@ -1029,7 +1052,7 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 
 // UpdateUserPassword 修改用户密码
 func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.UpdateUserPasswordRequest) (*adminv1.UpdateUserPasswordResponse, error) {
-	operatorID, err := a.requireUserManagePermission(ctx)
+	operatorID, err := a.requireUserManagePermission(ctx, permissionUsersPasswordReset)
 	if err != nil {
 		return nil, err
 	}

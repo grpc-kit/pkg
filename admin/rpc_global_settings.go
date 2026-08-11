@@ -264,7 +264,9 @@ func validateGlobalSettingValue(settingKey, value string, spec globalSettingSpec
 func (a *KnownAdminAPI) buildGlobalSettingCategory(ctx context.Context, category string) (*adminv1.GlobalSettingCategory, error) {
 	specs, ok := globalSettingRegistry[category]
 	if !ok {
-		return nil, errs.InvalidArgument(ctx).WithMessage("unknown category")
+		// 未注册的分类（如尚无全局策略的本地配置模块）返回空分类，
+		// 供前端统一渲染「全局策略」Tab 的空状态；写操作（UpdateGlobalSettings）仍各自校验。
+		return &adminv1.GlobalSettingCategory{Category: category, Settings: []*adminv1.GlobalSetting{}}, nil
 	}
 
 	db, err := a.GetLionClient()

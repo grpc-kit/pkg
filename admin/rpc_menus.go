@@ -559,11 +559,20 @@ func (a *KnownAdminAPI) UpdateMenu(ctx context.Context, req *adminv1.UpdateMenuR
 	}
 	update := obj.Update()
 	apply := func(path string) error {
-		// 受保护菜单的结构字段不可修改，仅允许展示属性
+		// 受保护菜单的结构字段不可修改，仅允许展示属性。
+		// 与 code（validateImmutableString）一致：仅在请求值与当前值不同时才视为修改并拒绝；
+		// 值相同视为 no-op 放行——否则编辑展示属性（如 display_name）时连带提交的原值
+		// parent_id/route_path 会被误判为修改而拒绝。
 		if obj.Protected {
 			switch path {
-			case "parent_id", "code", "route_path":
-				return errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("protected menu structure field %q cannot be modified", path))
+			case "parent_id":
+				if req.Menu.ParentId != obj.ParentID {
+					return errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("protected menu structure field %q cannot be modified", path))
+				}
+			case "route_path":
+				if req.Menu.RoutePath != obj.RoutePath {
+					return errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("protected menu structure field %q cannot be modified", path))
+				}
 			}
 		}
 		switch path {
@@ -575,11 +584,7 @@ func (a *KnownAdminAPI) UpdateMenu(ctx context.Context, req *adminv1.UpdateMenuR
 			}
 			update.SetParentID(req.Menu.ParentId)
 		case "code":
-			code, err := schema.EnsureCode(req.Menu.Code)
-			if err != nil {
-				return errs.InvalidArgument(ctx).WithMessage(err.Error())
-			}
-			update.SetCode(code)
+			return validateImmutableString(ctx, "menu", "code", obj.Code, req.Menu.Code)
 		case "display_name":
 			update.SetDisplayName(req.Menu.DisplayName)
 		case "route_path":
@@ -608,7 +613,12 @@ func (a *KnownAdminAPI) UpdateMenu(ctx context.Context, req *adminv1.UpdateMenuR
 			}
 		}
 	} else {
-		for _, path := range []string{"parent_id", "code", "display_name", "route_path", "component", "icon", "sort_order", "metadata", "visibility", "description"} {
+		if req.Menu.Code != "" {
+			if err := validateImmutableString(ctx, "menu", "code", obj.Code, req.Menu.Code); err != nil {
+				return nil, err
+			}
+		}
+		for _, path := range []string{"parent_id", "display_name", "route_path", "component", "icon", "sort_order", "metadata", "visibility", "description"} {
 			if err := apply(path); err != nil {
 				return nil, err
 			}

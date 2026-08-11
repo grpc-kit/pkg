@@ -278,8 +278,8 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 			switch field {
 			case policies.FieldCode:
 				// Code 创建后不可修改（见 Policy.code 注释）
-				if req.Policy.Code != policy.Code {
-					return nil, errs.InvalidArgument(ctx).WithMessage("policy code is immutable after creation")
+				if err := validateImmutableString(ctx, "policy", "code", policy.Code, req.Policy.Code); err != nil {
+					return nil, err
 				}
 			case policies.FieldDisplayName:
 				update.SetDisplayName(req.Policy.DisplayName)
@@ -300,8 +300,10 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 		update.SetUpdatedBy(userID)
 	} else {
 		// 如果没有指定更新字段，则更新所有字段（code 仍不可修改）
-		if req.Policy.Code != "" && req.Policy.Code != policy.Code {
-			return nil, errs.InvalidArgument(ctx).WithMessage("policy code is immutable after creation")
+		if req.Policy.Code != "" {
+			if err := validateImmutableString(ctx, "policy", "code", policy.Code, req.Policy.Code); err != nil {
+				return nil, err
+			}
 		}
 		if err := validatePolicyStatements(ctx, req.Policy.Statements); err != nil {
 			return nil, err

@@ -153,60 +153,6 @@
         }
       }
     },
-    "/builtin/admin/api/v1/auth/mfa/confirm": {
-      "post": {
-        "summary": "确认开启 MFA",
-        "description": "接口格式：/builtin/admin/api/v1/auth/mfa/confirm。用户扫码绑定验证器后输入 6 位 TOTP 码确认开启 MFA。前置条件：challenge_id 必须来自未完成的绑定流程，服务端应审计启用行为并禁止返回已使用过的恢复码。请求体示例：{\"challenge_id\":\"uuid-xxx\",\"totp_code\":\"123456\"}。",
-        "operationId": "KnownAdmin_ConfirmUserMFA",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1ConfirmUserMFAResponse"
-            },
-            "examples": {
-              "application/json": {
-                "recovery_codes": [
-                  "a1b2c3d4",
-                  "e5f6g7h8",
-                  "i9j0k1l2",
-                  "m3n4o5p6",
-                  "q7r8s9t0",
-                  "u1v2w3x4",
-                  "y5z6a7b8",
-                  "c9d0e1f2"
-                ]
-              }
-            }
-          },
-          "4xx": {
-            "description": "客户端参数异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          },
-          "5xx": {
-            "description": "服务端处理异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1ConfirmUserMFARequest"
-            }
-          }
-        ],
-        "tags": [
-          "MFA 多因素认证"
-        ]
-      }
-    },
     "/builtin/admin/api/v1/auth/mfa/setup/confirm": {
       "post": {
         "summary": "登录态首次配置 MFA（确认）",
@@ -1010,7 +956,7 @@
                 },
                 "update_mask": {
                   "type": "string",
-                  "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：code / type / algorithm / key_material / fingerprint 不可修改，即使列入 update_mask 也会被忽略。\n示例: paths: [\"display_name\", \"status\", \"expires_at\"]"
+                  "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：code / type / algorithm / key_material / fingerprint 不可修改；尝试变更时返回参数错误。\n示例: paths: [\"display_name\", \"status\", \"expires_at\"]"
                 }
               },
               "title": "UpdateCredentialRequest 更新凭证"
@@ -5208,6 +5154,314 @@
         ]
       }
     },
+    "/builtin/admin/api/v1/self/user": {
+      "get": {
+        "summary": "获取当前用户资料",
+        "description": "接口格式：GET /builtin/admin/api/v1/self/user。仅要求有效认证，不要求管理员角色；目标用户只取自认证上下文，URL、query 和 body 均不能指定其他用户。返回个人中心所需的最小资料、KnownAdmin LOCAL 身份的 MFA 状态和稳定 etag，不返回身份证、地址、metadata、审计操作人、身份凭据或成员关系。数据库用户不存在返回 404；认证缺失返回 401；策略拒绝返回 403；数据库或解密异常返回 500。响应包含 Cache-Control: private, no-store。",
+        "operationId": "KnownAdmin_GetCurrentUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CurrentUserProfile"
+            },
+            "examples": {
+              "application/json": {
+                "id": "1001",
+                "username": "alice",
+                "nickname": "Alice",
+                "timezone": "Asia/Shanghai",
+                "locale": "zh-CN",
+                "type": "EMPLOYEE",
+                "status": "ACTIVE",
+                "gender": "PRIVATE",
+                "email": "alice@example.test",
+                "email_verified": true,
+                "phone_number": {
+                  "country_code": "86",
+                  "national_number": "13800000000"
+                },
+                "phone_number_verified": true,
+                "mfa_enabled": true,
+                "password_change_supported": true,
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-02T00:00:00Z",
+                "etag": "8f7c2f5b6c29d4e4"
+              }
+            }
+          },
+          "401": {
+            "description": "缺少有效认证凭证或认证用户标识",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "个人中心"
+        ]
+      },
+      "patch": {
+        "summary": "更新当前用户资料",
+        "description": "接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409（reason=CURRENT_USER_ETAG_MISMATCH）。用户名、联系方式、账号状态和身份信息不可由此接口修改。",
+        "operationId": "KnownAdmin_UpdateCurrentUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CurrentUserProfile"
+            },
+            "examples": {
+              "application/json": {
+                "id": "1001",
+                "nickname": "Alice Chen",
+                "etag": "new-etag"
+              }
+            }
+          },
+          "409": {
+            "description": "资料已被其他请求更新，请刷新后重试",
+            "schema": {}
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1UpdateCurrentUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "个人中心"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/self/user/security/mfa/setup": {
+      "post": {
+        "summary": "设置 MFA（获取密钥和二维码）",
+        "description": "接口格式：POST /builtin/admin/api/v1/self/user/security/mfa/setup。目标用户只取自认证上下文；challenge 绑定当前 token 的 JWT ID、用户、类型和 TTL，生成的 secret 仅允许短时展示。",
+        "operationId": "KnownAdmin_SetupCurrentUserMFA",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SetupCurrentUserMFAResponse"
+            },
+            "examples": {
+              "application/json": {
+                "secret": "JBSWY3DPEHPK3PXP",
+                "qr_uri": "otpauth://totp/KnownAdmin:alice?secret=JBSWY3DPEHPK3PXP\u0026issuer=KnownAdmin",
+                "challenge_id": "uuid-xxx"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "MFA 多因素认证"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/self/user/security/mfa/setup:confirm": {
+      "post": {
+        "summary": "确认开启 MFA",
+        "description": "接口格式：POST /builtin/admin/api/v1/self/user/security/mfa/setup:confirm。仅允许发起 setup 的同一用户、同一 access-token 会话确认。challenge 必须类型正确、未过期且未被消费；成功后立即失效。请求体示例：{\"challenge_id\":\"uuid-xxx\",\"totp_code\":\"123456\"}。",
+        "operationId": "KnownAdmin_ConfirmCurrentUserMFA",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ConfirmCurrentUserMFAResponse"
+            },
+            "examples": {
+              "application/json": {
+                "recovery_codes": [
+                  "a1b2c3d4",
+                  "e5f6g7h8",
+                  "i9j0k1l2",
+                  "m3n4o5p6",
+                  "q7r8s9t0",
+                  "u1v2w3x4",
+                  "y5z6a7b8",
+                  "c9d0e1f2"
+                ]
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "ConfirmCurrentUserMFARequest confirms setup for the authenticated subject.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ConfirmCurrentUserMFARequest"
+            }
+          }
+        ],
+        "tags": [
+          "MFA 多因素认证"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/self/user/security/mfa:disable": {
+      "post": {
+        "summary": "关闭 MFA",
+        "description": "接口格式：POST /builtin/admin/api/v1/self/user/security/mfa:disable。目标用户只取自认证上下文；验证当前 TOTP 码或恢复码后关闭 MFA。请求体示例：{\"totp_code\":\"123456\"}。",
+        "operationId": "KnownAdmin_DisableCurrentUserMFA",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "DisableCurrentUserMFARequest disables MFA for the authenticated subject.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1DisableCurrentUserMFARequest"
+            }
+          }
+        ],
+        "tags": [
+          "MFA 多因素认证"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/self/user/security/password": {
+      "put": {
+        "summary": "修改当前用户本地密码",
+        "description": "接口格式：PUT /builtin/admin/api/v1/self/user/security/password。仅适用于具备 ACTIVE LOCAL 身份的用户；current_password_hash 和 new_password_hash 均为现有浏览器侧 SHA-256 协议值。当前密码错误返回 403，外部身份用户返回 400。",
+        "operationId": "KnownAdmin_ChangeCurrentUserPassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "访问策略拒绝当前认证用户",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "认证用户在当前数据库中不存在",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "数据库查询或敏感字段解密失败",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ChangeCurrentUserPasswordRequest"
+            }
+          }
+        ],
+        "tags": [
+          "个人中心"
+        ]
+      }
+    },
     "/builtin/admin/api/v1/services": {
       "get": {
         "summary": "TODO: 补充 ListServices 摘要",
@@ -5385,7 +5639,7 @@
     "/builtin/admin/api/v1/users": {
       "get": {
         "summary": "用户列表",
-        "description": "接口格式：/builtin/admin/api/v1/users。支持分页、过滤与排序，返回用户集合。",
+        "description": "接口格式：/builtin/admin/api/v1/users。需要 users.list 权限；FULL view 还需要 users.sensitive.get 权限。支持分页、过滤与排序。",
         "operationId": "KnownAdmin_ListUsers",
         "responses": {
           "200": {
@@ -5601,7 +5855,7 @@
     "/builtin/admin/api/v1/users/{id}": {
       "get": {
         "summary": "获取用户详情",
-        "description": "接口格式：/builtin/admin/api/v1/users/{id}。根据用户 ID 获取用户详情。",
+        "description": "接口格式：/builtin/admin/api/v1/users/{id}。需要 users.get 和 users.sensitive.get 权限，根据用户 ID 获取含敏感字段的管理详情。",
         "operationId": "KnownAdmin_GetUser",
         "responses": {
           "200": {
@@ -5668,7 +5922,7 @@
     "/builtin/admin/api/v1/users/{user.id}": {
       "patch": {
         "summary": "更新用户",
-        "description": "接口格式：/builtin/admin/api/v1/users/{user.id}。按请求中的 user/update_mask 更新指定用户。请求体示例：{\"user\":{\"id\":\"1001\",\"nickname\":\"Alice Chen\",\"profile\":\"资深风控审计员\"},\"update_mask\":{\"paths\":[\"nickname\",\"profile\"]}}。",
+        "description": "接口格式：/builtin/admin/api/v1/users/{user.id}。需要 users.update 权限。HTTP body 同时包含 user 和 protobuf JSON FieldMask；验证状态、审计字段及 deleted_at 由服务端或专用流程维护，不能通过本接口更新。请求体示例：{\"user\":{\"nickname\":\"Alice Chen\",\"profile\":\"资深风控审计员\",\"status\":\"ACTIVE\"},\"update_mask\":\"nickname,profile,status\"}。",
         "operationId": "KnownAdmin_UpdateUser",
         "responses": {
           "200": {
@@ -5714,138 +5968,145 @@
             "format": "int64"
           },
           {
-            "name": "user",
-            "description": "User 用户实体，表示系统中的账号信息\n\n字段布局约定：标识区 → 基础属性区 → 审计区(时间+操作人连续) → 敏感字段区 → 扩展区 → 关系区\n注意：审计区放在敏感字段之前，保持审计字段的连续性\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
+            "name": "body",
             "in": "body",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "username": {
-                  "type": "string",
-                  "title": "用户名，系统登录凭证，必须唯一"
-                },
-                "nickname": {
-                  "type": "string",
-                  "title": "昵称，用于社交或前端展示"
-                },
-                "profile": {
-                  "type": "string",
-                  "title": "个人简介或签名"
-                },
-                "picture": {
-                  "type": "string",
-                  "title": "用户头像 URL"
-                },
-                "website": {
-                  "type": "string",
-                  "title": "个人网站地址"
-                },
-                "timezone": {
-                  "type": "string",
-                  "title": "时区信息（IANA 时区标识，例如 \"Asia/Shanghai\"）"
-                },
-                "locale": {
-                  "type": "string",
-                  "title": "用户偏好的语言与地区（例如 \"zh-CN\"、\"en-US\"）"
-                },
-                "type": {
-                  "$ref": "#/definitions/v1UserType"
-                },
-                "status": {
-                  "$ref": "#/definitions/v1UserStatus"
-                },
-                "gender": {
-                  "$ref": "#/definitions/UserGender"
-                },
-                "email_verified": {
-                  "type": "boolean",
-                  "title": "邮箱是否已验证"
-                },
-                "phone_number_verified": {
-                  "type": "boolean",
-                  "title": "手机号码是否已验证"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "创建时间"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "更新时间"
-                },
-                "deleted_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "删除时间"
-                },
-                "created_by": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "CreatedBy 创建者用户ID，记录部门创建人"
-                },
-                "updated_by": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "UpdatedBy 最后更新者用户ID，记录最近修改人"
-                },
-                "realname": {
-                  "type": "string",
-                  "title": "真实姓名，用于实名认证或后台展示"
-                },
-                "national_id": {
-                  "type": "string",
-                  "title": "身份证号，用于身份验证（可选）"
-                },
-                "email": {
-                  "type": "string",
-                  "title": "邮箱地址"
-                },
-                "birthday": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "出生日期"
-                },
-                "phone_number": {
-                  "$ref": "#/definitions/v1PhoneNumber",
-                  "title": "手机号码"
-                },
-                "address": {
-                  "$ref": "#/definitions/v1Address",
-                  "title": "地址信息"
-                },
-                "metadata": {
+                "user": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
+                  "properties": {
+                    "username": {
+                      "type": "string",
+                      "title": "用户名，系统登录凭证，必须唯一"
+                    },
+                    "nickname": {
+                      "type": "string",
+                      "title": "昵称，用于社交或前端展示"
+                    },
+                    "profile": {
+                      "type": "string",
+                      "title": "个人简介或签名"
+                    },
+                    "picture": {
+                      "type": "string",
+                      "title": "用户头像 URL"
+                    },
+                    "website": {
+                      "type": "string",
+                      "title": "个人网站地址"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "title": "时区信息（IANA 时区标识，例如 \"Asia/Shanghai\"）"
+                    },
+                    "locale": {
+                      "type": "string",
+                      "title": "用户偏好的语言与地区（例如 \"zh-CN\"、\"en-US\"）"
+                    },
+                    "type": {
+                      "$ref": "#/definitions/v1UserType"
+                    },
+                    "status": {
+                      "$ref": "#/definitions/v1UserStatus"
+                    },
+                    "gender": {
+                      "$ref": "#/definitions/UserGender"
+                    },
+                    "email_verified": {
+                      "type": "boolean",
+                      "title": "邮箱是否已验证"
+                    },
+                    "phone_number_verified": {
+                      "type": "boolean",
+                      "title": "手机号码是否已验证"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "title": "创建时间"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "title": "更新时间"
+                    },
+                    "deleted_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "title": "删除时间"
+                    },
+                    "created_by": {
+                      "type": "string",
+                      "format": "int64",
+                      "title": "CreatedBy 创建者用户ID，记录部门创建人"
+                    },
+                    "updated_by": {
+                      "type": "string",
+                      "format": "int64",
+                      "title": "UpdatedBy 最后更新者用户ID，记录最近修改人"
+                    },
+                    "realname": {
+                      "type": "string",
+                      "title": "真实姓名，用于实名认证或后台展示"
+                    },
+                    "national_id": {
+                      "type": "string",
+                      "title": "身份证号，用于身份验证（可选）"
+                    },
+                    "email": {
+                      "type": "string",
+                      "title": "邮箱地址"
+                    },
+                    "birthday": {
+                      "type": "string",
+                      "format": "date-time",
+                      "title": "出生日期"
+                    },
+                    "phone_number": {
+                      "$ref": "#/definitions/v1PhoneNumber",
+                      "title": "手机号码"
+                    },
+                    "address": {
+                      "$ref": "#/definitions/v1Address",
+                      "title": "地址信息"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "title": "自定义元数据，用于存储额外的用户信息（如 JSON 字符串）"
+                    },
+                    "mfa_enabled": {
+                      "type": "boolean",
+                      "title": "是否启用 MFA（TOTP）"
+                    },
+                    "department_members": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/v1Membership"
+                      },
+                      "title": "用户所属部门 membership 关系"
+                    },
+                    "group_members": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/v1Membership"
+                      },
+                      "title": "用户所属群组 membership 关系"
+                    }
                   },
-                  "title": "自定义元数据，用于存储额外的用户信息（如 JSON 字符串）"
+                  "description": "字段布局约定：标识区 → 基础属性区 → 审计区(时间+操作人连续) → 敏感字段区 → 扩展区 → 关系区\n注意：审计区放在敏感字段之前，保持审计字段的连续性\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
+                  "title": "User 用户实体，表示系统中的账号信息"
                 },
-                "mfa_enabled": {
-                  "type": "boolean",
-                  "title": "是否启用 MFA（TOTP）"
-                },
-                "department_members": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1Membership"
-                  },
-                  "title": "用户所属部门 membership 关系"
-                },
-                "group_members": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1Membership"
-                  },
-                  "title": "用户所属群组 membership 关系"
+                "update_mask": {
+                  "type": "string"
                 }
-              },
-              "description": "字段布局约定：标识区 → 基础属性区 → 审计区(时间+操作人连续) → 敏感字段区 → 扩展区 → 关系区\n注意：审计区放在敏感字段之前，保持审计字段的连续性\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
-              "title": "User 用户实体，表示系统中的账号信息"
+              }
             }
           }
         ],
@@ -5854,125 +6115,10 @@
         ]
       }
     },
-    "/builtin/admin/api/v1/users/{user_id}/mfa/disable": {
-      "post": {
-        "summary": "关闭 MFA",
-        "description": "接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/disable。验证当前 TOTP 码或恢复码后关闭指定用户的 MFA。请求体示例：{\"user_id\":\"1001\",\"totp_code\":\"123456\"}。",
-        "operationId": "KnownAdmin_DisableUserMFA",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "type": "object",
-              "properties": {}
-            },
-            "examples": {
-              "application/json": {}
-            }
-          },
-          "4xx": {
-            "description": "客户端参数异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          },
-          "5xx": {
-            "description": "服务端处理异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "user_id",
-            "description": "目标用户 ID",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "totp_code": {
-                  "type": "string",
-                  "title": "当前有效的 6 位 TOTP 验证码（或恢复码）"
-                }
-              },
-              "title": "DisableUserMFARequest 关闭用户 MFA"
-            }
-          }
-        ],
-        "tags": [
-          "MFA 多因素认证"
-        ]
-      }
-    },
-    "/builtin/admin/api/v1/users/{user_id}/mfa/setup": {
-      "post": {
-        "summary": "设置 MFA（获取密钥和二维码）",
-        "description": "接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/setup。为指定用户生成 TOTP 密钥和 otpauth URI，前端据此展示二维码供用户扫描。前置条件：仅允许具备最小权限的管理员或用户本人发起，生成的 secret 仅允许短时展示并应审计发放行为。",
-        "operationId": "KnownAdmin_SetupUserMFA",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1SetupUserMFAResponse"
-            },
-            "examples": {
-              "application/json": {
-                "secret": "JBSWY3DPEHPK3PXP",
-                "qr_uri": "otpauth://totp/KnownAdmin:alice?secret=JBSWY3DPEHPK3PXP\u0026issuer=KnownAdmin",
-                "challenge_id": "uuid-xxx"
-              }
-            }
-          },
-          "4xx": {
-            "description": "客户端参数异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          },
-          "5xx": {
-            "description": "服务端处理异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "user_id",
-            "description": "目标用户 ID",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "title": "SetupUserMFARequest 初始化用户 MFA 设置（生成密钥 + 二维码 URI）"
-            }
-          }
-        ],
-        "tags": [
-          "MFA 多因素认证"
-        ]
-      }
-    },
     "/builtin/admin/api/v1/users/{user_id}/password": {
       "put": {
         "summary": "更新用户密码",
-        "description": "接口格式：/builtin/admin/api/v1/users/{user_id}/password。更新指定用户密码（传递哈希值）。前置条件：仅允许本人或具备最小权限的管理员调用，服务端应审计密码变更并禁止记录明文密码或明文哈希。请求体示例：{\"user_id\":\"1001\",\"old_password_hash\":\"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a\",\"new_password_hash\":\"5e884898da28047151d0e56f8dc6292773603d0d\"}。",
+        "description": "接口格式：/builtin/admin/api/v1/users/{user_id}/password。需要 users.password.reset 权限，用于管理员重置指定用户密码（传递哈希值）；本人改密将在 /self/user/password 使用独立流程。服务端不得记录明文密码或明文哈希。请求体示例：{\"new_password_hash\":\"5e884898da28047151d0e56f8dc6292773603d0d\"}。",
         "operationId": "KnownAdmin_UpdateUserPassword",
         "responses": {
           "200": {
@@ -6726,6 +6872,19 @@
         }
       }
     },
+    "v1ChangeCurrentUserPasswordRequest": {
+      "type": "object",
+      "properties": {
+        "current_password_hash": {
+          "type": "string",
+          "description": "The browser-side SHA-256 value of the current password. This preserves\nthe existing login protocol; it is never stored directly."
+        },
+        "new_password_hash": {
+          "type": "string",
+          "description": "The browser-side SHA-256 value of the replacement password."
+        }
+      }
+    },
     "v1CloudEventsConfig": {
       "type": "object",
       "properties": {
@@ -6758,21 +6917,21 @@
       },
       "title": "ConfirmAuthMFASetupRequest 确认登录态首绑 MFA"
     },
-    "v1ConfirmUserMFARequest": {
+    "v1ConfirmCurrentUserMFARequest": {
       "type": "object",
       "properties": {
         "challenge_id": {
           "type": "string",
-          "title": "SetupUserMFA 返回的 challenge_id"
+          "description": "SetupCurrentUserMFA returns this challenge_id."
         },
         "totp_code": {
           "type": "string",
           "title": "用户从验证器应用获取的 6 位 TOTP 验证码"
         }
       },
-      "title": "ConfirmUserMFARequest 确认开启 MFA（用户扫码后输入验证码确认）"
+      "description": "ConfirmCurrentUserMFARequest confirms setup for the authenticated subject."
     },
-    "v1ConfirmUserMFAResponse": {
+    "v1ConfirmCurrentUserMFAResponse": {
       "type": "object",
       "properties": {
         "recovery_codes": {
@@ -6783,7 +6942,7 @@
           "title": "恢复码列表（一次性展示，用户必须安全保存）"
         }
       },
-      "title": "ConfirmUserMFAResponse 确认成功后返回恢复码"
+      "description": "ConfirmCurrentUserMFAResponse returns recovery codes once after confirmation."
     },
     "v1ConnectionPoolConfig": {
       "type": "object",
@@ -6838,33 +6997,55 @@
     "v1CreateAuthTokenRequest": {
       "type": "object",
       "properties": {
-        "appid": {
+        "client_id": {
           "type": "string",
-          "title": "Appid 关联应用标识"
+          "title": "--- OAuth2 客户端与授权范围 ---\nClientId OAuth2 客户端标识，作为 access token 的 client_id 声明。"
+        },
+        "scope": {
+          "type": "string",
+          "title": "Scope 授权范围，空格分隔。留空则不签发 scope 声明。"
+        },
+        "tenant": {
+          "type": "string",
+          "title": "--- 令牌声明 Claims（授权字段）---\nTenant 租户标识。superadmin 可自由指定；其他角色仅可设为自身 tenant。\n留空则不写入 tenant 声明。"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Roles 角色 code 列表。superadmin 可手工输入任意值或从 DB 现有条目选择；\n其他角色仅可在自身 roles 子集内选择，留空则不写入 roles 声明。"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Groups 用户组 code 列表。superadmin 可手工输入任意值或从 DB 现有条目选择；\n其他角色仅可在自身 groups 子集内选择，留空则不写入 groups 声明。"
         },
         "username": {
           "type": "string",
-          "title": "Username 系统识别的用户名全局唯一"
+          "title": "--- 令牌身份展示字段（仅 superadmin 可自定义；非 superadmin 传入将被忽略）---\nUsername 令牌的 preferred_username 声明。superadmin 留空则不写入该声明；\n非 superadmin 留空则使用调用方自身用户名。"
         },
         "email": {
           "type": "string",
-          "title": "Email 用户邮箱地址"
+          "title": "Email 令牌的 email 声明。superadmin 留空则不写入该声明；\n非 superadmin 留空则使用调用方自身邮箱。"
         },
-        "phone_number": {
+        "email_verified": {
+          "type": "boolean",
+          "title": "EmailVerified 仅在设置了 email 时生效（superadmin 可选）。true 则令牌携带\nemail_verified=true；email 为空时不写入 email/email_verified 声明。"
+        },
+        "subject": {
           "type": "string",
-          "title": "PhoneNumber 用户手机号"
+          "title": "Subject 目标 user_id（仅 superadmin 可委托签发）。留空则签发给调用方自身；\n非空则签发给指定 user_id（委托签发，sub=目标 user_id，使用目标用户密钥/身份）。\n非 superadmin 传入将被忽略。"
         },
         "expires_in": {
           "type": "integer",
           "format": "int32",
-          "title": "ExpiresIn 控制生成 access_token 的有效时长，默认 24 * 60 * 60 秒"
-        },
-        "password_hash": {
-          "type": "string",
-          "title": "PasswordHash 用户密码在本地使用 sha256 哈希结果"
+          "title": "--- 令牌生命周期 ---\nExpiresIn 控制生成 access_token 的有效时长，默认 24 * 60 * 60 秒"
         }
       },
-      "title": "CreateAuthTokenRequest 用于创建 token，仅管理员或特定用户可建"
+      "title": "CreateAuthTokenRequest 用于创建 token，签发给调用方自己（已持有 access token）。\n调用方身份由拦截器校验 access token 后从 context 注入，请求体不再携带任何身份凭证。\ntenant/roles/groups 按授权决策填入：留空则对应声明不写入令牌。\nusername/email 仅 superadmin 可自定义（覆盖令牌展示字段，subject 不变）；\n非 superadmin 传入将被忽略，强制使用调用方自身值。"
     },
     "v1CreateDatabaseInitializeRequest": {
       "type": "object",
@@ -7061,6 +7242,111 @@
       "default": "TYPE_UNSPECIFIED",
       "description": "- TYPE_UNSPECIFIED: 未指定类型\n - API_KEY: API Key\n - SYMMETRIC_KEY: 对称密钥 / HMAC / AES\n - KEY_PAIR: 公私钥对\n - X509: X.509 证书凭证（包含主证书、私钥、CA链）\n - LICENSE: 软件许可证\n - SECRET: 非密钥类密文（数据库密码、连接串、第三方 API 凭据等），加密存储于 symmetric_key 字段",
       "title": "凭证类型"
+    },
+    "v1CurrentUserProfile": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "picture": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/v1UserType"
+        },
+        "status": {
+          "$ref": "#/definitions/v1UserStatus"
+        },
+        "gender": {
+          "$ref": "#/definitions/UserGender"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "email": {
+          "type": "string"
+        },
+        "email_verified": {
+          "type": "boolean"
+        },
+        "phone_number": {
+          "$ref": "#/definitions/v1PhoneNumber"
+        },
+        "phone_number_verified": {
+          "type": "boolean"
+        },
+        "mfa_enabled": {
+          "type": "boolean"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "etag": {
+          "type": "string"
+        },
+        "password_change_supported": {
+          "type": "boolean",
+          "description": "Whether this account has an active local-password identity that can be\nchanged from the personal center."
+        }
+      },
+      "description": "CurrentUserProfile is the self-service projection used by the personal\ncenter. It deliberately excludes administrator-only audit, identity and\nmembership fields from User."
+    },
+    "v1CurrentUserProfileUpdate": {
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "picture": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "gender": {
+          "$ref": "#/definitions/UserGender"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "CurrentUserProfileUpdate contains the editable portion of the current\nsubject's profile. Fields are applied only when named by update_mask."
     },
     "v1DatabaseConfig": {
       "type": "object",
@@ -7267,6 +7553,16 @@
       "default": "TYPE_UNSPECIFIED",
       "description": "- TYPE_UNSPECIFIED: 未指定类型\n - BUSINESS: 业务部门 - 直接产生收入的核心业务单位\n - SUPPORT: 支持部门 - 为业务部门提供服务支撑（如：IT、HR）\n - MANAGEMENT: 管理部门 - 负责决策和监督的管理层级\n - VIRTUAL: 虚拟部门 - 项目组、临时团队等非固定组织",
       "title": "Type 部门类型分类，用于业务逻辑和权限控制"
+    },
+    "v1DisableCurrentUserMFARequest": {
+      "type": "object",
+      "properties": {
+        "totp_code": {
+          "type": "string",
+          "title": "当前有效的 6 位 TOTP 验证码（或恢复码）"
+        }
+      },
+      "description": "DisableCurrentUserMFARequest disables MFA for the authenticated subject."
     },
     "v1DiscoverConfig": {
       "type": "object",
@@ -9813,7 +10109,7 @@
         }
       }
     },
-    "v1SetupUserMFAResponse": {
+    "v1SetupCurrentUserMFAResponse": {
       "type": "object",
       "properties": {
         "secret": {
@@ -9829,7 +10125,7 @@
           "title": "确认验证用的 challenge_id，TTL 5 分钟"
         }
       },
-      "title": "SetupUserMFAResponse 返回 TOTP 密钥和 otpauth URI 供前端展示"
+      "description": "SetupCurrentUserMFAResponse returns the TOTP secret and QR URI once."
     },
     "v1StartAuthMFASetupRequest": {
       "type": "object",
@@ -9973,6 +10269,21 @@
         },
         "http_response": {
           "type": "boolean"
+        }
+      }
+    },
+    "v1UpdateCurrentUserRequest": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/definitions/v1CurrentUserProfileUpdate"
+        },
+        "update_mask": {
+          "type": "string"
+        },
+        "etag": {
+          "type": "string",
+          "description": "The etag returned by GetCurrentUser. A stale value is rejected with 409."
         }
       }
     },

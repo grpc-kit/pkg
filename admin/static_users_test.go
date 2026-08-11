@@ -95,7 +95,11 @@ func TestStaticUserAccessTokenSeparatesRolesAndGroups(t *testing.T) {
 		{"groups-only", groupsOnlyUser, nil, []string{"engineering"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			tokenString, err := tc.user.issueAccessToken(testStaticIssuance("app"))
+			// 登录路径现在显式携带静态用户自身的 roles/groups（issuer 不再回退）。
+			issuance := testStaticIssuance("app")
+			issuance.Roles = tc.user.Roles
+			issuance.Groups = tc.user.Groups
+			tokenString, err := tc.user.issueAccessToken(issuance)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -113,5 +117,55 @@ func TestStaticUserAccessTokenSeparatesRolesAndGroups(t *testing.T) {
 				t.Fatalf("effective roles=%v", auth.EffectiveRoles(claims))
 			}
 		})
+	}
+}
+
+// TestStaticUserIssueAccessTokenOmitsEmptyClaims 验证 issuance 中 tenant/roles/groups
+// 留空时令牌不包含这些声明：issuer 不再隐式回退到静态用户配置或 "default"。
+func TestStaticUserIssueAccessTokenOmitsEmptyClaims(t *testing.T) {
+	const passwordHash = "omit-password-hash"
+	user := StaticUser{
+		UserID:       7,
+		Username:     "omit-user",
+		PasswordHash: passwordHash,
+		Roles:        []string{"static-role"},
+		Groups:       []string{"static-group"},
+		Tenant:       "static-tenant",
+	}
+	// issuance 不含 tenant/roles/groups：令牌应省略这些声明，即便静态用户自身有配置。
+	issuance := AccessTokenIssuanceContext{ClientID: "client-x", TTL: time.Hour}
+
+	tokenString, err := user.issueAccessToken(issuance)
+	if err != nil {
+		t.Fatalf("issueAccessToken: %v", err)
+	}
+
+	var claims auth.AccessTokenClaims
+	if _, err := jwt.ParseWithClaims(tokenString, &claims, func(*jwt.Token) (interface{}, error) {
+		return []byte(passwordHash), nil
+	}); err != nil {
+		t.Fatalf("ParseWithClaims: %v", err)
+	}
+	if claims.Tenant != "" || len(claims.Roles) != 0 || len(claims.Groups) != 0 {
+		t.Fatalf("expected omitted tenant/roles/groups, got tenant=%q roles=%v groups=%v", claims.Tenant, claims.Roles, claims.Groups)
+	}
+	if claims.ClientID != "client-x" || claims.Subject != "7" {
+		t.Fatalf("client_id/subject mismatch: client_id=%q sub=%q", claims.ClientID, claims.Subject)
+	}
+}
+
+// TestStaticUsersFindByUsername 验证按 username 反查静态用户（不校验口令），
+// 供已认证调用方重签自身令牌时定位静态用户与 HS256 签名密钥。
+func TestStaticUsersFindByUsername(t *testing.T) {
+	users := StaticUsers{
+		&StaticUser{UserID: 1, Username: "alice", PasswordHash: "h1"},
+		&StaticUser{UserID: 2, Username: "bob", PasswordHash: "h2"},
+	}
+	u, ok := users.Find("alice")
+	if !ok || u == nil || u.UserID != 1 || u.PasswordHash != "h1" {
+		t.Fatalf("find alice: ok=%v u=%+v", ok, u)
+	}
+	if _, ok := users.Find("missing"); ok {
+		t.Fatal("expected not found for missing user")
 	}
 }
