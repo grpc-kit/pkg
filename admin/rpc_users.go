@@ -75,9 +75,12 @@ func phoneNumberComplete(pn *adminv1.PhoneNumber) bool {
 	return strings.TrimSpace(pn.GetCountryCode()) != "" && strings.TrimSpace(pn.GetNationalNumber()) != ""
 }
 
+// isServerManagedUserField 表示由服务端写入、不接受调用方通过 update_mask 指定的字段。
+// email_verified 与 phone_number_verified 不在此列：管理端允许人工置位，
+// 由 UpdateUser 内的联系方式变更重置逻辑保证一致性。
 func isServerManagedUserField(path string) bool {
 	switch path {
-	case "email_verified", "phone_number_verified", users.FieldCreatedBy, users.FieldUpdatedBy,
+	case users.FieldCreatedBy, users.FieldUpdatedBy,
 		users.FieldCreatedAt, users.FieldUpdatedAt, users.FieldDeletedAt:
 		return true
 	default:
@@ -871,14 +874,26 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 	if req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("update_mask is empty")
 	}
+	maskPaths := make(map[string]bool, len(req.UpdateMask.Paths))
 	for _, path := range req.UpdateMask.Paths {
 		if isServerManagedUserField(path) {
 			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("server-managed update_mask path: %s", path))
 		}
+		maskPaths[path] = true
 	}
 
 	x := a.config.db.Users.Update()
 	x.SetUpdatedBy(operatorID)
+
+	// 联系方式发生变更但本次未显式指定验证状态时，验证状态失效，需重置为未验证，
+	// 避免新的邮箱/手机号继承旧地址的已验证标记。
+	if maskPaths["email"] && !maskPaths["email_verified"] {
+		x.SetEmailVerified(false)
+	}
+	if !maskPaths["phone_number_verified"] &&
+		(maskPaths["phone_number"] || maskPaths["phone_number.country_code"] || maskPaths["phone_number.national_number"]) {
+		x.SetPhoneNumberVerified(false)
+	}
 
 	for _, path := range req.UpdateMask.Paths {
 		switch path {
@@ -932,6 +947,8 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 			}
 			x.SetEmailEncrypted(encBody)
 			x.SetEmailHash(crypto.SHA256([]byte(req.User.GetEmail())))
+		case "email_verified":
+			x.SetEmailVerified(req.User.GetEmailVerified())
 		case "phone_number", "phone_number.country_code", "phone_number.national_number":
 			if phoneNumberComplete(req.User.GetPhoneNumber()) {
 				rawBody, err := proto.Marshal(req.User.GetPhoneNumber())
@@ -948,6 +965,8 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 				x.ClearPhoneNumberEncrypted()
 				x.ClearPhoneNumberHash()
 			}
+		case "phone_number_verified":
+			x.SetPhoneNumberVerified(req.User.GetPhoneNumberVerified())
 		case "address", "address.country", "address.postal_code", "address.region", "address.locality", "address.street_address":
 			rawBody, err := proto.Marshal(req.User.GetAddress())
 			if err != nil {

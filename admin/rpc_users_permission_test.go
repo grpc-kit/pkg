@@ -53,8 +53,6 @@ func TestRequireUserManagePermissionRoleBoundary(t *testing.T) {
 
 func TestUpdateUserRejectsServerManagedFieldsBeforeDatabaseAccess(t *testing.T) {
 	restrictedPaths := []string{
-		"email_verified",
-		"phone_number_verified",
 		"created_by",
 		"updated_by",
 		"created_at",
@@ -72,6 +70,18 @@ func TestUpdateUserRejectsServerManagedFieldsBeforeDatabaseAccess(t *testing.T) 
 			})
 			if err == nil || errs.FromError(err).HTTPStatusCode() != 400 {
 				t.Fatalf("expected 400 for %s, got %v", path, err)
+			}
+		})
+	}
+}
+
+// TestUpdateUserAcceptsVerificationFlagPaths 固化管理端可人工置位验证状态的约定：
+// email_verified / phone_number_verified 不再被 update_mask 前置校验拒绝。
+func TestUpdateUserAcceptsVerificationFlagPaths(t *testing.T) {
+	for _, path := range []string{"email_verified", "phone_number_verified"} {
+		t.Run(path, func(t *testing.T) {
+			if isServerManagedUserField(path) {
+				t.Fatalf("%s should be writable by user management", path)
 			}
 		})
 	}
