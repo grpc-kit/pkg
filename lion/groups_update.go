@@ -303,6 +303,20 @@ func (_u *GroupsUpdate) AddVisibility(v int) *GroupsUpdate {
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *GroupsUpdate) SetProtected(v bool) *GroupsUpdate {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableProtected(v *bool) *GroupsUpdate {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // SetDescription sets the "description" field.
 func (_u *GroupsUpdate) SetDescription(v string) *GroupsUpdate {
 	_u.mutation.SetDescription(v)
@@ -470,6 +484,9 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedVisibility(); ok {
 		_spec.AddField(groups.FieldVisibility, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(groups.FieldProtected, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
@@ -769,6 +786,20 @@ func (_u *GroupsUpdateOne) AddVisibility(v int) *GroupsUpdateOne {
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *GroupsUpdateOne) SetProtected(v bool) *GroupsUpdateOne {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableProtected(v *bool) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // SetDescription sets the "description" field.
 func (_u *GroupsUpdateOne) SetDescription(v string) *GroupsUpdateOne {
 	_u.mutation.SetDescription(v)
@@ -966,6 +997,9 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	}
 	if value, ok := _u.mutation.AddedVisibility(); ok {
 		_spec.AddField(groups.FieldVisibility, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(groups.FieldProtected, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)

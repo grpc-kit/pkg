@@ -95,6 +95,8 @@ const (
 	KnownAdmin_ListGroups_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGroups"
 	KnownAdmin_UpdateGroup_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGroup"
 	KnownAdmin_DeleteGroup_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteGroup"
+	KnownAdmin_UndeleteGroup_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/UndeleteGroup"
+	KnownAdmin_ExpungeGroup_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/ExpungeGroup"
 	KnownAdmin_ListGroupMembers_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGroupMembers"
 	KnownAdmin_CreateGroupMembers_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateGroupMembers"
 	KnownAdmin_DeleteGroupMember_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteGroupMember"
@@ -207,7 +209,9 @@ type KnownAdminClient interface {
 	CreateGroup(ctx context.Context, in *CreateGroupRequest, opts ...grpc.CallOption) (*Group, error)
 	ListGroups(ctx context.Context, in *ListGroupsRequest, opts ...grpc.CallOption) (*ListGroupsResponse, error)
 	UpdateGroup(ctx context.Context, in *UpdateGroupRequest, opts ...grpc.CallOption) (*Group, error)
-	DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*Group, error)
+	UndeleteGroup(ctx context.Context, in *UndeleteGroupRequest, opts ...grpc.CallOption) (*Group, error)
+	ExpungeGroup(ctx context.Context, in *ExpungeGroupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListGroupMembers(ctx context.Context, in *ListGroupMembersRequest, opts ...grpc.CallOption) (*ListGroupMembersResponse, error)
 	CreateGroupMembers(ctx context.Context, in *CreateGroupMembersRequest, opts ...grpc.CallOption) (*CreateGroupMembersResponse, error)
 	DeleteGroupMember(ctx context.Context, in *DeleteGroupMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -961,10 +965,30 @@ func (c *knownAdminClient) UpdateGroup(ctx context.Context, in *UpdateGroupReque
 	return out, nil
 }
 
-func (c *knownAdminClient) DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *knownAdminClient) DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*Group, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Group)
+	err := c.cc.Invoke(ctx, KnownAdmin_DeleteGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UndeleteGroup(ctx context.Context, in *UndeleteGroupRequest, opts ...grpc.CallOption) (*Group, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Group)
+	err := c.cc.Invoke(ctx, KnownAdmin_UndeleteGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ExpungeGroup(ctx context.Context, in *ExpungeGroupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, KnownAdmin_DeleteGroup_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, KnownAdmin_ExpungeGroup_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1261,7 +1285,9 @@ type KnownAdminServer interface {
 	CreateGroup(context.Context, *CreateGroupRequest) (*Group, error)
 	ListGroups(context.Context, *ListGroupsRequest) (*ListGroupsResponse, error)
 	UpdateGroup(context.Context, *UpdateGroupRequest) (*Group, error)
-	DeleteGroup(context.Context, *DeleteGroupRequest) (*emptypb.Empty, error)
+	DeleteGroup(context.Context, *DeleteGroupRequest) (*Group, error)
+	UndeleteGroup(context.Context, *UndeleteGroupRequest) (*Group, error)
+	ExpungeGroup(context.Context, *ExpungeGroupRequest) (*emptypb.Empty, error)
 	ListGroupMembers(context.Context, *ListGroupMembersRequest) (*ListGroupMembersResponse, error)
 	CreateGroupMembers(context.Context, *CreateGroupMembersRequest) (*CreateGroupMembersResponse, error)
 	DeleteGroupMember(context.Context, *DeleteGroupMemberRequest) (*emptypb.Empty, error)
@@ -1510,8 +1536,14 @@ func (UnimplementedKnownAdminServer) ListGroups(context.Context, *ListGroupsRequ
 func (UnimplementedKnownAdminServer) UpdateGroup(context.Context, *UpdateGroupRequest) (*Group, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateGroup not implemented")
 }
-func (UnimplementedKnownAdminServer) DeleteGroup(context.Context, *DeleteGroupRequest) (*emptypb.Empty, error) {
+func (UnimplementedKnownAdminServer) DeleteGroup(context.Context, *DeleteGroupRequest) (*Group, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteGroup not implemented")
+}
+func (UnimplementedKnownAdminServer) UndeleteGroup(context.Context, *UndeleteGroupRequest) (*Group, error) {
+	return nil, status.Error(codes.Unimplemented, "method UndeleteGroup not implemented")
+}
+func (UnimplementedKnownAdminServer) ExpungeGroup(context.Context, *ExpungeGroupRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExpungeGroup not implemented")
 }
 func (UnimplementedKnownAdminServer) ListGroupMembers(context.Context, *ListGroupMembersRequest) (*ListGroupMembersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListGroupMembers not implemented")
@@ -2907,6 +2939,42 @@ func _KnownAdmin_DeleteGroup_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_UndeleteGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UndeleteGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UndeleteGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_UndeleteGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UndeleteGroup(ctx, req.(*UndeleteGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ExpungeGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExpungeGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ExpungeGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_ExpungeGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ExpungeGroup(ctx, req.(*ExpungeGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_ListGroupMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListGroupMembersRequest)
 	if err := dec(in); err != nil {
@@ -3565,6 +3633,14 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteGroup",
 			Handler:    _KnownAdmin_DeleteGroup_Handler,
+		},
+		{
+			MethodName: "UndeleteGroup",
+			Handler:    _KnownAdmin_UndeleteGroup_Handler,
+		},
+		{
+			MethodName: "ExpungeGroup",
+			Handler:    _KnownAdmin_ExpungeGroup_Handler,
 		},
 		{
 			MethodName: "ListGroupMembers",

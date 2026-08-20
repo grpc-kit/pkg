@@ -50,6 +50,8 @@ type Groups struct {
 	RefExpr string `json:"ref_expr,omitempty"`
 	// 可见性定义，对应 api/known/admin/v1/common.proto 中定义
 	Visibility int `json:"visibility,omitempty"`
+	// 是否为受保护群组，受保护群组不可删除或永久删除
+	Protected bool `json:"protected,omitempty"`
 	// 用户组描述
 	Description             string `json:"description,omitempty"`
 	departments_lion_groups *int
@@ -63,6 +65,8 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case groups.FieldMetadata:
 			values[i] = new([]byte)
+		case groups.FieldProtected:
+			values[i] = new(sql.NullBool)
 		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldRefID, groups.FieldVisibility:
 			values[i] = new(sql.NullInt64)
 		case groups.FieldCode, groups.FieldDisplayName, groups.FieldRefExpr, groups.FieldDescription:
@@ -191,6 +195,12 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Visibility = int(value.Int64)
 			}
+		case groups.FieldProtected:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field protected", values[i])
+			} else if value.Valid {
+				_m.Protected = value.Bool
+			}
 		case groups.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
@@ -289,6 +299,9 @@ func (_m *Groups) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("visibility=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Visibility))
+	builder.WriteString(", ")
+	builder.WriteString("protected=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

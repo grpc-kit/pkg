@@ -234,7 +234,7 @@ func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, inclu
 				groupIDs = append(groupIDs, item.TargetID)
 			}
 			groupTargets, err := db.Groups.Query().
-				Where(groups.IDIn(groupIDs...)).
+				Where(groups.IDIn(groupIDs...), groups.DeletedAtIsNil()).
 				All(ctx)
 			if err != nil {
 				return nil, errs.Internal(ctx).WithMessage("query user group targets failed").Err()
@@ -245,10 +245,12 @@ func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, inclu
 		}
 		resp.GroupMembers = make([]*adminv1.Membership, 0, len(grpMembers))
 		for _, item := range grpMembers {
-			membership := userMembershipToProto(item)
-			if target := groupMap[item.TargetID]; target != nil {
-				applyMembershipTargetName(membership, target.DisplayName, target.Code)
+			target := groupMap[item.TargetID]
+			if target == nil {
+				continue
 			}
+			membership := userMembershipToProto(item)
+			applyMembershipTargetName(membership, target.DisplayName, target.Code)
 			resp.GroupMembers = append(resp.GroupMembers, membership)
 		}
 	}

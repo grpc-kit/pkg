@@ -281,9 +281,17 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGroup
     patch: "/builtin/admin/api/v1/groups/{group.id}"
     body: "group"
-    ## 删除群组
+    ## 软删除群组到回收站
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGroup
     delete: "/builtin/admin/api/v1/groups/{id}"
+    ## 从回收站恢复群组
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UndeleteGroup
+    post: "/builtin/admin/api/v1/groups/{id}:undelete"
+    body: "*"
+    ## 永久删除回收站群组
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ExpungeGroup
+    post: "/builtin/admin/api/v1/groups/{id}:expunge"
+    body: "*"
     ## 群组详情
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetGroup
     get: "/builtin/admin/api/v1/groups/{id}"

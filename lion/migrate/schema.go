@@ -213,6 +213,7 @@ var (
 		{Name: "ref_id", Type: field.TypeInt, Default: 0},
 		{Name: "ref_expr", Type: field.TypeString, Size: 4096, Default: ""},
 		{Name: "visibility", Type: field.TypeInt, Default: 0},
+		{Name: "protected", Type: field.TypeBool, Default: false},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "departments_lion_groups", Type: field.TypeInt, Nullable: true},
 	}
@@ -224,7 +225,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_groups_lion_departments_lion_groups",
-				Columns:    []*schema.Column{LionGroupsColumns[18]},
+				Columns:    []*schema.Column{LionGroupsColumns[19]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

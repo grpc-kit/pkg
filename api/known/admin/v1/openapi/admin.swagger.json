@@ -2054,6 +2054,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "show_deleted",
+            "description": "是否允许结果包含已软删除的群组。默认 false 时仅返回未删除群组。\n回收站查询应同时设置 show_deleted=true 和 filter=\"deleted_at != null\"。",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -2236,6 +2243,10 @@
                 "deleted_at": {
                   "type": "string",
                   "format": "date-time"
+                },
+                "protected": {
+                  "type": "boolean",
+                  "title": "Protected 是否为系统内置/受保护的群组。受保护群组不可删除或永久删除。\n该字段由系统种子或迁移管理，普通 CreateGroup/UpdateGroup 不可修改。"
                 }
               },
               "title": "Group 群组实体，表示一类相同维度的用户集合，扁平结构不支持树形\n该模型用于描述系统中各类用户分组，支持多维度的用户组织与管理"
@@ -2332,18 +2343,22 @@
         ]
       },
       "delete": {
-        "summary": "删除群组",
-        "description": "接口格式：/builtin/admin/api/v1/groups/{id}。删除指定群组。",
+        "summary": "软删除群组",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/groups/{id}。群组进入回收站并变为 DISABLED，成员关系和角色绑定保留以便恢复。访问权限由 IAM/OPA 策略控制。",
         "operationId": "KnownAdmin_DeleteGroup",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/v1Group"
             },
             "examples": {
-              "application/json": {}
+              "application/json": {
+                "id": "20",
+                "code": "ops-team",
+                "status": "DISABLED",
+                "deleted_at": "2026-08-20T00:00:00Z"
+              }
             }
           },
           "4xx": {
@@ -2366,6 +2381,103 @@
             "required": true,
             "type": "string",
             "format": "int64"
+          }
+        ],
+        "tags": [
+          "群组管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/groups/{id}:expunge": {
+      "post": {
+        "summary": "永久删除群组",
+        "description": "接口格式：POST /builtin/admin/api/v1/groups/{id}:expunge。仅允许永久删除已软删除且未受保护的叶子群组，并在同一事务清理成员关系和角色绑定；不可恢复。访问权限由 IAM/OPA 策略控制。",
+        "operationId": "KnownAdmin_ExpungeGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "ExpungeGroup permanently removes a soft-deleted group and its core bindings."
+            }
+          }
+        ],
+        "tags": [
+          "群组管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/groups/{id}:undelete": {
+      "post": {
+        "summary": "恢复群组",
+        "description": "接口格式：POST /builtin/admin/api/v1/groups/{id}:undelete。恢复后群组保持 DISABLED，须通过 UpdateGroup 显式启用。访问权限由 IAM/OPA 策略控制。",
+        "operationId": "KnownAdmin_UndeleteGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Group"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "UndeleteGroup restores a soft-deleted group in DISABLED state."
+            }
           }
         ],
         "tags": [
@@ -8020,6 +8132,10 @@
         "deleted_at": {
           "type": "string",
           "format": "date-time"
+        },
+        "protected": {
+          "type": "boolean",
+          "title": "Protected 是否为系统内置/受保护的群组。受保护群组不可删除或永久删除。\n该字段由系统种子或迁移管理，普通 CreateGroup/UpdateGroup 不可修改。"
         }
       },
       "title": "Group 群组实体，表示一类相同维度的用户集合，扁平结构不支持树形\n该模型用于描述系统中各类用户分组，支持多维度的用户组织与管理"

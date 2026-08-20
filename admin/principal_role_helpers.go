@@ -293,7 +293,7 @@ func loadPrincipalDisplays(ctx context.Context, db *lion.Client, bindings []*lio
 	if len(groupIDs) > 0 {
 		rows, err := db.Groups.Query().
 			Select(groups.FieldID, groups.FieldCode, groups.FieldDisplayName).
-			Where(groups.IDIn(groupIDs...)).
+			Where(groups.IDIn(groupIDs...), groups.DeletedAtIsNil()).
 			All(ctx)
 		if err != nil {
 			return nil, err

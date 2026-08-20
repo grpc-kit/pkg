@@ -14,6 +14,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/principalroles"
@@ -210,6 +211,15 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									},
 								},
 								{
+									Code:        "admin.setting.governance",
+									DisplayName: "资源治理",
+									RoutePath:   "/setting/governance",
+									SortOrder:   800,
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.governance.recycle-bin", DisplayName: "回收站", RoutePath: "/setting/governance/recycle-bin", SortOrder: 100},
+									},
+								},
+								{
 									Code:        "admin.setting.config",
 									DisplayName: "本地配置",
 									RoutePath:   "/setting/config",
@@ -353,7 +363,7 @@ func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items 
 // 每次初始化时主动回收这些叶子菜单，保持存量库与当前种子一致，避免残留指向已下线页面的死链入口。
 // 后续下线的内置菜单 code 追加到此列表即可。
 var builtinMenuObsoletes = []string{
-	"admin.setting.auth.tokens", // 令牌管理已并入凭证管理（/setting/auth/credentials）
+	"admin.setting.auth.tokens",     // 令牌管理已并入凭证管理（/setting/auth/credentials）
 	"admin.setting.global-settings", // 全局设置已并入本地配置 > 认证鉴权（/setting/config/security）
 }
 
@@ -403,6 +413,17 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 	rollback := func() { _ = tx.Rollback() }
+
+	// Keep legacy SYSTEM groups protected after the protected column is added.
+	// The update is intentionally idempotent and also repairs direct/manual data
+	// changes before lifecycle routes are exposed.
+	if _, err := tx.Groups.Update().
+		Where(groups.GroupTypeEQ(int(adminv1.Group_SYSTEM))).
+		SetProtected(true).
+		Save(ctx); err != nil {
+		rollback()
+		return nil, err
+	}
 
 	superadminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)
 	superadminRole, err := tx.Roles.Query().Where(roles.CodeEQ(superadminCode)).Only(ctx)

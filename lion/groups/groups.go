@@ -45,6 +45,8 @@ const (
 	FieldRefExpr = "ref_expr"
 	// FieldVisibility holds the string denoting the visibility field in the database.
 	FieldVisibility = "visibility"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// Table holds the table name of the groups in the database.
@@ -70,6 +72,7 @@ var Columns = []string{
 	FieldRefID,
 	FieldRefExpr,
 	FieldVisibility,
+	FieldProtected,
 	FieldDescription,
 }
 
@@ -129,6 +132,8 @@ var (
 	RefExprValidator func(string) error
 	// DefaultVisibility holds the default value on creation for the "visibility" field.
 	DefaultVisibility int
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -214,6 +219,11 @@ func ByRefExpr(opts ...sql.OrderTermOption) OrderOption {
 // ByVisibility orders the results by the visibility field.
 func ByVisibility(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVisibility, opts...).ToFunc()
+}
+
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

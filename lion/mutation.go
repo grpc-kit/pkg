@@ -6960,6 +6960,7 @@ type GroupsMutation struct {
 	ref_expr        *string
 	visibility      *int
 	addvisibility   *int
+	protected       *bool
 	description     *string
 	clearedFields   map[string]struct{}
 	done            bool
@@ -7862,6 +7863,42 @@ func (m *GroupsMutation) ResetVisibility() {
 	m.addvisibility = nil
 }
 
+// SetProtected sets the "protected" field.
+func (m *GroupsMutation) SetProtected(b bool) {
+	m.protected = &b
+}
+
+// Protected returns the value of the "protected" field in the mutation.
+func (m *GroupsMutation) Protected() (r bool, exists bool) {
+	v := m.protected
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtected returns the old "protected" field's value of the Groups entity.
+// If the Groups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupsMutation) OldProtected(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtected requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
+	}
+	return oldValue.Protected, nil
+}
+
+// ResetProtected resets all changes to the "protected" field.
+func (m *GroupsMutation) ResetProtected() {
+	m.protected = nil
+}
+
 // SetDescription sets the "description" field.
 func (m *GroupsMutation) SetDescription(s string) {
 	m.description = &s
@@ -7932,7 +7969,7 @@ func (m *GroupsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupsMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 18)
 	if m.created_at != nil {
 		fields = append(fields, groups.FieldCreatedAt)
 	}
@@ -7981,6 +8018,9 @@ func (m *GroupsMutation) Fields() []string {
 	if m.visibility != nil {
 		fields = append(fields, groups.FieldVisibility)
 	}
+	if m.protected != nil {
+		fields = append(fields, groups.FieldProtected)
+	}
 	if m.description != nil {
 		fields = append(fields, groups.FieldDescription)
 	}
@@ -8024,6 +8064,8 @@ func (m *GroupsMutation) Field(name string) (ent.Value, bool) {
 		return m.RefExpr()
 	case groups.FieldVisibility:
 		return m.Visibility()
+	case groups.FieldProtected:
+		return m.Protected()
 	case groups.FieldDescription:
 		return m.Description()
 	}
@@ -8067,6 +8109,8 @@ func (m *GroupsMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldRefExpr(ctx)
 	case groups.FieldVisibility:
 		return m.OldVisibility(ctx)
+	case groups.FieldProtected:
+		return m.OldProtected(ctx)
 	case groups.FieldDescription:
 		return m.OldDescription(ctx)
 	}
@@ -8189,6 +8233,13 @@ func (m *GroupsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetVisibility(v)
+		return nil
+	case groups.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
 		return nil
 	case groups.FieldDescription:
 		v, ok := value.(string)
@@ -8425,6 +8476,9 @@ func (m *GroupsMutation) ResetField(name string) error {
 		return nil
 	case groups.FieldVisibility:
 		m.ResetVisibility()
+		return nil
+	case groups.FieldProtected:
+		m.ResetProtected()
 		return nil
 	case groups.FieldDescription:
 		m.ResetDescription()

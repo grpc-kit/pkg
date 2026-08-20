@@ -766,12 +766,24 @@ openapiOptions:
       option:
         tags:
           - "群组管理"
-        summary: "删除群组"
-        description: "接口格式：/builtin/admin/api/v1/groups/{id}。删除指定群组。"
+        summary: "软删除群组"
+        description: "接口格式：DELETE /builtin/admin/api/v1/groups/{id}。群组进入回收站并变为 DISABLED，成员关系和角色绑定保留以便恢复。访问权限由 IAM/OPA 策略控制。"
         responses:
           "200":
             examples:
-              "application/json": '{}'
+              "application/json": '{"id":"20","code":"ops-team","status":"DISABLED","deleted_at":"2026-08-20T00:00:00Z"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UndeleteGroup
+      option:
+        tags:
+          - "群组管理"
+        summary: "恢复群组"
+        description: "接口格式：POST /builtin/admin/api/v1/groups/{id}:undelete。恢复后群组保持 DISABLED，须通过 UpdateGroup 显式启用。访问权限由 IAM/OPA 策略控制。"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ExpungeGroup
+      option:
+        tags:
+          - "群组管理"
+        summary: "永久删除群组"
+        description: "接口格式：POST /builtin/admin/api/v1/groups/{id}:expunge。仅允许永久删除已软删除且未受保护的叶子群组，并在同一事务清理成员关系和角色绑定；不可恢复。访问权限由 IAM/OPA 策略控制。"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetGroup
       option:
         tags:

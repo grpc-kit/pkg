@@ -35,7 +35,7 @@ func parseGroupParent(parent string) (int, error) {
 
 // getGroupType 获取群组类型（返回 adminv1.Group_Type）
 func (a *KnownAdminAPI) getGroupType(ctx context.Context, db *lion.Client, groupID int) (adminv1.Group_Type, error) {
-	group, err := db.Groups.Get(ctx, groupID)
+	group, err := db.Groups.Query().Where(groups.IDEQ(groupID), groups.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		return adminv1.Group_TYPE_UNSPECIFIED, err
 	}
@@ -54,6 +54,9 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 
 	if req.Group == nil {
 		return result, errs.InvalidArgument(ctx).WithMessage("request body group is nil")
+	}
+	if req.Group.Protected {
+		return result, errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
 	}
 
 	// 类型校验：不允许 TYPE_UNSPECIFIED 和 SYSTEM
@@ -121,6 +124,7 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		SetRefID(int(req.Group.RefId)).
 		SetRefExpr(req.Group.RefExpr).
 		SetVisibility(int(req.Group.Visibility.Number())).
+		SetProtected(false).
 		SetDescription(req.Group.Description).
 		SetCreatedBy(createdBy).
 		SetUpdatedBy(updatedBy)
@@ -158,15 +162,33 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 	if req.GetGroupType() > 0 {
 		where = append(where, groups.GroupType(int(req.GetGroupType())))
 	}
+	if req.GetGroupStatus() > 0 {
+		where = append(where, groups.GroupStatus(int(req.GetGroupStatus())))
+	}
+	if code := strings.TrimSpace(req.GetCode()); code != "" {
+		where = append(where, groups.CodeContainsFold(code))
+	}
+	if displayName := strings.TrimSpace(req.GetDisplayName()); displayName != "" {
+		where = append(where, groups.DisplayNameContainsFold(displayName))
+	}
 	if req.GetFilter() != "" {
-		predicates, err := parseListGroupsFilter(req.GetFilter())
+		predicates, deletedOnly, err := parseListGroupsFilter(req.GetFilter())
 		if err != nil {
-			return nil, err
+			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid filter: %v", err))
+		}
+		if deletedOnly && !req.GetShowDeleted() {
+			return nil, errs.InvalidArgument(ctx).WithMessage("deleted_at filter requires show_deleted=true")
 		}
 		where = append(where, predicates...)
+		if deletedOnly {
+			where = append(where, groups.DeletedAtNotNil())
+		}
 	}
 
-	groupQuery := db.Groups.Query().Where(groups.DeletedAtIsNil())
+	groupQuery := db.Groups.Query()
+	if !req.GetShowDeleted() {
+		groupQuery = groupQuery.Where(groups.DeletedAtIsNil())
+	}
 	if len(where) > 0 {
 		groupQuery = groupQuery.Where(where...)
 	}
@@ -249,16 +271,14 @@ func (a *KnownAdminAPI) GetGroup(ctx context.Context, req *adminv1.GetGroupReque
 		groups.FieldRefID,
 		groups.FieldRefExpr,
 		groups.FieldVisibility,
+		groups.FieldProtected,
 		groups.FieldDescription,
 		groups.FieldCreatedBy,
 		groups.FieldUpdatedBy,
 		groups.FieldCreatedAt,
 		groups.FieldUpdatedAt,
 		groups.FieldDeletedAt,
-	).Where(
-		groups.ID(int(req.Id)),
-		groups.DeletedAtIsNil(),
-	).Only(ctx)
+	).Where(groups.ID(int(req.Id))).Only(ctx)
 	if err != nil {
 		return nil, errs.NotFound(ctx).WithMessage("group not found")
 	}
@@ -268,17 +288,25 @@ func (a *KnownAdminAPI) GetGroup(ctx context.Context, req *adminv1.GetGroupReque
 }
 
 // parseListGroupsFilter 解析 filter 字符串为 predicate 列表，支持 key=value 与 AND 组合
-func parseListGroupsFilter(filter string) ([]predicate.Groups, error) {
+func parseListGroupsFilter(filter string) ([]predicate.Groups, bool, error) {
 	out := make([]predicate.Groups, 0)
+	deletedOnly := false
 	parts := strings.Split(filter, " AND ")
 	for _, p := range parts {
 		p = strings.TrimSpace(p)
 		if p == "" {
+			return nil, false, fmt.Errorf("empty filter clause")
+		}
+		if strings.EqualFold(strings.ReplaceAll(p, " ", ""), "deleted_at!=null") {
+			deletedOnly = true
 			continue
 		}
 		idx := strings.Index(p, "=")
 		if idx <= 0 {
-			continue
+			return nil, false, fmt.Errorf("unsupported filter clause %q", p)
+		}
+		if idx > 0 && p[idx-1] == '!' {
+			return nil, false, fmt.Errorf("unsupported filter clause %q", p)
 		}
 		key := strings.TrimSpace(strings.Trim(p[:idx], "\""))
 		val := strings.TrimSpace(strings.Trim(p[idx+1:], "\""))
@@ -286,19 +314,19 @@ func parseListGroupsFilter(filter string) ([]predicate.Groups, error) {
 		case "status", "group_status":
 			n, err := strconv.Atoi(val)
 			if err != nil {
-				return nil, fmt.Errorf("status must be int: %s", val)
+				return nil, false, fmt.Errorf("status must be int: %s", val)
 			}
 			out = append(out, groups.GroupStatus(n))
 		case "type", "group_type":
 			n, err := strconv.Atoi(val)
 			if err != nil {
-				return nil, fmt.Errorf("type must be int: %s", val)
+				return nil, false, fmt.Errorf("type must be int: %s", val)
 			}
 			out = append(out, groups.GroupType(n))
 		case "parent_id":
 			n, err := strconv.Atoi(val)
 			if err != nil {
-				return nil, fmt.Errorf("parent_id must be int: %s", val)
+				return nil, false, fmt.Errorf("parent_id must be int: %s", val)
 			}
 			out = append(out, groups.ParentID(n))
 		case "code":
@@ -308,12 +336,14 @@ func parseListGroupsFilter(filter string) ([]predicate.Groups, error) {
 		case "ref_id":
 			n, err := strconv.Atoi(val)
 			if err != nil {
-				return nil, fmt.Errorf("ref_id must be int: %s", val)
+				return nil, false, fmt.Errorf("ref_id must be int: %s", val)
 			}
 			out = append(out, groups.RefID(n))
+		default:
+			return nil, false, fmt.Errorf("unsupported filter field %q", key)
 		}
 	}
-	return out, nil
+	return out, deletedOnly, nil
 }
 
 func groupToProto(g *lion.Groups, includeTimestamps bool) *adminv1.Group {
@@ -329,6 +359,7 @@ func groupToProto(g *lion.Groups, includeTimestamps bool) *adminv1.Group {
 		RefId:       int64(g.RefID),
 		RefExpr:     g.RefExpr,
 		Visibility:  adminv1.Visibility(g.Visibility),
+		Protected:   g.Protected,
 		Description: g.Description,
 		CreatedBy:   g.CreatedBy,
 		UpdatedBy:   g.UpdatedBy,
@@ -365,15 +396,18 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 		return nil, err
 	}
 
-	group, err := db.Groups.Get(ctx, int(req.Group.Id))
+	group, err := db.Groups.Query().Where(groups.IDEQ(int(req.Group.Id)), groups.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		return result, err
+	}
+	if (req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0) && req.Group.Protected && !group.Protected {
+		return result, errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
 	}
 
 	// SYSTEM 类型群组不允许修改 code, type, ref_id, ref_expr
 	isSystem := adminv1.Group_Type(group.GroupType) == adminv1.Group_SYSTEM
 
-	update := group.Update()
+	update := db.Groups.Update().Where(groups.IDEQ(group.ID), groups.DeletedAtIsNil())
 	updatedBy := req.Group.UpdatedBy
 	if updatedBy == 0 {
 		if uid, err := GetUserID(ctx); err == nil {
@@ -388,6 +422,9 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 
 	if req.UpdateMask != nil && len(req.UpdateMask.Paths) > 0 {
 		for _, field := range req.UpdateMask.Paths {
+			if field == "protected" {
+				return nil, errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
+			}
 			// SYSTEM 群组的系统关联字段不可修改。
 			if isSystem && systemProtectedFields[field] {
 				return nil, errs.FailedPrecondition(ctx).
@@ -464,37 +501,19 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 		}
 	}
 
-	updatedGroup, err := update.Save(ctx)
+	affected, err := update.Save(ctx)
+	if err != nil {
+		return result, err
+	}
+	if affected != 1 {
+		return result, errs.NotFound(ctx).WithMessage("group not found")
+	}
+	updatedGroup, err := db.Groups.Query().Where(groups.IDEQ(group.ID), groups.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		return result, err
 	}
 
 	return groupToProto(updatedGroup, true), nil
-}
-
-// DeleteGroup 删除用户组（软删除：设置 deleted_at）
-func (a *KnownAdminAPI) DeleteGroup(ctx context.Context, req *adminv1.DeleteGroupRequest) (*emptypb.Empty, error) {
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
-	}
-
-	group, err := db.Groups.Get(ctx, int(req.Id))
-	if err != nil {
-		return nil, err
-	}
-
-	// SYSTEM 类型群组不允许删除
-	if adminv1.Group_Type(group.GroupType) == adminv1.Group_SYSTEM {
-		return nil, errs.InvalidArgument(ctx).WithMessage("SYSTEM type groups cannot be deleted")
-	}
-
-	_, err = group.Update().SetDeletedAt(time.Now()).Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &emptypb.Empty{}, nil
 }
 
 // ListGroupMembers 获取群组成员列表
@@ -524,7 +543,7 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 	}
 
 	// 查询群组信息以确定类型和关联ID
-	group, err := db.Groups.Get(ctx, groupID)
+	group, err := db.Groups.Query().Where(groups.IDEQ(groupID), groups.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		return result, err
 	}

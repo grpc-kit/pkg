@@ -220,6 +220,20 @@ func (_c *GroupsCreate) SetNillableVisibility(v *int) *GroupsCreate {
 	return _c
 }
 
+// SetProtected sets the "protected" field.
+func (_c *GroupsCreate) SetProtected(v bool) *GroupsCreate {
+	_c.mutation.SetProtected(v)
+	return _c
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableProtected(v *bool) *GroupsCreate {
+	if v != nil {
+		_c.SetProtected(*v)
+	}
+	return _c
+}
+
 // SetDescription sets the "description" field.
 func (_c *GroupsCreate) SetDescription(v string) *GroupsCreate {
 	_c.mutation.SetDescription(v)
@@ -321,6 +335,10 @@ func (_c *GroupsCreate) defaults() {
 		v := groups.DefaultVisibility
 		_c.mutation.SetVisibility(v)
 	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		v := groups.DefaultProtected
+		_c.mutation.SetProtected(v)
+	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := groups.DefaultDescription
 		_c.mutation.SetDescription(v)
@@ -382,6 +400,9 @@ func (_c *GroupsCreate) check() error {
 	}
 	if _, ok := _c.mutation.Visibility(); !ok {
 		return &ValidationError{Name: "visibility", err: errors.New(`lion: missing required field "Groups.visibility"`)}
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Groups.protected"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Groups.description"`)}
@@ -475,6 +496,10 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Visibility(); ok {
 		_spec.SetField(groups.FieldVisibility, field.TypeInt, value)
 		_node.Visibility = value
+	}
+	if value, ok := _c.mutation.Protected(); ok {
+		_spec.SetField(groups.FieldProtected, field.TypeBool, value)
+		_node.Protected = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)

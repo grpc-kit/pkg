@@ -58,6 +58,9 @@ func (Groups) Fields() []ent.Field {
 		field.Int("visibility").
 			Default(0).
 			Comment("可见性定义，对应 api/known/admin/v1/common.proto 中定义"),
+		field.Bool("protected").
+			Default(false).
+			Comment("是否为受保护群组，受保护群组不可删除或永久删除"),
 
 		field.String("description").
 			Default("").

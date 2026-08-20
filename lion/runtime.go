@@ -420,8 +420,12 @@ func init() {
 	groupsDescVisibility := groupsFields[10].Descriptor()
 	// groups.DefaultVisibility holds the default value on creation for the visibility field.
 	groups.DefaultVisibility = groupsDescVisibility.Default.(int)
+	// groupsDescProtected is the schema descriptor for protected field.
+	groupsDescProtected := groupsFields[11].Descriptor()
+	// groups.DefaultProtected holds the default value on creation for the protected field.
+	groups.DefaultProtected = groupsDescProtected.Default.(bool)
 	// groupsDescDescription is the schema descriptor for description field.
-	groupsDescDescription := groupsFields[11].Descriptor()
+	groupsDescDescription := groupsFields[12].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
 	menusMixin := schema.Menus{}.Mixin()
