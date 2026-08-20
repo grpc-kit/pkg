@@ -462,6 +462,10 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 			return nil, err
 		}
 	}
+	deletedOnly, err := listUsersDeletedOnly(req)
+	if err != nil {
+		return nil, err
+	}
 
 	result := &adminv1.ListUsersResponse{}
 
@@ -558,6 +562,9 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		}
 		userQuery = userQuery.Where(users.UserStatusEQ(status))
 	}
+	if deletedOnly {
+		userQuery = userQuery.Where(users.DeletedAtNotNil())
+	}
 	if !req.GetShowDeleted() {
 		userQuery = userQuery.Where(users.DeletedAtIsNil())
 	}
@@ -632,6 +639,23 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	}
 
 	return result, nil
+}
+
+// listUsersDeletedOnly implements the minimum AIP-160 subset required by the
+// recycle bin while retaining show_deleted's existing "include deleted"
+// semantics for normal management lists.
+func listUsersDeletedOnly(req *adminv1.ListUsersRequest) (bool, error) {
+	filter := strings.TrimSpace(req.GetFilter())
+	if filter == "" {
+		return false, nil
+	}
+	if filter != "deleted_at != null" {
+		return false, errs.InvalidArgument(context.Background()).WithMessage("unsupported filter")
+	}
+	if !req.GetShowDeleted() {
+		return false, errs.InvalidArgument(context.Background()).WithMessage("deleted_at filter requires show_deleted=true")
+	}
+	return true, nil
 }
 
 // ListUsersV1 列出用户列表
@@ -984,12 +1008,16 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 		}
 	}
 
-	if _, err := x.Where(users.IDEQ(int(req.User.GetId()))).Save(ctx); err != nil {
+	affected, err := x.Where(users.IDEQ(int(req.User.GetId())), users.DeletedAtIsNil()).Save(ctx)
+	if err != nil {
 		return nil, err
+	}
+	if affected == 0 {
+		return nil, errs.NotFound(ctx).WithMessage("user not found")
 	}
 
 	row, err := a.config.db.Users.Query().
-		Where(users.IDEQ(int(req.User.GetId()))).
+		Where(users.IDEQ(int(req.User.GetId())), users.DeletedAtIsNil()).
 		Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
@@ -1093,7 +1121,7 @@ func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.Upd
 	if targetUserID <= 0 {
 		targetUser, err := db.Users.Query().
 			Select(users.FieldID).
-			Where(users.UsernameEQ(req.GetUsername())).
+			Where(users.UsernameEQ(req.GetUsername()), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).
 			Only(ctx)
 		if err != nil {
 			if lion.IsNotFound(err) {
@@ -1103,6 +1131,15 @@ func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.Upd
 		}
 		targetUserID = targetUser.ID
 	}
+	active, err := db.Users.Query().
+		Where(users.IDEQ(targetUserID), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).
+		Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !active {
+		return nil, errs.NotFound(ctx).WithMessage("user not found")
+	}
 
 	tx, err := db.Tx(ctx)
 	if err != nil {
@@ -1111,6 +1148,15 @@ func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.Upd
 	defer func() {
 		_ = tx.Rollback()
 	}()
+	active, err = tx.Users.Query().
+		Where(users.IDEQ(targetUserID), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).
+		Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !active {
+		return nil, errs.NotFound(ctx).WithMessage("user not found")
+	}
 
 	provider, err := tx.AuthProviders.Query().
 		Select(

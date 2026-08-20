@@ -86,6 +86,9 @@ const (
 	KnownAdmin_CreateUser_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateUser"
 	KnownAdmin_UpdateUser_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUser"
 	KnownAdmin_ListUsers_FullMethodName                 = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers"
+	KnownAdmin_DeleteUser_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteUser"
+	KnownAdmin_UndeleteUser_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/UndeleteUser"
+	KnownAdmin_ExpungeUser_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/ExpungeUser"
 	KnownAdmin_UpdateUserPassword_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUserPassword"
 	KnownAdmin_DeleteUserMFA_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteUserMFA"
 	KnownAdmin_CreateGroup_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateGroup"
@@ -194,6 +197,9 @@ type KnownAdminClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
+	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*User, error)
+	UndeleteUser(ctx context.Context, in *UndeleteUserRequest, opts ...grpc.CallOption) (*User, error)
+	ExpungeUser(ctx context.Context, in *ExpungeUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateUserPassword(ctx context.Context, in *UpdateUserPasswordRequest, opts ...grpc.CallOption) (*UpdateUserPasswordResponse, error)
 	DeleteUserMFA(ctx context.Context, in *DeleteUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// rpc CreateUserIdentity(CreateUserIdentityRequest) returns(User);
@@ -875,6 +881,36 @@ func (c *knownAdminClient) ListUsers(ctx context.Context, in *ListUsersRequest, 
 	return out, nil
 }
 
+func (c *knownAdminClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, KnownAdmin_DeleteUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UndeleteUser(ctx context.Context, in *UndeleteUserRequest, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, KnownAdmin_UndeleteUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ExpungeUser(ctx context.Context, in *ExpungeUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, KnownAdmin_ExpungeUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) UpdateUserPassword(ctx context.Context, in *UpdateUserPasswordRequest, opts ...grpc.CallOption) (*UpdateUserPasswordResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateUserPasswordResponse)
@@ -1215,6 +1251,9 @@ type KnownAdminServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
+	DeleteUser(context.Context, *DeleteUserRequest) (*User, error)
+	UndeleteUser(context.Context, *UndeleteUserRequest) (*User, error)
+	ExpungeUser(context.Context, *ExpungeUserRequest) (*emptypb.Empty, error)
 	UpdateUserPassword(context.Context, *UpdateUserPasswordRequest) (*UpdateUserPasswordResponse, error)
 	DeleteUserMFA(context.Context, *DeleteUserMFARequest) (*emptypb.Empty, error)
 	// rpc CreateUserIdentity(CreateUserIdentityRequest) returns(User);
@@ -1446,6 +1485,15 @@ func (UnimplementedKnownAdminServer) UpdateUser(context.Context, *UpdateUserRequ
 }
 func (UnimplementedKnownAdminServer) ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListUsers not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteUser(context.Context, *DeleteUserRequest) (*User, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteUser not implemented")
+}
+func (UnimplementedKnownAdminServer) UndeleteUser(context.Context, *UndeleteUserRequest) (*User, error) {
+	return nil, status.Error(codes.Unimplemented, "method UndeleteUser not implemented")
+}
+func (UnimplementedKnownAdminServer) ExpungeUser(context.Context, *ExpungeUserRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExpungeUser not implemented")
 }
 func (UnimplementedKnownAdminServer) UpdateUserPassword(context.Context, *UpdateUserPasswordRequest) (*UpdateUserPasswordResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateUserPassword not implemented")
@@ -2697,6 +2745,60 @@ func _KnownAdmin_ListUsers_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_DeleteUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteUser(ctx, req.(*DeleteUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UndeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UndeleteUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UndeleteUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_UndeleteUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UndeleteUser(ctx, req.(*UndeleteUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ExpungeUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExpungeUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ExpungeUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_ExpungeUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ExpungeUser(ctx, req.(*ExpungeUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_UpdateUserPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateUserPasswordRequest)
 	if err := dec(in); err != nil {
@@ -3427,6 +3529,18 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListUsers",
 			Handler:    _KnownAdmin_ListUsers_Handler,
+		},
+		{
+			MethodName: "DeleteUser",
+			Handler:    _KnownAdmin_DeleteUser_Handler,
+		},
+		{
+			MethodName: "UndeleteUser",
+			Handler:    _KnownAdmin_UndeleteUser_Handler,
+		},
+		{
+			MethodName: "ExpungeUser",
+			Handler:    _KnownAdmin_ExpungeUser_Handler,
 		},
 		{
 			MethodName: "UpdateUserPassword",

@@ -605,6 +605,24 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"users":[{"id":"1001","username":"alice","nickname":"Alice Chen","profile":"资深风控审计员","picture":"https://cdn.example.com/avatars/alice.png","website":"https://intra.example.com/u/alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","phone_number":{"country_code":"86","national_number":"13900001234"},"email":"alice@example.com"},{"id":"1002","username":"bob","nickname":"Bob Li","profile":"平台研发工程师","picture":"https://cdn.example.com/avatars/bob.png","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"MALE","email":"bob@example.com"}],"next_page_token":"users:cursor:2","total_size":2}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteUser
+      option:
+        tags:
+          - "用户管理"
+        summary: "软删除用户"
+        description: "接口格式：DELETE /builtin/admin/api/v1/users/{id}。用户进入回收站并立即变为 DISABLED；不会删除身份、MFA、成员关系或角色绑定。访问权限由 IAM/OPA 策略控制。"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UndeleteUser
+      option:
+        tags:
+          - "用户管理"
+        summary: "恢复用户"
+        description: "接口格式：POST /builtin/admin/api/v1/users/{id}:undelete。恢复后用户保持 DISABLED，须通过 UpdateUser 显式启用。访问权限由 IAM/OPA 策略控制。"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ExpungeUser
+      option:
+        tags:
+          - "用户管理"
+        summary: "永久删除用户"
+        description: "接口格式：POST /builtin/admin/api/v1/users/{id}:expunge。仅允许永久删除已软删除用户，并在同一事务清理 core 从属数据；不可恢复。访问权限由 IAM/OPA 策略控制。"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser
       option:
         tags:

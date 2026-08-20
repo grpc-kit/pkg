@@ -5733,7 +5733,7 @@
           },
           {
             "name": "filter",
-            "description": "过滤条件，采用 AIP-160 定义的标准 filter 语法。\n示例: `email=\"alice@example.com\" AND state=\"ACTIVE\"`",
+            "description": "过滤条件。当前最小实现支持 `deleted_at != null`，用于在\nshow_deleted=true 时请求仅包含软删除用户的回收站列表。\n其他字段过滤继续使用下方兼容字段，后续再统一扩展 AIP-160 语法。",
             "in": "query",
             "required": false,
             "type": "string"
@@ -5912,6 +5912,140 @@
             "in": "query",
             "required": false,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "用户管理"
+        ]
+      },
+      "delete": {
+        "summary": "软删除用户",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/users/{id}。用户进入回收站并立即变为 DISABLED；不会删除身份、MFA、成员关系或角色绑定。访问权限由 IAM/OPA 策略控制。",
+        "operationId": "KnownAdmin_DeleteUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1User"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/users/{id}:expunge": {
+      "post": {
+        "summary": "永久删除用户",
+        "description": "接口格式：POST /builtin/admin/api/v1/users/{id}:expunge。仅允许永久删除已软删除用户，并在同一事务清理 core 从属数据；不可恢复。访问权限由 IAM/OPA 策略控制。",
+        "operationId": "KnownAdmin_ExpungeUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "ExpungeUser permanently removes a soft-deleted user and its core\ndependent data. This operation cannot target an active user."
+            }
+          }
+        ],
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/users/{id}:undelete": {
+      "post": {
+        "summary": "恢复用户",
+        "description": "接口格式：POST /builtin/admin/api/v1/users/{id}:undelete。恢复后用户保持 DISABLED，须通过 UpdateUser 显式启用。访问权限由 IAM/OPA 策略控制。",
+        "operationId": "KnownAdmin_UndeleteUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1User"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "UndeleteUser restores a soft-deleted user in DISABLED state."
+            }
           }
         ],
         "tags": [

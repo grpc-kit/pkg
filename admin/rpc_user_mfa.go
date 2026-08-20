@@ -24,7 +24,7 @@ func (a *KnownAdminAPI) DeleteUserMFA(ctx context.Context, req *adminv1.DeleteUs
 	}
 
 	userID := int(req.GetUserId())
-	exists, err := db.Users.Query().Where(users.IDEQ(userID)).Exist(ctx)
+	exists, err := db.Users.Query().Where(users.IDEQ(userID), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).Exist(ctx)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to query user")
 	}

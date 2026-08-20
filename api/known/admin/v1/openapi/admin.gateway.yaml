@@ -214,6 +214,17 @@ http:
     ## 用户列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers
     get: "/builtin/admin/api/v1/users"
+    ## 软删除用户到回收站
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteUser
+    delete: "/builtin/admin/api/v1/users/{id}"
+    ## 从回收站恢复用户
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UndeleteUser
+    post: "/builtin/admin/api/v1/users/{id}:undelete"
+    body: "*"
+    ## 永久删除回收站用户
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ExpungeUser
+    post: "/builtin/admin/api/v1/users/{id}:expunge"
+    body: "*"
     ## 创建用户
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser
     post: "/builtin/admin/api/v1/users"

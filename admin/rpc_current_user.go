@@ -60,7 +60,7 @@ func (a *KnownAdminAPI) GetCurrentUser(ctx context.Context, _ *adminv1.GetCurren
 	}
 	row, err := db.Users.Query().
 		Select(currentUserSelectFields...).
-		Where(users.IDEQ(int(userID))).
+		Where(users.IDEQ(int(userID)), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).
 		Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
@@ -160,7 +160,7 @@ func (a *KnownAdminAPI) UpdateCurrentUser(ctx context.Context, req *adminv1.Upda
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("database client is unavailable").Err()
 	}
-	row, err := db.Users.Query().Select(currentUserSelectFields...).Where(users.IDEQ(int(userID))).Only(ctx)
+	row, err := db.Users.Query().Select(currentUserSelectFields...).Where(users.IDEQ(int(userID)), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
 			return nil, errs.NotFound(ctx).WithMessage("current user not found").Err()
@@ -170,7 +170,7 @@ func (a *KnownAdminAPI) UpdateCurrentUser(ctx context.Context, req *adminv1.Upda
 	if req.Etag != currentUserETag(row.ID, row.UpdatedAt) {
 		return nil, errs.Aborted(ctx).WithErrorInfo("CURRENT_USER_ETAG_MISMATCH", "grpc-kit.com", nil).WithMessage("current user profile has changed; refresh and retry").Err()
 	}
-	update := db.Users.Update().Where(users.IDEQ(row.ID), users.UpdatedAtEQ(row.UpdatedAt))
+	update := db.Users.Update().Where(users.IDEQ(row.ID), users.UpdatedAtEQ(row.UpdatedAt), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil())
 	seen := map[string]bool{}
 	for _, path := range req.UpdateMask.Paths {
 		if seen[path] {
@@ -247,7 +247,7 @@ func (a *KnownAdminAPI) UpdateCurrentUser(ctx context.Context, req *adminv1.Upda
 	if affected == 0 {
 		return nil, errs.Aborted(ctx).WithErrorInfo("CURRENT_USER_ETAG_MISMATCH", "grpc-kit.com", nil).WithMessage("current user profile has changed; refresh and retry").Err()
 	}
-	row, err = db.Users.Query().Select(currentUserSelectFields...).Where(users.IDEQ(int(userID))).Only(ctx)
+	row, err = db.Users.Query().Select(currentUserSelectFields...).Where(users.IDEQ(int(userID)), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("read updated current user failed").Err()
 	}
@@ -282,6 +282,13 @@ func (a *KnownAdminAPI) ChangeCurrentUserPassword(ctx context.Context, req *admi
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("database client is unavailable").Err()
+	}
+	active, err := db.Users.Query().Where(users.IDEQ(int(userID)), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).Exist(ctx)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("query current user failed").Err()
+	}
+	if !active {
+		return nil, errs.NotFound(ctx).WithMessage("current user not found").Err()
 	}
 	identity, err := db.UserIdentities.Query().Where(useridentities.UserIDEQ(int(userID)), useridentities.PasswordHashNEQ(""), useridentities.HasLionAuthProvidersWith(authproviders.CodeEQ("local"), authproviders.ProviderTypeEQ(int(adminv1.AuthProvider_LOCAL.Number())), authproviders.ProviderStatusEQ(int(adminv1.AuthProvider_ACTIVE.Number())), authproviders.DeletedAtIsNil())).Only(ctx)
 	if err != nil {

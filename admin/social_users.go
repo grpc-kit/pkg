@@ -365,6 +365,7 @@ func (s *socialUsers) PasswordCheckLocal(ctx context.Context, username, password
 		Where(
 			users.UsernameEQ(username),
 			users.UserStatusEQ(int(adminv1.User_ACTIVE.Number())),
+			users.DeletedAtIsNil(),
 		).
 		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
 			q.Select(
@@ -549,6 +550,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		Where(
 			users.IDEQ(localUserID),
 			users.UserStatusEQ(int(adminv1.User_ACTIVE.Number())),
+			users.DeletedAtIsNil(),
 		).
 		Only(ctx)
 	if err != nil {
@@ -656,7 +658,7 @@ func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *
 		return
 	}
 
-	userUpdate := s.db.Users.Update().Where(users.IDEQ(userID))
+	userUpdate := s.db.Users.Update().Where(users.IDEQ(userID), users.UserStatusEQ(int(adminv1.User_ACTIVE.Number())), users.DeletedAtIsNil())
 
 	updated := false
 	if attrs.DisplayName != "" {
