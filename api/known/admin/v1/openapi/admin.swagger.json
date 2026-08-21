@@ -1219,6 +1219,13 @@
             "required": false,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "show_deleted",
+            "description": "是否允许结果包含已软删除的部门。默认 false 时仅返回未删除部门。\n回收站查询应同时设置 show_deleted=true 和 filter=\"deleted_at != null\"。",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -1332,129 +1339,136 @@
             "format": "int64"
           },
           {
-            "name": "department",
-            "description": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能\n\n字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
+            "name": "body",
             "in": "body",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "parent_id": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "ParentID 父部门ID，构建树形组织结构\n值为 0 表示顶级部门（如：总公司、集团总部）\n支持多级嵌套，建议层级深度不超过 6 级以保证查询性能"
-                },
-                "code": {
-                  "type": "string",
-                  "title": "Code 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号，不允许连续分隔符，以字母或数字结尾\n长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：手动 \"tech.dept\"、\"hr\"；自动 \"a7k2m3x9b5f1\""
-                },
-                "display_name": {
-                  "type": "string",
-                  "title": "DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明\n用于部门名称的多语言显示，提升用户体验和国际化支持"
-                },
-                "type": {
-                  "$ref": "#/definitions/v1DepartmentType"
-                },
-                "status": {
-                  "$ref": "#/definitions/v1DepartmentStatus"
-                },
-                "sort_order": {
-                  "type": "integer",
-                  "format": "int32",
-                  "title": "SortOrder 部门排序顺序，用于同级部门的显示顺序\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
-                },
-                "email": {
-                  "type": "string",
-                  "title": "Email 部门公共邮箱地址，用于对外联系和内部通知\n格式：标准邮箱格式，如 \"tech@company.com\"\n用途：部门公告、外部合作、客户联系等"
-                },
-                "phone_number": {
-                  "$ref": "#/definitions/v1PhoneNumber",
-                  "title": "PhoneNumber 部门联系电话，支持国际化电话号码格式\n包含国家代码、区号、号码等完整信息\n用于紧急联系、业务咨询等场景"
-                },
-                "address": {
-                  "$ref": "#/definitions/v1Address",
-                  "title": "Address 部门办公地址，支持结构化地址信息\n包含国家、省市、详细地址等信息\n用于邮寄、拜访、资产管理等业务场景"
-                },
-                "cost_center_code": {
-                  "type": "string",
-                  "title": "CostCenterCode 成本中心编码，用于财务核算和成本控制\n格式：企业自定义编码规则，如 \"CC-TECH-001\"\n用途：预算分配、成本归集、财务报表等\n与 ERP 系统集成时的重要标识字段"
-                },
-                "budget_item_code": {
-                  "type": "string",
-                  "title": "BudgetCode 预算编码，用于预算管理和费用控制\n格式：与财务系统对应的预算科目编码\n用途：年度预算、费用审批、财务分析等\n支持多维度预算管理（如：人员预算、设备预算等）"
-                },
-                "max_members": {
-                  "type": "integer",
-                  "format": "int32",
-                  "title": "MaxMembers 部门最大成员数限制，用于人员规模控制\n值为 0 表示无限制，正整数表示具体限制\n用途：组织规模控制、人力成本管理、办公空间规划"
-                },
-                "external_id": {
-                  "type": "string",
-                  "title": "ExternalID 外部系统标识符，用于第三方系统集成\n如：ERP 系统部门编码、OA 系统部门 ID 等\n支持数据同步和跨系统业务流程"
-                },
-                "metadata": {
+                "department": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
+                  "properties": {
+                    "parent_id": {
+                      "type": "string",
+                      "format": "int64",
+                      "title": "ParentID 父部门ID，构建树形组织结构\n值为 0 表示顶级部门（如：总公司、集团总部）\n支持多级嵌套，建议层级深度不超过 6 级以保证查询性能"
+                    },
+                    "code": {
+                      "type": "string",
+                      "title": "Code 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号，不允许连续分隔符，以字母或数字结尾\n长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：手动 \"tech.dept\"、\"hr\"；自动 \"a7k2m3x9b5f1\""
+                    },
+                    "display_name": {
+                      "type": "string",
+                      "title": "DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明\n用于部门名称的多语言显示，提升用户体验和国际化支持"
+                    },
+                    "type": {
+                      "$ref": "#/definitions/v1DepartmentType"
+                    },
+                    "status": {
+                      "$ref": "#/definitions/v1DepartmentStatus"
+                    },
+                    "sort_order": {
+                      "type": "integer",
+                      "format": "int32",
+                      "title": "SortOrder 部门排序顺序，用于同级部门的显示顺序\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
+                    },
+                    "email": {
+                      "type": "string",
+                      "title": "Email 部门公共邮箱地址，用于对外联系和内部通知\n格式：标准邮箱格式，如 \"tech@company.com\"\n用途：部门公告、外部合作、客户联系等"
+                    },
+                    "phone_number": {
+                      "$ref": "#/definitions/v1PhoneNumber",
+                      "title": "PhoneNumber 部门联系电话，支持国际化电话号码格式\n包含国家代码、区号、号码等完整信息\n用于紧急联系、业务咨询等场景"
+                    },
+                    "address": {
+                      "$ref": "#/definitions/v1Address",
+                      "title": "Address 部门办公地址，支持结构化地址信息\n包含国家、省市、详细地址等信息\n用于邮寄、拜访、资产管理等业务场景"
+                    },
+                    "cost_center_code": {
+                      "type": "string",
+                      "title": "CostCenterCode 成本中心编码，用于财务核算和成本控制\n格式：企业自定义编码规则，如 \"CC-TECH-001\"\n用途：预算分配、成本归集、财务报表等\n与 ERP 系统集成时的重要标识字段"
+                    },
+                    "budget_item_code": {
+                      "type": "string",
+                      "title": "BudgetCode 预算编码，用于预算管理和费用控制\n格式：与财务系统对应的预算科目编码\n用途：年度预算、费用审批、财务分析等\n支持多维度预算管理（如：人员预算、设备预算等）"
+                    },
+                    "max_members": {
+                      "type": "integer",
+                      "format": "int32",
+                      "title": "MaxMembers 部门最大成员数限制，用于人员规模控制\n值为 0 表示无限制，正整数表示具体限制\n用途：组织规模控制、人力成本管理、办公空间规划"
+                    },
+                    "external_id": {
+                      "type": "string",
+                      "title": "ExternalID 外部系统标识符，用于第三方系统集成\n如：ERP 系统部门编码、OA 系统部门 ID 等\n支持数据同步和跨系统业务流程"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "title": "Metadata 扩展元数据，存储自定义业务属性\n键值对格式，支持灵活的业务扩展需求\n示例：{\"location\": \"北京\", \"floor\": \"15F\", \"capacity\": \"50\"}"
+                    },
+                    "description": {
+                      "type": "string",
+                      "title": "Description 部门描述信息，详细说明部门职责和业务范围\n用于组织介绍、职责说明、业务范围描述等\n建议长度：500 字符以内，支持富文本格式"
+                    },
+                    "visibility": {
+                      "$ref": "#/definitions/v1Visibility",
+                      "title": "Visibility 部门及成员列表的可见性策略（使用公共枚举 Visibility）"
+                    },
+                    "protected": {
+                      "type": "boolean",
+                      "title": "Protected 是否为系统内置/受保护的部门，受保护的部门不可删除"
+                    },
+                    "members": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/v1Membership"
+                      },
+                      "title": "Members 部门成员列表"
+                    },
+                    "children": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/v1Department"
+                      },
+                      "title": "Children 直接子部门列表，用于构建完整的组织树\n仅包含直接下级，避免深度递归查询\n建议在需要完整树结构时通过专门的服务接口获取"
+                    },
+                    "created_by": {
+                      "type": "string",
+                      "format": "int64",
+                      "title": "CreatedBy 创建者用户ID，记录部门创建人\n用于审计追踪和权限验证"
+                    },
+                    "updated_by": {
+                      "type": "string",
+                      "format": "int64",
+                      "title": "UpdatedBy 最后更新者用户ID，记录最近修改人\n用于变更追踪和责任确认"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "title": "CreatedAt 创建时间戳，记录部门建立时间\n使用 UTC 时间，精确到毫秒级别"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "title": "UpdatedAt 最后更新时间戳，记录最近修改时间\n用于数据同步和缓存失效判断"
+                    },
+                    "deleted_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "title": "DeletedAt 软删除时间戳，支持数据恢复\n非空表示已删除，空值表示正常状态\n实现软删除机制，保护重要组织数据"
+                    }
                   },
-                  "title": "Metadata 扩展元数据，存储自定义业务属性\n键值对格式，支持灵活的业务扩展需求\n示例：{\"location\": \"北京\", \"floor\": \"15F\", \"capacity\": \"50\"}"
+                  "description": "字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
+                  "title": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能"
                 },
-                "description": {
-                  "type": "string",
-                  "title": "Description 部门描述信息，详细说明部门职责和业务范围\n用于组织介绍、职责说明、业务范围描述等\n建议长度：500 字符以内，支持富文本格式"
-                },
-                "visibility": {
-                  "$ref": "#/definitions/v1Visibility",
-                  "title": "Visibility 部门及成员列表的可见性策略（使用公共枚举 Visibility）"
-                },
-                "protected": {
-                  "type": "boolean",
-                  "title": "Protected 是否为系统内置/受保护的部门，受保护的部门不可删除"
-                },
-                "members": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1Membership"
-                  },
-                  "title": "Members 部门成员列表"
-                },
-                "children": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1Department"
-                  },
-                  "title": "Children 直接子部门列表，用于构建完整的组织树\n仅包含直接下级，避免深度递归查询\n建议在需要完整树结构时通过专门的服务接口获取"
-                },
-                "created_by": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "CreatedBy 创建者用户ID，记录部门创建人\n用于审计追踪和权限验证"
-                },
-                "updated_by": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "UpdatedBy 最后更新者用户ID，记录最近修改人\n用于变更追踪和责任确认"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "CreatedAt 创建时间戳，记录部门建立时间\n使用 UTC 时间，精确到毫秒级别"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "UpdatedAt 最后更新时间戳，记录最近修改时间\n用于数据同步和缓存失效判断"
-                },
-                "deleted_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "DeletedAt 软删除时间戳，支持数据恢复\n非空表示已删除，空值表示正常状态\n实现软删除机制，保护重要组织数据"
+                "update_mask": {
+                  "type": "string"
                 }
-              },
-              "description": "字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
-              "title": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能"
+              }
             }
           }
         ],
@@ -1627,9 +1641,56 @@
     },
     "/builtin/admin/api/v1/departments/{id}": {
       "delete": {
-        "summary": "删除部门",
-        "description": "接口格式：/builtin/admin/api/v1/departments/{id}。删除指定部门。",
+        "summary": "移至部门回收站",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/departments/{id}。仅叶子、未保护且没有部门群组引用的部门可软删除；成功后状态为 INACTIVE。",
         "operationId": "KnownAdmin_DeleteDepartment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Department"
+            },
+            "examples": {
+              "application/json": {
+                "id": "5001",
+                "code": "risk-center",
+                "status": "INACTIVE",
+                "deleted_at": "2026-08-21T09:00:00Z"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/departments/{id}:expunge": {
+      "post": {
+        "summary": "永久删除部门",
+        "description": "接口格式：POST /builtin/admin/api/v1/departments/{id}:expunge。仅处理已软删除、未保护、无子部门且无部门群组引用的部门；会物理清理部门成员和角色绑定。",
+        "operationId": "KnownAdmin_ExpungeDepartment",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -1661,6 +1722,70 @@
             "required": true,
             "type": "string",
             "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "ExpungeDepartment permanently removes a soft-deleted department and its core bindings."
+            }
+          }
+        ],
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/departments/{id}:undelete": {
+      "post": {
+        "summary": "恢复部门",
+        "description": "接口格式：POST /builtin/admin/api/v1/departments/{id}:undelete。恢复后保持 INACTIVE，须显式更新为 ACTIVE。",
+        "operationId": "KnownAdmin_UndeleteDepartment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Department"
+            },
+            "examples": {
+              "application/json": {
+                "id": "5001",
+                "code": "risk-center",
+                "status": "INACTIVE"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "UndeleteDepartment restores a soft-deleted department in INACTIVE state."
+            }
           }
         ],
         "tags": [

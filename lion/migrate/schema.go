@@ -139,7 +139,7 @@ var (
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
-		{Name: "code", Type: field.TypeString, Size: 256},
+		{Name: "code", Type: field.TypeString, Unique: true, Size: 256},
 		{Name: "display_name", Type: field.TypeString, Size: 256},
 		{Name: "department_type", Type: field.TypeInt, Default: 0},
 		{Name: "department_status", Type: field.TypeInt, Default: 1},

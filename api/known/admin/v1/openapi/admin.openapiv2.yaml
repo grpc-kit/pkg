@@ -487,8 +487,28 @@ openapiOptions:
       option:
         tags:
           - "部门管理"
-        summary: "删除部门"
-        description: "接口格式：/builtin/admin/api/v1/departments/{id}。删除指定部门。"
+        summary: "移至部门回收站"
+        description: "接口格式：DELETE /builtin/admin/api/v1/departments/{id}。仅叶子、未保护且没有部门群组引用的部门可软删除；成功后状态为 INACTIVE。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"5001","code":"risk-center","status":"INACTIVE","deleted_at":"2026-08-21T09:00:00Z"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UndeleteDepartment
+      option:
+        tags:
+          - "部门管理"
+        summary: "恢复部门"
+        description: "接口格式：POST /builtin/admin/api/v1/departments/{id}:undelete。恢复后保持 INACTIVE，须显式更新为 ACTIVE。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"5001","code":"risk-center","status":"INACTIVE"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ExpungeDepartment
+      option:
+        tags:
+          - "部门管理"
+        summary: "永久删除部门"
+        description: "接口格式：POST /builtin/admin/api/v1/departments/{id}:expunge。仅处理已软删除、未保护、无子部门且无部门群组引用的部门；会物理清理部门成员和角色绑定。"
         responses:
           "200":
             examples:

@@ -306,7 +306,7 @@ func loadPrincipalDisplays(ctx context.Context, db *lion.Client, bindings []*lio
 	if len(departmentIDs) > 0 {
 		rows, err := db.Departments.Query().
 			Select(departments.FieldID, departments.FieldCode, departments.FieldDisplayName).
-			Where(departments.IDIn(departmentIDs...)).
+			Where(departments.IDIn(departmentIDs...), departments.DeletedAtIsNil()).
 			All(ctx)
 		if err != nil {
 			return nil, err
@@ -390,6 +390,18 @@ func expandPrincipalRoleBindingsToMembers(ctx context.Context, db *lion.Client, 
 		for _, row := range rows {
 			result = append(result, userMembershipToProto(row))
 		}
+	}
+
+	if len(departmentIDs) > 0 {
+		validDepartmentIDs, err := db.Departments.Query().Where(
+			departments.IDIn(departmentIDs...),
+			departments.DepartmentStatusEQ(int(adminv1.Department_ACTIVE)),
+			departments.DeletedAtIsNil(),
+		).IDs(ctx)
+		if err != nil {
+			return nil, err
+		}
+		departmentIDs = validDepartmentIDs
 	}
 
 	if len(departmentIDs) > 0 {

@@ -199,7 +199,7 @@ func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, inclu
 				departmentIDs = append(departmentIDs, item.TargetID)
 			}
 			depTargets, err := db.Departments.Query().
-				Where(departments.IDIn(departmentIDs...)).
+				Where(departments.IDIn(departmentIDs...), departments.DeletedAtIsNil()).
 				All(ctx)
 			if err != nil {
 				return nil, errs.Internal(ctx).WithMessage("query user department targets failed").Err()
@@ -210,10 +210,12 @@ func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, inclu
 		}
 		resp.DepartmentMembers = make([]*adminv1.Membership, 0, len(depMembers))
 		for _, item := range depMembers {
-			membership := userMembershipToProto(item)
-			if target := departmentMap[item.TargetID]; target != nil {
-				applyMembershipTargetName(membership, target.DisplayName, target.Code)
+			target := departmentMap[item.TargetID]
+			if target == nil {
+				continue
 			}
+			membership := userMembershipToProto(item)
+			applyMembershipTargetName(membership, target.DisplayName, target.Code)
 			resp.DepartmentMembers = append(resp.DepartmentMembers, membership)
 		}
 

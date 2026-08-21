@@ -182,10 +182,16 @@ http:
     ## 删除部门
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteDepartment
     delete: "/builtin/admin/api/v1/departments/{id}"
-    ## 更新部门
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UndeleteDepartment
+    post: "/builtin/admin/api/v1/departments/{id}:undelete"
+    body: "*"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ExpungeDepartment
+    post: "/builtin/admin/api/v1/departments/{id}:expunge"
+    body: "*"
+  ## 更新部门
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateDepartment
     patch: "/builtin/admin/api/v1/departments/{department.id}"
-    body: "department"
+    body: "*"
     ## 获取部门成员
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListDepartmentMembers
     get: "/builtin/admin/api/v1/departments/{parent}/members"

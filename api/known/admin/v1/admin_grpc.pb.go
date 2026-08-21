@@ -74,6 +74,8 @@ const (
 	KnownAdmin_CreateDepartment_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartment"
 	KnownAdmin_ListDepartments_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListDepartments"
 	KnownAdmin_DeleteDepartment_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteDepartment"
+	KnownAdmin_UndeleteDepartment_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/UndeleteDepartment"
+	KnownAdmin_ExpungeDepartment_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/ExpungeDepartment"
 	KnownAdmin_UpdateDepartment_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartment"
 	KnownAdmin_ListDepartmentMembers_FullMethodName     = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListDepartmentMembers"
 	KnownAdmin_CreateDepartmentMembers_FullMethodName   = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartmentMembers"
@@ -185,7 +187,9 @@ type KnownAdminClient interface {
 	// 部门管理
 	CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
-	DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
+	UndeleteDepartment(ctx context.Context, in *UndeleteDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
+	ExpungeDepartment(ctx context.Context, in *ExpungeDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateDepartment(ctx context.Context, in *UpdateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartmentMembers(ctx context.Context, in *ListDepartmentMembersRequest, opts ...grpc.CallOption) (*ListDepartmentMembersResponse, error)
 	CreateDepartmentMembers(ctx context.Context, in *CreateDepartmentMembersRequest, opts ...grpc.CallOption) (*CreateDepartmentMembersResponse, error)
@@ -755,10 +759,30 @@ func (c *knownAdminClient) ListDepartments(ctx context.Context, in *ListDepartme
 	return out, nil
 }
 
-func (c *knownAdminClient) DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *knownAdminClient) DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*Department, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Department)
+	err := c.cc.Invoke(ctx, KnownAdmin_DeleteDepartment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UndeleteDepartment(ctx context.Context, in *UndeleteDepartmentRequest, opts ...grpc.CallOption) (*Department, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Department)
+	err := c.cc.Invoke(ctx, KnownAdmin_UndeleteDepartment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ExpungeDepartment(ctx context.Context, in *ExpungeDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, KnownAdmin_DeleteDepartment_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, KnownAdmin_ExpungeDepartment_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1261,7 +1285,9 @@ type KnownAdminServer interface {
 	// 部门管理
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
-	DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*emptypb.Empty, error)
+	DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*Department, error)
+	UndeleteDepartment(context.Context, *UndeleteDepartmentRequest) (*Department, error)
+	ExpungeDepartment(context.Context, *ExpungeDepartmentRequest) (*emptypb.Empty, error)
 	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error)
 	ListDepartmentMembers(context.Context, *ListDepartmentMembersRequest) (*ListDepartmentMembersResponse, error)
 	CreateDepartmentMembers(context.Context, *CreateDepartmentMembersRequest) (*CreateDepartmentMembersResponse, error)
@@ -1473,8 +1499,14 @@ func (UnimplementedKnownAdminServer) CreateDepartment(context.Context, *CreateDe
 func (UnimplementedKnownAdminServer) ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListDepartments not implemented")
 }
-func (UnimplementedKnownAdminServer) DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*emptypb.Empty, error) {
+func (UnimplementedKnownAdminServer) DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*Department, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteDepartment not implemented")
+}
+func (UnimplementedKnownAdminServer) UndeleteDepartment(context.Context, *UndeleteDepartmentRequest) (*Department, error) {
+	return nil, status.Error(codes.Unimplemented, "method UndeleteDepartment not implemented")
+}
+func (UnimplementedKnownAdminServer) ExpungeDepartment(context.Context, *ExpungeDepartmentRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExpungeDepartment not implemented")
 }
 func (UnimplementedKnownAdminServer) UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateDepartment not implemented")
@@ -2561,6 +2593,42 @@ func _KnownAdmin_DeleteDepartment_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_UndeleteDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UndeleteDepartmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UndeleteDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_UndeleteDepartment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UndeleteDepartment(ctx, req.(*UndeleteDepartmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ExpungeDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExpungeDepartmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ExpungeDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_ExpungeDepartment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ExpungeDepartment(ctx, req.(*ExpungeDepartmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_UpdateDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateDepartmentRequest)
 	if err := dec(in); err != nil {
@@ -3549,6 +3617,14 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDepartment",
 			Handler:    _KnownAdmin_DeleteDepartment_Handler,
+		},
+		{
+			MethodName: "UndeleteDepartment",
+			Handler:    _KnownAdmin_UndeleteDepartment_Handler,
+		},
+		{
+			MethodName: "ExpungeDepartment",
+			Handler:    _KnownAdmin_ExpungeDepartment_Handler,
 		},
 		{
 			MethodName: "UpdateDepartment",

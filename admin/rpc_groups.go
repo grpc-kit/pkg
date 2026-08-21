@@ -19,6 +19,7 @@ import (
 
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
@@ -46,6 +47,24 @@ func (a *KnownAdminAPI) getGroupType(ctx context.Context, db *lion.Client, group
 // DEPARTMENT(1), ROLE(2), DYNAMIC(3), SYSTEM(4) 的成员均由系统自动管理
 func isAutoManagedGroupType(t adminv1.Group_Type) bool {
 	return t == adminv1.Group_DEPARTMENT || t == adminv1.Group_ROLE || t == adminv1.Group_DYNAMIC || t == adminv1.Group_SYSTEM
+}
+
+func requireActiveDepartmentGroupReference(ctx context.Context, db *lion.Client, departmentID int) error {
+	if departmentID <= 0 {
+		return errs.InvalidArgument(ctx).WithMessage("department group ref_id is required")
+	}
+	exists, err := db.Departments.Query().Where(
+		departments.IDEQ(departmentID),
+		departments.DepartmentStatusEQ(int(adminv1.Department_ACTIVE)),
+		departments.DeletedAtIsNil(),
+	).Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return errs.FailedPrecondition(ctx).WithMessage("department group reference must be active and not deleted")
+	}
+	return nil
 }
 
 // CreateGroup 创建用户组
@@ -93,6 +112,11 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
+	}
+	if groupType == adminv1.Group_DEPARTMENT {
+		if err := requireActiveDepartmentGroupReference(ctx, db, int(req.Group.RefId)); err != nil {
+			return result, err
+		}
 	}
 
 	displayName := req.Group.DisplayName
@@ -403,6 +427,26 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 	if (req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0) && req.Group.Protected && !group.Protected {
 		return result, errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
 	}
+	if adminv1.Group_Type(group.GroupType) == adminv1.Group_DEPARTMENT {
+		refID := group.RefID
+		shouldValidateReference := req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0
+		if req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0 {
+			refID = int(req.Group.RefId)
+		} else {
+			for _, field := range req.UpdateMask.Paths {
+				if field == "ref_id" {
+					refID = int(req.Group.RefId)
+					shouldValidateReference = true
+					break
+				}
+			}
+		}
+		if shouldValidateReference {
+			if err := requireActiveDepartmentGroupReference(ctx, db, refID); err != nil {
+				return result, err
+			}
+		}
+	}
 
 	// SYSTEM 类型群组不允许修改 code, type, ref_id, ref_expr
 	isSystem := adminv1.Group_Type(group.GroupType) == adminv1.Group_SYSTEM
@@ -553,6 +597,9 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 	// 根据群组类型路由到不同的数据源
 	switch groupType {
 	case adminv1.Group_DEPARTMENT:
+		if err := requireActiveDepartmentGroupReference(ctx, db, group.RefID); err != nil {
+			return result, err
+		}
 		return a.listGroupMembersFromDepartment(ctx, req, db, group.RefID)
 	case adminv1.Group_ROLE:
 		return a.listGroupMembersFromRole(ctx, req, db, group.RefID)
