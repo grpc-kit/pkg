@@ -3,7 +3,6 @@ package admin
 import (
 	"context"
 	"sort"
-	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
@@ -13,17 +12,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-func optionalUserAuthBindingTimestamp(value *time.Time) *timestamppb.Timestamp {
-	if value == nil || value.IsZero() {
-		return nil
-	}
-	return timestamppb.New(*value)
-}
-
-func userAuthBindingTimestamp(value time.Time) *timestamppb.Timestamp {
-	return optionalUserAuthBindingTimestamp(&value)
-}
 
 func projectUserAuthBindings(ctx context.Context, identities []*lion.UserIdentities) ([]*adminv1.UserAuthBinding, error) {
 	bindings := make([]*adminv1.UserAuthBinding, 0, len(identities))
@@ -49,25 +37,25 @@ func projectUserAuthBindings(ctx context.Context, identities []*lion.UserIdentit
 
 	for _, identity := range ordered {
 		provider := identity.Edges.LionAuthProviders
-		passwordConfigured := identity.PasswordHash != ""
+		var credentialConfigured *bool
+		if adminv1.AuthProvider_Type(provider.ProviderType) == adminv1.AuthProvider_LOCAL {
+			configured := identity.PasswordHash != ""
+			credentialConfigured = &configured
+		}
 		bindings = append(bindings, &adminv1.UserAuthBinding{
-			Id:                  int64(identity.ID),
-			UserId:              int64(identity.UserID),
-			ProviderId:          int64(provider.ID),
-			ProviderCode:        provider.Code,
-			ProviderDisplayName: provider.DisplayName,
-			ProviderType:        adminv1.AuthProvider_Type(provider.ProviderType),
-			ProviderStatus:      adminv1.AuthProvider_Status(provider.ProviderStatus),
-			ProviderIconUrl:     provider.IconURL,
-			ProviderUserId:      identity.ProviderUserID,
-			ProviderUnionId:     identity.ProviderUnionID,
-			PasswordConfigured:  passwordConfigured,
-			MfaEnabled:          identity.MfaEnabled,
-			PasswordChangedAt:   optionalUserAuthBindingTimestamp(identity.PasswordChangedAt),
-			PasswordExpiresAt:   optionalUserAuthBindingTimestamp(identity.PasswordExpiresAt),
-			LastLoginAt:         optionalUserAuthBindingTimestamp(identity.LastLoginAt),
-			CreatedAt:           userAuthBindingTimestamp(identity.CreatedAt),
-			UpdatedAt:           userAuthBindingTimestamp(identity.UpdatedAt),
+			Id:                   int64(identity.ID),
+			UserId:               int64(identity.UserID),
+			ProviderId:           int64(provider.ID),
+			ProviderCode:         provider.Code,
+			ProviderDisplayName:  provider.DisplayName,
+			ProviderType:         adminv1.AuthProvider_Type(provider.ProviderType),
+			ProviderStatus:       adminv1.AuthProvider_Status(provider.ProviderStatus),
+			ProviderIconUrl:      provider.IconURL,
+			ProviderUserId:       identity.ProviderUserID,
+			ProviderUnionId:      identity.ProviderUnionID,
+			CredentialConfigured: credentialConfigured,
+			CreatedAt:            timestamppb.New(identity.CreatedAt),
+			UpdatedAt:            timestamppb.New(identity.UpdatedAt),
 		})
 	}
 
@@ -89,15 +77,19 @@ func (a *KnownAdminAPI) ListUserAuthBindings(ctx context.Context, req *adminv1.L
 	}
 	userID := int(req.GetUserId())
 
-	exists, err := db.Users.Query().
-		Select(users.FieldID).
+	// OnlyID expresses the three outcomes we need directly: the user exists,
+	// the user is absent, or the database query failed. Avoid wrapping Exist
+	// with an explicit Select, because Exist performs its own ID projection.
+	if _, err := db.Users.Query().
 		Where(users.IDEQ(userID)).
-		Exist(ctx)
-	if err != nil {
+		OnlyID(ctx); err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("user not found").Err()
+		}
+		if a.logger != nil {
+			a.logger.WithError(err).Error("query user existence failed")
+		}
 		return nil, errs.Internal(ctx).WithMessage("query user failed").Err()
-	}
-	if !exists {
-		return nil, errs.NotFound(ctx).WithMessage("user not found").Err()
 	}
 
 	identities, err := db.UserIdentities.Query().
@@ -108,10 +100,6 @@ func (a *KnownAdminAPI) ListUserAuthBindings(ctx context.Context, req *adminv1.L
 			useridentities.FieldProviderUserID,
 			useridentities.FieldProviderUnionID,
 			useridentities.FieldPasswordHash,
-			useridentities.FieldMfaEnabled,
-			useridentities.FieldPasswordChangedAt,
-			useridentities.FieldPasswordExpiresAt,
-			useridentities.FieldLastLoginAt,
 			useridentities.FieldCreatedAt,
 			useridentities.FieldUpdatedAt,
 		).
@@ -129,6 +117,9 @@ func (a *KnownAdminAPI) ListUserAuthBindings(ctx context.Context, req *adminv1.L
 		}).
 		All(ctx)
 	if err != nil {
+		if a.logger != nil {
+			a.logger.WithError(err).Error("query user authentication bindings failed")
+		}
 		return nil, errs.Internal(ctx).WithMessage("query user authentication bindings failed").Err()
 	}
 
