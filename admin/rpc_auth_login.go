@@ -134,7 +134,13 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			if lion.IsNotFound(err) {
 				return nil, errs.Unauthenticated(ctx)
 			}
-			return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+			a.logger.Errorf(
+				"password login failed: provider_code=%s provider_type=%s err=%v",
+				providerCode,
+				providerType.String(),
+				err,
+			)
+			return nil, errs.Unauthenticated(ctx)
 		}
 		if pcResult == nil || !pcResult.OK {
 			return nil, errs.Unauthenticated(ctx)
@@ -689,19 +695,28 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 			return nil, err
 		}
 
+		var existProvider *lion.AuthProviders
 		if existID > 0 {
-			existProvider, getErr := db.AuthProviders.Get(ctx, existID)
-			if getErr != nil {
-				return nil, getErr
+			existProvider, err = db.AuthProviders.Get(ctx, existID)
+			if err != nil {
+				return nil, err
 			}
 			if isLocalProviderType(existProvider.ProviderType) {
 				return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider is system-initialized and cannot be upserted")
 			}
 		}
 
+		if existID == 0 {
+			if err := prepareLDAPProviderConfigForCreate(ctx, p); err != nil {
+				return nil, err
+			}
+		} else if err := prepareLDAPProviderConfigForUpdate(ctx, db, existProvider, p); err != nil {
+			return nil, err
+		}
+
 		configJSON, secretEnc, err := protoToDBConfig(p, a.config.aesKey)
 		if err != nil {
-			return nil, errs.Internal(ctx).WithMessage(err.Error())
+			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 		}
 
 		if existID == 0 {
@@ -790,10 +805,13 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 	if err := ensureSingleLocalProviderHealth(ctx, db); err != nil {
 		return nil, err
 	}
+	if err := prepareLDAPProviderConfigForCreate(ctx, req.Provider); err != nil {
+		return nil, err
+	}
 
 	configJSON, secretEnc, err := protoToDBConfig(req.Provider, a.config.aesKey)
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage(err.Error())
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 	}
 
 	// TODO; 权限验证
@@ -941,6 +959,9 @@ func (a *KnownAdminAPI) UpdateAuthProvider(ctx context.Context, req *adminv1.Upd
 	if req.Provider.Type != adminv1.AuthProvider_TYPE_UNSPECIFIED && int(req.Provider.Type.Number()) != provider.ProviderType {
 		return nil, immutableFieldError(ctx, "auth provider", "type")
 	}
+	if err := prepareLDAPProviderConfigForUpdate(ctx, db, provider, req.Provider); err != nil {
+		return nil, err
+	}
 
 	// 构建更新操作
 	update := provider.Update()
@@ -969,7 +990,7 @@ func (a *KnownAdminAPI) UpdateAuthProvider(ctx context.Context, req *adminv1.Upd
 	if req.Provider.GetConfig() != nil {
 		configJSON, secretEnc, err := protoToDBConfig(req.Provider, a.config.aesKey)
 		if err != nil {
-			return nil, errs.Internal(ctx).WithMessage(err.Error())
+			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 		}
 		if configJSON != nil {
 			update.SetConfig(configJSON)

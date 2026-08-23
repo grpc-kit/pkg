@@ -603,6 +603,11 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{LionUserIdentitiesColumns[18], LionUserIdentitiesColumns[17]},
 			},
+			{
+				Name:    "useridentities_provider_id_provider_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionUserIdentitiesColumns[17], LionUserIdentitiesColumns[5]},
+			},
 		},
 	}
 	// LionUserMembershipsColumns holds the columns for the "lion_user_memberships" table.
