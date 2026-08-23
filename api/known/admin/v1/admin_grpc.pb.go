@@ -85,6 +85,7 @@ const (
 	KnownAdmin_UpdateCurrentUser_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateCurrentUser"
 	KnownAdmin_ChangeCurrentUserPassword_FullMethodName = "/grpc_kit.api.known.admin.v1.KnownAdmin/ChangeCurrentUserPassword"
 	KnownAdmin_GetUser_FullMethodName                   = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetUser"
+	KnownAdmin_ListUserAuthBindings_FullMethodName      = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUserAuthBindings"
 	KnownAdmin_CreateUser_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateUser"
 	KnownAdmin_UpdateUser_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUser"
 	KnownAdmin_ListUsers_FullMethodName                 = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers"
@@ -200,6 +201,7 @@ type KnownAdminClient interface {
 	UpdateCurrentUser(ctx context.Context, in *UpdateCurrentUserRequest, opts ...grpc.CallOption) (*CurrentUserProfile, error)
 	ChangeCurrentUserPassword(ctx context.Context, in *ChangeCurrentUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
+	ListUserAuthBindings(ctx context.Context, in *ListUserAuthBindingsRequest, opts ...grpc.CallOption) (*ListUserAuthBindingsResponse, error)
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
@@ -879,6 +881,16 @@ func (c *knownAdminClient) GetUser(ctx context.Context, in *GetUserRequest, opts
 	return out, nil
 }
 
+func (c *knownAdminClient) ListUserAuthBindings(ctx context.Context, in *ListUserAuthBindingsRequest, opts ...grpc.CallOption) (*ListUserAuthBindingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListUserAuthBindingsResponse)
+	err := c.cc.Invoke(ctx, KnownAdmin_ListUserAuthBindings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(User)
@@ -1298,6 +1310,7 @@ type KnownAdminServer interface {
 	UpdateCurrentUser(context.Context, *UpdateCurrentUserRequest) (*CurrentUserProfile, error)
 	ChangeCurrentUserPassword(context.Context, *ChangeCurrentUserPasswordRequest) (*emptypb.Empty, error)
 	GetUser(context.Context, *GetUserRequest) (*User, error)
+	ListUserAuthBindings(context.Context, *ListUserAuthBindingsRequest) (*ListUserAuthBindingsResponse, error)
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
@@ -1534,6 +1547,9 @@ func (UnimplementedKnownAdminServer) ChangeCurrentUserPassword(context.Context, 
 }
 func (UnimplementedKnownAdminServer) GetUser(context.Context, *GetUserRequest) (*User, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
+}
+func (UnimplementedKnownAdminServer) ListUserAuthBindings(context.Context, *ListUserAuthBindingsRequest) (*ListUserAuthBindingsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListUserAuthBindings not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateUser(context.Context, *CreateUserRequest) (*User, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateUser not implemented")
@@ -2791,6 +2807,24 @@ func _KnownAdmin_GetUser_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_ListUserAuthBindings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserAuthBindingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListUserAuthBindings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_ListUserAuthBindings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListUserAuthBindings(ctx, req.(*ListUserAuthBindingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateUserRequest)
 	if err := dec(in); err != nil {
@@ -3661,6 +3695,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUser",
 			Handler:    _KnownAdmin_GetUser_Handler,
+		},
+		{
+			MethodName: "ListUserAuthBindings",
+			Handler:    _KnownAdmin_ListUserAuthBindings_Handler,
 		},
 		{
 			MethodName: "CreateUser",
