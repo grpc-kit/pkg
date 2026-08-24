@@ -168,7 +168,7 @@ func (a *KnownAdminAPI) UpdateCurrentUser(ctx context.Context, req *adminv1.Upda
 		return nil, errs.Internal(ctx).WithMessage("query current user failed").Err()
 	}
 	if req.Etag != currentUserETag(row.ID, row.UpdatedAt) {
-		return nil, errs.Aborted(ctx).WithErrorInfo("CURRENT_USER_ETAG_MISMATCH", "grpc-kit.com", nil).WithMessage("current user profile has changed; refresh and retry").Err()
+		return nil, errs.Aborted(ctx).WithMessage("current user profile has changed; refresh and retry").Err()
 	}
 	update := db.Users.Update().Where(users.IDEQ(row.ID), users.UpdatedAtEQ(row.UpdatedAt), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil())
 	seen := map[string]bool{}
@@ -245,7 +245,7 @@ func (a *KnownAdminAPI) UpdateCurrentUser(ctx context.Context, req *adminv1.Upda
 		return nil, errs.Internal(ctx).WithMessage("update current user failed").Err()
 	}
 	if affected == 0 {
-		return nil, errs.Aborted(ctx).WithErrorInfo("CURRENT_USER_ETAG_MISMATCH", "grpc-kit.com", nil).WithMessage("current user profile has changed; refresh and retry").Err()
+		return nil, errs.Aborted(ctx).WithMessage("current user profile has changed; refresh and retry").Err()
 	}
 	row, err = db.Users.Query().Select(currentUserSelectFields...).Where(users.IDEQ(int(userID)), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
@@ -293,12 +293,12 @@ func (a *KnownAdminAPI) ChangeCurrentUserPassword(ctx context.Context, req *admi
 	identity, err := db.UserIdentities.Query().Where(useridentities.UserIDEQ(int(userID)), useridentities.PasswordHashNEQ(""), useridentities.HasLionAuthProvidersWith(authproviders.CodeEQ("local"), authproviders.ProviderTypeEQ(int(adminv1.AuthProvider_LOCAL.Number())), authproviders.ProviderStatusEQ(int(adminv1.AuthProvider_ACTIVE.Number())), authproviders.DeletedAtIsNil())).Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
-			return nil, errs.FailedPrecondition(ctx).WithErrorInfo("PASSWORD_CHANGE_NOT_SUPPORTED", "grpc-kit.com", nil).WithMessage("current account has no active local password identity").Err()
+			return nil, errs.FailedPrecondition(ctx).WithMessage("current account has no active local password identity").Err()
 		}
 		return nil, errs.Internal(ctx).WithMessage("query local password identity failed").Err()
 	}
 	if crypto.BcryptCompare(identity.PasswordHash, req.CurrentPasswordHash) != nil {
-		return nil, errs.PermissionDenied(ctx).WithErrorInfo("CURRENT_PASSWORD_INCORRECT", "grpc-kit.com", nil).WithMessage("current password is incorrect").Err()
+		return nil, errs.PermissionDenied(ctx).WithMessage("current password is incorrect").Err()
 	}
 	if _, err := db.UserIdentities.Update().Where(useridentities.IDEQ(identity.ID)).SetPasswordHash(crypto.BcryptHashMust(req.NewPasswordHash)).SetPasswordChangedAt(time.Now()).Save(ctx); err != nil {
 		return nil, errs.Internal(ctx).WithMessage("change current user password failed").Err()
