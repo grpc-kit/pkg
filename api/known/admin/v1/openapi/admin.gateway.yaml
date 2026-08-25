@@ -242,6 +242,9 @@ http:
     ## 获取用户
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetUser
     get: "/builtin/admin/api/v1/users/{id}"
+    ## 获取用户认证身份绑定
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListUserAuthBindings
+    get: "/builtin/admin/api/v1/users/{user_id}/auth-bindings"
     ## 更新用户密码
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUserPassword
     put: "/builtin/admin/api/v1/users/{user_id}/password"

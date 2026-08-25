@@ -65,6 +65,8 @@ func TestVerifyOIDCIDToken(t *testing.T) {
 		Email:             "alice@example.com",
 		EmailVerified:     true,
 	}}
+	claims.PhoneNumber = "+8613900001234"
+	claims.PhoneNumberVerified = true
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	token.Header["kid"] = "test-key"
 	rawIDToken, err := token.SignedString(privateKey)
@@ -76,7 +78,7 @@ func TestVerifyOIDCIDToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("verifyOIDCIDToken: %v", err)
 	}
-	if got.Subject != claims.Subject || got.Email != claims.Email {
+	if got.Subject != claims.Subject || got.Email != claims.Email || got.PhoneNumber != claims.PhoneNumber || !got.PhoneNumberVerified {
 		t.Fatalf("verified claims mismatch: %#v", got)
 	}
 
@@ -118,8 +120,10 @@ func TestExternalUserClaimsFromIDToken(t *testing.T) {
 		Email:             "user@example.com",
 		EmailVerified:     true,
 	}}
+	claims.PhoneNumber = "+8613900001234"
+	claims.PhoneNumberVerified = true
 	profile := externalUserClaimsFromIDToken(claims)
-	if profile.ProviderSubject != "provider-subject" || profile.Username != "preferred-user" {
+	if profile.ProviderSubject != "provider-subject" || profile.Username != "preferred-user" || profile.PhoneNumber != claims.PhoneNumber || !profile.PhoneNumberVerified {
 		t.Fatalf("profile mapping mismatch: %#v", profile)
 	}
 }
