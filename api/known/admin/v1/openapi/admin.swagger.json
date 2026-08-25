@@ -5452,7 +5452,7 @@
       },
       "patch": {
         "summary": "更新当前用户资料",
-        "description": "接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409（reason=CURRENT_USER_ETAG_MISMATCH）。用户名、联系方式、账号状态和身份信息不可由此接口修改。",
+        "description": "接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409。用户名、联系方式、账号状态和身份信息不可由此接口修改。",
         "operationId": "KnownAdmin_UpdateCurrentUser",
         "responses": {
           "200": {
@@ -6479,6 +6479,103 @@
                 }
               }
             }
+          }
+        ],
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/users/{user_id}/auth-bindings": {
+      "get": {
+        "summary": "获取用户认证身份绑定",
+        "description": "接口格式：GET /builtin/admin/api/v1/users/{user_id}/auth-bindings。IAM action 为 admin.v1.known:ListUserAuthBindings，由方法级 Policy 在 handler 之前授权。返回认证身份和提供方的只读摘要；credential_configured 表示该绑定所需的用户级认证凭据是否已经配置，当前仅对 LOCAL identity 返回，其他 Provider 省略。用户级 MFA 状态通过 User.mfa_enabled 获取。外部身份标识属于敏感管理信息，响应不会包含密码、MFA、外部令牌或提供方凭据。软删除用户仍可查询；永久不存在的用户返回 404。",
+        "operationId": "KnownAdmin_ListUserAuthBindings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListUserAuthBindingsResponse"
+            },
+            "examples": {
+              "application/json": {
+                "bindings": [
+                  {
+                    "id": "8101",
+                    "user_id": "1001",
+                    "provider_id": "1",
+                    "provider_code": "local",
+                    "provider_display_name": "本地账号密码登录",
+                    "provider_type": "LOCAL",
+                    "provider_status": "ACTIVE",
+                    "provider_icon_url": "",
+                    "provider_user_id": "local-user-1001",
+                    "credential_configured": true,
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2026-08-20T01:15:00Z"
+                  },
+                  {
+                    "id": "8102",
+                    "user_id": "1001",
+                    "provider_id": "7",
+                    "provider_code": "corp-oidc",
+                    "provider_display_name": "企业统一登录",
+                    "provider_type": "OIDC",
+                    "provider_status": "DISABLED",
+                    "provider_icon_url": "https://cdn.example.test/icons/oidc.svg",
+                    "provider_user_id": "oidc-subject-8f31",
+                    "provider_union_id": "directory-person-52",
+                    "created_at": "2026-02-02T02:00:00Z",
+                    "updated_at": "2026-07-03T03:00:00Z"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "user_id 不是正整数",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "IAM Policy 拒绝调用此方法或目标资源",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "用户不存在或已被永久删除",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "认证身份或提供方摘要查询失败",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -8477,6 +8574,10 @@
         "group_search_filter": {
           "type": "string",
           "title": "GroupSearchFilter 群组搜索过滤器（可选）\n示例: \"(member={{.UserDN}})\""
+        },
+        "user_id_attribute": {
+          "type": "string",
+          "title": "UserIDAttribute 用于从已认证 LDAP Entry 生成 provider_user_id。\n常见值：uid、uidNumber、entryUUID、objectGUID；特殊值 dn 使用完整 Entry DN。\n新建 LDAP Provider 未提供时默认 uid；历史配置缺失时由服务端继续按 dn 兼容。\n该字段不是本地 users.id，uidNumber 也只能作为外部身份值使用。"
         }
       },
       "title": "LdapConfig LDAP 身份提供商配置"
@@ -8834,6 +8935,18 @@
         "total_size": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "v1ListUserAuthBindingsResponse": {
+      "type": "object",
+      "properties": {
+        "bindings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1UserAuthBinding"
+          }
         }
       }
     },
@@ -10886,6 +10999,57 @@
       },
       "description": "字段布局约定：标识区 → 基础属性区 → 审计区(时间+操作人连续) → 敏感字段区 → 扩展区 → 关系区\n注意：审计区放在敏感字段之前，保持审计字段的连续性\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
       "title": "User 用户实体，表示系统中的账号信息"
+    },
+    "v1UserAuthBinding": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "provider_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "provider_code": {
+          "type": "string"
+        },
+        "provider_display_name": {
+          "type": "string"
+        },
+        "provider_type": {
+          "$ref": "#/definitions/v1AuthProviderType"
+        },
+        "provider_status": {
+          "$ref": "#/definitions/v1AuthProviderStatus"
+        },
+        "provider_icon_url": {
+          "type": "string"
+        },
+        "provider_user_id": {
+          "type": "string"
+        },
+        "provider_union_id": {
+          "type": "string"
+        },
+        "credential_configured": {
+          "type": "boolean",
+          "description": "Whether the user-level credential required by this provider is configured.\nCurrently this is populated for LOCAL identities only and is absent for\nproviders that do not have a user-level credential in this model."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "UserAuthBinding is a read-only administrator projection. It deliberately\nexcludes password hashes, MFA secrets, external tokens and provider secrets."
     },
     "v1UserStatus": {
       "type": "string",

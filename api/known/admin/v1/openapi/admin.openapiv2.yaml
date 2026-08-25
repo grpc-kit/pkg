@@ -583,7 +583,7 @@ openapiOptions:
         tags:
           - "个人中心"
         summary: "更新当前用户资料"
-        description: '接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409（reason=CURRENT_USER_ETAG_MISMATCH）。用户名、联系方式、账号状态和身份信息不可由此接口修改。'
+        description: '接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409。用户名、联系方式、账号状态和身份信息不可由此接口修改。'
         responses:
           "200":
             examples:
@@ -673,6 +673,36 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"id":"1001","username":"alice","nickname":"Alice Chen","profile":"资深风控审计员","picture":"https://cdn.example.com/avatars/alice.png","website":"https://intra.example.com/u/alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","phone_number":{"country_code":"86","national_number":"13900001234"},"email":"alice@example.com"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListUserAuthBindings
+      option:
+        tags:
+          - "用户管理"
+        summary: "获取用户认证身份绑定"
+        description: "接口格式：GET /builtin/admin/api/v1/users/{user_id}/auth-bindings。IAM action 为 admin.v1.known:ListUserAuthBindings，由方法级 Policy 在 handler 之前授权。返回认证身份和提供方的只读摘要；credential_configured 表示该绑定所需的用户级认证凭据是否已经配置，当前仅对 LOCAL identity 返回，其他 Provider 省略。用户级 MFA 状态通过 User.mfa_enabled 获取。外部身份标识属于敏感管理信息，响应不会包含密码、MFA、外部令牌或提供方凭据。软删除用户仍可查询；永久不存在的用户返回 404。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"bindings":[{"id":"8101","user_id":"1001","provider_id":"1","provider_code":"local","provider_display_name":"本地账号密码登录","provider_type":"LOCAL","provider_status":"ACTIVE","provider_icon_url":"","provider_user_id":"local-user-1001","credential_configured":true,"created_at":"2025-01-01T00:00:00Z","updated_at":"2026-08-20T01:15:00Z"},{"id":"8102","user_id":"1001","provider_id":"7","provider_code":"corp-oidc","provider_display_name":"企业统一登录","provider_type":"OIDC","provider_status":"DISABLED","provider_icon_url":"https://cdn.example.test/icons/oidc.svg","provider_user_id":"oidc-subject-8f31","provider_union_id":"directory-person-52","created_at":"2026-02-02T02:00:00Z","updated_at":"2026-07-03T03:00:00Z"}]}'
+          "400":
+            description: "user_id 不是正整数"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
+          "403":
+            description: "IAM Policy 拒绝调用此方法或目标资源"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
+          "404":
+            description: "用户不存在或已被永久删除"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
+          "500":
+            description: "认证身份或提供方摘要查询失败"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUserPassword
       option:
         tags:
