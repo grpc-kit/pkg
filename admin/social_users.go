@@ -224,12 +224,14 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		email := getMapString(userinfo, emailField)
 
 		profile := externalUserClaims{
-			ProviderSubject:   providerUserID,
-			Username:          username,
-			PreferredUsername: username,
-			Nickname:          username,
-			Email:             email,
-			EmailVerified:     getMapBool(userinfo, "email_verified"),
+			ProviderSubject:     providerUserID,
+			Username:            username,
+			PreferredUsername:   username,
+			Nickname:            username,
+			Email:               email,
+			EmailVerified:       getMapBool(userinfo, "email_verified"),
+			PhoneNumber:         getMapString(userinfo, "phone_number"),
+			PhoneNumberVerified: getMapBool(userinfo, "phone_number_verified"),
 		}
 
 		userID, err := s.upsertUserOIDC(ctx, oauth2Token, profile)
@@ -247,12 +249,14 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 }
 
 type externalUserClaims struct {
-	ProviderSubject   string
-	Username          string
-	PreferredUsername string
-	Nickname          string
-	Email             string
-	EmailVerified     bool
+	ProviderSubject     string
+	Username            string
+	PreferredUsername   string
+	Nickname            string
+	Email               string
+	EmailVerified       bool
+	PhoneNumber         string
+	PhoneNumberVerified bool
 }
 
 func externalUserClaimsFromIDToken(claims *auth.IDTokenClaims) externalUserClaims {
@@ -267,12 +271,14 @@ func externalUserClaimsFromIDToken(claims *auth.IDTokenClaims) externalUserClaim
 	}
 
 	return externalUserClaims{
-		ProviderSubject:   claims.Subject,
-		Username:          username,
-		PreferredUsername: preferredUsername,
-		Nickname:          claims.Nickname,
-		Email:             claims.Email,
-		EmailVerified:     claims.EmailVerified,
+		ProviderSubject:     claims.Subject,
+		Username:            username,
+		PreferredUsername:   preferredUsername,
+		Nickname:            claims.Nickname,
+		Email:               claims.Email,
+		EmailVerified:       claims.EmailVerified,
+		PhoneNumber:         claims.PhoneNumber,
+		PhoneNumberVerified: claims.PhoneNumberVerified,
 	}
 }
 
@@ -369,9 +375,9 @@ func (s *socialUsers) PasswordCheckLocal(ctx context.Context, username, password
 		).
 		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
 			q.Select(
+				useridentities.FieldID,
 				useridentities.FieldPasswordHash,
-				useridentities.FieldMfaEnabled,
-			)
+			).Where(useridentities.ProviderIDEQ(s.AuthProvider.ID))
 		}).
 		Only(ctx)
 	if err != nil {
@@ -387,7 +393,11 @@ func (s *socialUsers) PasswordCheckLocal(ctx context.Context, username, password
 		return &passwordCheckResult{}, nil
 	}
 
-	if identity.MfaEnabled {
+	mfaEnabled, err := hasUserMFAEnabledIdentity(ctx, s.db, u.ID)
+	if err != nil {
+		return nil, err
+	}
+	if mfaEnabled {
 		return &passwordCheckResult{
 			OK:         true,
 			MfaEnabled: true,
@@ -484,7 +494,6 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		Select(
 			useridentities.FieldID,
 			useridentities.FieldUserID,
-			useridentities.FieldMfaEnabled,
 		).
 		Where(
 			useridentities.ProviderIDEQ(s.AuthProvider.ID),
@@ -502,10 +511,8 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	}
 
 	var localUserID int
-	var ldapMfaEnabled bool
 	if ldapIdentity != nil {
 		localUserID = ldapIdentity.UserID
-		ldapMfaEnabled = ldapIdentity.MfaEnabled
 		s.logger.Infof(
 			"ldap login debug: identity hit, provider=%s user_dn=%s local_user_id=%d",
 			s.ProviderName,
@@ -516,7 +523,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		s.syncLDAPUserAttrs(ctx, localUserID, resolvedUser.Attrs)
 	} else {
 		s.logger.Warnf(
-			"ldap login debug: identity miss, start auto provision, provider=%s username=%s resolved_username=%s user_dn=%s",
+			"ldap login debug: identity miss, start verified email resolve or provision, provider=%s username=%s resolved_username=%s user_dn=%s",
 			s.ProviderName,
 			username,
 			resolvedUser.Username,
@@ -535,7 +542,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			return nil, err
 		}
 		s.logger.Infof(
-			"ldap login debug: auto provision success, provider=%s user_dn=%s local_user_id=%d",
+			"ldap login debug: identity resolve or provision success, provider=%s user_dn=%s local_user_id=%d",
 			s.ProviderName,
 			maskLDAPDN(userDN),
 			localUserID,
@@ -573,7 +580,11 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		return nil, err
 	}
 
-	if ldapMfaEnabled {
+	mfaEnabled, err := hasUserMFAEnabledIdentity(ctx, s.db, userEntity.ID)
+	if err != nil {
+		return nil, err
+	}
+	if mfaEnabled {
 		return &passwordCheckResult{
 			OK:         true,
 			MfaEnabled: true,
@@ -595,9 +606,41 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 }
 
 func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, providerUserID, ldapUsername string, attrs *ldapUserAttrs) (int, error) {
+	autoLinkEnabled := false
+	if attrs != nil && strings.TrimSpace(attrs.Email) != "" {
+		var settingErr error
+		autoLinkEnabled, settingErr = s.identityAutoLinkEnabled(ctx)
+		if settingErr != nil {
+			return 0, settingErr
+		}
+	}
+
 	tx, err := s.db.Tx(ctx)
 	if err != nil {
 		return 0, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	var assertedEmail string
+	if attrs != nil {
+		assertedEmail = attrs.Email
+	}
+	linkedUserID, linked, err := s.linkExternalIdentityByVerifiedIdentifiers(
+		ctx,
+		tx,
+		providerUserID,
+		verifiedIdentityClaims{Email: assertedEmail, EmailVerified: true},
+		autoLinkEnabled,
+		nil,
+	)
+	if err != nil {
+		return 0, err
+	}
+	if linked {
+		if err := tx.Commit(); err != nil {
+			return 0, fmt.Errorf("commit LDAP verified email binding: %w", err)
+		}
+		return linkedUserID, nil
 	}
 
 	baseUsername := buildLDAPLocalUsernameBase(s.ProviderName, ldapUsername)
@@ -618,21 +661,36 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 	}
 	userCreate.SetNickname(nickname)
 
-	// 写入邮箱（加密 + hash + verified 标记）。
+	var emailIdentifier canonicalIdentifier
+	// 写入邮箱（加密 + hash + verified 标记）。LDAP 用户已经完成
+	// directory bind，因此该 Provider 返回的邮箱属于可信断言。
 	if attrs != nil && attrs.Email != "" {
-		emailEnc, encErr := crypto.EncryptAES(s.aesKey, []byte(attrs.Email))
-		if encErr != nil {
-			_ = tx.Rollback()
-			return 0, fmt.Errorf("encrypt ldap email: %w", encErr)
+		var identifierErr error
+		emailIdentifier, identifierErr = canonicalizeEmailIdentifier(attrs.Email)
+		if identifierErr != nil {
+			s.logger.Warnf("ignore invalid LDAP email: provider=%s err=%v", s.ProviderName, identifierErr)
+		} else {
+			emailEnc, encErr := crypto.EncryptAES(s.aesKey, []byte(emailIdentifier.StoredValue))
+			if encErr != nil {
+				_ = tx.Rollback()
+				return 0, fmt.Errorf("encrypt ldap email: %w", encErr)
+			}
+			userCreate.SetEmailEncrypted(emailEnc)
+			userCreate.SetEmailHash(emailIdentifier.Hash)
+			userCreate.SetEmailVerified(true)
 		}
-		userCreate.SetEmailEncrypted(emailEnc)
-		userCreate.SetEmailHash(crypto.SHA256([]byte(attrs.Email)))
-		userCreate.SetEmailVerified(true)
 	}
 
 	newUser, err := userCreate.Save(ctx)
 	if err != nil {
 		_ = tx.Rollback()
+		if emailIdentifier.Hash != "" && lion.IsConstraintError(err) {
+			if _, queryErr := s.db.Users.Query().
+				Where(users.EmailHashEQ(emailIdentifier.Hash)).
+				OnlyID(ctx); queryErr == nil {
+				return 0, errExternalEmailAlreadyExists
+			}
+		}
 		return 0, err
 	}
 
@@ -688,14 +746,19 @@ func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *
 		updated = true
 	}
 	if attrs.Email != "" {
-		emailEnc, err := crypto.EncryptAES(s.aesKey, []byte(attrs.Email))
+		identifier, err := canonicalizeEmailIdentifier(attrs.Email)
 		if err != nil {
-			s.logger.Warnf("ldap sync attrs: encrypt email failed, provider=%s user_id=%d err=%v", s.ProviderName, userID, err)
+			s.logger.Warnf("ldap sync attrs: ignore invalid email, provider=%s user_id=%d err=%v", s.ProviderName, userID, err)
 		} else {
-			userUpdate.SetEmailEncrypted(emailEnc)
-			userUpdate.SetEmailHash(crypto.SHA256([]byte(attrs.Email)))
-			userUpdate.SetEmailVerified(true)
-			updated = true
+			emailEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(identifier.StoredValue))
+			if encryptErr != nil {
+				s.logger.Warnf("ldap sync attrs: encrypt email failed, provider=%s user_id=%d err=%v", s.ProviderName, userID, encryptErr)
+			} else {
+				userUpdate.SetEmailEncrypted(emailEnc)
+				userUpdate.SetEmailHash(identifier.Hash)
+				userUpdate.SetEmailVerified(true)
+				updated = true
+			}
 		}
 	}
 
@@ -984,58 +1047,111 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 	}
 
 	if existUserID == 0 && lion.IsNotFound(err) {
-		// TODO; 新增用户，preferred username 如何定义，开启事务
-		// 规范：provider_name_email_prefix
-		username := strings.ToLower(fmt.Sprintf("%v_%v", s.ProviderName, profile.ProviderSubject))
+		autoLinkEnabled := false
+		if (profile.EmailVerified && strings.TrimSpace(profile.Email) != "") ||
+			(profile.PhoneNumberVerified && strings.TrimSpace(profile.PhoneNumber) != "") {
+			autoLinkEnabled, err = s.identityAutoLinkEnabled(ctx)
+			if err != nil {
+				return 0, err
+			}
+		}
 
-		// 首先确保 "lion_users" 不存在这个用户，开启一个事务
 		tx, err := s.db.Tx(ctx)
 		if err != nil {
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			s.logger.Errorf("create external user: provider=%s err=%v", s.ProviderName, err)
 			return 0, fmt.Errorf("create user failed")
 		}
+		defer func() { _ = tx.Rollback() }()
 
-		_, err = tx.Users.Query().Where(users.UsernameEQ(username)).OnlyID(ctx)
-		if !lion.IsNotFound(err) {
-			s.logger.Errorf("create user: %v, err: %v", username, err)
-			return 0, fmt.Errorf("create user failed")
-		}
-
-		var emailEnc []byte
-		emailEnc, err = crypto.EncryptAES(s.aesKey, []byte(profile.Email))
+		linkedUserID, linked, err := s.linkExternalIdentityByVerifiedIdentifiers(
+			ctx,
+			tx,
+			profile.ProviderSubject,
+			verifiedIdentityClaims{
+				Email:               profile.Email,
+				EmailVerified:       profile.EmailVerified,
+				PhoneNumber:         profile.PhoneNumber,
+				PhoneNumberVerified: profile.PhoneNumberVerified,
+			},
+			autoLinkEnabled,
+			oauth2Token,
+		)
 		if err != nil {
-			// TODO;
+			return 0, err
+		}
+		if linked {
+			if err := tx.Commit(); err != nil {
+				return 0, fmt.Errorf("commit verified identifier identity binding: %w", err)
+			}
+			return linkedUserID, nil
 		}
 
-		newUser, err := tx.Users.Create().
-			SetUsername(username).
-			SetEmailEncrypted(emailEnc).
-			SetEmailVerified(profile.EmailVerified).
-			SetEmailHash(crypto.SHA256([]byte(profile.Email))).
-			Save(ctx)
+		usernameSource := profile.Username
+		if strings.TrimSpace(usernameSource) == "" {
+			usernameSource = profile.ProviderSubject
+		}
+		username, err := findAvailableUsername(ctx, tx, buildLDAPLocalUsernameBase(s.ProviderName, usernameSource))
+		if err != nil {
+			s.logger.Errorf("allocate external username: provider=%s err=%v", s.ProviderName, err)
+			return 0, fmt.Errorf("create user failed")
+		}
+
+		userCreate := tx.Users.Create().SetUsername(username)
+		var emailIdentifier canonicalIdentifier
+		if profile.Email != "" {
+			var identifierErr error
+			emailIdentifier, identifierErr = canonicalizeEmailIdentifier(profile.Email)
+			if identifierErr != nil {
+				s.logger.Warnf("ignore invalid external email: provider=%s err=%v", s.ProviderName, identifierErr)
+			} else {
+				emailEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(emailIdentifier.StoredValue))
+				if encryptErr != nil {
+					return 0, fmt.Errorf("encrypt external user email: %w", encryptErr)
+				}
+				userCreate.SetEmailEncrypted(emailEnc).
+					SetEmailHash(emailIdentifier.Hash).
+					SetEmailVerified(profile.EmailVerified)
+			}
+		}
+
+		newUser, err := userCreate.Save(ctx)
 		if err != nil {
 			_ = tx.Rollback()
+			if profile.EmailVerified && emailIdentifier.Hash != "" && lion.IsConstraintError(err) {
+				if _, queryErr := s.db.Users.Query().
+					Where(users.EmailHashEQ(emailIdentifier.Hash)).
+					OnlyID(ctx); queryErr == nil {
+					return 0, errExternalEmailAlreadyExists
+				}
+			}
 
 			s.logger.Errorf("create user: %v, to save err: %v", username, err)
 			return 0, fmt.Errorf("create user failed")
 		}
 
-		var accessTokenEnc, refreshTokenEnc []byte
-		if oauth2Token.AccessToken != "" {
-			accessTokenEnc, err = crypto.EncryptAES(s.aesKey, []byte(oauth2Token.AccessToken))
-		}
-		if oauth2Token.RefreshToken != "" {
-			refreshTokenEnc, err = crypto.EncryptAES(s.aesKey, []byte(oauth2Token.RefreshToken))
-		}
-
-		_, err = tx.UserIdentities.Create().
+		identityCreate := tx.UserIdentities.Create().
 			SetUserID(newUser.ID).
 			SetProviderID(s.AuthProvider.ID).
-			SetProviderUserID(profile.ProviderSubject).
-			SetAccessTokenEncrypted(accessTokenEnc).
-			SetRefreshTokenEncrypted(refreshTokenEnc).
-			SetTokenExpiresAt(oauth2Token.Expiry).
-			Save(ctx)
+			SetProviderUserID(profile.ProviderSubject)
+		if oauth2Token.AccessToken != "" {
+			accessTokenEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(oauth2Token.AccessToken))
+			if encryptErr != nil {
+				return 0, fmt.Errorf("encrypt external access token: %w", encryptErr)
+			}
+			identityCreate.SetAccessTokenEncrypted(accessTokenEnc)
+		}
+		if oauth2Token.RefreshToken != "" {
+			refreshTokenEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(oauth2Token.RefreshToken))
+			if encryptErr != nil {
+				return 0, fmt.Errorf("encrypt external refresh token: %w", encryptErr)
+			}
+			identityCreate.SetRefreshTokenEncrypted(refreshTokenEnc)
+		}
+		if !oauth2Token.Expiry.IsZero() {
+			identityCreate.SetTokenExpiresAt(oauth2Token.Expiry)
+		}
+
+		_, err = identityCreate.Save(ctx)
 		if err != nil {
 			_ = tx.Rollback()
 
@@ -1043,23 +1159,38 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			return 0, fmt.Errorf("create user failed")
 		}
 
+		if err := tx.Commit(); err != nil {
+			return 0, fmt.Errorf("commit external user creation: %w", err)
+		}
 		existUserID = newUser.ID
-
-		_ = tx.Commit()
 	} else {
-		var accessTokenEnc, refreshTokenEnc []byte
+		identityUpdate := s.db.UserIdentities.Update().Where(useridentities.IDEQ(existIdentity.ID))
+		hasUpdate := false
 		if oauth2Token.AccessToken != "" {
-			accessTokenEnc, err = crypto.EncryptAES(s.aesKey, []byte(oauth2Token.AccessToken))
+			accessTokenEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(oauth2Token.AccessToken))
+			if encryptErr != nil {
+				return 0, fmt.Errorf("encrypt external access token: %w", encryptErr)
+			}
+			identityUpdate.SetAccessTokenEncrypted(accessTokenEnc)
+			hasUpdate = true
 		}
 		if oauth2Token.RefreshToken != "" {
-			refreshTokenEnc, err = crypto.EncryptAES(s.aesKey, []byte(oauth2Token.RefreshToken))
+			refreshTokenEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(oauth2Token.RefreshToken))
+			if encryptErr != nil {
+				return 0, fmt.Errorf("encrypt external refresh token: %w", encryptErr)
+			}
+			identityUpdate.SetRefreshTokenEncrypted(refreshTokenEnc)
+			hasUpdate = true
 		}
-
-		s.db.UserIdentities.Update().
-			Where(useridentities.IDEQ(existIdentity.ID)).
-			SetAccessTokenEncrypted(accessTokenEnc).
-			SetRefreshTokenEncrypted(refreshTokenEnc).
-			SetTokenExpiresAt(oauth2Token.Expiry)
+		if !oauth2Token.Expiry.IsZero() {
+			identityUpdate.SetTokenExpiresAt(oauth2Token.Expiry)
+			hasUpdate = true
+		}
+		if hasUpdate {
+			if _, err := identityUpdate.Save(ctx); err != nil {
+				return 0, fmt.Errorf("update external identity token: %w", err)
+			}
+		}
 
 		// 设置用户组
 	}
@@ -1296,19 +1427,8 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 			return 0, fmt.Errorf("create user failed")
 		}
 
-		/*
-			var emailEnc []byte
-			emailEnc, err = crypto.EncryptAES(s.aesKey, []byte(idToken.Email))
-			if err != nil {
-				// TODO;
-			}
-		*/
-
 		newUser, err := tx.Users.Create().
 			SetUsername(username).
-			//SetEmailEncrypted(emailEnc).
-			//SetEmailVerified(idToken.EmailVerified).
-			//SetEmailHash(crypto.SHA256([]byte(idToken.Email))).
 			Save(ctx)
 		if err != nil {
 			_ = tx.Rollback()

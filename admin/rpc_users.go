@@ -75,6 +75,18 @@ func phoneNumberComplete(pn *adminv1.PhoneNumber) bool {
 	return strings.TrimSpace(pn.GetCountryCode()) != "" && strings.TrimSpace(pn.GetNationalNumber()) != ""
 }
 
+// validateCreateUserVerificationState prevents a verification flag from being
+// persisted without the contact value it is supposed to attest to.
+func validateCreateUserVerificationState(user *adminv1.User) error {
+	if user.GetEmailVerified() && strings.TrimSpace(user.GetEmail()) == "" {
+		return fmt.Errorf("email_verified requires email")
+	}
+	if user.GetPhoneNumberVerified() && !phoneNumberComplete(user.GetPhoneNumber()) {
+		return fmt.Errorf("phone_number_verified requires a complete phone_number")
+	}
+	return nil
+}
+
 // isServerManagedUserField 表示由服务端写入、不接受调用方通过 update_mask 指定的字段。
 // email_verified 与 phone_number_verified 不在此列：管理端允许人工置位，
 // 由 UpdateUser 内的联系方式变更重置逻辑保证一致性。
@@ -308,6 +320,9 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	if !isSupportedGender(req.User.GetGender()) {
 		return nil, errs.InvalidArgument(ctx).WithMessage("gender is out of supported range")
 	}
+	if err := validateCreateUserVerificationState(req.User); err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
 
 	db, err := a.GetLionClient()
 	if err != nil {
@@ -380,14 +395,23 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		userCreate.SetWebsite(req.GetUser().GetWebsite())
 	}
 	if req.GetUser().Email != "" {
-		email, err := crypto.EncryptAES(a.config.aesKey, []byte(req.GetUser().GetEmail()))
+		identifier, err := canonicalizeEmailIdentifier(req.GetUser().GetEmail())
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage("invalid email format")
+		}
+		email, err := crypto.EncryptAES(a.config.aesKey, []byte(identifier.StoredValue))
 		if err != nil {
 			return nil, err
 		}
 		userCreate.SetEmailEncrypted(email)
-		userCreate.SetEmailHash(crypto.SHA256([]byte(req.GetUser().GetEmail())))
+		userCreate.SetEmailHash(identifier.Hash)
+		userCreate.SetEmailVerified(req.GetUser().GetEmailVerified())
 	}
 	if phoneNumberComplete(req.GetUser().GetPhoneNumber()) {
+		identifier, err := canonicalizePhoneNumberIdentifier(req.GetUser().GetPhoneNumber())
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+		}
 		tmp, err := proto.Marshal(req.GetUser().GetPhoneNumber())
 		if err != nil {
 			return nil, errs.InvalidArgument(ctx).WithMessage("invalid phone_number format")
@@ -397,7 +421,8 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 			return nil, err
 		}
 		userCreate.SetPhoneNumberEncrypted(phoneNumber)
-		userCreate.SetPhoneNumberHash(crypto.SHA256(tmp))
+		userCreate.SetPhoneNumberHash(identifier.Hash)
+		userCreate.SetPhoneNumberVerified(req.GetUser().GetPhoneNumberVerified())
 	}
 	if req.GetUser().GetAddress() != nil {
 		rawAddress, err := proto.Marshal(req.GetUser().GetAddress())
@@ -969,16 +994,30 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 			x.SetBirthdate(req.User.GetBirthday().AsTime())
 
 		case "email":
-			encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.GetEmail()))
+			if strings.TrimSpace(req.User.GetEmail()) == "" {
+				x.ClearEmailEncrypted()
+				x.ClearEmailHash()
+				x.SetEmailVerified(false)
+				continue
+			}
+			identifier, err := canonicalizeEmailIdentifier(req.User.GetEmail())
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage("invalid email format")
+			}
+			encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(identifier.StoredValue))
 			if err != nil {
 				return nil, err
 			}
 			x.SetEmailEncrypted(encBody)
-			x.SetEmailHash(crypto.SHA256([]byte(req.User.GetEmail())))
+			x.SetEmailHash(identifier.Hash)
 		case "email_verified":
 			x.SetEmailVerified(req.User.GetEmailVerified())
 		case "phone_number", "phone_number.country_code", "phone_number.national_number":
 			if phoneNumberComplete(req.User.GetPhoneNumber()) {
+				identifier, err := canonicalizePhoneNumberIdentifier(req.User.GetPhoneNumber())
+				if err != nil {
+					return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+				}
 				rawBody, err := proto.Marshal(req.User.GetPhoneNumber())
 				if err != nil {
 					return nil, errs.InvalidArgument(ctx).WithMessage("invalid phone_number format")
@@ -988,7 +1027,7 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 					return nil, err
 				}
 				x.SetPhoneNumberEncrypted(encBody)
-				x.SetPhoneNumberHash(crypto.SHA256(rawBody))
+				x.SetPhoneNumberHash(identifier.Hash)
 			} else {
 				x.ClearPhoneNumberEncrypted()
 				x.ClearPhoneNumberHash()

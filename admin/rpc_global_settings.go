@@ -12,15 +12,10 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/globalsettings"
-	"github.com/grpc-kit/pkg/lion/roles"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (a *KnownAdminAPI) GetGlobalSettings(ctx context.Context, req *adminv1.GetGlobalSettingsRequest) (*adminv1.GlobalSettingCategory, error) {
-	if err := a.checkGlobalSettingsReadPermission(ctx); err != nil {
-		return nil, err
-	}
-
 	category := strings.TrimSpace(req.GetCategory())
 	if category == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("category is required")
@@ -35,9 +30,6 @@ func (a *KnownAdminAPI) GetGlobalSettings(ctx context.Context, req *adminv1.GetG
 
 func (a *KnownAdminAPI) ListGlobalSettings(ctx context.Context, req *adminv1.ListGlobalSettingsRequest) (*adminv1.ListGlobalSettingsResponse, error) {
 	_ = req
-	if err := a.checkGlobalSettingsReadPermission(ctx); err != nil {
-		return nil, err
-	}
 
 	result := &adminv1.ListGlobalSettingsResponse{Categories: make([]*adminv1.GlobalSettingCategory, 0, len(globalSettingRegistry))}
 
@@ -74,10 +66,6 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 	if err != nil {
 		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
 	}
-	if err := a.checkGlobalSettingsWritePermission(ctx, db); err != nil {
-		return nil, err
-	}
-
 	validated, err := validateGlobalSettingsUpdates(req)
 	if err != nil {
 		return nil, err
@@ -102,7 +90,8 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 			).
 			Only(ctx)
 		if queryErr != nil && !lion.IsNotFound(queryErr) {
-			return nil, errs.Internal(ctx).WithMessage(queryErr.Error())
+			a.logger.WithError(queryErr).Error("query global setting failed")
+			return nil, errs.Internal(ctx).WithMessage("failed to query global setting")
 		}
 
 		if lion.IsNotFound(queryErr) {
@@ -117,7 +106,8 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 				create = create.SetCreatedBy(actor).SetUpdatedBy(actor)
 			}
 			if _, createErr := create.Save(ctx); createErr != nil {
-				return nil, errs.Internal(ctx).WithMessage(createErr.Error())
+				a.logger.WithError(createErr).Error("create global setting failed")
+				return nil, errs.Internal(ctx).WithMessage("failed to create global setting")
 			}
 			continue
 		}
@@ -130,7 +120,8 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 			update = update.SetUpdatedBy(actor)
 		}
 		if _, updateErr := update.Save(ctx); updateErr != nil {
-			return nil, errs.Internal(ctx).WithMessage(updateErr.Error())
+			a.logger.WithError(updateErr).Error("update global setting failed")
+			return nil, errs.Internal(ctx).WithMessage("failed to update global setting")
 		}
 	}
 
@@ -143,43 +134,6 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 		return nil, err
 	}
 	return &adminv1.UpdateGlobalSettingsResponse{Category: categoryResp}, nil
-}
-
-func (a *KnownAdminAPI) checkGlobalSettingsReadPermission(ctx context.Context) error {
-	userRoleIDs, err := a.getUserRoleID(ctx)
-	if err != nil {
-		return err
-	}
-	if len(userRoleIDs) == 0 {
-		return errs.PermissionDenied(ctx).WithMessage("user has no roles")
-	}
-	return nil
-}
-
-func (a *KnownAdminAPI) checkGlobalSettingsWritePermission(ctx context.Context, db *lion.Client) error {
-	userRoleIDs, err := a.getUserRoleID(ctx)
-	if err != nil {
-		return err
-	}
-	if len(userRoleIDs) == 0 {
-		return errs.PermissionDenied(ctx).WithMessage("user has no roles")
-	}
-
-	superadminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)
-	hasSuperadminRole, err := db.Roles.Query().
-		Where(
-			roles.IDIn(userRoleIDs...),
-			roles.CodeEQ(superadminCode),
-		).
-		Exist(ctx)
-	if err != nil {
-		return errs.Internal(ctx).WithMessage(err.Error())
-	}
-	if !hasSuperadminRole {
-		return errs.PermissionDenied(ctx).WithMessage("global settings write requires superadmin role")
-	}
-
-	return nil
 }
 
 type validatedGlobalSettingUpdate struct {
@@ -225,7 +179,7 @@ func validateGlobalSettingsUpdates(req *adminv1.UpdateGlobalSettingsRequest) ([]
 func validateGlobalSettingValue(settingKey, value string, spec globalSettingSpec) error {
 	switch spec.ValueType {
 	case globalSettingValueTypeBool:
-		if _, err := strconv.ParseBool(value); err != nil {
+		if value != "true" && value != "false" {
 			return errs.InvalidArgument(context.Background()).WithMessage(fmt.Sprintf("invalid bool for %s: %q", settingKey, value))
 		}
 	case globalSettingValueTypeInt:
@@ -278,7 +232,8 @@ func (a *KnownAdminAPI) buildGlobalSettingCategory(ctx context.Context, category
 		Where(globalsettings.CategoryEQ(category)).
 		All(ctx)
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage(err.Error())
+		a.logger.WithError(err).Error("list global settings failed")
+		return nil, errs.Internal(ctx).WithMessage("failed to list global settings")
 	}
 
 	rowByKey := make(map[string]*lion.GlobalSettings, len(rows))

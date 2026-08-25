@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -131,6 +132,18 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 
 		pcResult, err := su.PasswordCheck(ctx, req.Username, passwordPayload)
 		if err != nil {
+			if errors.Is(err, errExternalEmailAlreadyExists) {
+				return nil, externalEmailAlreadyExistsPublicError(ctx)
+			}
+			if errors.Is(err, errExternalPhoneAlreadyExists) {
+				return nil, externalPhoneAlreadyExistsPublicError(ctx)
+			}
+			if errors.Is(err, errExternalVerifiedIdentifiersConflict) {
+				return nil, externalVerifiedIdentifiersConflictPublicError(ctx)
+			}
+			if errors.Is(err, errExternalIdentityAlreadyBound) {
+				return nil, externalIdentityAlreadyBoundPublicError(ctx)
+			}
 			if lion.IsNotFound(err) {
 				return nil, errs.Unauthenticated(ctx)
 			}

@@ -153,3 +153,15 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 		ExpiresIn:   durationSecondsInt32(issuance.TTL),
 	}, nil
 }
+
+func hasUserMFAEnabledIdentity(ctx context.Context, db *lion.Client, userID int) (bool, error) {
+	if db == nil || userID <= 0 {
+		return false, nil
+	}
+	return db.UserIdentities.Query().
+		Where(
+			useridentities.UserIDEQ(userID),
+			useridentities.MfaEnabledEQ(true),
+		).
+		Exist(ctx)
+}

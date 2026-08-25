@@ -22,6 +22,7 @@ const (
 	globalSettingKeyMFAMaxVerifyAttempts  = "mfa.max_verify_attempts"
 	globalSettingKeyMFARecoveryCodesCount = "mfa.recovery_codes_count"
 	globalSettingKeyMFATOTPIssuer         = "mfa.totp_issuer"
+	globalSettingKeyIdentityAutoLink      = "identity.auto_link"
 )
 
 type globalSettingSpec struct {
@@ -82,6 +83,12 @@ var globalSettingRegistry = map[string]map[string]globalSettingSpec{
 			Description:  "Issuer shown in generated TOTP credentials.",
 			Protected:    true,
 			MaxLen:       64,
+		},
+		globalSettingKeyIdentityAutoLink: {
+			ValueType:    globalSettingValueTypeBool,
+			DefaultValue: "true",
+			Description:  "Automatically link external identities to existing users by verified email or phone number.",
+			Protected:    true,
 		},
 	},
 }
