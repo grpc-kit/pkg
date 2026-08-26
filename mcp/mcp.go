@@ -44,14 +44,14 @@ func NewServer(enable bool, transport string) (*Server, error) {
 	switch transport {
 	case "streamable_http":
 		handler = mcp.NewStreamableHTTPHandler(getServer, &mcp.StreamableHTTPOptions{
-			JSONResponse:               false,
-			DisableLocalhostProtection: true,
+			JSONResponse: false,
 		})
 	case "sse":
 		handler = mcp.NewSSEHandler(getServer, nil)
 	default:
 		return nil, fmt.Errorf("unsupported MCP transport: %s (supported: streamable_http, sse)", transport)
 	}
+	handler = NewOriginProtectionMiddleware(handler)
 
 	return &Server{
 		mcpServer: mcpServer,

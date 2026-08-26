@@ -2,6 +2,8 @@ package mcp
 
 import (
 	"context"
+	"net"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -82,6 +84,21 @@ func TestNewServer(t *testing.T) {
 				t.Fatalf("MCPServer() returned nil")
 			}
 		})
+	}
+}
+
+func TestMCPHandlerRejectsLocalhostHostMismatch(t *testing.T) {
+	srv, err := NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer failed: %v", err)
+	}
+	req := httptest.NewRequest(http.MethodPost, "http://attacker.example/mcp", nil)
+	req.Host = "attacker.example"
+	req = req.WithContext(context.WithValue(req.Context(), http.LocalAddrContextKey, &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 8080}))
+	rec := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusForbidden)
 	}
 }
 

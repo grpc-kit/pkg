@@ -105,6 +105,44 @@ func TestLoggingMiddleware(t *testing.T) {
 	}
 }
 
+func TestOriginProtectionMiddleware(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		origin     string
+		fetchSite  string
+		host       string
+		wantStatus int
+	}{
+		{name: "non-browser client", method: http.MethodPost, host: "admin.example.test", wantStatus: http.StatusOK},
+		{name: "same origin", method: http.MethodPost, origin: "https://admin.example.test", host: "admin.example.test", wantStatus: http.StatusOK},
+		{name: "browser same origin", method: http.MethodPost, origin: "https://admin.example.test", fetchSite: "same-origin", host: "admin.example.test", wantStatus: http.StatusOK},
+		{name: "cross origin post", method: http.MethodPost, origin: "https://evil.example.test", host: "admin.example.test", wantStatus: http.StatusForbidden},
+		{name: "cross origin sse get", method: http.MethodGet, origin: "https://evil.example.test", host: "admin.example.test", wantStatus: http.StatusForbidden},
+		{name: "browser cross site get", method: http.MethodGet, origin: "https://evil.example.test", fetchSite: "cross-site", host: "admin.example.test", wantStatus: http.StatusForbidden},
+		{name: "opaque origin", method: http.MethodPost, origin: "null", host: "admin.example.test", wantStatus: http.StatusForbidden},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := NewOriginProtectionMiddleware(dummyHandler())
+			req := httptest.NewRequest(tt.method, "https://"+tt.host+"/mcp", nil)
+			req.Host = tt.host
+			if tt.origin != "" {
+				req.Header.Set("Origin", tt.origin)
+			}
+			if tt.fetchSite != "" {
+				req.Header.Set("Sec-Fetch-Site", tt.fetchSite)
+			}
+			rec := httptest.NewRecorder()
+			h.ServeHTTP(rec, req)
+			if rec.Code != tt.wantStatus {
+				t.Fatalf("status = %d, want %d", rec.Code, tt.wantStatus)
+			}
+		})
+	}
+}
+
 // captureAuthHandler 捕获下游收到的 context 中的 Authorization 值。
 type captureAuthHandler struct {
 	got string
