@@ -24,6 +24,7 @@ type LocalConfigSnapshot struct {
 	Observables *adminv1.ObservablesConfig
 	Cloudevents *adminv1.CloudEventsConfig
 	Automations *adminv1.AutomationsConfig
+	AIConnector *adminv1.AIConnectorConfig
 	Independent *structpb.Struct
 }
 

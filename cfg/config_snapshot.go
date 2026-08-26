@@ -102,6 +102,7 @@ func (c *LocalConfig) toAdminLocalConfigSnapshot() *admin.LocalConfigSnapshot {
 		Observables: c.toAdminObservablesConfig(),
 		Cloudevents: c.toAdminCloudEventsConfig(),
 		Automations: c.toAdminAutomationsConfig(),
+		AIConnector: c.toAdminAIConnectorConfig(),
 		Independent: toStruct(c.Independent),
 	}
 }
@@ -461,6 +462,22 @@ func (c *LocalConfig) toAdminAutomationsConfig() *adminv1.AutomationsConfig {
 				Insecure: c.Automations.Kubernetes.RestConfig.TLSClientConfig.Insecure,
 			},
 		}
+	}
+	return out
+}
+
+func (c *LocalConfig) toAdminAIConnectorConfig() *adminv1.AIConnectorConfig {
+	out := &adminv1.AIConnectorConfig{Name: "aiconnector"}
+	if c.AIConnector == nil {
+		return out
+	}
+
+	out.Enabled = c.AIConnector.Enable
+	out.McpServer = &adminv1.MCPServerConfig{
+		Enabled:     c.AIConnector.MCPServer.Enable,
+		Path:        c.AIConnector.MCPServer.Path,
+		Transport:   c.AIConnector.MCPServer.Transport,
+		AllowedTags: append([]string(nil), c.AIConnector.MCPServer.AllowedTags...),
 	}
 	return out
 }

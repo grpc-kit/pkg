@@ -5,10 +5,32 @@ import (
 	"testing"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func TestListLocalConfigs_OmitsIndependent(t *testing.T) {
+func TestLocalConfigsFieldNumbers(t *testing.T) {
+	fields := (&adminv1.LocalConfigs{}).ProtoReflect().Descriptor().Fields()
+	tests := []struct {
+		name protoreflect.Name
+		want protoreflect.FieldNumber
+	}{
+		{name: "aiconnector", want: 12},
+		{name: "independent", want: 13},
+	}
+
+	for _, tt := range tests {
+		field := fields.ByName(tt.name)
+		if field == nil {
+			t.Fatalf("LocalConfigs field %q not found", tt.name)
+		}
+		if field.Number() != tt.want {
+			t.Fatalf("LocalConfigs field %q number = %d, want %d", tt.name, field.Number(), tt.want)
+		}
+	}
+}
+
+func TestListLocalConfigs_IncludesAIConnectorAndOmitsIndependent(t *testing.T) {
 	api := New(WithLocalConfigSnapshot(&LocalConfigSnapshot{
 		Services:    &adminv1.ServicesConfig{Name: "services", Enabled: true},
 		Discover:    &adminv1.DiscoverConfig{Name: "discover", Enabled: false},
@@ -21,6 +43,7 @@ func TestListLocalConfigs_OmitsIndependent(t *testing.T) {
 		Observables: &adminv1.ObservablesConfig{Name: "observables", Enabled: true},
 		Cloudevents: &adminv1.CloudEventsConfig{Name: "cloudevents", Enabled: false},
 		Automations: &adminv1.AutomationsConfig{Name: "automations", Enabled: true},
+		AIConnector: &adminv1.AIConnectorConfig{Name: "aiconnector", Enabled: true},
 		Independent: &structpb.Struct{},
 	}))
 
@@ -28,13 +51,23 @@ func TestListLocalConfigs_OmitsIndependent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListLocalConfigs returned error: %v", err)
 	}
-	if len(resp.GetConfigs()) != 11 {
-		t.Fatalf("expected 11 local config entries, got %d", len(resp.GetConfigs()))
+	if len(resp.GetConfigs()) != 12 {
+		t.Fatalf("expected 12 local config entries, got %d", len(resp.GetConfigs()))
 	}
+	foundAIConnector := false
 	for _, entry := range resp.GetConfigs() {
 		if entry.GetName() == "independent" {
 			t.Fatalf("list response should not include independent entry")
 		}
+		if entry.GetName() == "aiconnector" {
+			foundAIConnector = true
+			if !entry.GetEnabled() {
+				t.Fatalf("expected aiconnector entry to be enabled")
+			}
+		}
+	}
+	if !foundAIConnector {
+		t.Fatalf("list response should include aiconnector entry")
 	}
 }
 
@@ -318,6 +351,41 @@ func TestGetLocalConfigs_Automations(t *testing.T) {
 	}
 	if config.Name != "automations" {
 		t.Fatalf("automations config mismatch")
+	}
+}
+
+func TestGetLocalConfigs_AIConnector(t *testing.T) {
+	expectedConfig := &adminv1.AIConnectorConfig{
+		Name:    "aiconnector",
+		Enabled: true,
+		McpServer: &adminv1.MCPServerConfig{
+			Enabled:     true,
+			Path:        "/mcp",
+			Transport:   "streamable_http",
+			AllowedTags: []string{"mcp", "chat"},
+		},
+	}
+	api := New(WithLocalConfigSnapshot(&LocalConfigSnapshot{
+		AIConnector: expectedConfig,
+	}))
+
+	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "aiconnector"})
+	if err != nil {
+		t.Fatalf("GetLocalConfigs returned error: %v", err)
+	}
+
+	config := resp.GetAiconnector()
+	if config == nil {
+		t.Fatalf("expected aiconnector config, got nil")
+	}
+	if config.GetName() != "aiconnector" || !config.GetEnabled() {
+		t.Fatalf("aiconnector config mismatch")
+	}
+	if config.GetMcpServer().GetPath() != "/mcp" || len(config.GetMcpServer().GetAllowedTags()) != 2 {
+		t.Fatalf("aiconnector MCP server config mismatch")
+	}
+	if resp.GetIndependent() != nil {
+		t.Fatalf("expected only aiconnector branch to be set")
 	}
 }
 

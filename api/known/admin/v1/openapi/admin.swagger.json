@@ -7064,6 +7064,20 @@
         }
       }
     },
+    "v1AIConnectorConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "mcp_server": {
+          "$ref": "#/definitions/v1MCPServerConfig"
+        }
+      }
+    },
     "v1Action": {
       "type": "object",
       "properties": {
@@ -9019,6 +9033,9 @@
         "automations": {
           "$ref": "#/definitions/v1AutomationsConfig"
         },
+        "aiconnector": {
+          "$ref": "#/definitions/v1AIConnectorConfig"
+        },
         "independent": {
           "type": "object"
         }
@@ -9062,6 +9079,26 @@
         }
       },
       "title": "LoginOption 登录页认证提供方选项（最小字段集，不含敏感信息）"
+    },
+    "v1MCPServerConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "path": {
+          "type": "string"
+        },
+        "transport": {
+          "type": "string"
+        },
+        "allowed_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "v1Membership": {
       "type": "object",
