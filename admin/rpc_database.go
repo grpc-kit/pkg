@@ -127,7 +127,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 							DisplayName: "个人中心",
 							RoutePath:   "/user",
 							Icon:        "UserOutlined",
-							SortOrder:   100,
+							SortOrder:   adminMenuSortPersonal,
 							Children: []builtinMenuSeed{
 								{
 									Code:        "admin.user.profile",
@@ -142,13 +142,13 @@ func builtinMenuSeeds() []builtinMenuSeed {
 							DisplayName: "系统设置",
 							RoutePath:   "/setting",
 							Icon:        "SettingOutlined",
-							SortOrder:   200,
+							SortOrder:   adminMenuSortSettings,
 							Children: []builtinMenuSeed{
 								{
 									Code:        "admin.setting.auth",
 									DisplayName: "身份认证",
 									RoutePath:   "/setting/auth",
-									SortOrder:   100,
+									SortOrder:   adminSettingsMenuSortAuth,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.auth.providers", DisplayName: "认证提供方", RoutePath: "/setting/auth/providers", SortOrder: 100},
 										{Code: "admin.setting.auth.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/auth/oauth2-clients", SortOrder: 200},
@@ -159,7 +159,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.departments",
 									DisplayName: "部门管理",
 									RoutePath:   "/setting/departments",
-									SortOrder:   200,
+									SortOrder:   adminSettingsMenuSortDepartments,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.departments.detail", DisplayName: "部门详情", RoutePath: "/setting/departments/detail", SortOrder: 100},
 									},
@@ -168,7 +168,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.menus",
 									DisplayName: "菜单管理",
 									RoutePath:   "/setting/menus",
-									SortOrder:   300,
+									SortOrder:   adminSettingsMenuSortMenus,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.menus.list", DisplayName: "菜单列表", RoutePath: "/setting/menus/list", SortOrder: 100},
 									},
@@ -177,7 +177,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.roles",
 									DisplayName: "角色管理",
 									RoutePath:   "/setting/roles",
-									SortOrder:   400,
+									SortOrder:   adminSettingsMenuSortRoles,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.roles.list", DisplayName: "角色列表", RoutePath: "/setting/roles/list", SortOrder: 100},
 									},
@@ -186,7 +186,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.policies",
 									DisplayName: "权限策略",
 									RoutePath:   "/setting/policies",
-									SortOrder:   500,
+									SortOrder:   adminSettingsMenuSortPolicies,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.policies.list", DisplayName: "策略列表", RoutePath: "/setting/policies/list", SortOrder: 100},
 										{Code: "admin.setting.policies.create", DisplayName: "新建策略", RoutePath: "/setting/policies/create", SortOrder: 200},
@@ -196,7 +196,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.groups",
 									DisplayName: "群组管理",
 									RoutePath:   "/setting/groups",
-									SortOrder:   600,
+									SortOrder:   adminSettingsMenuSortGroups,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.groups.list", DisplayName: "群组列表", RoutePath: "/setting/groups/list", SortOrder: 100},
 									},
@@ -205,7 +205,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.users",
 									DisplayName: "用户管理",
 									RoutePath:   "/setting/users",
-									SortOrder:   700,
+									SortOrder:   adminSettingsMenuSortUsers,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.users.list", DisplayName: "用户列表", RoutePath: "/setting/users/list", SortOrder: 100},
 									},
@@ -214,16 +214,16 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.governance",
 									DisplayName: "资源治理",
 									RoutePath:   "/setting/governance",
-									SortOrder:   800,
+									SortOrder:   adminSettingsMenuSortGovernance,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.governance.recycle-bin", DisplayName: "回收站", RoutePath: "/setting/governance/recycle-bin", SortOrder: 100},
 									},
 								},
 								{
 									Code:        "admin.setting.config",
-									DisplayName: "本地配置",
+									DisplayName: "配置管理",
 									RoutePath:   "/setting/config",
-									SortOrder:   900,
+									SortOrder:   adminSettingsMenuSortConfig,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.config.security", DisplayName: "认证鉴权", RoutePath: "/setting/config/security", SortOrder: 100},
 										{Code: "admin.setting.config.services", DisplayName: "基础服务", RoutePath: "/setting/config/services", SortOrder: 200},
@@ -247,7 +247,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 							DisplayName: "开发工具",
 							RoutePath:   "/devtools",
 							Icon:        "SolutionOutlined",
-							SortOrder:   300,
+							SortOrder:   adminMenuSortDevtools,
 							Children: []builtinMenuSeed{
 								{
 									Code:        "admin.devtools.api",
@@ -268,7 +268,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 							DisplayName: "可观测性",
 							RoutePath:   "/observability",
 							Icon:        "FundProjectionScreenOutlined",
-							SortOrder:   400,
+							SortOrder:   adminMenuSortObservability,
 							Children: []builtinMenuSeed{
 								{
 									Code:        "admin.observability.metrics",
@@ -392,7 +392,7 @@ func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items 
 // 后续下线的内置菜单 code 追加到此列表即可。
 var builtinMenuObsoletes = []string{
 	"admin.setting.auth.tokens",     // 令牌管理已并入凭证管理（/setting/auth/credentials）
-	"admin.setting.global-settings", // 全局设置已并入本地配置 > 认证鉴权（/setting/config/security）
+	"admin.setting.global-settings", // 全局设置已并入配置管理 > 认证鉴权（/setting/config/security）
 }
 
 // deleteObsoleteBuiltinMenus 删除已下线的内置菜单。

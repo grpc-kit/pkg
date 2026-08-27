@@ -180,3 +180,87 @@ func TestResolveMenuCode(t *testing.T) {
 		})
 	}
 }
+
+func TestNormalizeMenuSortOrder(t *testing.T) {
+	tests := []struct {
+		name       string
+		parentCode string
+		requested  int
+		want       int
+		wantErr    bool
+	}{
+		{name: "admin default", parentCode: adminMenuCode, requested: 0, want: adminMenuSortBusinessDefault},
+		{name: "admin minimum", parentCode: adminMenuCode, requested: adminMenuSortBusinessMin, want: adminMenuSortBusinessMin},
+		{name: "admin middle", parentCode: adminMenuCode, requested: 500, want: 500},
+		{name: "admin maximum", parentCode: adminMenuCode, requested: adminMenuSortBusinessMax, want: adminMenuSortBusinessMax},
+		{name: "admin below range", parentCode: adminMenuCode, requested: adminMenuSortBusinessMin - 1, wantErr: true},
+		{name: "admin above range", parentCode: adminMenuCode, requested: adminMenuSortBusinessMax + 1, wantErr: true},
+		{name: "admin framework range", parentCode: adminMenuCode, requested: adminMenuSortObservability, wantErr: true},
+		{name: "nested default", parentCode: "admin.setting", requested: 0, want: defaultMenuSortOrder},
+		{name: "nested framework-like number", parentCode: "admin.setting", requested: 900, want: 900},
+		{name: "negative", parentCode: "admin.setting", requested: -1, wantErr: true},
+		{name: "above global maximum", parentCode: "admin.setting", requested: maxMenuSortOrder + 1, wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := normalizeMenuSortOrder(tt.parentCode, tt.requested)
+			if tt.wantErr {
+				if err == nil {
+					t.Fatalf("normalizeMenuSortOrder(%q, %d) expected error, got %d", tt.parentCode, tt.requested, got)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("normalizeMenuSortOrder(%q, %d) unexpected error: %v", tt.parentCode, tt.requested, err)
+			}
+			if got != tt.want {
+				t.Fatalf("normalizeMenuSortOrder(%q, %d) = %d, want %d", tt.parentCode, tt.requested, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBuildMenuTree_AdminBusinessMenusStayBetweenFrameworkMenus(t *testing.T) {
+	items := []*lion.Menus{
+		{ID: 11, ParentID: 8, Code: "admin.project.create", SortOrder: 200},
+		{ID: 6, ParentID: 2, Code: "admin.setting", SortOrder: 990},
+		{ID: 9, ParentID: 2, Code: "admin.order", SortOrder: 300},
+		{ID: 1, ParentID: 0, Code: "root", SortOrder: 1},
+		{ID: 5, ParentID: 2, Code: "admin.devtools", SortOrder: 910},
+		{ID: 8, ParentID: 2, Code: "admin.project", SortOrder: 300},
+		{ID: 3, ParentID: 2, Code: "admin.user", SortOrder: 100},
+		{ID: 10, ParentID: 8, Code: "admin.project.list", SortOrder: 100},
+		{ID: 4, ParentID: 2, Code: "admin.observability", SortOrder: 900},
+		{ID: 2, ParentID: 1, Code: "admin", SortOrder: 100},
+	}
+
+	tree := buildMenuTree(items)
+	if len(tree) != 1 || tree[0].Code != "root" {
+		t.Fatalf("unexpected menu roots: %#v", tree)
+	}
+	if len(tree[0].Children) != 1 || tree[0].Children[0].Code != adminMenuCode {
+		t.Fatalf("unexpected root children: %#v", tree[0].Children)
+	}
+	adminChildren := tree[0].Children[0].Children
+	wantAdminCodes := []string{
+		"admin.user",
+		"admin.project",
+		"admin.order",
+		"admin.observability",
+		"admin.devtools",
+		"admin.setting",
+	}
+	if len(adminChildren) != len(wantAdminCodes) {
+		t.Fatalf("admin child count = %d, want %d", len(adminChildren), len(wantAdminCodes))
+	}
+	for i, want := range wantAdminCodes {
+		if got := adminChildren[i].Code; got != want {
+			t.Fatalf("admin child at %d = %q, want %q", i, got, want)
+		}
+	}
+	projectChildren := adminChildren[1].Children
+	if len(projectChildren) != 2 || projectChildren[0].Code != "admin.project.list" || projectChildren[1].Code != "admin.project.create" {
+		t.Fatalf("unexpected project child order: %#v", projectChildren)
+	}
+}

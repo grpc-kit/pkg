@@ -482,6 +482,17 @@ func resolveMenuCode(parentCode, userCode string) (string, error) {
 	return fullCode, nil
 }
 
+func getMenuParentCode(ctx context.Context, db *lion.Client, parentID int64) (string, error) {
+	if parentID == 0 {
+		return "", nil
+	}
+	parent, err := db.Menus.Get(ctx, int(parentID))
+	if err != nil {
+		return "", errs.InvalidArgument(ctx).WithMessage("parent menu not found")
+	}
+	return parent.Code, nil
+}
+
 func (a *KnownAdminAPI) CreateMenu(ctx context.Context, req *adminv1.CreateMenuRequest) (*adminv1.Menu, error) {
 	if req == nil || req.Menu == nil {
 		return nil, errs.InvalidArgument(ctx).WithMessage("request body menu is nil")
@@ -494,14 +505,14 @@ func (a *KnownAdminAPI) CreateMenu(ctx context.Context, req *adminv1.CreateMenuR
 	if err != nil {
 		return nil, err
 	}
-	// 先获取父菜单，以便解析 code 前缀
-	var parentCode string
-	if req.Menu.ParentId > 0 {
-		parent, err := db.Menus.Get(ctx, int(req.Menu.ParentId))
-		if err != nil {
-			return nil, errs.InvalidArgument(ctx).WithMessage("parent menu not found")
-		}
-		parentCode = parent.Code
+	// 先获取父菜单，以便解析 code 前缀和对应层级的排序区间。
+	parentCode, err := getMenuParentCode(ctx, db, req.Menu.ParentId)
+	if err != nil {
+		return nil, err
+	}
+	sortOrder, err := normalizeMenuSortOrder(parentCode, int(req.Menu.SortOrder))
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 	}
 	// 解析最终 code：自动补全父前缀或自动生成
 	code, err := resolveMenuCode(parentCode, req.Menu.Code)
@@ -519,7 +530,7 @@ func (a *KnownAdminAPI) CreateMenu(ctx context.Context, req *adminv1.CreateMenuR
 		SetRoutePath(req.Menu.RoutePath).
 		SetComponent(req.Menu.Component).
 		SetIcon(req.Menu.Icon).
-		SetSortOrder(int(req.Menu.SortOrder)).
+		SetSortOrder(sortOrder).
 		SetVisibility(menuVisibilityFromProto(req.Menu.Visibility)).
 		SetDescription(req.Menu.Description).
 		SetProtected(false).
@@ -557,6 +568,48 @@ func (a *KnownAdminAPI) UpdateMenu(ctx context.Context, req *adminv1.UpdateMenuR
 	if err != nil {
 		return nil, errs.NotFound(ctx).WithMessage("menu not found")
 	}
+	applyAll := req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0
+	hasPath := func(target string) bool {
+		if applyAll {
+			return true
+		}
+		for _, path := range req.UpdateMask.Paths {
+			if path == target {
+				return true
+			}
+		}
+		return false
+	}
+
+	effectiveParentID := obj.ParentID
+	parentChanged := hasPath("parent_id") && req.Menu.ParentId != obj.ParentID
+	if parentChanged {
+		effectiveParentID = req.Menu.ParentId
+	}
+	effectiveSortOrder := obj.SortOrder
+	sortOrderChanged := hasPath("sort_order") && int(req.Menu.SortOrder) != obj.SortOrder
+	if parentChanged || sortOrderChanged {
+		if obj.Protected {
+			field := "sort_order"
+			if parentChanged {
+				field = "parent_id"
+			}
+			return nil, errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("protected menu structure field %q cannot be modified", field))
+		}
+		parentCode, err := getMenuParentCode(ctx, db, effectiveParentID)
+		if err != nil {
+			return nil, err
+		}
+		requestedSortOrder := obj.SortOrder
+		if sortOrderChanged {
+			requestedSortOrder = int(req.Menu.SortOrder)
+		}
+		effectiveSortOrder, err = normalizeMenuSortOrder(parentCode, requestedSortOrder)
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+		}
+	}
+
 	update := obj.Update()
 	apply := func(path string) error {
 		// 受保护菜单的结构字段不可修改，仅允许展示属性。
@@ -573,16 +626,15 @@ func (a *KnownAdminAPI) UpdateMenu(ctx context.Context, req *adminv1.UpdateMenuR
 				if req.Menu.RoutePath != obj.RoutePath {
 					return errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("protected menu structure field %q cannot be modified", path))
 				}
+			case "sort_order":
+				if int(req.Menu.SortOrder) != obj.SortOrder {
+					return errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("protected menu structure field %q cannot be modified", path))
+				}
 			}
 		}
 		switch path {
 		case "parent_id":
-			if req.Menu.ParentId > 0 {
-				if _, err := db.Menus.Get(ctx, int(req.Menu.ParentId)); err != nil {
-					return errs.InvalidArgument(ctx).WithMessage("parent menu not found")
-				}
-			}
-			update.SetParentID(req.Menu.ParentId)
+			update.SetParentID(effectiveParentID)
 		case "code":
 			return validateImmutableString(ctx, "menu", "code", obj.Code, req.Menu.Code)
 		case "display_name":
@@ -594,7 +646,7 @@ func (a *KnownAdminAPI) UpdateMenu(ctx context.Context, req *adminv1.UpdateMenuR
 		case "icon":
 			update.SetIcon(req.Menu.Icon)
 		case "sort_order":
-			update.SetSortOrder(int(req.Menu.SortOrder))
+			update.SetSortOrder(effectiveSortOrder)
 		case "metadata":
 			update.SetMetadata(menuMetadataToEnt(req.Menu.Metadata))
 		case "visibility":
