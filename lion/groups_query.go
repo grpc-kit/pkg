@@ -22,7 +22,6 @@ type GroupsQuery struct {
 	order      []groups.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Groups
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -333,13 +332,9 @@ func (_q *GroupsQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *GroupsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Groups, error) {
 	var (
-		nodes   = []*Groups{}
-		withFKs = _q.withFKs
-		_spec   = _q.querySpec()
+		nodes = []*Groups{}
+		_spec = _q.querySpec()
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, groups.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Groups).scanValues(nil, columns)
 	}

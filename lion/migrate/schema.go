@@ -215,21 +215,12 @@ var (
 		{Name: "visibility", Type: field.TypeInt, Default: 0},
 		{Name: "protected", Type: field.TypeBool, Default: false},
 		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "departments_lion_groups", Type: field.TypeInt, Nullable: true},
 	}
 	// LionGroupsTable holds the schema information for the "lion_groups" table.
 	LionGroupsTable = &schema.Table{
 		Name:       "lion_groups",
 		Columns:    LionGroupsColumns,
 		PrimaryKey: []*schema.Column{LionGroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_groups_lion_departments_lion_groups",
-				Columns:    []*schema.Column{LionGroupsColumns[19]},
-				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "groups_code",
@@ -850,7 +841,6 @@ func init() {
 	LionSettingsTable.Annotation = &entsql.Annotation{
 		Table: "lion_settings",
 	}
-	LionGroupsTable.ForeignKeys[0].RefTable = LionDepartmentsTable
 	LionGroupsTable.Annotation = &entsql.Annotation{
 		Table: "lion_groups",
 	}

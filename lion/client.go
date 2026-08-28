@@ -729,22 +729,6 @@ func (c *DepartmentsClient) GetX(ctx context.Context, id int) *Departments {
 	return obj
 }
 
-// QueryLionGroups queries the lion_groups edge of a Departments.
-func (c *DepartmentsClient) QueryLionGroups(_m *Departments) *GroupsQuery {
-	query := (&GroupsClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(departments.Table, departments.FieldID, id),
-			sqlgraph.To(groups.Table, groups.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionGroupsTable, departments.LionGroupsColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *DepartmentsClient) Hooks() []Hook {
 	return c.hooks.Departments

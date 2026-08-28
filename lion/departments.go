@@ -61,29 +61,8 @@ type Departments struct {
 	// 部门描述信息，详细说明部门职责和业务范围
 	Description string `json:"description,omitempty"`
 	// 是否为保护资源，保护资源不能被删除，描述等可更改
-	Protected bool `json:"protected,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the DepartmentsQuery when eager-loading is set.
-	Edges        DepartmentsEdges `json:"edges"`
+	Protected    bool `json:"protected,omitempty"`
 	selectValues sql.SelectValues
-}
-
-// DepartmentsEdges holds the relations/edges for other nodes in the graph.
-type DepartmentsEdges struct {
-	// LionGroups holds the value of the lion_groups edge.
-	LionGroups []*Groups `json:"lion_groups,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// LionGroupsOrErr returns the LionGroups value or an error if the edge
-// was not loaded in eager-loading.
-func (e DepartmentsEdges) LionGroupsOrErr() ([]*Groups, error) {
-	if e.loadedTypes[0] {
-		return e.LionGroups, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_groups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -268,11 +247,6 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Departments) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryLionGroups queries the "lion_groups" edge of the Departments entity.
-func (_m *Departments) QueryLionGroups() *GroupsQuery {
-	return NewDepartmentsClient(_m.config).QueryLionGroups(_m)
 }
 
 // Update returns a builder for updating this Departments.

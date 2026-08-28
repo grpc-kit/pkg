@@ -4027,9 +4027,6 @@ type DepartmentsMutation struct {
 	description            *string
 	protected              *bool
 	clearedFields          map[string]struct{}
-	lion_groups            map[int]struct{}
-	removedlion_groups     map[int]struct{}
-	clearedlion_groups     bool
 	done                   bool
 	oldValue               func(context.Context) (*Departments, error)
 	predicates             []predicate.Departments
@@ -5217,60 +5214,6 @@ func (m *DepartmentsMutation) ResetProtected() {
 	m.protected = nil
 }
 
-// AddLionGroupIDs adds the "lion_groups" edge to the Groups entity by ids.
-func (m *DepartmentsMutation) AddLionGroupIDs(ids ...int) {
-	if m.lion_groups == nil {
-		m.lion_groups = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.lion_groups[ids[i]] = struct{}{}
-	}
-}
-
-// ClearLionGroups clears the "lion_groups" edge to the Groups entity.
-func (m *DepartmentsMutation) ClearLionGroups() {
-	m.clearedlion_groups = true
-}
-
-// LionGroupsCleared reports if the "lion_groups" edge to the Groups entity was cleared.
-func (m *DepartmentsMutation) LionGroupsCleared() bool {
-	return m.clearedlion_groups
-}
-
-// RemoveLionGroupIDs removes the "lion_groups" edge to the Groups entity by IDs.
-func (m *DepartmentsMutation) RemoveLionGroupIDs(ids ...int) {
-	if m.removedlion_groups == nil {
-		m.removedlion_groups = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.lion_groups, ids[i])
-		m.removedlion_groups[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedLionGroups returns the removed IDs of the "lion_groups" edge to the Groups entity.
-func (m *DepartmentsMutation) RemovedLionGroupsIDs() (ids []int) {
-	for id := range m.removedlion_groups {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// LionGroupsIDs returns the "lion_groups" edge IDs in the mutation.
-func (m *DepartmentsMutation) LionGroupsIDs() (ids []int) {
-	for id := range m.lion_groups {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetLionGroups resets all changes to the "lion_groups" edge.
-func (m *DepartmentsMutation) ResetLionGroups() {
-	m.lion_groups = nil
-	m.clearedlion_groups = false
-	m.removedlion_groups = nil
-}
-
 // Where appends a list predicates to the DepartmentsMutation builder.
 func (m *DepartmentsMutation) Where(ps ...predicate.Departments) {
 	m.predicates = append(m.predicates, ps...)
@@ -5923,85 +5866,49 @@ func (m *DepartmentsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DepartmentsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.lion_groups != nil {
-		edges = append(edges, departments.EdgeLionGroups)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *DepartmentsMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case departments.EdgeLionGroups:
-		ids := make([]ent.Value, 0, len(m.lion_groups))
-		for id := range m.lion_groups {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DepartmentsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedlion_groups != nil {
-		edges = append(edges, departments.EdgeLionGroups)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *DepartmentsMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case departments.EdgeLionGroups:
-		ids := make([]ent.Value, 0, len(m.removedlion_groups))
-		for id := range m.removedlion_groups {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DepartmentsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedlion_groups {
-		edges = append(edges, departments.EdgeLionGroups)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *DepartmentsMutation) EdgeCleared(name string) bool {
-	switch name {
-	case departments.EdgeLionGroups:
-		return m.clearedlion_groups
-	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *DepartmentsMutation) ClearEdge(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Departments unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *DepartmentsMutation) ResetEdge(name string) error {
-	switch name {
-	case departments.EdgeLionGroups:
-		m.ResetLionGroups()
-		return nil
-	}
 	return fmt.Errorf("unknown Departments edge %s", name)
 }
 

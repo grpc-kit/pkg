@@ -53,9 +53,8 @@ type Groups struct {
 	// 是否为受保护群组，受保护群组不可删除或永久删除
 	Protected bool `json:"protected,omitempty"`
 	// 用户组描述
-	Description             string `json:"description,omitempty"`
-	departments_lion_groups *int
-	selectValues            sql.SelectValues
+	Description  string `json:"description,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -73,8 +72,6 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case groups.FieldCreatedAt, groups.FieldUpdatedAt, groups.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
-		case groups.ForeignKeys[0]: // departments_lion_groups
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -206,13 +203,6 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
 				_m.Description = value.String
-			}
-		case groups.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field departments_lion_groups", value)
-			} else if value.Valid {
-				_m.departments_lion_groups = new(int)
-				*_m.departments_lion_groups = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
