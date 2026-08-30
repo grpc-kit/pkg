@@ -669,6 +669,9 @@ func effectiveGroupCodesForUserAt(ctx context.Context, db *lion.Client, userID i
 		return nil
 	}
 
+	// 此处不设 LIMIT：若在 groups 表的 ACTIVE/未软删过滤之前截断 membership 行，
+	// 超限用户的活跃组 claim 会被静默丢弃并随数据库返回顺序漂移；行数以单用户
+	// membership 数为界，claimMaxItems+1 上限在下方 groups 查询按 code 稳定排序后执行。
 	directMemberships, err := db.UserMemberships.Query().
 		Select(usermemberships.FieldTargetID).
 		Where(
@@ -676,7 +679,7 @@ func effectiveGroupCodesForUserAt(ctx context.Context, db *lion.Client, userID i
 			usermemberships.TargetTypeEQ(membershipTargetGroup),
 			usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
 			usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(now)),
-		).Limit(groupClaimMaxItems + 1).
+		).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -699,12 +702,13 @@ func effectiveGroupCodesForUserAt(ctx context.Context, db *lion.Client, userID i
 		}
 	}
 
+	// 同上：不得在 ACTIVE 部门过滤前截断 membership 行。
 	departmentMemberships, err := db.UserMemberships.Query().Select(usermemberships.FieldTargetID).Where(
 		usermemberships.UserIDEQ(userID),
 		usermemberships.TargetTypeEQ(membershipTargetDepartment),
 		usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
 		usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(now)),
-	).Limit(groupClaimMaxItems + 1).All(ctx)
+	).All(ctx)
 	if err != nil {
 		return nil, err
 	}

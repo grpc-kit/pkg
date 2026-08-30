@@ -65,8 +65,19 @@ func ensureBuiltinGroup(ctx context.Context, tx *lion.Tx, seed builtinGroupSeed)
 	if err != nil {
 		return nil, err
 	}
-	group, err := tx.Groups.Query().Where(groups.CodeEQ(seed.Code)).Only(ctx)
+	group, err := tx.Groups.Query().Where(groups.CodeEQ(seed.Code), groups.DeletedAtIsNil()).Only(ctx)
 	if lion.IsNotFound(err) {
+		// 唯一索引不含 deleted_at：同 code 的回收站行继续占位，直接创建必然冲突；
+		// 与同 code 非 SYSTEM 脏数据处理一致，返回 FailedPrecondition 要求先恢复或
+		// 彻底清除，不原地转换（§3.1/§4.4）。
+		occupied, probeErr := tx.Groups.Query().Where(groups.CodeEQ(seed.Code)).Count(ctx)
+		if probeErr != nil {
+			return nil, probeErr
+		}
+		if occupied > 0 {
+			return nil, errs.FailedPrecondition(ctx).WithMessage(
+				"built-in group code is occupied by a deleted group; undelete or expunge it before initialization")
+		}
 		if err := lockAndCheckActiveRuleGroupCapacity(ctx, tx, 1); err != nil {
 			return nil, err
 		}
