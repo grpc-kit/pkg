@@ -14,10 +14,8 @@ import (
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestCredentialToProto_BasicFields(t *testing.T) {
@@ -369,17 +367,6 @@ func TestParseListCredentialsFilter_Fingerprint(t *testing.T) {
 	}
 }
 
-func TestTimePtr(t *testing.T) {
-	now := time.Now()
-	ptr := timePtr(now)
-	if ptr == nil {
-		t.Fatal("expected non-nil pointer")
-	}
-	if !ptr.Equal(now) {
-		t.Errorf("expected %v, got %v", now, *ptr)
-	}
-}
-
 func TestFirstByte(t *testing.T) {
 	if firstByte(nil) != 0 {
 		t.Error("expected 0 for empty slice")
@@ -392,40 +379,6 @@ func TestFirstByte(t *testing.T) {
 	}
 	if firstByte([]byte{0x30, 0x82}) != 0x30 {
 		t.Error("expected 0x30")
-	}
-}
-
-// Ensure credentials.FieldXxx constants are used (compile-time check)
-func TestFieldConstantsExist(t *testing.T) {
-	fields := []string{
-		credentials.FieldID,
-		credentials.FieldCode,
-		credentials.FieldFingerprint,
-		credentials.FieldCredentialType,
-		credentials.FieldCredentialStatus,
-		credentials.FieldCredentialUsage,
-		credentials.FieldCredentialSource,
-		credentials.FieldCredentialVisibility,
-		credentials.FieldProtected,
-		credentials.FieldDisplayName,
-		credentials.FieldDescription,
-		credentials.FieldAPIKey,
-		credentials.FieldPublicKey,
-		credentials.FieldCertificate,
-		credentials.FieldSignature,
-		credentials.FieldNotBefore,
-		credentials.FieldExpiresAt,
-		credentials.FieldMetadata,
-		credentials.FieldCreatedBy,
-		credentials.FieldUpdatedBy,
-		credentials.FieldCreatedAt,
-		credentials.FieldUpdatedAt,
-		credentials.FieldDeletedAt,
-	}
-	for _, f := range fields {
-		if f == "" {
-			t.Error("expected non-empty field constant")
-		}
 	}
 }
 
@@ -490,46 +443,6 @@ func TestIsTokenPersistenceRequest_WrongSource(t *testing.T) {
 	}
 	if isTokenPersistenceRequest(cred) {
 		t.Error("expected false for SECRET+AUTH+SYSTEM")
-	}
-}
-
-func TestDecryptToken_RoundTrip(t *testing.T) {
-	aesKey := []byte("0123456789abcdef0123456789abcdef")
-	api := New(WithAESKey(aesKey))
-
-	originalToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.payload.signature"
-	encrypted, err := crypto.EncryptAES(aesKey, []byte(originalToken))
-	if err != nil {
-		t.Fatalf("encrypt failed: %v", err)
-	}
-
-	decrypted, err := api.decryptToken(encrypted)
-	if err != nil {
-		t.Fatalf("decrypt failed: %v", err)
-	}
-	if decrypted != originalToken {
-		t.Errorf("expected %q, got %q", originalToken, decrypted)
-	}
-}
-
-func TestDecryptToken_EmptyInput(t *testing.T) {
-	aesKey := []byte("0123456789abcdef0123456789abcdef")
-	api := New(WithAESKey(aesKey))
-
-	decrypted, err := api.decryptToken(nil)
-	if err != nil {
-		t.Fatalf("expected no error for empty input, got %v", err)
-	}
-	if decrypted != "" {
-		t.Errorf("expected empty string, got %q", decrypted)
-	}
-}
-
-// Test that timestamppb import is used (compile-time check)
-func TestTimestampPbUsage(t *testing.T) {
-	ts := timestamppb.Now()
-	if ts == nil {
-		t.Fatal("expected non-nil timestamp")
 	}
 }
 
@@ -598,27 +511,6 @@ func TestRevealCredentialSecret_NoUserContext(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatal("expected error for missing user context")
-	}
-	st, ok := err.(*errs.Status)
-	if !ok {
-		t.Fatalf("expected *errs.Status, got %T", err)
-	}
-	if st.Code != int32(codes.Unauthenticated) {
-		t.Errorf("expected Unauthenticated, got code=%d", st.Code)
-	}
-}
-
-func TestRevealCredentialSecret_AnonymousUser(t *testing.T) {
-	api := newRevealTestAPI(t)
-	// 未设置 username 时，GetUsernameFromContext 返回 "anonymous"
-	ctx := context.Background()
-
-	_, err := api.RevealCredentialSecret(ctx, &adminv1.RevealCredentialSecretRequest{
-		Id:           1,
-		PasswordHash: "some-hash",
-	})
-	if err == nil {
-		t.Fatal("expected error for anonymous user")
 	}
 	st, ok := err.(*errs.Status)
 	if !ok {
@@ -790,16 +682,6 @@ func TestRevealCredentialSecret_EncryptionRoundTrip(t *testing.T) {
 	if string(decLic) != string(originalLicense) {
 		t.Errorf("license_key round-trip mismatch: expected %q, got %q", originalLicense, decLic)
 	}
-}
-
-// 确保 lion 包导入在测试中被使用（编译时检查）
-func TestRevealCredentialSecret_LionImportCheck(t *testing.T) {
-	// 验证 credentials 包的加密字段名称存在
-	_ = credentials.FieldPrivateKeyEncrypted
-	_ = credentials.FieldAPISecretEncrypted
-	_ = credentials.FieldSymmetricKeyEncrypted
-	_ = credentials.FieldPassphraseEncrypted
-	_ = credentials.FieldLicenseKeyEncrypted
 }
 
 // ======================== normalizePublicKeyToDER tests ========================

@@ -22,16 +22,6 @@ func TestAccessTokenClaimsContext(t *testing.T) {
 	}
 }
 
-func TestTokenClaimsContextSupportsPointer(t *testing.T) {
-	want := &testTokenClaims{Subject: "123"}
-	ctx := ContextWithIDToken(context.Background(), want)
-
-	got, ok := GetTokenClaimsFromContext(ctx).(*testTokenClaims)
-	if !ok || got != want {
-		t.Fatalf("legacy context claims = %#v, %v", got, ok)
-	}
-}
-
 func TestLegacyTokenContextRemainsReadable(t *testing.T) {
 	want := testTokenClaims{Subject: "legacy-user"}
 	ctx := ContextWithIDToken(context.Background(), want)

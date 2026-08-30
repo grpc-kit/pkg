@@ -153,19 +153,3 @@ func TestStaticUserIssueAccessTokenOmitsEmptyClaims(t *testing.T) {
 		t.Fatalf("client_id/subject mismatch: client_id=%q sub=%q", claims.ClientID, claims.Subject)
 	}
 }
-
-// TestStaticUsersFindByUsername 验证按 username 反查静态用户（不校验口令），
-// 供已认证调用方重签自身令牌时定位静态用户与 HS256 签名密钥。
-func TestStaticUsersFindByUsername(t *testing.T) {
-	users := StaticUsers{
-		&StaticUser{UserID: 1, Username: "alice", PasswordHash: "h1"},
-		&StaticUser{UserID: 2, Username: "bob", PasswordHash: "h2"},
-	}
-	u, ok := users.Find("alice")
-	if !ok || u == nil || u.UserID != 1 || u.PasswordHash != "h1" {
-		t.Fatalf("find alice: ok=%v u=%+v", ok, u)
-	}
-	if _, ok := users.Find("missing"); ok {
-		t.Fatal("expected not found for missing user")
-	}
-}

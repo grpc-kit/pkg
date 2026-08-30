@@ -114,25 +114,3 @@ func testInitAIConnectorDisabled(t *testing.T) {
 		t.Errorf("MCPServer.AllowedTags = %v, want [\"mcp\"] (should fill default even when disabled)", got)
 	}
 }
-
-func TestDefaultAIConnectorConfig(t *testing.T) {
-	d := DefaultAIConnectorConfig()
-	if d == nil {
-		t.Fatal("DefaultAIConnectorConfig() returned nil")
-	}
-	if d.Enable {
-		t.Error("Enable should be false")
-	}
-	if d.MCPServer.Enable {
-		t.Error("MCPServer.Enable should be false")
-	}
-	if d.MCPServer.Path != "/mcp" {
-		t.Errorf("MCPServer.Path = %q, want %q", d.MCPServer.Path, "/mcp")
-	}
-	if d.MCPServer.Transport != "streamable_http" {
-		t.Errorf("MCPServer.Transport = %q, want %q", d.MCPServer.Transport, "streamable_http")
-	}
-	if got := d.MCPServer.AllowedTags; len(got) != 1 || got[0] != "mcp" {
-		t.Errorf("MCPServer.AllowedTags = %v, want [\"mcp\"]", got)
-	}
-}

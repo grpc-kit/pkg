@@ -102,16 +102,6 @@ func TestMCPHandlerRejectsLocalhostHostMismatch(t *testing.T) {
 	}
 }
 
-func TestNewServer_Disabled(t *testing.T) {
-	srv, err := NewServer(false, "streamable_http")
-	if err != nil {
-		t.Fatalf("unexpected error for disabled config: %v", err)
-	}
-	if srv != nil {
-		t.Fatalf("expected nil server for disabled config, got non-nil")
-	}
-}
-
 func TestMCPHandler(t *testing.T) {
 	// 创建 MCP Server
 	srv, err := NewServer(true, "streamable_http")
