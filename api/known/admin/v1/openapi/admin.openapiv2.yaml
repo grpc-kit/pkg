@@ -791,7 +791,7 @@ openapiOptions:
         responses:
           "200":
             examples:
-              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"metadata":{"slack_channel":"#ops-alert"},"description":"负责线上运行保障","visibility":"VISIBLE","ref_id":"0","ref_expr":""}'
+              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"metadata":{"slack_channel":"#ops-alert"},"description":"负责线上运行保障","visibility":"VISIBLE"}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListGroups
       option:
         tags:
@@ -801,7 +801,7 @@ openapiOptions:
         responses:
           "200":
             examples:
-              "application/json": '{"groups":[{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"description":"负责线上运行保障","visibility":"VISIBLE","ref_id":"0","ref_expr":""}],"next_page_token":"groups:21","total_size":14}'
+              "application/json": '{"groups":[{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"description":"负责线上运行保障","visibility":"VISIBLE"}],"next_page_token":"groups:21","total_size":14}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGroup
       option:
         tags:
@@ -811,7 +811,7 @@ openapiOptions:
         responses:
           "200":
             examples:
-              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队（更新）","sort_order":25,"max_members":100,"metadata":{"slack_channel":"#ops-warroom"},"description":"增加应急值班职能","visibility":"VISIBLE","ref_id":"0","ref_expr":""}'
+              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队（更新）","sort_order":25,"max_members":100,"metadata":{"slack_channel":"#ops-warroom"},"description":"增加应急值班职能","visibility":"VISIBLE"}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGroup
       option:
         tags:
@@ -843,7 +843,7 @@ openapiOptions:
         responses:
           "200":
             examples:
-              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"metadata":{"slack_channel":"#ops-alert"},"description":"负责线上运行保障","visibility":"VISIBLE","ref_id":"0","ref_expr":""}'
+              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"metadata":{"slack_channel":"#ops-alert"},"description":"负责线上运行保障","visibility":"VISIBLE"}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListGroupMembers
       option:
         tags:

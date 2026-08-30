@@ -2057,9 +2057,7 @@
                     "sort_order": 30,
                     "max_members": 80,
                     "description": "负责线上运行保障",
-                    "visibility": "VISIBLE",
-                    "ref_id": "0",
-                    "ref_expr": ""
+                    "visibility": "VISIBLE"
                   }
                 ],
                 "next_page_token": "groups:21",
@@ -2215,9 +2213,7 @@
                   "slack_channel": "#ops-alert"
                 },
                 "description": "负责线上运行保障",
-                "visibility": "VISIBLE",
-                "ref_id": "0",
-                "ref_expr": ""
+                "visibility": "VISIBLE"
               }
             }
           },
@@ -2273,9 +2269,7 @@
                   "slack_channel": "#ops-warroom"
                 },
                 "description": "增加应急值班职能",
-                "visibility": "VISIBLE",
-                "ref_id": "0",
-                "ref_expr": ""
+                "visibility": "VISIBLE"
               }
             }
           },
@@ -2342,12 +2336,26 @@
                 "visibility": {
                   "$ref": "#/definitions/v1Visibility"
                 },
-                "ref_id": {
+                "parent_id": {
                   "type": "string",
-                  "format": "int64"
+                  "format": "int64",
+                  "title": "为后续层级扩展保留；0 表示根 Group，普通 API 当前只能写 0。"
                 },
-                "ref_expr": {
-                  "type": "string"
+                "department_config": {
+                  "$ref": "#/definitions/GroupDepartmentConfig"
+                },
+                "role_config": {
+                  "$ref": "#/definitions/GroupRoleConfig"
+                },
+                "dynamic_config": {
+                  "$ref": "#/definitions/GroupDynamicConfig"
+                },
+                "system_config": {
+                  "$ref": "#/definitions/GroupSystemConfig"
+                },
+                "protected": {
+                  "type": "boolean",
+                  "title": "Protected 是否为系统内置/受保护的群组。受保护群组不可删除或永久删除。\n该字段由系统种子或迁移管理，普通 CreateGroup/UpdateGroup 不可修改。"
                 },
                 "created_by": {
                   "type": "string",
@@ -2368,10 +2376,6 @@
                 "deleted_at": {
                   "type": "string",
                   "format": "date-time"
-                },
-                "protected": {
-                  "type": "boolean",
-                  "title": "Protected 是否为系统内置/受保护的群组。受保护群组不可删除或永久删除。\n该字段由系统种子或迁移管理，普通 CreateGroup/UpdateGroup 不可修改。"
                 }
               },
               "title": "Group 群组实体，表示一类相同维度的用户集合，扁平结构不支持树形\n该模型用于描述系统中各类用户分组，支持多维度的用户组织与管理"
@@ -2407,9 +2411,7 @@
                   "slack_channel": "#ops-alert"
                 },
                 "description": "负责线上运行保障",
-                "visibility": "VISIBLE",
-                "ref_id": "0",
-                "ref_expr": ""
+                "visibility": "VISIBLE"
               }
             }
           },
@@ -4596,7 +4598,7 @@
           },
           {
             "name": "principal_type",
-            "description": "可选主体类型过滤，不传则返回全部类型。",
+            "description": "可选主体类型过滤，不传则返回全部类型。\n\n - GROUP: 角色绑定时仅允许 type=SYSTEM 的 Group",
             "in": "query",
             "required": false,
             "type": "string",
@@ -6831,6 +6833,42 @@
       },
       "title": "X.509 证书捆绑数据"
     },
+    "GroupDepartmentConfig": {
+      "type": "object",
+      "properties": {
+        "department_id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "GroupDynamicConfig": {
+      "type": "object",
+      "properties": {
+        "user_filter": {
+          "type": "string",
+          "title": "服务端支持的用户过滤语法。"
+        }
+      }
+    },
+    "GroupRoleConfig": {
+      "type": "object",
+      "properties": {
+        "role_id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "GroupSystemConfig": {
+      "type": "object",
+      "properties": {
+        "user_filter": {
+          "type": "string",
+          "title": "仅由系统种子写入。"
+        }
+      }
+    },
     "ListUsersRequestUserView": {
       "type": "string",
       "enum": [
@@ -8342,12 +8380,26 @@
         "visibility": {
           "$ref": "#/definitions/v1Visibility"
         },
-        "ref_id": {
+        "parent_id": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "为后续层级扩展保留；0 表示根 Group，普通 API 当前只能写 0。"
         },
-        "ref_expr": {
-          "type": "string"
+        "department_config": {
+          "$ref": "#/definitions/GroupDepartmentConfig"
+        },
+        "role_config": {
+          "$ref": "#/definitions/GroupRoleConfig"
+        },
+        "dynamic_config": {
+          "$ref": "#/definitions/GroupDynamicConfig"
+        },
+        "system_config": {
+          "$ref": "#/definitions/GroupSystemConfig"
+        },
+        "protected": {
+          "type": "boolean",
+          "title": "Protected 是否为系统内置/受保护的群组。受保护群组不可删除或永久删除。\n该字段由系统种子或迁移管理，普通 CreateGroup/UpdateGroup 不可修改。"
         },
         "created_by": {
           "type": "string",
@@ -8368,10 +8420,6 @@
         "deleted_at": {
           "type": "string",
           "format": "date-time"
-        },
-        "protected": {
-          "type": "boolean",
-          "title": "Protected 是否为系统内置/受保护的群组。受保护群组不可删除或永久删除。\n该字段由系统种子或迁移管理，普通 CreateGroup/UpdateGroup 不可修改。"
         }
       },
       "title": "Group 群组实体，表示一类相同维度的用户集合，扁平结构不支持树形\n该模型用于描述系统中各类用户分组，支持多维度的用户组织与管理"
@@ -9954,6 +10002,7 @@
         "DEPARTMENT"
       ],
       "default": "PRINCIPAL_TYPE_UNSPECIFIED",
+      "description": "- GROUP: 角色绑定时仅允许 type=SYSTEM 的 Group",
       "title": "PrincipalType 主体类型，用于角色绑定关系"
     },
     "v1PrometheusExporterConfig": {
