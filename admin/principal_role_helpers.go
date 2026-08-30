@@ -527,6 +527,44 @@ func effectiveRoleIDsForUserAt(ctx context.Context, db *lion.Client, userID int,
 	return effectiveRoleIDsForUserAtWithProjection(ctx, db, userID, now, nil)
 }
 
+func matchedActiveSystemGroupIDsForUserAt(ctx context.Context, db *lion.Client, userID int, targetUser *lion.Users) ([]int, error) {
+	systemGroups, err := db.Groups.Query().Select(
+		groups.FieldID,
+		groups.FieldGroupType,
+		groups.FieldConfig,
+	).Where(
+		groups.GroupTypeEQ(int(adminv1.Group_SYSTEM)),
+		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+		groups.DeletedAtIsNil(),
+	).Limit(activeRuleGroupMax + 1).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(systemGroups) > activeRuleGroupMax {
+		return nil, errs.ResourceExhausted(ctx).WithMessage("active rule group limit exceeded")
+	}
+	if len(systemGroups) == 0 {
+		return []int{}, nil
+	}
+	if targetUser == nil {
+		targetUser, err = loadUserFilterProjection(ctx, db, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	matchedGroupIDs := make([]int, 0, len(systemGroups))
+	for _, group := range systemGroups {
+		compiled, configErr := decodeStoredUserFilter(group.Config)
+		if configErr != nil {
+			return nil, errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("SYSTEM group %d has invalid rule config", group.ID))
+		}
+		if compiled.matches(targetUser) {
+			matchedGroupIDs = append(matchedGroupIDs, group.ID)
+		}
+	}
+	return matchedGroupIDs, nil
+}
+
 func effectiveRoleIDsForUserAtWithProjection(ctx context.Context, db *lion.Client, userID int, now time.Time, targetUser *lion.Users) ([]int, error) {
 	roleIDs := map[int]struct{}{}
 
@@ -596,42 +634,12 @@ func effectiveRoleIDsForUserAtWithProjection(ctx context.Context, db *lion.Clien
 	// GROUP principals are deliberately limited to SYSTEM groups. SYSTEM
 	// membership depends only on user_filter, so evaluating it here cannot form
 	// a Role -> Group -> Role cycle.
-	systemGroups, err := db.Groups.Query().Select(
-		groups.FieldID,
-		groups.FieldGroupType,
-		groups.FieldConfig,
-	).Where(
-		groups.GroupTypeEQ(int(adminv1.Group_SYSTEM)),
-		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
-		groups.DeletedAtIsNil(),
-	).Limit(activeRuleGroupMax + 1).All(ctx)
+	matchedGroupIDs, err := matchedActiveSystemGroupIDsForUserAt(ctx, db, userID, targetUser)
 	if err != nil {
 		return nil, err
 	}
-	if len(systemGroups) > activeRuleGroupMax {
-		return nil, errs.ResourceExhausted(ctx).WithMessage("active rule group limit exceeded")
-	}
-	if len(systemGroups) > 0 {
-		if targetUser == nil {
-			var queryErr error
-			targetUser, queryErr = loadUserFilterProjection(ctx, db, userID)
-			if queryErr != nil {
-				return nil, queryErr
-			}
-		}
-		matchedGroupIDs := make([]int, 0, len(systemGroups))
-		for _, group := range systemGroups {
-			compiled, configErr := decodeStoredUserFilter(group.Config)
-			if configErr != nil {
-				return nil, errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("SYSTEM group %d has invalid rule config", group.ID))
-			}
-			if compiled.matches(targetUser) {
-				matchedGroupIDs = append(matchedGroupIDs, group.ID)
-			}
-		}
-		if err := collect(principalTypeGroup, matchedGroupIDs); err != nil {
-			return nil, err
-		}
+	if err := collect(principalTypeGroup, matchedGroupIDs); err != nil {
+		return nil, err
 	}
 
 	candidates := make([]int, 0, len(roleIDs))
@@ -669,99 +677,59 @@ func effectiveGroupCodesForUserAt(ctx context.Context, db *lion.Client, userID i
 		return nil
 	}
 
-	// 此处不设 LIMIT：若在 groups 表的 ACTIVE/未软删过滤之前截断 membership 行，
-	// 超限用户的活跃组 claim 会被静默丢弃并随数据库返回顺序漂移；行数以单用户
-	// membership 数为界，claimMaxItems+1 上限在下方 groups 查询按 code 稳定排序后执行。
-	directMemberships, err := db.UserMemberships.Query().
-		Select(usermemberships.FieldTargetID).
-		Where(
-			usermemberships.UserIDEQ(userID),
-			usermemberships.TargetTypeEQ(membershipTargetGroup),
-			usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
-			usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(now)),
-		).
-		All(ctx)
+	// Apply membership and source validity with EXISTS predicates on the bounded
+	// groups query. This preserves the deterministic overflow check without an
+	// unbounded membership pre-query or an arbitrarily truncated ID slice.
+	directGroups, err := db.Groups.Query().Select(groups.FieldID, groups.FieldCode).Where(
+		groups.GroupTypeIn(
+			int(adminv1.Group_PROJECT),
+			int(adminv1.Group_EXTERNAL),
+			int(adminv1.Group_COMMUNITY),
+		),
+		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+		groups.DeletedAtIsNil(),
+		groupHasDirectMembershipForUser(userID, now),
+	).Order(lion.Asc(groups.FieldCode)).Limit(groupClaimMaxItems + 1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	directIDs := make([]int, 0, len(directMemberships))
-	for _, row := range directMemberships {
-		directIDs = append(directIDs, row.TargetID)
-	}
-	if len(directIDs) > 0 {
-		rows, queryErr := db.Groups.Query().Select(groups.FieldID, groups.FieldCode).Where(
-			groups.IDIn(directIDs...),
-			groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
-			groups.DeletedAtIsNil(),
-		).Order(lion.Asc(groups.FieldCode)).Limit(groupClaimMaxItems + 1).All(ctx)
-		if queryErr != nil {
-			return nil, queryErr
-		}
-		if err := addGroups(rows); err != nil {
-			return nil, err
-		}
+	if err := addGroups(directGroups); err != nil {
+		return nil, err
 	}
 
-	// 同上：不得在 ACTIVE 部门过滤前截断 membership 行。
-	departmentMemberships, err := db.UserMemberships.Query().Select(usermemberships.FieldTargetID).Where(
-		usermemberships.UserIDEQ(userID),
-		usermemberships.TargetTypeEQ(membershipTargetDepartment),
-		usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
-		usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(now)),
-	).All(ctx)
+	departmentGroups, err := db.Groups.Query().Select(groups.FieldID, groups.FieldCode).Where(
+		groups.GroupTypeEQ(int(adminv1.Group_DEPARTMENT)),
+		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+		groups.DeletedAtIsNil(),
+		groupHasDepartmentMembershipForUser(userID, now),
+	).Order(lion.Asc(groups.FieldCode)).Limit(groupClaimMaxItems + 1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	departmentIDs := make([]int, 0, len(departmentMemberships))
-	for _, membership := range departmentMemberships {
-		departmentIDs = append(departmentIDs, membership.TargetID)
-	}
-	if len(departmentIDs) > 0 {
-		departmentIDs, err = db.Departments.Query().Where(
-			departments.IDIn(departmentIDs...),
-			departments.DepartmentStatusEQ(int(adminv1.Department_ACTIVE)),
-			departments.DeletedAtIsNil(),
-		).IDs(ctx)
-		if err != nil {
-			return nil, err
-		}
-		if len(departmentIDs) > 0 {
-			rows, queryErr := db.Groups.Query().Select(groups.FieldID, groups.FieldCode).Where(
-				groups.GroupTypeEQ(int(adminv1.Group_DEPARTMENT)),
-				groups.SourceIDIn(departmentIDs...),
-				groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
-				groups.DeletedAtIsNil(),
-			).Order(lion.Asc(groups.FieldCode)).Limit(groupClaimMaxItems + 1).All(ctx)
-			if queryErr != nil {
-				return nil, queryErr
-			}
-			if err := addGroups(rows); err != nil {
-				return nil, err
-			}
-		}
+	if err := addGroups(departmentGroups); err != nil {
+		return nil, err
 	}
 
 	targetUser, err := loadUserFilterProjection(ctx, db, userID)
 	if err != nil {
 		return nil, err
 	}
-	roleIDs, err := effectiveRoleIDsForUserAtWithProjection(ctx, db, userID, now, targetUser)
+	matchedSystemGroupIDs, err := matchedActiveSystemGroupIDsForUserAt(ctx, db, userID, targetUser)
 	if err != nil {
 		return nil, err
 	}
-	if len(roleIDs) > 0 {
-		rows, queryErr := db.Groups.Query().Select(groups.FieldID, groups.FieldCode).Where(
-			groups.GroupTypeEQ(int(adminv1.Group_ROLE)),
-			groups.SourceIDIn(roleIDs...),
-			groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
-			groups.DeletedAtIsNil(),
-		).Order(lion.Asc(groups.FieldCode)).Limit(groupClaimMaxItems + 1).All(ctx)
-		if queryErr != nil {
-			return nil, queryErr
-		}
-		if err := addGroups(rows); err != nil {
-			return nil, err
-		}
+	roleGroups, err := db.Groups.Query().Select(groups.FieldID, groups.FieldCode).Where(
+		groups.GroupTypeEQ(int(adminv1.Group_ROLE)),
+		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+		groups.DeletedAtIsNil(),
+		groupHasActiveRoleSource(),
+		groupProjectsEffectiveRoleForUser(userID, matchedSystemGroupIDs, now),
+	).Order(lion.Asc(groups.FieldCode)).Limit(groupClaimMaxItems + 1).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := addGroups(roleGroups); err != nil {
+		return nil, err
 	}
 
 	ruleGroups, err := db.Groups.Query().Select(

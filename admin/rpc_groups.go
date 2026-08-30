@@ -2,8 +2,6 @@ package admin
 
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strconv"
@@ -203,13 +201,21 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 		groupQuery = groupQuery.Where(where...)
 	}
 
-	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
-	case "created_at asc", "create_time asc":
-		groupQuery = groupQuery.Order(lion.Asc(groups.FieldCreatedAt))
-	case "created_at desc", "create_time desc":
-		groupQuery = groupQuery.Order(lion.Desc(groups.FieldCreatedAt))
-	default:
-		groupQuery = groupQuery.Order(lion.Asc(groups.FieldSortOrder), lion.Asc(groups.FieldID))
+	_, cursorMode := req.GetPagination().(*adminv1.ListGroupsRequest_PageToken)
+	if cursorMode {
+		if err := requireIDCursorOrder(ctx, req.GetOrderBy()); err != nil {
+			return nil, err
+		}
+		groupQuery = groupQuery.Order(lion.Asc(groups.FieldID))
+	} else {
+		switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+		case "created_at asc", "create_time asc":
+			groupQuery = groupQuery.Order(lion.Asc(groups.FieldCreatedAt), lion.Asc(groups.FieldID))
+		case "created_at desc", "create_time desc":
+			groupQuery = groupQuery.Order(lion.Desc(groups.FieldCreatedAt), lion.Desc(groups.FieldID))
+		default:
+			groupQuery = groupQuery.Order(lion.Asc(groups.FieldSortOrder), lion.Asc(groups.FieldID))
+		}
 	}
 
 	totalSize, err := groupQuery.Clone().Count(ctx)
@@ -223,18 +229,12 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 	case *adminv1.ListGroupsRequest_Offset:
 		groupQuery = groupQuery.Offset(int(p.Offset))
 	case *adminv1.ListGroupsRequest_PageToken:
-		if req.GetPageToken() != "" {
-			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
-			if decErr != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
-			}
-			var lastID int
-			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
-			}
-			if lastID > 0 {
-				groupQuery = groupQuery.Where(groups.IDGT(lastID))
-			}
+		lastID, tokenErr := decodeGroupIDPageToken(ctx, p.PageToken)
+		if tokenErr != nil {
+			return nil, tokenErr
+		}
+		if lastID > 0 {
+			groupQuery = groupQuery.Where(groups.IDGT(lastID))
 		}
 	}
 
@@ -252,10 +252,8 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 		}
 		result.Groups = append(result.Groups, item)
 	}
-	if _, ok := req.GetPagination().(*adminv1.ListGroupsRequest_PageToken); ok && len(groupList) == int(pageSize) && len(groupList) > 0 {
-		last := groupList[len(groupList)-1].ID
-		tokenData, _ := json.Marshal(last)
-		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	if cursorMode && len(groupList) == int(pageSize) && len(groupList) > 0 {
+		result.NextPageToken = encodeGroupIDPageToken(groupList[len(groupList)-1].ID)
 	}
 
 	return result, nil
@@ -382,8 +380,9 @@ func groupToProto(g *lion.Groups, includeTimestamps bool) (*adminv1.Group, error
 			grp.DeletedAt = timestamppb.New(*g.DeletedAt)
 		}
 	}
+	// 读取路径对外只暴露组 ID 与错误类别，不透传存量配置细节（§4.1/§4.1.4）。
 	if err := populateGroupProtoConfig(grp, g); err != nil {
-		return nil, fmt.Errorf("group %d has invalid type config: %w", g.ID, err)
+		return nil, fmt.Errorf("group %d has invalid type config", g.ID)
 	}
 	return grp, nil
 }
@@ -593,7 +592,7 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 		}
 		return a.listGroupMembersFromDepartment(ctx, req, db, *group.SourceID)
 	case adminv1.Group_ROLE:
-		return a.listGroupMembersFromRole(ctx, req, db, *group.SourceID)
+		return a.listGroupMembersFromRole(ctx, req, db, groupID, *group.SourceID)
 	case adminv1.Group_DYNAMIC, adminv1.Group_SYSTEM:
 		compiled, configErr := decodeStoredUserFilter(group.Config)
 		if configErr != nil {
@@ -623,14 +622,21 @@ func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req 
 		usermemberships.HasLionUsersWith(users.DeletedAtIsNil()),
 	)
 
-	// 排序
-	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
-	case "created_at desc", "create_time desc":
-		memberQuery = memberQuery.Order(lion.Desc(usermemberships.FieldCreatedAt))
-	case "created_at asc", "create_time asc":
-		memberQuery = memberQuery.Order(lion.Asc(usermemberships.FieldCreatedAt))
-	default:
+	_, cursorMode := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken)
+	if cursorMode {
+		if err := requireIDCursorOrder(ctx, req.GetOrderBy()); err != nil {
+			return nil, err
+		}
 		memberQuery = memberQuery.Order(lion.Desc(usermemberships.FieldID))
+	} else {
+		switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+		case "created_at desc", "create_time desc":
+			memberQuery = memberQuery.Order(lion.Desc(usermemberships.FieldCreatedAt), lion.Desc(usermemberships.FieldID))
+		case "created_at asc", "create_time asc":
+			memberQuery = memberQuery.Order(lion.Asc(usermemberships.FieldCreatedAt), lion.Asc(usermemberships.FieldID))
+		default:
+			memberQuery = memberQuery.Order(lion.Desc(usermemberships.FieldID))
+		}
 	}
 
 	totalSize, err := memberQuery.Clone().Count(ctx)
@@ -646,18 +652,12 @@ func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req 
 	case *adminv1.ListGroupMembersRequest_Offset:
 		memberQuery = memberQuery.Offset(int(p.Offset))
 	case *adminv1.ListGroupMembersRequest_PageToken:
-		if req.GetPageToken() != "" {
-			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
-			if decErr != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
-			}
-			var lastID int
-			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
-			}
-			if lastID > 0 {
-				memberQuery = memberQuery.Where(usermemberships.IDGT(lastID))
-			}
+		lastID, tokenErr := decodeGroupIDPageToken(ctx, p.PageToken)
+		if tokenErr != nil {
+			return nil, tokenErr
+		}
+		if lastID > 0 {
+			memberQuery = memberQuery.Where(usermemberships.IDLT(lastID))
 		}
 	}
 	memberQuery = memberQuery.Limit(int(pageSize))
@@ -690,17 +690,18 @@ func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req 
 	}
 
 	// Cursor 分页
-	if _, ok := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken); ok && len(members) == int(pageSize) && len(members) > 0 {
-		lastID := members[len(members)-1].ID
-		tokenData, _ := json.Marshal(lastID)
-		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	if cursorMode && len(members) == int(pageSize) && len(members) > 0 {
+		result.NextPageToken = encodeGroupIDPageToken(members[len(members)-1].ID)
 	}
 
 	return result, nil
 }
 
-// listGroupMembersFromRole 从 principal_roles 查询角色主体绑定，并在 full 视图下展开为用户列表。
-func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, roleID int) (*adminv1.ListGroupMembersResponse, error) {
+// listGroupMembersFromRole paginates the final, deduplicated user set. Paging
+// principal-role bindings first is incorrect because one binding may expand to
+// many users and the same user may be reached through several principals.
+func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, groupID, roleID int) (*adminv1.ListGroupMembersResponse, error) {
+	result := &adminv1.ListGroupMembersResponse{Members: make([]*adminv1.Membership, 0)}
 	exists, err := db.Roles.Query().Where(
 		roles.IDEQ(roleID),
 		roles.RoleStatusEQ(int(adminv1.Role_ACTIVE)),
@@ -712,29 +713,70 @@ func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *admin
 	if !exists {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("role group reference must be active and not deleted")
 	}
-	roleReq := &adminv1.ListRoleMembersRequest{
-		Parent:        strconv.Itoa(roleID),
-		PageSize:      req.GetPageSize(),
-		Filter:        req.GetFilter(),
-		OrderBy:       req.GetOrderBy(),
-		View:          adminv1.View_VIEW_FULL,
-		PrincipalType: adminv1.PrincipalType_PRINCIPAL_TYPE_UNSPECIFIED,
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
 	}
-	switch p := req.GetPagination().(type) {
-	case *adminv1.ListGroupMembersRequest_PageToken:
-		roleReq.Pagination = &adminv1.ListRoleMembersRequest_PageToken{PageToken: p.PageToken}
-	case *adminv1.ListGroupMembersRequest_Offset:
-		roleReq.Pagination = &adminv1.ListRoleMembersRequest_Offset{Offset: p.Offset}
-	}
-	roleResp, err := a.ListRoleMembers(ctx, roleReq)
+
+	where, err := roleGroupUserPredicates(ctx, db, roleID, time.Now())
 	if err != nil {
 		return nil, err
 	}
-	return &adminv1.ListGroupMembersResponse{
-		Members:       roleResp.GetMembers(),
-		NextPageToken: roleResp.GetNextPageToken(),
-		TotalSize:     roleResp.GetTotalSize(),
-	}, nil
+	query := db.Users.Query().Where(where...)
+	_, cursorMode := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken)
+	if cursorMode {
+		if err := requireIDCursorOrder(ctx, req.GetOrderBy()); err != nil {
+			return nil, err
+		}
+		query = query.Order(lion.Asc(users.FieldID))
+	} else {
+		switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+		case "created_at desc", "create_time desc":
+			query = query.Order(lion.Desc(users.FieldCreatedAt), lion.Desc(users.FieldID))
+		case "created_at asc", "create_time asc":
+			query = query.Order(lion.Asc(users.FieldCreatedAt), lion.Asc(users.FieldID))
+		default:
+			query = query.Order(lion.Asc(users.FieldID))
+		}
+	}
+
+	totalSize, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result.TotalSize = int32(totalSize)
+	pageSize := GetPageSize(ctx, req.GetPageSize())
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListGroupMembersRequest_Offset:
+		query = query.Offset(int(p.Offset))
+	case *adminv1.ListGroupMembersRequest_PageToken:
+		lastID, tokenErr := decodeGroupIDPageToken(ctx, p.PageToken)
+		if tokenErr != nil {
+			return nil, tokenErr
+		}
+		if lastID > 0 {
+			query = query.Where(users.IDGT(lastID))
+		}
+	}
+	userList, err := query.Select(users.FieldID, users.FieldUsername, users.FieldNickname).
+		Limit(int(pageSize)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, user := range userList {
+		result.Members = append(result.Members, &adminv1.Membership{
+			UserId:       int64(user.ID),
+			Username:     user.Username,
+			Nickname:     user.Nickname,
+			TargetType:   adminv1.Membership_GROUP,
+			TargetId:     int64(groupID),
+			MemberStatus: adminv1.Membership_ACTIVE,
+		})
+	}
+	if cursorMode && len(userList) == int(pageSize) && len(userList) > 0 {
+		result.NextPageToken = encodeGroupIDPageToken(userList[len(userList)-1].ID)
+	}
+	return result, nil
 }
 
 // dynamicRuleAllowedFields 动态规则允许过滤的用户字段白名单（非敏感、非加密字段）
@@ -744,16 +786,22 @@ func (a *KnownAdminAPI) listGroupMembersFromDynamicRule(ctx context.Context, req
 		Members: make([]*adminv1.Membership, 0),
 	}
 
-	query := db.Users.Query().Where(rule.predicates()...)
-
-	// 排序
-	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
-	case "created_at desc", "create_time desc":
-		query = query.Order(lion.Desc(users.FieldCreatedAt))
-	case "created_at asc", "create_time asc":
-		query = query.Order(lion.Asc(users.FieldCreatedAt))
-	default:
+	query := db.Users.Query().Where(users.DeletedAtIsNil()).Where(rule.predicates()...)
+	_, cursorMode := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken)
+	if cursorMode {
+		if err := requireIDCursorOrder(ctx, req.GetOrderBy()); err != nil {
+			return nil, err
+		}
 		query = query.Order(lion.Asc(users.FieldID))
+	} else {
+		switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+		case "created_at desc", "create_time desc":
+			query = query.Order(lion.Desc(users.FieldCreatedAt), lion.Desc(users.FieldID))
+		case "created_at asc", "create_time asc":
+			query = query.Order(lion.Asc(users.FieldCreatedAt), lion.Asc(users.FieldID))
+		default:
+			query = query.Order(lion.Asc(users.FieldID))
+		}
 	}
 
 	totalSize, err := query.Clone().Count(ctx)
@@ -769,18 +817,12 @@ func (a *KnownAdminAPI) listGroupMembersFromDynamicRule(ctx context.Context, req
 	case *adminv1.ListGroupMembersRequest_Offset:
 		query = query.Offset(int(p.Offset))
 	case *adminv1.ListGroupMembersRequest_PageToken:
-		if req.GetPageToken() != "" {
-			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
-			if decErr != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
-			}
-			var lastID int
-			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
-			}
-			if lastID > 0 {
-				query = query.Where(users.IDGT(lastID))
-			}
+		lastID, tokenErr := decodeGroupIDPageToken(ctx, p.PageToken)
+		if tokenErr != nil {
+			return nil, tokenErr
+		}
+		if lastID > 0 {
+			query = query.Where(users.IDGT(lastID))
 		}
 	}
 	query = query.Limit(int(pageSize))
@@ -805,10 +847,8 @@ func (a *KnownAdminAPI) listGroupMembersFromDynamicRule(ctx context.Context, req
 	}
 
 	// Cursor 分页
-	if _, ok := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken); ok && len(userList) == int(pageSize) && len(userList) > 0 {
-		lastID := userList[len(userList)-1].ID
-		tokenData, _ := json.Marshal(lastID)
-		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	if cursorMode && len(userList) == int(pageSize) && len(userList) > 0 {
+		result.NextPageToken = encodeGroupIDPageToken(userList[len(userList)-1].ID)
 	}
 
 	return result, nil
@@ -834,21 +874,27 @@ func (a *KnownAdminAPI) listGroupMembersFromGroupMembers(ctx context.Context, re
 
 	query := db.UserMemberships.Query().Where(where...)
 
-	if req.GetOrderBy() != "" {
+	_, cursorMode := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken)
+	if cursorMode {
+		if err := requireIDCursorOrder(ctx, req.GetOrderBy()); err != nil {
+			return nil, err
+		}
+		query = query.Order(lion.Desc(usermemberships.FieldID))
+	} else if req.GetOrderBy() != "" {
 		switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
 		case "joined_at desc":
-			query = query.Order(lion.Desc(usermemberships.FieldJoinedAt), lion.Asc(usermemberships.FieldID))
+			query = query.Order(lion.Desc(usermemberships.FieldJoinedAt), lion.Desc(usermemberships.FieldID))
 		case "joined_at asc":
 			query = query.Order(lion.Asc(usermemberships.FieldJoinedAt), lion.Asc(usermemberships.FieldID))
 		case "create_time desc", "created_at desc":
-			query = query.Order(lion.Desc(usermemberships.FieldCreatedAt), lion.Asc(usermemberships.FieldID))
+			query = query.Order(lion.Desc(usermemberships.FieldCreatedAt), lion.Desc(usermemberships.FieldID))
 		case "create_time asc", "created_at asc":
 			query = query.Order(lion.Asc(usermemberships.FieldCreatedAt), lion.Asc(usermemberships.FieldID))
 		default:
-			query = query.Order(lion.Desc(usermemberships.FieldCreatedAt), lion.Asc(usermemberships.FieldID))
+			query = query.Order(lion.Desc(usermemberships.FieldCreatedAt), lion.Desc(usermemberships.FieldID))
 		}
 	} else {
-		query = query.Order(lion.Desc(usermemberships.FieldCreatedAt), lion.Asc(usermemberships.FieldID))
+		query = query.Order(lion.Desc(usermemberships.FieldCreatedAt), lion.Desc(usermemberships.FieldID))
 	}
 
 	totalSize, err := query.Clone().Count(ctx)
@@ -858,24 +904,17 @@ func (a *KnownAdminAPI) listGroupMembersFromGroupMembers(ctx context.Context, re
 	result.TotalSize = int32(totalSize)
 
 	pageSize := GetPageSize(ctx, req.GetPageSize())
-	var lastID int
-	if req.GetPageToken() != "" {
-		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
-		if err != nil {
-			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", err))
-		}
-		if err := json.Unmarshal(data, &lastID); err != nil {
-			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", err))
-		}
-		if lastID > 0 {
-			query = query.Where(usermemberships.IDGT(lastID))
-		}
-	}
 	switch p := req.GetPagination().(type) {
 	case *adminv1.ListGroupMembersRequest_Offset:
 		query = query.Offset(int(p.Offset))
 	case *adminv1.ListGroupMembersRequest_PageToken:
-		// cursor 已处理
+		lastID, tokenErr := decodeGroupIDPageToken(ctx, p.PageToken)
+		if tokenErr != nil {
+			return nil, tokenErr
+		}
+		if lastID > 0 {
+			query = query.Where(usermemberships.IDLT(lastID))
+		}
 	}
 	query = query.Limit(int(pageSize))
 
@@ -905,10 +944,8 @@ func (a *KnownAdminAPI) listGroupMembersFromGroupMembers(ctx context.Context, re
 		result.Members = append(result.Members, userMembershipToProto(member))
 	}
 
-	if _, ok := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken); ok && len(members) == int(pageSize) && len(members) > 0 {
-		last := members[len(members)-1].ID
-		tokenData, _ := json.Marshal(last)
-		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	if cursorMode && len(members) == int(pageSize) && len(members) > 0 {
+		result.NextPageToken = encodeGroupIDPageToken(members[len(members)-1].ID)
 	}
 
 	return result, nil

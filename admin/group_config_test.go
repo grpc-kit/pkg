@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -57,5 +58,27 @@ func TestPopulateGroupProtoConfigRejectsCorruptStorage(t *testing.T) {
 	}
 	if err := populateGroupProtoConfig(&adminv1.Group{}, row); err == nil {
 		t.Fatal("expected corrupt config to be rejected")
+	}
+}
+
+func TestGroupToProtoCorruptConfigErrorIsGeneric(t *testing.T) {
+	// §4.1/§4.1.4：读取路径对存量配置损坏只暴露组 ID 与错误类别，
+	// 不得透传存量规则内容（字段名、condition 序号、原始值）。
+	row := &lion.Groups{
+		ID:        7,
+		GroupType: int(adminv1.Group_DYNAMIC),
+		Config:    []byte(`{"user_filter":"status = 2"}`),
+	}
+	_, err := groupToProto(row, false)
+	if err == nil {
+		t.Fatal("expected corrupt config to be rejected")
+	}
+	if !strings.Contains(err.Error(), "group 7") {
+		t.Fatalf("error %q should identify the group id", err)
+	}
+	for _, leaked := range []string{"2", "condition", "status"} {
+		if strings.Contains(err.Error(), leaked) {
+			t.Fatalf("error %q leaks stored rule content %q", err, leaked)
+		}
 	}
 }

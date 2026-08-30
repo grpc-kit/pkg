@@ -234,14 +234,16 @@ func validateUserFilterValue(condition *userFilterCondition, raw string) (string
 	case "type":
 		value, ok := adminv1.User_Type_value[upper]
 		if !ok || value == int32(adminv1.User_TYPE_UNSPECIFIED) {
-			return "", fmt.Errorf("invalid User.Type value %q", raw)
+			// 错误信息只含字段与类别，不回显原始值（§4.1.4）。
+			return "", fmt.Errorf("value is not an allowed User.Type name")
 		}
 		condition.enumValue = int(value)
 		return adminv1.User_Type(value).String(), nil
 	case "status":
 		value, ok := adminv1.User_Status_value[upper]
 		if !ok || value == int32(adminv1.User_STATUS_UNSPECIFIED) {
-			return "", fmt.Errorf("invalid User.Status value %q", raw)
+			// 同上：不回显原始值（§4.1.4）。
+			return "", fmt.Errorf("value is not an allowed User.Status name")
 		}
 		condition.enumValue = int(value)
 		return adminv1.User_Status(value).String(), nil

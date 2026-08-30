@@ -67,3 +67,24 @@ func TestDecodeStoredUserFilterRejectsUnknownFields(t *testing.T) {
 		t.Fatal("expected unknown field error")
 	}
 }
+
+func TestParseAndValidateUserFilterErrorsOmitRawValue(t *testing.T) {
+	// §4.1.4：错误信息只含 condition 序号、字段和错误类别，不得回显原始值。
+	tests := []string{
+		"status = 2",
+		"type = SECRET",
+		"email_verified = MAYBE",
+	}
+	for _, input := range tests {
+		t.Run(input, func(t *testing.T) {
+			_, err := parseAndValidateUserFilter(input)
+			if err == nil {
+				t.Fatalf("expected %q to be rejected", input)
+			}
+			rawValue := input[strings.LastIndex(input, " ")+1:]
+			if strings.Contains(err.Error(), rawValue) {
+				t.Fatalf("error %q leaks raw value %q", err, rawValue)
+			}
+		})
+	}
+}
