@@ -86,8 +86,8 @@ var (
 	DefaultCreatedBy int64
 	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
 	DefaultUpdatedBy int64
-	// DefaultPrincipalType holds the default value on creation for the "principal_type" field.
-	DefaultPrincipalType int
+	// PrincipalTypeValidator is a validator for the "principal_type" field. It is called by the builders before save.
+	PrincipalTypeValidator func(int) error
 	// PrincipalIDValidator is a validator for the "principal_id" field. It is called by the builders before save.
 	PrincipalIDValidator func(int) error
 	// RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.

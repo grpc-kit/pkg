@@ -44,10 +44,10 @@ type Groups struct {
 	MaxMembers int `json:"max_members,omitempty"`
 	// 元数据，用于存储自定义属性，对应 proto 中的 map<string, string> metadata
 	Metadata map[string]string `json:"metadata,omitempty"`
-	// 类型关联引用ID：DEPARTMENT→部门ID，ROLE→角色ID；其他类型为0
-	RefID int `json:"ref_id,omitempty"`
-	// 类型关联表达式：DYNAMIC→成员过滤规则，EXTERNAL→外部源描述(JSON)；其他类型为空
-	RefExpr string `json:"ref_expr,omitempty"`
+	// DEPARTMENT/ROLE 的上游实体 ID，目标类型由 group_type 决定
+	SourceID *int `json:"source_id,omitempty"`
+	// DYNAMIC/SYSTEM 配置，仅由 typed codec 读写
+	Config json.RawMessage `json:"config,omitempty"`
 	// 可见性定义，对应 api/known/admin/v1/common.proto 中定义
 	Visibility int `json:"visibility,omitempty"`
 	// 是否为受保护群组，受保护群组不可删除或永久删除
@@ -62,13 +62,13 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case groups.FieldMetadata:
+		case groups.FieldMetadata, groups.FieldConfig:
 			values[i] = new([]byte)
 		case groups.FieldProtected:
 			values[i] = new(sql.NullBool)
-		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldRefID, groups.FieldVisibility:
+		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldSourceID, groups.FieldVisibility:
 			values[i] = new(sql.NullInt64)
-		case groups.FieldCode, groups.FieldDisplayName, groups.FieldRefExpr, groups.FieldDescription:
+		case groups.FieldCode, groups.FieldDisplayName, groups.FieldDescription:
 			values[i] = new(sql.NullString)
 		case groups.FieldCreatedAt, groups.FieldUpdatedAt, groups.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -174,17 +174,20 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field metadata: %w", err)
 				}
 			}
-		case groups.FieldRefID:
+		case groups.FieldSourceID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field ref_id", values[i])
+				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				_m.RefID = int(value.Int64)
+				_m.SourceID = new(int)
+				*_m.SourceID = int(value.Int64)
 			}
-		case groups.FieldRefExpr:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field ref_expr", values[i])
-			} else if value.Valid {
-				_m.RefExpr = value.String
+		case groups.FieldConfig:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field config", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Config); err != nil {
+					return fmt.Errorf("unmarshal field config: %w", err)
+				}
 			}
 		case groups.FieldVisibility:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -281,11 +284,13 @@ func (_m *Groups) String() string {
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
-	builder.WriteString("ref_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.RefID))
+	if v := _m.SourceID; v != nil {
+		builder.WriteString("source_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("ref_expr=")
-	builder.WriteString(_m.RefExpr)
+	builder.WriteString("config=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Config))
 	builder.WriteString(", ")
 	builder.WriteString("visibility=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Visibility))

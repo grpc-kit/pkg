@@ -39,10 +39,10 @@ const (
 	FieldMaxMembers = "max_members"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
-	// FieldRefID holds the string denoting the ref_id field in the database.
-	FieldRefID = "ref_id"
-	// FieldRefExpr holds the string denoting the ref_expr field in the database.
-	FieldRefExpr = "ref_expr"
+	// FieldSourceID holds the string denoting the source_id field in the database.
+	FieldSourceID = "source_id"
+	// FieldConfig holds the string denoting the config field in the database.
+	FieldConfig = "config"
 	// FieldVisibility holds the string denoting the visibility field in the database.
 	FieldVisibility = "visibility"
 	// FieldProtected holds the string denoting the protected field in the database.
@@ -69,8 +69,8 @@ var Columns = []string{
 	FieldParentID,
 	FieldMaxMembers,
 	FieldMetadata,
-	FieldRefID,
-	FieldRefExpr,
+	FieldSourceID,
+	FieldConfig,
 	FieldVisibility,
 	FieldProtected,
 	FieldDescription,
@@ -113,12 +113,8 @@ var (
 	DefaultMaxMembers int
 	// DefaultMetadata holds the default value on creation for the "metadata" field.
 	DefaultMetadata map[string]string
-	// DefaultRefID holds the default value on creation for the "ref_id" field.
-	DefaultRefID int
-	// DefaultRefExpr holds the default value on creation for the "ref_expr" field.
-	DefaultRefExpr string
-	// RefExprValidator is a validator for the "ref_expr" field. It is called by the builders before save.
-	RefExprValidator func(string) error
+	// SourceIDValidator is a validator for the "source_id" field. It is called by the builders before save.
+	SourceIDValidator func(int) error
 	// DefaultVisibility holds the default value on creation for the "visibility" field.
 	DefaultVisibility int
 	// DefaultProtected holds the default value on creation for the "protected" field.
@@ -195,14 +191,9 @@ func ByMaxMembers(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMaxMembers, opts...).ToFunc()
 }
 
-// ByRefID orders the results by the ref_id field.
-func ByRefID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRefID, opts...).ToFunc()
-}
-
-// ByRefExpr orders the results by the ref_expr field.
-func ByRefExpr(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRefExpr, opts...).ToFunc()
+// BySourceID orders the results by the source_id field.
+func BySourceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSourceID, opts...).ToFunc()
 }
 
 // ByVisibility orders the results by the visibility field.

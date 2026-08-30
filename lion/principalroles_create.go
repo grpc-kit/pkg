@@ -83,14 +83,6 @@ func (_c *PrincipalRolesCreate) SetPrincipalType(v int) *PrincipalRolesCreate {
 	return _c
 }
 
-// SetNillablePrincipalType sets the "principal_type" field if the given value is not nil.
-func (_c *PrincipalRolesCreate) SetNillablePrincipalType(v *int) *PrincipalRolesCreate {
-	if v != nil {
-		_c.SetPrincipalType(*v)
-	}
-	return _c
-}
-
 // SetPrincipalID sets the "principal_id" field.
 func (_c *PrincipalRolesCreate) SetPrincipalID(v int) *PrincipalRolesCreate {
 	_c.mutation.SetPrincipalID(v)
@@ -213,10 +205,6 @@ func (_c *PrincipalRolesCreate) defaults() {
 		v := principalroles.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
-	if _, ok := _c.mutation.PrincipalType(); !ok {
-		v := principalroles.DefaultPrincipalType
-		_c.mutation.SetPrincipalType(v)
-	}
 	if _, ok := _c.mutation.BindingStatus(); !ok {
 		v := principalroles.DefaultBindingStatus
 		_c.mutation.SetBindingStatus(v)
@@ -237,6 +225,11 @@ func (_c *PrincipalRolesCreate) check() error {
 	}
 	if _, ok := _c.mutation.PrincipalType(); !ok {
 		return &ValidationError{Name: "principal_type", err: errors.New(`lion: missing required field "PrincipalRoles.principal_type"`)}
+	}
+	if v, ok := _c.mutation.PrincipalType(); ok {
+		if err := principalroles.PrincipalTypeValidator(v); err != nil {
+			return &ValidationError{Name: "principal_type", err: fmt.Errorf(`lion: validator failed for field "PrincipalRoles.principal_type": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.PrincipalID(); !ok {
 		return &ValidationError{Name: "principal_id", err: errors.New(`lion: missing required field "PrincipalRoles.principal_id"`)}

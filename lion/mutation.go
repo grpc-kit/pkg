@@ -6862,9 +6862,10 @@ type GroupsMutation struct {
 	max_members     *int
 	addmax_members  *int
 	metadata        *map[string]string
-	ref_id          *int
-	addref_id       *int
-	ref_expr        *string
+	source_id       *int
+	addsource_id    *int
+	_config         *json.RawMessage
+	append_config   json.RawMessage
 	visibility      *int
 	addvisibility   *int
 	protected       *bool
@@ -7622,96 +7623,139 @@ func (m *GroupsMutation) ResetMetadata() {
 	m.metadata = nil
 }
 
-// SetRefID sets the "ref_id" field.
-func (m *GroupsMutation) SetRefID(i int) {
-	m.ref_id = &i
-	m.addref_id = nil
+// SetSourceID sets the "source_id" field.
+func (m *GroupsMutation) SetSourceID(i int) {
+	m.source_id = &i
+	m.addsource_id = nil
 }
 
-// RefID returns the value of the "ref_id" field in the mutation.
-func (m *GroupsMutation) RefID() (r int, exists bool) {
-	v := m.ref_id
+// SourceID returns the value of the "source_id" field in the mutation.
+func (m *GroupsMutation) SourceID() (r int, exists bool) {
+	v := m.source_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRefID returns the old "ref_id" field's value of the Groups entity.
+// OldSourceID returns the old "source_id" field's value of the Groups entity.
 // If the Groups object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GroupsMutation) OldRefID(ctx context.Context) (v int, err error) {
+func (m *GroupsMutation) OldSourceID(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRefID is only allowed on UpdateOne operations")
+		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRefID requires an ID field in the mutation")
+		return v, errors.New("OldSourceID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRefID: %w", err)
+		return v, fmt.Errorf("querying old value for OldSourceID: %w", err)
 	}
-	return oldValue.RefID, nil
+	return oldValue.SourceID, nil
 }
 
-// AddRefID adds i to the "ref_id" field.
-func (m *GroupsMutation) AddRefID(i int) {
-	if m.addref_id != nil {
-		*m.addref_id += i
+// AddSourceID adds i to the "source_id" field.
+func (m *GroupsMutation) AddSourceID(i int) {
+	if m.addsource_id != nil {
+		*m.addsource_id += i
 	} else {
-		m.addref_id = &i
+		m.addsource_id = &i
 	}
 }
 
-// AddedRefID returns the value that was added to the "ref_id" field in this mutation.
-func (m *GroupsMutation) AddedRefID() (r int, exists bool) {
-	v := m.addref_id
+// AddedSourceID returns the value that was added to the "source_id" field in this mutation.
+func (m *GroupsMutation) AddedSourceID() (r int, exists bool) {
+	v := m.addsource_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetRefID resets all changes to the "ref_id" field.
-func (m *GroupsMutation) ResetRefID() {
-	m.ref_id = nil
-	m.addref_id = nil
+// ClearSourceID clears the value of the "source_id" field.
+func (m *GroupsMutation) ClearSourceID() {
+	m.source_id = nil
+	m.addsource_id = nil
+	m.clearedFields[groups.FieldSourceID] = struct{}{}
 }
 
-// SetRefExpr sets the "ref_expr" field.
-func (m *GroupsMutation) SetRefExpr(s string) {
-	m.ref_expr = &s
+// SourceIDCleared returns if the "source_id" field was cleared in this mutation.
+func (m *GroupsMutation) SourceIDCleared() bool {
+	_, ok := m.clearedFields[groups.FieldSourceID]
+	return ok
 }
 
-// RefExpr returns the value of the "ref_expr" field in the mutation.
-func (m *GroupsMutation) RefExpr() (r string, exists bool) {
-	v := m.ref_expr
+// ResetSourceID resets all changes to the "source_id" field.
+func (m *GroupsMutation) ResetSourceID() {
+	m.source_id = nil
+	m.addsource_id = nil
+	delete(m.clearedFields, groups.FieldSourceID)
+}
+
+// SetConfig sets the "config" field.
+func (m *GroupsMutation) SetConfig(jm json.RawMessage) {
+	m._config = &jm
+	m.append_config = nil
+}
+
+// Config returns the value of the "config" field in the mutation.
+func (m *GroupsMutation) Config() (r json.RawMessage, exists bool) {
+	v := m._config
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRefExpr returns the old "ref_expr" field's value of the Groups entity.
+// OldConfig returns the old "config" field's value of the Groups entity.
 // If the Groups object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GroupsMutation) OldRefExpr(ctx context.Context) (v string, err error) {
+func (m *GroupsMutation) OldConfig(ctx context.Context) (v json.RawMessage, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRefExpr is only allowed on UpdateOne operations")
+		return v, errors.New("OldConfig is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRefExpr requires an ID field in the mutation")
+		return v, errors.New("OldConfig requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRefExpr: %w", err)
+		return v, fmt.Errorf("querying old value for OldConfig: %w", err)
 	}
-	return oldValue.RefExpr, nil
+	return oldValue.Config, nil
 }
 
-// ResetRefExpr resets all changes to the "ref_expr" field.
-func (m *GroupsMutation) ResetRefExpr() {
-	m.ref_expr = nil
+// AppendConfig adds jm to the "config" field.
+func (m *GroupsMutation) AppendConfig(jm json.RawMessage) {
+	m.append_config = append(m.append_config, jm...)
+}
+
+// AppendedConfig returns the list of values that were appended to the "config" field in this mutation.
+func (m *GroupsMutation) AppendedConfig() (json.RawMessage, bool) {
+	if len(m.append_config) == 0 {
+		return nil, false
+	}
+	return m.append_config, true
+}
+
+// ClearConfig clears the value of the "config" field.
+func (m *GroupsMutation) ClearConfig() {
+	m._config = nil
+	m.append_config = nil
+	m.clearedFields[groups.FieldConfig] = struct{}{}
+}
+
+// ConfigCleared returns if the "config" field was cleared in this mutation.
+func (m *GroupsMutation) ConfigCleared() bool {
+	_, ok := m.clearedFields[groups.FieldConfig]
+	return ok
+}
+
+// ResetConfig resets all changes to the "config" field.
+func (m *GroupsMutation) ResetConfig() {
+	m._config = nil
+	m.append_config = nil
+	delete(m.clearedFields, groups.FieldConfig)
 }
 
 // SetVisibility sets the "visibility" field.
@@ -7916,11 +7960,11 @@ func (m *GroupsMutation) Fields() []string {
 	if m.metadata != nil {
 		fields = append(fields, groups.FieldMetadata)
 	}
-	if m.ref_id != nil {
-		fields = append(fields, groups.FieldRefID)
+	if m.source_id != nil {
+		fields = append(fields, groups.FieldSourceID)
 	}
-	if m.ref_expr != nil {
-		fields = append(fields, groups.FieldRefExpr)
+	if m._config != nil {
+		fields = append(fields, groups.FieldConfig)
 	}
 	if m.visibility != nil {
 		fields = append(fields, groups.FieldVisibility)
@@ -7965,10 +8009,10 @@ func (m *GroupsMutation) Field(name string) (ent.Value, bool) {
 		return m.MaxMembers()
 	case groups.FieldMetadata:
 		return m.Metadata()
-	case groups.FieldRefID:
-		return m.RefID()
-	case groups.FieldRefExpr:
-		return m.RefExpr()
+	case groups.FieldSourceID:
+		return m.SourceID()
+	case groups.FieldConfig:
+		return m.Config()
 	case groups.FieldVisibility:
 		return m.Visibility()
 	case groups.FieldProtected:
@@ -8010,10 +8054,10 @@ func (m *GroupsMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldMaxMembers(ctx)
 	case groups.FieldMetadata:
 		return m.OldMetadata(ctx)
-	case groups.FieldRefID:
-		return m.OldRefID(ctx)
-	case groups.FieldRefExpr:
-		return m.OldRefExpr(ctx)
+	case groups.FieldSourceID:
+		return m.OldSourceID(ctx)
+	case groups.FieldConfig:
+		return m.OldConfig(ctx)
 	case groups.FieldVisibility:
 		return m.OldVisibility(ctx)
 	case groups.FieldProtected:
@@ -8120,19 +8164,19 @@ func (m *GroupsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMetadata(v)
 		return nil
-	case groups.FieldRefID:
+	case groups.FieldSourceID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRefID(v)
+		m.SetSourceID(v)
 		return nil
-	case groups.FieldRefExpr:
-		v, ok := value.(string)
+	case groups.FieldConfig:
+		v, ok := value.(json.RawMessage)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRefExpr(v)
+		m.SetConfig(v)
 		return nil
 	case groups.FieldVisibility:
 		v, ok := value.(int)
@@ -8184,8 +8228,8 @@ func (m *GroupsMutation) AddedFields() []string {
 	if m.addmax_members != nil {
 		fields = append(fields, groups.FieldMaxMembers)
 	}
-	if m.addref_id != nil {
-		fields = append(fields, groups.FieldRefID)
+	if m.addsource_id != nil {
+		fields = append(fields, groups.FieldSourceID)
 	}
 	if m.addvisibility != nil {
 		fields = append(fields, groups.FieldVisibility)
@@ -8212,8 +8256,8 @@ func (m *GroupsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedParentID()
 	case groups.FieldMaxMembers:
 		return m.AddedMaxMembers()
-	case groups.FieldRefID:
-		return m.AddedRefID()
+	case groups.FieldSourceID:
+		return m.AddedSourceID()
 	case groups.FieldVisibility:
 		return m.AddedVisibility()
 	}
@@ -8274,12 +8318,12 @@ func (m *GroupsMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddMaxMembers(v)
 		return nil
-	case groups.FieldRefID:
+	case groups.FieldSourceID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddRefID(v)
+		m.AddSourceID(v)
 		return nil
 	case groups.FieldVisibility:
 		v, ok := value.(int)
@@ -8305,6 +8349,12 @@ func (m *GroupsMutation) ClearedFields() []string {
 	if m.FieldCleared(groups.FieldUpdatedBy) {
 		fields = append(fields, groups.FieldUpdatedBy)
 	}
+	if m.FieldCleared(groups.FieldSourceID) {
+		fields = append(fields, groups.FieldSourceID)
+	}
+	if m.FieldCleared(groups.FieldConfig) {
+		fields = append(fields, groups.FieldConfig)
+	}
 	return fields
 }
 
@@ -8327,6 +8377,12 @@ func (m *GroupsMutation) ClearField(name string) error {
 		return nil
 	case groups.FieldUpdatedBy:
 		m.ClearUpdatedBy()
+		return nil
+	case groups.FieldSourceID:
+		m.ClearSourceID()
+		return nil
+	case groups.FieldConfig:
+		m.ClearConfig()
 		return nil
 	}
 	return fmt.Errorf("unknown Groups nullable field %s", name)
@@ -8375,11 +8431,11 @@ func (m *GroupsMutation) ResetField(name string) error {
 	case groups.FieldMetadata:
 		m.ResetMetadata()
 		return nil
-	case groups.FieldRefID:
-		m.ResetRefID()
+	case groups.FieldSourceID:
+		m.ResetSourceID()
 		return nil
-	case groups.FieldRefExpr:
-		m.ResetRefExpr()
+	case groups.FieldConfig:
+		m.ResetConfig()
 		return nil
 	case groups.FieldVisibility:
 		m.ResetVisibility()

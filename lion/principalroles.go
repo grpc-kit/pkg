@@ -27,7 +27,7 @@ type PrincipalRoles struct {
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
-	// 主体类型：0-未指定，1-用户，2-群组，3-部门
+	// 主体类型：1-用户，2-SYSTEM 群组，3-部门；GROUP 的子类型约束由领域服务校验
 	PrincipalType int `json:"principal_type,omitempty"`
 	// 主体 ID，与 principal_type 配合使用
 	PrincipalID int `json:"principal_id,omitempty"`

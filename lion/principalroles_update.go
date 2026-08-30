@@ -272,6 +272,11 @@ func (_u *PrincipalRolesUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PrincipalRolesUpdate) check() error {
+	if v, ok := _u.mutation.PrincipalType(); ok {
+		if err := principalroles.PrincipalTypeValidator(v); err != nil {
+			return &ValidationError{Name: "principal_type", err: fmt.Errorf(`lion: validator failed for field "PrincipalRoles.principal_type": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.PrincipalID(); ok {
 		if err := principalroles.PrincipalIDValidator(v); err != nil {
 			return &ValidationError{Name: "principal_id", err: fmt.Errorf(`lion: validator failed for field "PrincipalRoles.principal_id": %w`, err)}
@@ -659,6 +664,11 @@ func (_u *PrincipalRolesUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PrincipalRolesUpdateOne) check() error {
+	if v, ok := _u.mutation.PrincipalType(); ok {
+		if err := principalroles.PrincipalTypeValidator(v); err != nil {
+			return &ValidationError{Name: "principal_type", err: fmt.Errorf(`lion: validator failed for field "PrincipalRoles.principal_type": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.PrincipalID(); ok {
 		if err := principalroles.PrincipalIDValidator(v); err != nil {
 			return &ValidationError{Name: "principal_id", err: fmt.Errorf(`lion: validator failed for field "PrincipalRoles.principal_id": %w`, err)}

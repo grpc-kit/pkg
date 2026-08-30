@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"encoding/json"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
@@ -47,13 +49,14 @@ func (Groups) Fields() []ent.Field {
 		field.JSON("metadata", map[string]string{}).
 			Default(map[string]string{}).
 			Comment("元数据，用于存储自定义属性，对应 proto 中的 map<string, string> metadata"),
-		field.Int("ref_id").
-			Default(0).
-			Comment("类型关联引用ID：DEPARTMENT→部门ID，ROLE→角色ID；其他类型为0"),
-		field.String("ref_expr").
-			Default("").
-			MaxLen(4096).
-			Comment("类型关联表达式：DYNAMIC→成员过滤规则，EXTERNAL→外部源描述(JSON)；其他类型为空"),
+		field.Int("source_id").
+			Optional().
+			Nillable().
+			Positive().
+			Comment("DEPARTMENT/ROLE 的上游实体 ID，目标类型由 group_type 决定"),
+		field.JSON("config", json.RawMessage{}).
+			Optional().
+			Comment("DYNAMIC/SYSTEM 配置，仅由 typed codec 读写"),
 
 		field.Int("visibility").
 			Default(0).
@@ -70,15 +73,7 @@ func (Groups) Fields() []ent.Field {
 
 // Edges of the table.
 func (Groups) Edges() []ent.Edge {
-	return []ent.Edge{
-		// 一个 Role 可以对应多个 RoleMenu (中间实体)
-		/*
-			edge.From("lion_departments", Departments.Type).
-				Ref("lion_groups").
-				Field("department_id").
-				Unique(),
-		*/
-	}
+	return nil
 }
 
 // Mixin of the table.
@@ -98,8 +93,8 @@ func (Groups) Indexes() []ent.Index {
 		index.Fields("group_type"),
 		// 群组状态索引，用于按状态过滤查询
 		index.Fields("group_status"),
-		// 类型+引用ID组合索引，支持按类型+关联ID查询（如查找关联某角色/部门的群组）
-		index.Fields("group_type", "ref_id"),
+		// 回收站行继续占用来源槽位，避免恢复时产生同源冲突。
+		index.Fields("group_type", "source_id").Unique(),
 	}
 }
 

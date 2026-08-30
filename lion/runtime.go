@@ -406,16 +406,10 @@ func init() {
 	groupsDescMetadata := groupsFields[7].Descriptor()
 	// groups.DefaultMetadata holds the default value on creation for the metadata field.
 	groups.DefaultMetadata = groupsDescMetadata.Default.(map[string]string)
-	// groupsDescRefID is the schema descriptor for ref_id field.
-	groupsDescRefID := groupsFields[8].Descriptor()
-	// groups.DefaultRefID holds the default value on creation for the ref_id field.
-	groups.DefaultRefID = groupsDescRefID.Default.(int)
-	// groupsDescRefExpr is the schema descriptor for ref_expr field.
-	groupsDescRefExpr := groupsFields[9].Descriptor()
-	// groups.DefaultRefExpr holds the default value on creation for the ref_expr field.
-	groups.DefaultRefExpr = groupsDescRefExpr.Default.(string)
-	// groups.RefExprValidator is a validator for the "ref_expr" field. It is called by the builders before save.
-	groups.RefExprValidator = groupsDescRefExpr.Validators[0].(func(string) error)
+	// groupsDescSourceID is the schema descriptor for source_id field.
+	groupsDescSourceID := groupsFields[8].Descriptor()
+	// groups.SourceIDValidator is a validator for the "source_id" field. It is called by the builders before save.
+	groups.SourceIDValidator = groupsDescSourceID.Validators[0].(func(int) error)
 	// groupsDescVisibility is the schema descriptor for visibility field.
 	groupsDescVisibility := groupsFields[10].Descriptor()
 	// groups.DefaultVisibility holds the default value on creation for the visibility field.
@@ -725,8 +719,8 @@ func init() {
 	principalroles.DefaultUpdatedBy = principalrolesDescUpdatedBy.Default.(int64)
 	// principalrolesDescPrincipalType is the schema descriptor for principal_type field.
 	principalrolesDescPrincipalType := principalrolesFields[0].Descriptor()
-	// principalroles.DefaultPrincipalType holds the default value on creation for the principal_type field.
-	principalroles.DefaultPrincipalType = principalrolesDescPrincipalType.Default.(int)
+	// principalroles.PrincipalTypeValidator is a validator for the "principal_type" field. It is called by the builders before save.
+	principalroles.PrincipalTypeValidator = principalrolesDescPrincipalType.Validators[0].(func(int) error)
 	// principalrolesDescPrincipalID is the schema descriptor for principal_id field.
 	principalrolesDescPrincipalID := principalrolesFields[1].Descriptor()
 	// principalroles.PrincipalIDValidator is a validator for the "principal_id" field. It is called by the builders before save.
