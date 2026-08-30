@@ -323,6 +323,10 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	if err := validateCreateUserVerificationState(req.User); err != nil {
 		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 	}
+	timezone, locale, err := normalizeUserLocaleFields(req.User.GetTimezone(), req.User.GetLocale())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
 
 	db, err := a.GetLionClient()
 	if err != nil {
@@ -358,8 +362,8 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	userCreate.SetUserType(int(req.User.GetType()))
 	userCreate.SetUserStatus(int(req.User.GetStatus()))
 	userCreate.SetGender(int(req.User.GetGender()))
-	userCreate.SetTimezone(req.User.GetTimezone())
-	userCreate.SetLocale(req.User.GetLocale())
+	userCreate.SetTimezone(timezone)
+	userCreate.SetLocale(locale)
 	if req.User.GetMetadata() != nil {
 		userCreate.SetMetadata(req.User.GetMetadata())
 	}
@@ -961,9 +965,17 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 		case "website":
 			x.SetWebsite(req.User.GetWebsite())
 		case "timezone":
-			x.SetTimezone(req.User.GetTimezone())
+			value, err := normalizeUserTimezone(req.User.GetTimezone())
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+			}
+			x.SetTimezone(value)
 		case "locale":
-			x.SetLocale(req.User.GetLocale())
+			value, err := normalizeUserLocale(req.User.GetLocale())
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+			}
+			x.SetLocale(value)
 		case users.FieldUserType, "type":
 			x.SetUserType(int(req.User.GetType()))
 		case users.FieldUserStatus, "status":

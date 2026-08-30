@@ -253,7 +253,7 @@ func ensureDepartmentDeleteAllowed(ctx context.Context, tx *lion.Tx, department 
 	}
 	hasGroups, err := tx.Groups.Query().Where(
 		groups.GroupTypeEQ(int(adminv1.Group_DEPARTMENT)),
-		groups.RefIDEQ(department.ID),
+		groups.SourceIDEQ(department.ID),
 	).Exist(ctx)
 	if err != nil {
 		return errs.Internal(ctx).WithMessage("query department group references failed")
@@ -277,7 +277,7 @@ func ensureDepartmentExpungeAllowed(ctx context.Context, tx *lion.Tx, department
 	}
 	hasGroups, err := tx.Groups.Query().Where(
 		groups.GroupTypeEQ(int(adminv1.Group_DEPARTMENT)),
-		groups.RefIDEQ(department.ID),
+		groups.SourceIDEQ(department.ID),
 	).Exist(ctx)
 	if err != nil {
 		return errs.Internal(ctx).WithMessage("query department group references failed")

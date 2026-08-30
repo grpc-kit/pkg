@@ -19,9 +19,9 @@ import (
 
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/roles"
 )
 
 // parseGroupParent 解析 parent 为群组 ID，支持 "groups/123" 或 "123"
@@ -40,6 +40,9 @@ func (a *KnownAdminAPI) getGroupType(ctx context.Context, db *lion.Client, group
 	if err != nil {
 		return adminv1.Group_TYPE_UNSPECIFIED, err
 	}
+	if _, err := groupToProto(group, false); err != nil {
+		return adminv1.Group_TYPE_UNSPECIFIED, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
 	return adminv1.Group_Type(group.GroupType), nil
 }
 
@@ -47,24 +50,6 @@ func (a *KnownAdminAPI) getGroupType(ctx context.Context, db *lion.Client, group
 // DEPARTMENT(1), ROLE(2), DYNAMIC(3), SYSTEM(4) 的成员均由系统自动管理
 func isAutoManagedGroupType(t adminv1.Group_Type) bool {
 	return t == adminv1.Group_DEPARTMENT || t == adminv1.Group_ROLE || t == adminv1.Group_DYNAMIC || t == adminv1.Group_SYSTEM
-}
-
-func requireActiveDepartmentGroupReference(ctx context.Context, db *lion.Client, departmentID int) error {
-	if departmentID <= 0 {
-		return errs.InvalidArgument(ctx).WithMessage("department group ref_id is required")
-	}
-	exists, err := db.Departments.Query().Where(
-		departments.IDEQ(departmentID),
-		departments.DepartmentStatusEQ(int(adminv1.Department_ACTIVE)),
-		departments.DeletedAtIsNil(),
-	).Exist(ctx)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return errs.FailedPrecondition(ctx).WithMessage("department group reference must be active and not deleted")
-	}
-	return nil
 }
 
 // CreateGroup 创建用户组
@@ -78,44 +63,33 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		return result, errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
 	}
 
-	// 类型校验：不允许 TYPE_UNSPECIFIED 和 SYSTEM
 	groupType := req.Group.Type
-	switch groupType {
-	case adminv1.Group_TYPE_UNSPECIFIED:
-		return result, errs.InvalidArgument(ctx).WithMessage("group type must be specified")
-	case adminv1.Group_SYSTEM:
-		return result, errs.InvalidArgument(ctx).WithMessage("SYSTEM type groups cannot be created via API")
-	case adminv1.Group_DEPARTMENT:
-		if req.Group.RefId == 0 {
-			return result, errs.InvalidArgument(ctx).WithMessage("ref_id (department_id) is required when type is DEPARTMENT")
-		}
-	case adminv1.Group_ROLE:
-		if req.Group.RefId == 0 {
-			return result, errs.InvalidArgument(ctx).WithMessage("ref_id (role_id) is required when type is ROLE")
-		}
-	case adminv1.Group_EXTERNAL:
-		if req.Group.RefExpr == "" {
-			return result, errs.InvalidArgument(ctx).WithMessage("ref_expr is required when type is EXTERNAL, format: {\"external_id\":\"...\",\"external_source\":\"...\"}")
-		}
-	case adminv1.Group_DYNAMIC:
-		if req.Group.RefExpr == "" {
-			return result, errs.InvalidArgument(ctx).WithMessage("ref_expr (member_rule) is required when type is DYNAMIC")
-		}
-	}
 
 	code, err := schema.EnsureCode(req.Group.Code)
 	if err != nil {
 		return result, errs.InvalidArgument(ctx).WithMessage(err.Error())
 	}
 	req.Group.Code = code
+	if code == "everyone" {
+		return result, errs.InvalidArgument(ctx).WithMessage("group code is reserved for a built-in group")
+	}
 
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
 	}
-	if groupType == adminv1.Group_DEPARTMENT {
-		if err := requireActiveDepartmentGroupReference(ctx, db, int(req.Group.RefId)); err != nil {
-			return result, err
+	tx, err := db.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	validated, err := validateGroupTypeConfig(ctx, tx.Client(), req.Group, false)
+	if err != nil {
+		return result, groupConfigWriteError(ctx, err)
+	}
+	if groupType == adminv1.Group_DYNAMIC && req.Group.Status == adminv1.Group_ACTIVE {
+		if err := lockAndCheckActiveRuleGroupCapacity(ctx, tx, 1); err != nil {
+			return nil, err
 		}
 	}
 
@@ -137,28 +111,40 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		}
 	}
 
-	create := db.Groups.Create().
+	create := tx.Groups.Create().
 		SetCode(req.Group.Code).
 		SetDisplayName(displayName).
 		SetGroupType(int(groupType.Number())).
 		SetGroupStatus(int(req.Group.Status.Number())).
 		SetSortOrder(int(req.Group.SortOrder)).
+		SetParentID(0).
 		SetMaxMembers(int(req.Group.MaxMembers)).
 		SetMetadata(req.Group.Metadata).
-		SetRefID(int(req.Group.RefId)).
-		SetRefExpr(req.Group.RefExpr).
 		SetVisibility(int(req.Group.Visibility.Number())).
 		SetProtected(false).
 		SetDescription(req.Group.Description).
 		SetCreatedBy(createdBy).
-		SetUpdatedBy(updatedBy)
+		SetUpdatedBy(updatedBy).
+		SetNillableSourceID(validated.sourceID)
+	if len(validated.config) > 0 {
+		create.SetConfig(validated.config)
+	}
 
 	group, err := create.Save(ctx)
 	if err != nil {
+		if lion.IsConstraintError(err) {
+			return result, errs.AlreadyExists(ctx).WithMessage("group code or source mapping already exists, including recycle-bin rows")
+		}
 		return result, err
 	}
-
-	return groupToProto(group, true), nil
+	resultGroup, err := groupToProto(group, true)
+	if err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return resultGroup, nil
 }
 
 // ListGroups 列出用户组
@@ -260,7 +246,11 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 	includeTimestamps := req.GetView() == adminv1.View_VIEW_STANDARD || req.GetView() == adminv1.View_VIEW_FULL
 	result.Groups = make([]*adminv1.Group, 0, len(groupList))
 	for _, g := range groupList {
-		result.Groups = append(result.Groups, groupToProto(g, includeTimestamps))
+		item, mapErr := groupToProto(g, includeTimestamps)
+		if mapErr != nil {
+			return nil, errs.FailedPrecondition(ctx).WithMessage(mapErr.Error())
+		}
+		result.Groups = append(result.Groups, item)
 	}
 	if _, ok := req.GetPagination().(*adminv1.ListGroupsRequest_PageToken); ok && len(groupList) == int(pageSize) && len(groupList) > 0 {
 		last := groupList[len(groupList)-1].ID
@@ -292,8 +282,8 @@ func (a *KnownAdminAPI) GetGroup(ctx context.Context, req *adminv1.GetGroupReque
 		groups.FieldParentID,
 		groups.FieldMaxMembers,
 		groups.FieldMetadata,
-		groups.FieldRefID,
-		groups.FieldRefExpr,
+		groups.FieldSourceID,
+		groups.FieldConfig,
 		groups.FieldVisibility,
 		groups.FieldProtected,
 		groups.FieldDescription,
@@ -308,7 +298,11 @@ func (a *KnownAdminAPI) GetGroup(ctx context.Context, req *adminv1.GetGroupReque
 	}
 
 	// 详情接口默认返回完整信息（含时间戳）
-	return groupToProto(group, true), nil
+	result, err := groupToProto(group, true)
+	if err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
+	return result, nil
 }
 
 // parseListGroupsFilter 解析 filter 字符串为 predicate 列表，支持 key=value 与 AND 组合
@@ -357,12 +351,6 @@ func parseListGroupsFilter(filter string) ([]predicate.Groups, bool, error) {
 			out = append(out, groups.CodeContainsFold(val))
 		case "display_name":
 			out = append(out, groups.DisplayNameContainsFold(val))
-		case "ref_id":
-			n, err := strconv.Atoi(val)
-			if err != nil {
-				return nil, false, fmt.Errorf("ref_id must be int: %s", val)
-			}
-			out = append(out, groups.RefID(n))
 		default:
 			return nil, false, fmt.Errorf("unsupported filter field %q", key)
 		}
@@ -370,7 +358,7 @@ func parseListGroupsFilter(filter string) ([]predicate.Groups, bool, error) {
 	return out, deletedOnly, nil
 }
 
-func groupToProto(g *lion.Groups, includeTimestamps bool) *adminv1.Group {
+func groupToProto(g *lion.Groups, includeTimestamps bool) (*adminv1.Group, error) {
 	grp := &adminv1.Group{
 		Id:          int64(g.ID),
 		Code:        g.Code,
@@ -380,8 +368,7 @@ func groupToProto(g *lion.Groups, includeTimestamps bool) *adminv1.Group {
 		SortOrder:   int32(g.SortOrder),
 		MaxMembers:  int32(g.MaxMembers),
 		Metadata:    g.Metadata,
-		RefId:       int64(g.RefID),
-		RefExpr:     g.RefExpr,
+		ParentId:    int64(g.ParentID),
 		Visibility:  adminv1.Visibility(g.Visibility),
 		Protected:   g.Protected,
 		Description: g.Description,
@@ -395,7 +382,10 @@ func groupToProto(g *lion.Groups, includeTimestamps bool) *adminv1.Group {
 			grp.DeletedAt = timestamppb.New(*g.DeletedAt)
 		}
 	}
-	return grp
+	if err := populateGroupProtoConfig(grp, g); err != nil {
+		return nil, fmt.Errorf("group %d has invalid type config: %w", g.ID, err)
+	}
+	return grp, nil
 }
 
 func sortGroupSlice(s []*adminv1.Group) {
@@ -407,165 +397,163 @@ func sortGroupSlice(s []*adminv1.Group) {
 	})
 }
 
-// UpdateGroup 更新用户组；code 和 type 创建后不可修改。
+// UpdateGroup 更新用户组；code、type 以及来源绑定创建后不可修改。
 func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGroupRequest) (*adminv1.Group, error) {
-	result := &adminv1.Group{}
-
-	if req.Group == nil {
-		return result, errs.InvalidArgument(ctx).WithMessage("request body group is nil")
+	if req.Group == nil || req.Group.Id <= 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("group and group.id are required")
 	}
-
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
 	}
-
-	group, err := db.Groups.Query().Where(groups.IDEQ(int(req.Group.Id)), groups.DeletedAtIsNil()).Only(ctx)
+	tx, err := db.Tx(ctx)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
-	if (req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0) && req.Group.Protected && !group.Protected {
-		return result, errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
+	defer func() { _ = tx.Rollback() }()
+	row, err := tx.Groups.Query().Where(groups.IDEQ(int(req.Group.Id)), groups.DeletedAtIsNil()).Only(ctx)
+	if err != nil {
+		return nil, err
 	}
-	if adminv1.Group_Type(group.GroupType) == adminv1.Group_DEPARTMENT {
-		refID := group.RefID
-		shouldValidateReference := req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0
-		if req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0 {
-			refID = int(req.Group.RefId)
-		} else {
-			for _, field := range req.UpdateMask.Paths {
-				if field == "ref_id" {
-					refID = int(req.Group.RefId)
-					shouldValidateReference = true
-					break
-				}
-			}
-		}
-		if shouldValidateReference {
-			if err := requireActiveDepartmentGroupReference(ctx, db, refID); err != nil {
-				return result, err
-			}
+	// Capacity mutations use a single lock order (setting row, then group row),
+	// matching initialization and avoiding a seed/update deadlock.
+	if row.GroupType == int(adminv1.Group_DYNAMIC) || row.GroupType == int(adminv1.Group_SYSTEM) {
+		if err := lockActiveRuleGroupCapacity(ctx, tx); err != nil {
+			return nil, err
 		}
 	}
-
-	// SYSTEM 类型群组不允许修改 code, type, ref_id, ref_expr
-	isSystem := adminv1.Group_Type(group.GroupType) == adminv1.Group_SYSTEM
-
-	update := db.Groups.Update().Where(groups.IDEQ(group.ID), groups.DeletedAtIsNil())
+	if _, err := tx.Groups.Update().Where(groups.IDEQ(row.ID), groups.DeletedAtIsNil()).SetUpdatedAt(row.UpdatedAt).Save(ctx); err != nil {
+		return nil, err
+	}
+	// The first query supplies the no-op update value; re-read after acquiring
+	// the row lock so concurrent updates cannot leave this request validating
+	// stale status/config/max_members values.
+	row, err = tx.Groups.Query().Where(groups.IDEQ(row.ID), groups.DeletedAtIsNil()).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	current, err := groupToProto(row, false)
+	if err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
+	isSystem := current.Type == adminv1.Group_SYSTEM
+	update := tx.Groups.Update().Where(groups.IDEQ(row.ID), groups.DeletedAtIsNil())
 	updatedBy := req.Group.UpdatedBy
 	if updatedBy == 0 {
-		if uid, err := GetUserID(ctx); err == nil {
+		if uid, userErr := GetUserID(ctx); userErr == nil {
 			updatedBy = uid
 		}
 	}
-
-	// SYSTEM 类型群组受保护的关联字段不允许修改。
-	systemProtectedFields := map[string]bool{
-		"ref_id": true, "ref_expr": true,
+	paths := []string(nil)
+	if req.UpdateMask != nil {
+		paths = req.UpdateMask.Paths
 	}
-
-	if req.UpdateMask != nil && len(req.UpdateMask.Paths) > 0 {
-		for _, field := range req.UpdateMask.Paths {
-			if field == "protected" {
-				return nil, errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
-			}
-			// SYSTEM 群组的系统关联字段不可修改。
-			if isSystem && systemProtectedFields[field] {
-				return nil, errs.FailedPrecondition(ctx).
-					WithMessage(fmt.Sprintf("SYSTEM group field %q is immutable", field)).Err()
-			}
-			switch field {
-			case "code":
-				if err := validateImmutableString(ctx, "group", "code", group.Code, req.Group.Code); err != nil {
-					return nil, err
-				}
-			case "display_name":
-				update.SetDisplayName(req.Group.DisplayName)
-			case "type":
-				if int(req.Group.Type.Number()) != group.GroupType {
-					return nil, immutableFieldError(ctx, "group", "type")
-				}
-			case "status":
-				update.SetGroupStatus(int(req.Group.Status.Number()))
-			case "sort_order":
-				update.SetSortOrder(int(req.Group.SortOrder))
-			case "max_members":
-				update.SetMaxMembers(int(req.Group.MaxMembers))
-			case "metadata":
-				update.SetMetadata(req.Group.Metadata)
-			case "ref_id":
-				update.SetRefID(int(req.Group.RefId))
-			case "ref_expr":
-				update.SetRefExpr(req.Group.RefExpr)
-			case "visibility":
-				update.SetVisibility(int(req.Group.Visibility.Number()))
-			case "description":
-				update.SetDescription(req.Group.Description)
-			case "updated_by":
-				update.SetUpdatedBy(updatedBy)
-			}
+	if len(paths) == 0 {
+		paths = []string{"display_name", "status", "sort_order", "max_members", "metadata", "description", "visibility"}
+		if current.Type == adminv1.Group_DYNAMIC && req.Group.GetDynamicConfig() != nil {
+			paths = append(paths, "dynamic_config.user_filter")
 		}
-		update.SetUpdatedBy(updatedBy)
-	} else {
-		if req.Group.Code != "" {
-			if err := validateImmutableString(ctx, "group", "code", group.Code, req.Group.Code); err != nil {
+	}
+	for _, path := range paths {
+		switch path {
+		case "code":
+			if err := validateImmutableString(ctx, "group", "code", row.Code, req.Group.Code); err != nil {
 				return nil, err
 			}
-		}
-		if req.Group.Type != adminv1.Group_TYPE_UNSPECIFIED && int(req.Group.Type.Number()) != group.GroupType {
-			return nil, immutableFieldError(ctx, "group", "type")
-		}
-		displayName := req.Group.DisplayName
-		if displayName == "" {
-			displayName = group.DisplayName
-		}
-		// SYSTEM 群组：仅更新允许的字段，跳过 code/type/ref_id/ref_expr
-		if isSystem {
-			update.
-				SetDisplayName(displayName).
-				SetGroupStatus(int(req.Group.Status.Number())).
-				SetSortOrder(int(req.Group.SortOrder)).
-				SetMaxMembers(int(req.Group.MaxMembers)).
-				SetMetadata(req.Group.Metadata).
-				SetVisibility(int(req.Group.Visibility.Number())).
-				SetDescription(req.Group.Description).
-				SetUpdatedBy(updatedBy)
-		} else {
-			update.
-				SetDisplayName(displayName).
-				SetGroupStatus(int(req.Group.Status.Number())).
-				SetSortOrder(int(req.Group.SortOrder)).
-				SetMaxMembers(int(req.Group.MaxMembers)).
-				SetMetadata(req.Group.Metadata).
-				SetRefID(int(req.Group.RefId)).
-				SetRefExpr(req.Group.RefExpr).
-				SetVisibility(int(req.Group.Visibility.Number())).
-				SetDescription(req.Group.Description).
-				SetUpdatedBy(updatedBy)
+		case "type":
+			if req.Group.Type != current.Type {
+				return nil, immutableFieldError(ctx, "group", "type")
+			}
+		case "parent_id":
+			if req.Group.ParentId != 0 {
+				return nil, errs.InvalidArgument(ctx).WithMessage("parent_id must be 0 until group hierarchy is enabled")
+			}
+		case "department_config", "department_config.department_id", "role_config", "role_config.role_id":
+			return nil, immutableFieldError(ctx, "group", path)
+		case "system_config", "system_config.user_filter":
+			return nil, errs.FailedPrecondition(ctx).WithMessage("SYSTEM group config is managed by system seed")
+		case "dynamic_config", "dynamic_config.user_filter":
+			if isSystem || current.Type != adminv1.Group_DYNAMIC || req.Group.GetDynamicConfig() == nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage("dynamic_config is only valid for DYNAMIC groups")
+			}
+			current.Config = req.Group.Config
+		case "protected":
+			return nil, errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
+		case "display_name":
+			current.DisplayName = req.Group.DisplayName
+			update.SetDisplayName(req.Group.DisplayName)
+		case "status":
+			current.Status = req.Group.Status
+			update.SetGroupStatus(int(req.Group.Status))
+		case "sort_order":
+			update.SetSortOrder(int(req.Group.SortOrder))
+		case "max_members":
+			current.MaxMembers = req.Group.MaxMembers
+			update.SetMaxMembers(int(req.Group.MaxMembers))
+		case "metadata":
+			update.SetMetadata(req.Group.Metadata)
+		case "description":
+			update.SetDescription(req.Group.Description)
+		case "visibility":
+			update.SetVisibility(int(req.Group.Visibility))
+		case "updated_by":
+		default:
+			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("unsupported update field %q", path))
 		}
 	}
-
+	validated, err := validateGroupTypeConfig(ctx, tx.Client(), current, isSystem)
+	if err != nil {
+		return nil, groupConfigWriteError(ctx, err)
+	}
+	if current.MaxMembers > 0 {
+		count, countErr := tx.UserMemberships.Query().Where(
+			usermemberships.TargetTypeEQ(membershipTargetGroup),
+			usermemberships.TargetIDEQ(row.ID),
+		).Count(ctx)
+		if countErr != nil {
+			return nil, countErr
+		}
+		if count > int(current.MaxMembers) {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("max_members is lower than existing direct membership count")
+		}
+	}
+	if (current.Type == adminv1.Group_DYNAMIC || current.Type == adminv1.Group_SYSTEM) &&
+		row.GroupStatus != int(adminv1.Group_ACTIVE) && current.Status == adminv1.Group_ACTIVE {
+		if err := checkActiveRuleGroupCapacity(ctx, tx, 1); err != nil {
+			return nil, err
+		}
+	}
+	if current.Type == adminv1.Group_DYNAMIC {
+		update.SetConfig(validated.config)
+	}
+	update.SetUpdatedBy(updatedBy)
 	affected, err := update.Save(ctx)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	if affected != 1 {
-		return result, errs.NotFound(ctx).WithMessage("group not found")
+		return nil, errs.NotFound(ctx).WithMessage("group not found")
 	}
-	updatedGroup, err := db.Groups.Query().Where(groups.IDEQ(group.ID), groups.DeletedAtIsNil()).Only(ctx)
+	updated, err := tx.Groups.Query().Where(groups.IDEQ(row.ID), groups.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
-
-	return groupToProto(updatedGroup, true), nil
+	result, err := groupToProto(updated, true)
+	if err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // ListGroupMembers 获取群组成员列表
 // 根据群组类型从不同数据源获取成员：
 //   - DEPARTMENT: 从 user_departments 表查询关联部门的成员
 //   - ROLE: 从 user_roles 表查询关联角色的成员
-//   - DYNAMIC: 根据 ref_expr 动态规则从 users 表查询
-//   - SYSTEM: 同 DYNAMIC，根据 ref_expr 动态规则从 users 表查询（系统内置，不可创建/修改/删除）
+//   - DYNAMIC: 根据 dynamic_config.user_filter 从 users 表查询
+//   - SYSTEM: 同 DYNAMIC，根据 system_config.user_filter 查询（系统内置，不可创建/修改/删除）
 //   - 其他类型: 从 user_groups 表查询
 func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListGroupMembersRequest) (*adminv1.ListGroupMembersResponse, error) {
 	result := &adminv1.ListGroupMembersResponse{
@@ -593,19 +581,25 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 	}
 
 	groupType := adminv1.Group_Type(group.GroupType)
+	if _, err := groupToProto(group, false); err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
 
 	// 根据群组类型路由到不同的数据源
 	switch groupType {
 	case adminv1.Group_DEPARTMENT:
-		if err := requireActiveDepartmentGroupReference(ctx, db, group.RefID); err != nil {
-			return result, err
+		if err := requireActiveDepartmentGroupReference(ctx, db, *group.SourceID); err != nil {
+			return result, errs.FailedPrecondition(ctx).WithMessage(err.Error())
 		}
-		return a.listGroupMembersFromDepartment(ctx, req, db, group.RefID)
+		return a.listGroupMembersFromDepartment(ctx, req, db, *group.SourceID)
 	case adminv1.Group_ROLE:
-		return a.listGroupMembersFromRole(ctx, req, db, group.RefID)
+		return a.listGroupMembersFromRole(ctx, req, db, *group.SourceID)
 	case adminv1.Group_DYNAMIC, adminv1.Group_SYSTEM:
-		// DYNAMIC 和 SYSTEM 均通过 ref_expr 动态规则自动关联成员
-		return a.listGroupMembersFromDynamicRule(ctx, req, db, group.RefExpr)
+		compiled, configErr := decodeStoredUserFilter(group.Config)
+		if configErr != nil {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("group config is invalid")
+		}
+		return a.listGroupMembersFromDynamicRule(ctx, req, db, compiled)
 	default:
 		return a.listGroupMembersFromGroupMembers(ctx, req, db, groupID)
 	}
@@ -624,6 +618,9 @@ func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req 
 	memberQuery := db.UserMemberships.Query().Where(
 		usermemberships.TargetTypeEQ(membershipTargetDepartment),
 		usermemberships.TargetIDEQ(departmentID),
+		usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
+		usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(time.Now())),
+		usermemberships.HasLionUsersWith(users.DeletedAtIsNil()),
 	)
 
 	// 排序
@@ -673,6 +670,8 @@ func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req 
 		usermemberships.FieldMemberRole,
 		usermemberships.FieldMemberStatus,
 		usermemberships.FieldMemberType,
+		usermemberships.FieldJoinedAt,
+		usermemberships.FieldExpiresAt,
 		usermemberships.FieldDescription,
 		usermemberships.FieldMetadata,
 		usermemberships.FieldCreatedBy,
@@ -680,7 +679,7 @@ func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req 
 		usermemberships.FieldCreatedAt,
 		usermemberships.FieldUpdatedAt,
 	).WithLionUsers(func(q *lion.UsersQuery) {
-		q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
+		q.Select(users.FieldID, users.FieldUsername, users.FieldNickname).Where(users.DeletedAtIsNil())
 	}).All(ctx)
 	if err != nil {
 		return nil, err
@@ -702,6 +701,17 @@ func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req 
 
 // listGroupMembersFromRole 从 principal_roles 查询角色主体绑定，并在 full 视图下展开为用户列表。
 func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, roleID int) (*adminv1.ListGroupMembersResponse, error) {
+	exists, err := db.Roles.Query().Where(
+		roles.IDEQ(roleID),
+		roles.RoleStatusEQ(int(adminv1.Role_ACTIVE)),
+		roles.DeletedAtIsNil(),
+	).Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("role group reference must be active and not deleted")
+	}
 	roleReq := &adminv1.ListRoleMembersRequest{
 		Parent:        strconv.Itoa(roleID),
 		PageSize:      req.GetPageSize(),
@@ -728,36 +738,13 @@ func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *admin
 }
 
 // dynamicRuleAllowedFields 动态规则允许过滤的用户字段白名单（非敏感、非加密字段）
-var dynamicRuleAllowedFields = map[string]string{
-	"user_type":             "int",
-	"user_status":           "int",
-	"gender":                "int",
-	"email_verified":        "bool",
-	"phone_number_verified": "bool",
-	"timezone":              "string",
-	"locale":                "string",
-}
-
 // listGroupMembersFromDynamicRule 根据动态规则表达式从 users 表查询成员
-func (a *KnownAdminAPI) listGroupMembersFromDynamicRule(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, memberRule string) (*adminv1.ListGroupMembersResponse, error) {
+func (a *KnownAdminAPI) listGroupMembersFromDynamicRule(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, rule *compiledUserFilter) (*adminv1.ListGroupMembersResponse, error) {
 	result := &adminv1.ListGroupMembersResponse{
 		Members: make([]*adminv1.Membership, 0),
 	}
 
-	if memberRule == "" {
-		return result, nil
-	}
-
-	// 解析规则表达式为 ent predicates
-	predicates, err := parseDynamicRule(memberRule)
-	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage(fmt.Sprintf("invalid member_rule: %v", err))
-	}
-
-	// 默认排除已删除的用户
-	predicates = append(predicates, users.DeletedAtIsNil())
-
-	query := db.Users.Query().Where(predicates...)
+	query := db.Users.Query().Where(rule.predicates()...)
 
 	// 排序
 	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
@@ -814,7 +801,6 @@ func (a *KnownAdminAPI) listGroupMembersFromDynamicRule(ctx context.Context, req
 			Username:   u.Username,
 			Nickname:   u.Nickname,
 			TargetType: adminv1.Membership_GROUP,
-			MemberRole: adminv1.Membership_MEMBER,
 		})
 	}
 
@@ -826,159 +812,6 @@ func (a *KnownAdminAPI) listGroupMembersFromDynamicRule(ctx context.Context, req
 	}
 
 	return result, nil
-}
-
-// parseDynamicRule 解析动态规则表达式为 ent predicates
-// 格式: "field op value AND field op value ..."
-// 支持操作符: =, !=, >, >=, <, <=
-func parseDynamicRule(rule string) ([]predicate.Users, error) {
-	var predicates []predicate.Users
-	parts := strings.Split(rule, " AND ")
-	for _, p := range parts {
-		p = strings.TrimSpace(p)
-		if p == "" {
-			continue
-		}
-		pred, err := parseDynamicRuleCondition(p)
-		if err != nil {
-			return nil, err
-		}
-		predicates = append(predicates, pred)
-	}
-	if len(predicates) == 0 {
-		return nil, fmt.Errorf("empty rule")
-	}
-	return predicates, nil
-}
-
-// parseDynamicRuleCondition 解析单个条件表达式
-func parseDynamicRuleCondition(cond string) (predicate.Users, error) {
-	// 支持 >=, <=, !=, >, <, = 操作符
-	operators := []string{">=", "<=", "!=", ">", "<", "="}
-	var fieldName, op, val string
-	for _, operator := range operators {
-		idx := strings.Index(cond, operator)
-		if idx > 0 {
-			fieldName = strings.TrimSpace(cond[:idx])
-			op = operator
-			val = strings.TrimSpace(cond[idx+len(operator):])
-			break
-		}
-	}
-	if fieldName == "" || op == "" {
-		return nil, fmt.Errorf("invalid condition: %s", cond)
-	}
-
-	// 去掉值的引号
-	val = strings.Trim(val, "'\"")
-
-	// 校验字段在白名单中
-	fieldType, ok := dynamicRuleAllowedFields[fieldName]
-	if !ok {
-		return nil, fmt.Errorf("field %q is not allowed in dynamic rule", fieldName)
-	}
-
-	switch fieldType {
-	case "int":
-		n, err := strconv.Atoi(val)
-		if err != nil {
-			return nil, fmt.Errorf("field %q expects int value, got %q", fieldName, val)
-		}
-		return dynamicRuleIntPredicate(fieldName, op, n)
-	case "bool":
-		b, err := strconv.ParseBool(val)
-		if err != nil {
-			return nil, fmt.Errorf("field %q expects bool value, got %q", fieldName, val)
-		}
-		return dynamicRuleBoolPredicate(fieldName, op, b)
-	case "string":
-		return dynamicRuleStringPredicate(fieldName, op, val)
-	default:
-		return nil, fmt.Errorf("unsupported field type %q for field %q", fieldType, fieldName)
-	}
-}
-
-// dynamicRuleIntPredicate 构建 int 类型字段的 predicate
-func dynamicRuleIntPredicate(fieldName, op string, val int) (predicate.Users, error) {
-	switch fieldName {
-	case "user_type":
-		switch op {
-		case "=":
-			return users.UserTypeEQ(val), nil
-		case "!=":
-			return users.UserTypeNEQ(val), nil
-		case ">":
-			return users.UserTypeGT(val), nil
-		case ">=":
-			return users.UserTypeGTE(val), nil
-		case "<":
-			return users.UserTypeLT(val), nil
-		case "<=":
-			return users.UserTypeLTE(val), nil
-		}
-	case "user_status":
-		switch op {
-		case "=":
-			return users.UserStatusEQ(val), nil
-		case "!=":
-			return users.UserStatusNEQ(val), nil
-		case ">":
-			return users.UserStatusGT(val), nil
-		case ">=":
-			return users.UserStatusGTE(val), nil
-		case "<":
-			return users.UserStatusLT(val), nil
-		case "<=":
-			return users.UserStatusLTE(val), nil
-		}
-	case "gender":
-		switch op {
-		case "=":
-			return users.GenderEQ(val), nil
-		case "!=":
-			return users.GenderNEQ(val), nil
-		}
-	}
-	return nil, fmt.Errorf("unsupported operator %q for field %q", op, fieldName)
-}
-
-// dynamicRuleBoolPredicate 构建 bool 类型字段的 predicate
-func dynamicRuleBoolPredicate(fieldName, op string, val bool) (predicate.Users, error) {
-	if op != "=" && op != "!=" {
-		return nil, fmt.Errorf("bool field %q only supports = and != operators", fieldName)
-	}
-	target := val
-	if op == "!=" {
-		target = !val
-	}
-	switch fieldName {
-	case "email_verified":
-		return users.EmailVerifiedEQ(target), nil
-	case "phone_number_verified":
-		return users.PhoneNumberVerifiedEQ(target), nil
-	}
-	return nil, fmt.Errorf("unsupported bool field %q", fieldName)
-}
-
-// dynamicRuleStringPredicate 构建 string 类型字段的 predicate
-func dynamicRuleStringPredicate(fieldName, op string, val string) (predicate.Users, error) {
-	switch fieldName {
-	case "timezone":
-		switch op {
-		case "=":
-			return users.TimezoneEQ(val), nil
-		case "!=":
-			return users.TimezoneNEQ(val), nil
-		}
-	case "locale":
-		switch op {
-		case "=":
-			return users.LocaleEQ(val), nil
-		case "!=":
-			return users.LocaleNEQ(val), nil
-		}
-	}
-	return nil, fmt.Errorf("unsupported operator %q for string field %q", op, fieldName)
 }
 
 // listGroupMembersFromGroupMembers 从 group_members 表查询普通群组成员（默认方式）
@@ -1136,21 +969,69 @@ func (a *KnownAdminAPI) CreateGroupMembers(ctx context.Context, req *adminv1.Cre
 	if err != nil {
 		return nil, err
 	}
-
-	// 校验群组类型：DEPARTMENT/ROLE 类型不允许手动添加成员
-	groupType, err := a.getGroupType(ctx, db, groupID)
+	seen := make(map[int64]struct{}, len(req.Members))
+	for _, member := range req.Members {
+		if member == nil || member.UserId <= 0 {
+			return result, errs.InvalidArgument(ctx).WithMessage("each member.user_id must be positive")
+		}
+		if _, duplicate := seen[member.UserId]; duplicate {
+			return result, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("duplicate member user_id %d", member.UserId))
+		}
+		seen[member.UserId] = struct{}{}
+	}
+	tx, err := db.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	group, err := tx.Groups.Query().Where(groups.IDEQ(groupID), groups.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		return result, err
 	}
-	if isAutoManagedGroupType(groupType) {
-		typeName := groupType.String()
-		return result, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("%s type groups do not support manual member management, members are synced automatically", typeName))
+	if _, err := tx.Groups.Update().Where(groups.IDEQ(groupID), groups.DeletedAtIsNil()).SetUpdatedAt(group.UpdatedAt).Save(ctx); err != nil {
+		return result, err
 	}
-
-	allMembers := make([]*lion.UserMembershipsCreate, 0, len(req.Members))
-
+	group, err = tx.Groups.Query().Where(groups.IDEQ(groupID), groups.DeletedAtIsNil()).Only(ctx)
+	if err != nil {
+		return result, err
+	}
+	groupType := adminv1.Group_Type(group.GroupType)
+	if _, err := groupToProto(group, false); err != nil {
+		return result, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
+	if isAutoManagedGroupType(groupType) {
+		return result, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("%s type groups do not support manual member management", groupType))
+	}
+	memberIDs := make([]int, 0, len(req.Members))
 	for _, member := range req.Members {
-		create := db.UserMemberships.Create().
+		memberIDs = append(memberIDs, int(member.UserId))
+	}
+	if len(memberIDs) > 0 {
+		existing, queryErr := tx.UserMemberships.Query().Where(
+			usermemberships.TargetTypeEQ(membershipTargetGroup),
+			usermemberships.TargetIDEQ(groupID),
+			usermemberships.UserIDIn(memberIDs...),
+		).Exist(ctx)
+		if queryErr != nil {
+			return result, queryErr
+		}
+		if existing {
+			return result, errs.AlreadyExists(ctx).WithMessage("one or more users are already group members")
+		}
+	}
+	existingCount, err := tx.UserMemberships.Query().Where(
+		usermemberships.TargetTypeEQ(membershipTargetGroup),
+		usermemberships.TargetIDEQ(groupID),
+	).Count(ctx)
+	if err != nil {
+		return result, err
+	}
+	if group.MaxMembers > 0 && existingCount+len(req.Members) > group.MaxMembers {
+		return result, errs.ResourceExhausted(ctx).WithMessage("group max_members limit exceeded")
+	}
+	allMembers := make([]*lion.UserMembershipsCreate, 0, len(req.Members))
+	for _, member := range req.Members {
+		create := tx.UserMemberships.Create().
 			SetUserID(int(member.UserId)).
 			SetTargetType(membershipTargetGroup).
 			SetTargetID(groupID).
@@ -1176,11 +1057,14 @@ func (a *KnownAdminAPI) CreateGroupMembers(ctx context.Context, req *adminv1.Cre
 		allMembers = append(allMembers, create)
 	}
 
-	_, err = db.UserMemberships.CreateBulk(allMembers...).Save(ctx)
-	if err != nil {
+	if len(allMembers) > 0 {
+		if _, err = tx.UserMemberships.CreateBulk(allMembers...).Save(ctx); err != nil {
+			return result, err
+		}
+	}
+	if err := tx.Commit(); err != nil {
 		return result, err
 	}
-
 	return result, nil
 }
 

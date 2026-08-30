@@ -9,9 +9,7 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/principalroles"
-	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
-	"github.com/grpc-kit/pkg/lion/users"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -60,9 +58,6 @@ func (a *KnownAdminAPI) DeleteGroup(ctx context.Context, req *adminv1.DeleteGrou
 	if affected != 1 {
 		return nil, errs.NotFound(ctx).WithMessage("group not found")
 	}
-	if err := a.ensureGroupDeleteLeavesSuperadmin(ctx, tx, targetID); err != nil {
-		return nil, err
-	}
 	if err := tx.Commit(); err != nil {
 		return nil, errs.Internal(ctx).WithMessage("commit delete group failed")
 	}
@@ -71,7 +66,11 @@ func (a *KnownAdminAPI) DeleteGroup(ctx context.Context, req *adminv1.DeleteGrou
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("read deleted group failed")
 	}
-	return groupToProto(row, true), nil
+	result, err := groupToProto(row, true)
+	if err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
+	return result, nil
 }
 
 // UndeleteGroup restores a group from the recycle bin. Restored groups remain
@@ -140,7 +139,11 @@ func (a *KnownAdminAPI) UndeleteGroup(ctx context.Context, req *adminv1.Undelete
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("read restored group failed")
 	}
-	return groupToProto(row, true), nil
+	result, err := groupToProto(row, true)
+	if err != nil {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+	}
+	return result, nil
 }
 
 // ExpungeGroup irreversibly removes a soft-deleted group and the core rows
@@ -187,6 +190,9 @@ func (a *KnownAdminAPI) ExpungeGroup(ctx context.Context, req *adminv1.ExpungeGr
 			).Exec(ctx)
 			return err
 		},
+		// Valid Role bindings can reference only protected SYSTEM groups, which
+		// cannot reach this expunge path. Keep this cleanup for legacy or
+		// out-of-band invalid GROUP bindings so expunge never leaves orphans.
 		func() error {
 			_, err := tx.PrincipalRoles.Delete().Where(
 				principalroles.PrincipalTypeEQ(principalTypeGroup),
@@ -238,65 +244,4 @@ func ensureGroupExpungeAllowed(ctx context.Context, tx *lion.Tx, group *lion.Gro
 		return errs.FailedPrecondition(ctx).WithMessage("group with children cannot be expunged")
 	}
 	return nil
-}
-
-// ensureGroupDeleteLeavesSuperadmin runs after the target group has been
-// disabled in the transaction, so the existing effective-role resolver sees
-// the post-delete authorization state. Any error rolls the transaction back.
-func (a *KnownAdminAPI) ensureGroupDeleteLeavesSuperadmin(ctx context.Context, tx *lion.Tx, groupID int) error {
-	superadmin, err := tx.Roles.Query().Where(roles.CodeEQ(seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN))).Only(ctx)
-	if err != nil {
-		if lion.IsNotFound(err) {
-			return nil
-		}
-		return errs.Internal(ctx).WithMessage("query superadmin role failed")
-	}
-	if _, err := tx.Roles.Update().Where(roles.IDEQ(superadmin.ID)).SetUpdatedAt(superadmin.UpdatedAt).Save(ctx); err != nil {
-		return errs.Internal(ctx).WithMessage("lock superadmin role failed")
-	}
-
-	now := time.Now()
-	hasBinding, err := tx.PrincipalRoles.Query().Where(
-		principalroles.PrincipalTypeEQ(principalTypeGroup),
-		principalroles.PrincipalIDEQ(groupID),
-		principalroles.RoleIDEQ(superadmin.ID),
-		principalroles.BindingStatusEQ(bindingStatusActive),
-		principalroles.Or(principalroles.ExpiresAtIsNil(), principalroles.ExpiresAtGT(now)),
-	).Exist(ctx)
-	if err != nil {
-		return errs.Internal(ctx).WithMessage("query group superadmin binding failed")
-	}
-	if !hasBinding {
-		return nil
-	}
-	hasMember, err := tx.UserMemberships.Query().Where(
-		usermemberships.TargetTypeEQ(membershipTargetGroup),
-		usermemberships.TargetIDEQ(groupID),
-		usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
-		usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(now)),
-	).Exist(ctx)
-	if err != nil {
-		return errs.Internal(ctx).WithMessage("query group members failed")
-	}
-	if !hasMember {
-		return nil
-	}
-
-	candidates, err := tx.Users.Query().Select(users.FieldID).Where(
-		users.UserStatusEQ(int(adminv1.User_ACTIVE)),
-		users.DeletedAtIsNil(),
-	).All(ctx)
-	if err != nil {
-		return errs.Internal(ctx).WithMessage("query active users failed")
-	}
-	for _, candidate := range candidates {
-		roleIDs, err := effectiveRoleIDsForUserAt(ctx, tx.Client(), candidate.ID, now)
-		if err != nil {
-			return errs.Internal(ctx).WithMessage("resolve active user roles failed")
-		}
-		if containsInt(roleIDs, superadmin.ID) {
-			return nil
-		}
-	}
-	return errs.FailedPrecondition(ctx).WithMessage("cannot delete group that removes the last active superadmin")
 }

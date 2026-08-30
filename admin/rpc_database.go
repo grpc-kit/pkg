@@ -41,6 +41,73 @@ type builtinRoleSeed struct {
 	SortOrder   int
 }
 
+type builtinGroupSeed struct {
+	Code        string
+	DisplayName string
+	Description string
+	UserFilter  string
+	SortOrder   int
+}
+
+func ensureBuiltinGroup(ctx context.Context, tx *lion.Tx, seed builtinGroupSeed) (*lion.Groups, error) {
+	protoGroup := &adminv1.Group{
+		Code:        seed.Code,
+		DisplayName: seed.DisplayName,
+		Description: seed.Description,
+		Type:        adminv1.Group_SYSTEM,
+		Status:      adminv1.Group_ACTIVE,
+		SortOrder:   int32(seed.SortOrder),
+		Config: &adminv1.Group_SystemConfig_{SystemConfig: &adminv1.Group_SystemConfig{
+			UserFilter: seed.UserFilter,
+		}},
+	}
+	validated, err := validateGroupTypeConfig(ctx, tx.Client(), protoGroup, true)
+	if err != nil {
+		return nil, err
+	}
+	group, err := tx.Groups.Query().Where(groups.CodeEQ(seed.Code)).Only(ctx)
+	if lion.IsNotFound(err) {
+		if err := lockAndCheckActiveRuleGroupCapacity(ctx, tx, 1); err != nil {
+			return nil, err
+		}
+		return tx.Groups.Create().
+			SetCode(seed.Code).
+			SetDisplayName(seed.DisplayName).
+			SetGroupType(int(adminv1.Group_SYSTEM)).
+			SetGroupStatus(int(adminv1.Group_ACTIVE)).
+			SetSortOrder(seed.SortOrder).
+			SetParentID(0).
+			SetMaxMembers(0).
+			SetConfig(validated.config).
+			SetProtected(true).
+			SetDescription(seed.Description).
+			Save(ctx)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if adminv1.Group_Type(group.GroupType) != adminv1.Group_SYSTEM {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("built-in group code is occupied by a non-SYSTEM group")
+	}
+	if group.GroupStatus != int(adminv1.Group_ACTIVE) {
+		if err := lockAndCheckActiveRuleGroupCapacity(ctx, tx, 1); err != nil {
+			return nil, err
+		}
+	}
+	return group.Update().
+		SetDisplayName(seed.DisplayName).
+		SetGroupType(int(adminv1.Group_SYSTEM)).
+		SetGroupStatus(int(adminv1.Group_ACTIVE)).
+		SetSortOrder(seed.SortOrder).
+		SetParentID(0).
+		SetMaxMembers(0).
+		ClearSourceID().
+		SetConfig(validated.config).
+		SetProtected(true).
+		SetDescription(seed.Description).
+		Save(ctx)
+}
+
 func ensureBuiltinRole(ctx context.Context, tx *lion.Tx, seed builtinRoleSeed) (*lion.Roles, error) {
 	role, err := tx.Roles.Query().Where(roles.CodeEQ(seed.Code)).Only(ctx)
 	if lion.IsNotFound(err) {
@@ -441,6 +508,20 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 	rollback := func() { _ = tx.Rollback() }
+	if err := ensureGroupCapacitySetting(ctx, tx); err != nil {
+		rollback()
+		return nil, err
+	}
+	if _, err := ensureBuiltinGroup(ctx, tx, builtinGroupSeed{
+		Code:        "everyone",
+		DisplayName: "Everyone",
+		Description: "All non-deleted users",
+		UserFilter:  "status != DELETED",
+		SortOrder:   10,
+	}); err != nil {
+		rollback()
+		return nil, err
+	}
 
 	// Keep legacy SYSTEM groups protected after the protected column is added.
 	// The update is intentionally idempotent and also repairs direct/manual data

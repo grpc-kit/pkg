@@ -207,17 +207,17 @@ func (a *KnownAdminAPI) UpdateCurrentUser(ctx context.Context, req *adminv1.Upda
 				update.SetWebsite(req.Profile.Website)
 			}
 		case "timezone":
-			if req.Profile.Timezone != "" {
-				if _, err := time.LoadLocation(req.Profile.Timezone); err != nil {
-					return nil, errs.InvalidArgument(ctx).WithMessage("timezone is invalid").Err()
-				}
+			value, err := normalizeUserTimezone(req.Profile.Timezone)
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(err.Error()).Err()
 			}
-			update.SetTimezone(req.Profile.Timezone)
+			update.SetTimezone(value)
 		case "locale":
-			if len(req.Profile.Locale) > 35 {
-				return nil, errs.InvalidArgument(ctx).WithMessage("locale is too long").Err()
+			value, err := normalizeUserLocale(req.Profile.Locale)
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(err.Error()).Err()
 			}
-			update.SetLocale(req.Profile.Locale)
+			update.SetLocale(value)
 		case "gender":
 			if !isSupportedGender(req.Profile.Gender) {
 				return nil, errs.InvalidArgument(ctx).WithMessage("gender is invalid").Err()
