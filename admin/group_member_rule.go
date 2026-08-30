@@ -22,6 +22,12 @@ const (
 	userFilterCacheBytes    = userFilterCacheEntries * maxUserFilterBytes
 )
 
+type userFilterHashFunc func(string) [sha256.Size]byte
+
+func hashUserFilter(value string) [sha256.Size]byte {
+	return sha256.Sum256([]byte(value))
+}
+
 type userFilterOperator uint8
 
 const (
@@ -232,21 +238,49 @@ func validateUserFilterValue(condition *userFilterCondition, raw string) (string
 	upper := strings.ToUpper(raw)
 	switch condition.field {
 	case "type":
-		value, ok := adminv1.User_Type_value[upper]
-		if !ok || value == int32(adminv1.User_TYPE_UNSPECIFIED) {
+		var value adminv1.User_Type
+		switch upper {
+		case "CUSTOMER":
+			value = adminv1.User_CUSTOMER
+		case "MERCHANT":
+			value = adminv1.User_MERCHANT
+		case "SUPPLIER":
+			value = adminv1.User_SUPPLIER
+		case "EMPLOYEE":
+			value = adminv1.User_EMPLOYEE
+		case "ADMIN":
+			value = adminv1.User_ADMIN
+		case "SYSTEM":
+			value = adminv1.User_SYSTEM
+		default:
 			// 错误信息只含字段与类别，不回显原始值（§4.1.4）。
 			return "", fmt.Errorf("value is not an allowed User.Type name")
 		}
 		condition.enumValue = int(value)
-		return adminv1.User_Type(value).String(), nil
+		return value.String(), nil
 	case "status":
-		value, ok := adminv1.User_Status_value[upper]
-		if !ok || value == int32(adminv1.User_STATUS_UNSPECIFIED) {
+		var value adminv1.User_Status
+		switch upper {
+		case "PENDING":
+			value = adminv1.User_PENDING
+		case "ACTIVE":
+			value = adminv1.User_ACTIVE
+		case "LOCKED":
+			value = adminv1.User_LOCKED
+		case "DISABLED":
+			value = adminv1.User_DISABLED
+		case "EXPIRED":
+			value = adminv1.User_EXPIRED
+		case "SUSPENDED":
+			value = adminv1.User_SUSPENDED
+		case "DELETED":
+			value = adminv1.User_DELETED
+		default:
 			// 同上：不回显原始值（§4.1.4）。
 			return "", fmt.Errorf("value is not an allowed User.Status name")
 		}
 		condition.enumValue = int(value)
-		return adminv1.User_Status(value).String(), nil
+		return value.String(), nil
 	case "email_verified", "phone_number_verified":
 		switch strings.ToLower(raw) {
 		case "true":
@@ -269,60 +303,81 @@ type userFilterCacheEntry struct {
 }
 
 type userFilterLRU struct {
-	mu      sync.Mutex
-	items   map[[sha256.Size]byte]*list.Element
-	order   *list.List
-	maxSize int
-	bytes   int
+	mu       sync.Mutex
+	items    map[[sha256.Size]byte]*list.Element
+	order    *list.List
+	maxItems int
+	maxSize  int
+	bytes    int
 }
 
-var compiledUserFilters = userFilterLRU{
-	items:   make(map[[sha256.Size]byte]*list.Element),
-	order:   list.New(),
-	maxSize: userFilterCacheBytes,
+func newUserFilterLRU(maxItems, maxSize int) *userFilterLRU {
+	return &userFilterLRU{
+		items:    make(map[[sha256.Size]byte]*list.Element),
+		order:    list.New(),
+		maxItems: maxItems,
+		maxSize:  maxSize,
+	}
 }
 
-func compileUserFilter(input string) (*compiledUserFilter, error) {
+var compiledUserFilters = newUserFilterLRU(userFilterCacheEntries, userFilterCacheBytes)
+
+func (cache *userFilterLRU) get(key [sha256.Size]byte, canonical string) (*compiledUserFilter, bool) {
+	cache.mu.Lock()
+	defer cache.mu.Unlock()
+	element, ok := cache.items[key]
+	if !ok {
+		return nil, false
+	}
+	entry := element.Value.(*userFilterCacheEntry)
+	if entry.filter.canonical != canonical {
+		return nil, false
+	}
+	cache.order.MoveToFront(element)
+	return entry.filter, true
+}
+
+func (cache *userFilterLRU) add(key [sha256.Size]byte, parsed *compiledUserFilter) *compiledUserFilter {
+	cache.mu.Lock()
+	defer cache.mu.Unlock()
+	if element, ok := cache.items[key]; ok {
+		entry := element.Value.(*userFilterCacheEntry)
+		if entry.filter.canonical == parsed.canonical {
+			cache.order.MoveToFront(element)
+			return entry.filter
+		}
+		// A SHA-256 collision must never replace or alias the existing rule.
+		return parsed
+	}
+	entry := &userFilterCacheEntry{key: key, filter: parsed, bytes: len(parsed.canonical)}
+	element := cache.order.PushFront(entry)
+	cache.items[key] = element
+	cache.bytes += entry.bytes
+	for cache.order.Len() > cache.maxItems || cache.bytes > cache.maxSize {
+		oldest := cache.order.Back()
+		oldEntry := oldest.Value.(*userFilterCacheEntry)
+		delete(cache.items, oldEntry.key)
+		cache.bytes -= oldEntry.bytes
+		cache.order.Remove(oldest)
+	}
+	return parsed
+}
+
+func compileUserFilterWithCache(input string, cache *userFilterLRU, hash userFilterHashFunc) (*compiledUserFilter, error) {
 	// Stored rules are canonical. Check them before parsing so repeated login
 	// and authorization evaluations take the true cache-hit path.
-	inputKey := sha256.Sum256([]byte(input))
-	compiledUserFilters.mu.Lock()
-	if element, ok := compiledUserFilters.items[inputKey]; ok {
-		entry := element.Value.(*userFilterCacheEntry)
-		if entry.filter.canonical == input {
-			compiledUserFilters.order.MoveToFront(element)
-			compiledUserFilters.mu.Unlock()
-			return entry.filter, nil
-		}
+	inputKey := hash(input)
+	if cached, ok := cache.get(inputKey, input); ok {
+		return cached, nil
 	}
-	compiledUserFilters.mu.Unlock()
 
 	parsed, err := parseAndValidateUserFilter(input)
 	if err != nil {
 		return nil, err
 	}
-	key := sha256.Sum256([]byte(parsed.canonical))
-	compiledUserFilters.mu.Lock()
-	defer compiledUserFilters.mu.Unlock()
-	if element, ok := compiledUserFilters.items[key]; ok {
-		entry := element.Value.(*userFilterCacheEntry)
-		if entry.filter.canonical == parsed.canonical {
-			compiledUserFilters.order.MoveToFront(element)
-			return entry.filter, nil
-		}
-		// A SHA-256 collision must never replace or alias the existing rule.
-		return parsed, nil
-	}
-	entry := &userFilterCacheEntry{key: key, filter: parsed, bytes: len(parsed.canonical)}
-	element := compiledUserFilters.order.PushFront(entry)
-	compiledUserFilters.items[key] = element
-	compiledUserFilters.bytes += entry.bytes
-	for compiledUserFilters.order.Len() > userFilterCacheEntries || compiledUserFilters.bytes > compiledUserFilters.maxSize {
-		oldest := compiledUserFilters.order.Back()
-		oldEntry := oldest.Value.(*userFilterCacheEntry)
-		delete(compiledUserFilters.items, oldEntry.key)
-		compiledUserFilters.bytes -= oldEntry.bytes
-		compiledUserFilters.order.Remove(oldest)
-	}
-	return parsed, nil
+	return cache.add(hash(parsed.canonical), parsed), nil
+}
+
+func compileUserFilter(input string) (*compiledUserFilter, error) {
+	return compileUserFilterWithCache(input, compiledUserFilters, hashUserFilter)
 }

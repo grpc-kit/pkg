@@ -401,6 +401,10 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 	if req.Group == nil || req.Group.Id <= 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("group and group.id are required")
 	}
+	paths, err := requiredGroupUpdatePaths(ctx, req.UpdateMask)
+	if err != nil {
+		return nil, err
+	}
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
@@ -441,16 +445,6 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 	if updatedBy == 0 {
 		if uid, userErr := GetUserID(ctx); userErr == nil {
 			updatedBy = uid
-		}
-	}
-	paths := []string(nil)
-	if req.UpdateMask != nil {
-		paths = req.UpdateMask.Paths
-	}
-	if len(paths) == 0 {
-		paths = []string{"display_name", "status", "sort_order", "max_members", "metadata", "description", "visibility"}
-		if current.Type == adminv1.Group_DYNAMIC && req.Group.GetDynamicConfig() != nil {
-			paths = append(paths, "dynamic_config.user_filter")
 		}
 	}
 	for _, path := range paths {
@@ -579,29 +573,11 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 		return result, err
 	}
 
-	groupType := adminv1.Group_Type(group.GroupType)
 	if _, err := groupToProto(group, false); err != nil {
 		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
 	}
 
-	// 根据群组类型路由到不同的数据源
-	switch groupType {
-	case adminv1.Group_DEPARTMENT:
-		if err := requireActiveDepartmentGroupReference(ctx, db, *group.SourceID); err != nil {
-			return result, errs.FailedPrecondition(ctx).WithMessage(err.Error())
-		}
-		return a.listGroupMembersFromDepartment(ctx, req, db, *group.SourceID)
-	case adminv1.Group_ROLE:
-		return a.listGroupMembersFromRole(ctx, req, db, groupID, *group.SourceID)
-	case adminv1.Group_DYNAMIC, adminv1.Group_SYSTEM:
-		compiled, configErr := decodeStoredUserFilter(group.Config)
-		if configErr != nil {
-			return nil, errs.FailedPrecondition(ctx).WithMessage("group config is invalid")
-		}
-		return a.listGroupMembersFromDynamicRule(ctx, req, db, compiled)
-	default:
-		return a.listGroupMembersFromGroupMembers(ctx, req, db, groupID)
-	}
+	return a.resolveGroupMembers(ctx, req, db, group)
 }
 
 // listGroupMembersFromDepartment 从 department_members 表查询部门群组成员

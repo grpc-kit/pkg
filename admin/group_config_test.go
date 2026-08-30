@@ -27,26 +27,123 @@ func TestValidateGroupTypeConfigDynamic(t *testing.T) {
 }
 
 func TestValidateGroupTypeConfigRejectsCrossBranchAndMaxMembers(t *testing.T) {
-	tests := []*adminv1.Group{
+	tests := []struct {
+		name        string
+		group       *adminv1.Group
+		allowSystem bool
+	}{
+		{name: "nil group"},
+		{name: "unspecified type", group: &adminv1.Group{}},
+		{name: "negative max members", group: &adminv1.Group{Type: adminv1.Group_PROJECT, MaxMembers: -1}},
+		{name: "parent before hierarchy enabled", group: &adminv1.Group{Type: adminv1.Group_PROJECT, ParentId: 1}},
 		{
-			Type: adminv1.Group_EXTERNAL,
-			Config: &adminv1.Group_DynamicConfig_{DynamicConfig: &adminv1.Group_DynamicConfig{
-				UserFilter: "status = ACTIVE",
-			}},
+			name: "manual group with config",
+			group: &adminv1.Group{
+				Type: adminv1.Group_EXTERNAL,
+				Config: &adminv1.Group_DynamicConfig_{DynamicConfig: &adminv1.Group_DynamicConfig{
+					UserFilter: "status = ACTIVE",
+				}},
+			},
+		},
+		{name: "dynamic without config", group: &adminv1.Group{Type: adminv1.Group_DYNAMIC}},
+		{
+			name: "dynamic max members",
+			group: &adminv1.Group{
+				Type:       adminv1.Group_DYNAMIC,
+				MaxMembers: 1,
+				Config: &adminv1.Group_DynamicConfig_{DynamicConfig: &adminv1.Group_DynamicConfig{
+					UserFilter: "status = ACTIVE",
+				}},
+			},
 		},
 		{
-			Type:       adminv1.Group_DYNAMIC,
-			MaxMembers: 1,
-			Config: &adminv1.Group_DynamicConfig_{DynamicConfig: &adminv1.Group_DynamicConfig{
-				UserFilter: "status = ACTIVE",
-			}},
+			name: "system through public API",
+			group: &adminv1.Group{
+				Type: adminv1.Group_SYSTEM,
+				Config: &adminv1.Group_SystemConfig_{SystemConfig: &adminv1.Group_SystemConfig{
+					UserFilter: "status = ACTIVE",
+				}},
+			},
 		},
-		{Type: adminv1.Group_PROJECT, ParentId: 1},
+		{name: "system seed without config", group: &adminv1.Group{Type: adminv1.Group_SYSTEM}, allowSystem: true},
+		{
+			name: "system seed max members",
+			group: &adminv1.Group{
+				Type:       adminv1.Group_SYSTEM,
+				MaxMembers: 1,
+				Config: &adminv1.Group_SystemConfig_{SystemConfig: &adminv1.Group_SystemConfig{
+					UserFilter: "status = ACTIVE",
+				}},
+			},
+			allowSystem: true,
+		},
+		{name: "department without config", group: &adminv1.Group{Type: adminv1.Group_DEPARTMENT}},
+		{
+			name: "department max members",
+			group: &adminv1.Group{
+				Type:       adminv1.Group_DEPARTMENT,
+				MaxMembers: 1,
+				Config: &adminv1.Group_DepartmentConfig_{DepartmentConfig: &adminv1.Group_DepartmentConfig{
+					DepartmentId: 1,
+				}},
+			},
+		},
+		{name: "role without config", group: &adminv1.Group{Type: adminv1.Group_ROLE}},
+		{
+			name: "role max members",
+			group: &adminv1.Group{
+				Type:       adminv1.Group_ROLE,
+				MaxMembers: 1,
+				Config: &adminv1.Group_RoleConfig_{RoleConfig: &adminv1.Group_RoleConfig{
+					RoleId: 1,
+				}},
+			},
+		},
 	}
-	for _, group := range tests {
-		if _, err := validateGroupTypeConfig(context.Background(), nil, group, false); err == nil {
-			t.Fatalf("expected group %+v to be rejected", group)
-		}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if _, err := validateGroupTypeConfig(context.Background(), nil, test.group, test.allowSystem); err == nil {
+				t.Fatalf("expected group %+v to be rejected", test.group)
+			}
+		})
+	}
+}
+
+func TestValidateGroupTypeConfigAcceptsNonDatabaseBranches(t *testing.T) {
+	tests := []struct {
+		name        string
+		group       *adminv1.Group
+		allowSystem bool
+	}{
+		{name: "project", group: &adminv1.Group{Type: adminv1.Group_PROJECT, MaxMembers: 10}},
+		{name: "external", group: &adminv1.Group{Type: adminv1.Group_EXTERNAL, MaxMembers: 10}},
+		{name: "community", group: &adminv1.Group{Type: adminv1.Group_COMMUNITY, MaxMembers: 10}},
+		{
+			name: "dynamic",
+			group: &adminv1.Group{
+				Type: adminv1.Group_DYNAMIC,
+				Config: &adminv1.Group_DynamicConfig_{DynamicConfig: &adminv1.Group_DynamicConfig{
+					UserFilter: "status = ACTIVE",
+				}},
+			},
+		},
+		{
+			name: "system seed",
+			group: &adminv1.Group{
+				Type: adminv1.Group_SYSTEM,
+				Config: &adminv1.Group_SystemConfig_{SystemConfig: &adminv1.Group_SystemConfig{
+					UserFilter: "status = ACTIVE",
+				}},
+			},
+			allowSystem: true,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if _, err := validateGroupTypeConfig(context.Background(), nil, test.group, test.allowSystem); err != nil {
+				t.Fatalf("validate group: %v", err)
+			}
+		})
 	}
 }
 
