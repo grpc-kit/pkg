@@ -5,9 +5,14 @@ import (
 	"testing"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/known/structpb"
 )
+
+func configSuperadminTestContext() context.Context {
+	return rpc.ContextWithRoles(context.Background(), []string{seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)})
+}
 
 func TestLocalConfigsFieldNumbers(t *testing.T) {
 	fields := (&adminv1.LocalConfigs{}).ProtoReflect().Descriptor().Fields()
@@ -30,7 +35,7 @@ func TestLocalConfigsFieldNumbers(t *testing.T) {
 	}
 }
 
-func TestListLocalConfigs_IncludesAIConnectorAndOmitsIndependent(t *testing.T) {
+func TestListLocalConfigs_IncludesAllCategories(t *testing.T) {
 	api := New(WithLocalConfigSnapshot(&LocalConfigSnapshot{
 		Services:    &adminv1.ServicesConfig{Name: "services", Enabled: true},
 		Discover:    &adminv1.DiscoverConfig{Name: "discover", Enabled: false},
@@ -47,17 +52,21 @@ func TestListLocalConfigs_IncludesAIConnectorAndOmitsIndependent(t *testing.T) {
 		Independent: &structpb.Struct{},
 	}))
 
-	resp, err := api.ListLocalConfigs(context.Background(), &adminv1.ListLocalConfigsRequest{})
+	resp, err := api.ListLocalConfigs(configSuperadminTestContext(), &adminv1.ListLocalConfigsRequest{})
 	if err != nil {
 		t.Fatalf("ListLocalConfigs returned error: %v", err)
 	}
-	if len(resp.GetConfigs()) != 12 {
-		t.Fatalf("expected 12 local config entries, got %d", len(resp.GetConfigs()))
+	if len(resp.GetConfigs()) != 13 {
+		t.Fatalf("expected 13 local config entries, got %d", len(resp.GetConfigs()))
 	}
 	foundAIConnector := false
+	foundIndependent := false
 	for _, entry := range resp.GetConfigs() {
 		if entry.GetName() == "independent" {
-			t.Fatalf("list response should not include independent entry")
+			foundIndependent = true
+			if !entry.GetEnabled() {
+				t.Fatalf("expected independent entry to be enabled")
+			}
 		}
 		if entry.GetName() == "aiconnector" {
 			foundAIConnector = true
@@ -68,6 +77,9 @@ func TestListLocalConfigs_IncludesAIConnectorAndOmitsIndependent(t *testing.T) {
 	}
 	if !foundAIConnector {
 		t.Fatalf("list response should include aiconnector entry")
+	}
+	if !foundIndependent {
+		t.Fatalf("list response should include independent entry")
 	}
 }
 
@@ -90,7 +102,7 @@ func TestGetLocalConfigs_SecurityIncludesStaticUsers(t *testing.T) {
 		}),
 	)
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "security"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "security"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -105,7 +117,7 @@ func TestGetLocalConfigs_SecurityIncludesStaticUsers(t *testing.T) {
 
 func TestGetLocalConfigs_InvalidName(t *testing.T) {
 	api := New()
-	_, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "unknown"})
+	_, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "unknown"})
 	if err == nil {
 		t.Fatalf("expected error for unknown local config name")
 	}
@@ -121,7 +133,7 @@ func TestGetLocalConfigs_Services(t *testing.T) {
 		Services: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "services"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "services"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -148,7 +160,7 @@ func TestGetLocalConfigs_Discover(t *testing.T) {
 		Discover: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "discover"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "discover"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -175,7 +187,7 @@ func TestGetLocalConfigs_Database(t *testing.T) {
 		Database: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "database"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "database"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -202,7 +214,7 @@ func TestGetLocalConfigs_Cachebox(t *testing.T) {
 		Cachebox: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "cachebox"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "cachebox"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -225,7 +237,7 @@ func TestGetLocalConfigs_Debugger(t *testing.T) {
 		Debugger: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "debugger"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "debugger"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -248,7 +260,7 @@ func TestGetLocalConfigs_Objstore(t *testing.T) {
 		Objstore: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "objstore"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "objstore"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -271,7 +283,7 @@ func TestGetLocalConfigs_Frontend(t *testing.T) {
 		Frontend: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "frontend"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "frontend"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -294,7 +306,7 @@ func TestGetLocalConfigs_Observables(t *testing.T) {
 		Observables: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "observables"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "observables"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -317,7 +329,7 @@ func TestGetLocalConfigs_Cloudevents(t *testing.T) {
 		Cloudevents: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "cloudevents"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "cloudevents"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -340,7 +352,7 @@ func TestGetLocalConfigs_Automations(t *testing.T) {
 		Automations: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "automations"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "automations"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -369,7 +381,7 @@ func TestGetLocalConfigs_AIConnector(t *testing.T) {
 		AIConnector: expectedConfig,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "aiconnector"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "aiconnector"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}
@@ -398,7 +410,7 @@ func TestGetLocalConfigs_Independent(t *testing.T) {
 		Independent: expectedStruct,
 	}))
 
-	resp, err := api.GetLocalConfigs(context.Background(), &adminv1.GetLocalConfigsRequest{Name: "independent"})
+	resp, err := api.GetLocalConfigs(configSuperadminTestContext(), &adminv1.GetLocalConfigsRequest{Name: "independent"})
 	if err != nil {
 		t.Fatalf("GetLocalConfigs returned error: %v", err)
 	}

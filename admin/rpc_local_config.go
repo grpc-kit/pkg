@@ -146,6 +146,9 @@ func (a *KnownAdminAPI) mergeStaticUsers(security *adminv1.SecurityConfig) *admi
 	return security
 }
 func (a *KnownAdminAPI) ListLocalConfigs(ctx context.Context, req *adminv1.ListLocalConfigsRequest) (*adminv1.ListLocalConfigsResponse, error) {
+	if err := requireConfigSuperadmin(ctx); err != nil {
+		return nil, err
+	}
 	snapshot := a.getLocalConfigSnapshot()
 
 	entries := []*adminv1.LocalConfigEntry{
@@ -161,12 +164,16 @@ func (a *KnownAdminAPI) ListLocalConfigs(ctx context.Context, req *adminv1.ListL
 		{Name: "cloudevents", Enabled: snapshot.Cloudevents != nil && snapshot.Cloudevents.Enabled},
 		{Name: "automations", Enabled: snapshot.Automations != nil && snapshot.Automations.Enabled},
 		{Name: "aiconnector", Enabled: snapshot.AIConnector != nil && snapshot.AIConnector.Enabled},
+		{Name: "independent", Enabled: snapshot.Independent != nil},
 	}
 
 	return &adminv1.ListLocalConfigsResponse{Configs: entries}, nil
 }
 
 func (a *KnownAdminAPI) GetLocalConfigs(ctx context.Context, req *adminv1.GetLocalConfigsRequest) (*adminv1.LocalConfigs, error) {
+	if err := requireConfigSuperadmin(ctx); err != nil {
+		return nil, err
+	}
 	if req == nil || req.Name == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("name is required")
 	}
