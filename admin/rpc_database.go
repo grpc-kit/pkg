@@ -302,10 +302,11 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									DisplayName: "配置管理",
 									RoutePath:   "/setting/config",
 									SortOrder:   adminSettingsMenuSortConfig,
+									// 子菜单排序与 pkg/cfg/app-sample.yaml 的大类保持一致
 									Children: []builtinMenuSeed{
-										{Code: "admin.setting.config.security", DisplayName: "认证鉴权", RoutePath: "/setting/config/security", SortOrder: 100},
-										{Code: "admin.setting.config.services", DisplayName: "基础服务", RoutePath: "/setting/config/services", SortOrder: 200},
-										{Code: "admin.setting.config.discover", DisplayName: "服务发现", RoutePath: "/setting/config/discover", SortOrder: 300},
+										{Code: "admin.setting.config.services", DisplayName: "基础服务", RoutePath: "/setting/config/services", SortOrder: 100},
+										{Code: "admin.setting.config.discover", DisplayName: "服务发现", RoutePath: "/setting/config/discover", SortOrder: 200},
+										{Code: "admin.setting.config.security", DisplayName: "认证鉴权", RoutePath: "/setting/config/security", SortOrder: 300},
 										{Code: "admin.setting.config.database", DisplayName: "关系存储", RoutePath: "/setting/config/database", SortOrder: 400},
 										{Code: "admin.setting.config.cachebox", DisplayName: "缓存服务", RoutePath: "/setting/config/cachebox", SortOrder: 500},
 										{Code: "admin.setting.config.debugger", DisplayName: "日志调试", RoutePath: "/setting/config/debugger", SortOrder: 600},
