@@ -2,7 +2,9 @@ package admin
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 
@@ -21,62 +23,136 @@ func newGlobalSettingsReader(logger *logrus.Entry, db *lion.Client) *globalSetti
 }
 
 func (r *globalSettingsReader) GetBool(ctx context.Context, category, settingKey string) (bool, bool, error) {
-	raw, spec, found, err := r.getRawValue(ctx, category, settingKey)
+	raw, spec, found, builtIn, err := r.getRawValue(ctx, category, settingKey)
 	if err != nil {
 		return false, false, err
+	}
+	if spec.ValueType != globalSettingValueTypeBool {
+		return false, false, globalSettingTypeMismatch(category, settingKey, globalSettingValueTypeBool, spec.ValueType)
 	}
 	parsed, parseErr := strconv.ParseBool(raw)
 	if parseErr == nil {
 		return parsed, found, nil
 	}
-	r.warnParseFallback(category, settingKey, raw, spec.DefaultValue, parseErr)
+	if !builtIn {
+		return false, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
+	}
+	r.warnParseFallback(category, settingKey, parseErr)
 	parsed, _ = strconv.ParseBool(spec.DefaultValue)
 	return parsed, false, nil
 }
 
 func (r *globalSettingsReader) GetInt(ctx context.Context, category, settingKey string) (int, bool, error) {
-	raw, spec, found, err := r.getRawValue(ctx, category, settingKey)
+	raw, spec, found, builtIn, err := r.getRawValue(ctx, category, settingKey)
 	if err != nil {
 		return 0, false, err
+	}
+	if spec.ValueType != globalSettingValueTypeInt {
+		return 0, false, globalSettingTypeMismatch(category, settingKey, globalSettingValueTypeInt, spec.ValueType)
 	}
 	parsed, parseErr := strconv.Atoi(raw)
 	if parseErr == nil {
 		return parsed, found, nil
 	}
-	r.warnParseFallback(category, settingKey, raw, spec.DefaultValue, parseErr)
+	if !builtIn {
+		return 0, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
+	}
+	r.warnParseFallback(category, settingKey, parseErr)
 	parsed, _ = strconv.Atoi(spec.DefaultValue)
 	return parsed, false, nil
 }
 
-func (r *globalSettingsReader) GetDuration(ctx context.Context, category, settingKey string) (time.Duration, bool, error) {
-	raw, spec, found, err := r.getRawValue(ctx, category, settingKey)
+func (r *globalSettingsReader) GetFloat(ctx context.Context, category, settingKey string) (float64, bool, error) {
+	raw, spec, found, builtIn, err := r.getRawValue(ctx, category, settingKey)
 	if err != nil {
 		return 0, false, err
+	}
+	if spec.ValueType != globalSettingValueTypeFloat {
+		return 0, false, globalSettingTypeMismatch(category, settingKey, globalSettingValueTypeFloat, spec.ValueType)
+	}
+	parsed, parseErr := strconv.ParseFloat(raw, 64)
+	if parseErr == nil && !math.IsInf(parsed, 0) && !math.IsNaN(parsed) {
+		return parsed, found, nil
+	}
+	if !builtIn {
+		return 0, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
+	}
+	r.warnParseFallback(category, settingKey, parseErr)
+	parsed, _ = strconv.ParseFloat(spec.DefaultValue, 64)
+	return parsed, false, nil
+}
+
+func (r *globalSettingsReader) GetDuration(ctx context.Context, category, settingKey string) (time.Duration, bool, error) {
+	raw, spec, found, builtIn, err := r.getRawValue(ctx, category, settingKey)
+	if err != nil {
+		return 0, false, err
+	}
+	if spec.ValueType != globalSettingValueTypeDuration {
+		return 0, false, globalSettingTypeMismatch(category, settingKey, globalSettingValueTypeDuration, spec.ValueType)
 	}
 	parsed, parseErr := time.ParseDuration(raw)
 	if parseErr == nil {
 		return parsed, found, nil
 	}
-	r.warnParseFallback(category, settingKey, raw, spec.DefaultValue, parseErr)
+	if !builtIn {
+		return 0, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
+	}
+	r.warnParseFallback(category, settingKey, parseErr)
 	parsed, _ = time.ParseDuration(spec.DefaultValue)
 	return parsed, false, nil
 }
 
 func (r *globalSettingsReader) GetString(ctx context.Context, category, settingKey string) (string, bool, error) {
-	raw, _, found, err := r.getRawValue(ctx, category, settingKey)
+	raw, spec, found, _, err := r.getRawValue(ctx, category, settingKey)
 	if err != nil {
 		return "", false, err
+	}
+	if spec.ValueType != globalSettingValueTypeString {
+		return "", false, globalSettingTypeMismatch(category, settingKey, globalSettingValueTypeString, spec.ValueType)
 	}
 	return raw, found, nil
 }
 
-func (r *globalSettingsReader) getRawValue(ctx context.Context, category, settingKey string) (string, globalSettingSpec, bool, error) {
-	spec, ok := lookupGlobalSettingSpec(category, settingKey)
-	if !ok {
-		return "", globalSettingSpec{}, false, fmt.Errorf("unknown global setting: %s/%s", category, settingKey)
+func (r *globalSettingsReader) GetStringArray(ctx context.Context, category, settingKey string) ([]string, bool, error) {
+	raw, spec, found, _, err := r.getRawValue(ctx, category, settingKey)
+	if err != nil {
+		return nil, false, err
 	}
+	if spec.ValueType != globalSettingValueTypeStringArray {
+		return nil, false, globalSettingTypeMismatch(category, settingKey, globalSettingValueTypeStringArray, spec.ValueType)
+	}
+	var result []string
+	if err := json.Unmarshal([]byte(raw), &result); err != nil || result == nil {
+		return nil, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
+	}
+	return result, found, nil
+}
+
+func (r *globalSettingsReader) GetJSON(ctx context.Context, category, settingKey string) (json.RawMessage, bool, error) {
+	raw, spec, found, _, err := r.getRawValue(ctx, category, settingKey)
+	if err != nil {
+		return nil, false, err
+	}
+	if spec.ValueType != globalSettingValueTypeJSON {
+		return nil, false, globalSettingTypeMismatch(category, settingKey, globalSettingValueTypeJSON, spec.ValueType)
+	}
+	var decoded any
+	if err := json.Unmarshal([]byte(raw), &decoded); err != nil {
+		return nil, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
+	}
+	return json.RawMessage(raw), found, nil
+}
+
+func (r *globalSettingsReader) getRawValue(ctx context.Context, category, settingKey string) (string, globalSettingSpec, bool, bool, error) {
+	if !isGlobalSettingsCategory(category) {
+		return "", globalSettingSpec{}, false, false, fmt.Errorf("unknown global setting category: %s", category)
+	}
+	spec, builtIn := lookupGlobalSettingSpec(category, settingKey)
 	if r == nil || r.db == nil {
-		return spec.DefaultValue, spec, false, nil
+		if builtIn {
+			return spec.DefaultValue, spec, false, true, nil
+		}
+		return "", globalSettingSpec{}, false, false, fmt.Errorf("unknown global setting: %s/%s", category, settingKey)
 	}
 	row, err := r.db.GlobalSettings.Query().
 		Where(
@@ -85,24 +161,32 @@ func (r *globalSettingsReader) getRawValue(ctx context.Context, category, settin
 		).
 		Only(ctx)
 	if err != nil {
-		if lion.IsNotFound(err) {
-			return spec.DefaultValue, spec, false, nil
+		if lion.IsNotFound(err) && builtIn {
+			return spec.DefaultValue, spec, false, true, nil
 		}
-		return "", globalSettingSpec{}, false, err
+		if lion.IsNotFound(err) {
+			return "", globalSettingSpec{}, false, false, fmt.Errorf("unknown global setting: %s/%s", category, settingKey)
+		}
+		return "", globalSettingSpec{}, false, builtIn, err
 	}
-	return row.SettingValue, spec, true, nil
+	if builtIn {
+		return row.SettingValue, spec, true, true, nil
+	}
+	return row.SettingValue, globalSettingSpec{ValueType: globalSettingValueType(row.ValueType)}, true, false, nil
 }
 
-func (r *globalSettingsReader) warnParseFallback(category, settingKey, raw, fallback string, parseErr error) {
+func globalSettingTypeMismatch(category, settingKey string, expected, actual globalSettingValueType) error {
+	return fmt.Errorf("global setting type mismatch for %s/%s: expected %s, got %s", category, settingKey, expected, actual)
+}
+
+func (r *globalSettingsReader) warnParseFallback(category, settingKey string, parseErr error) {
 	if r == nil || r.logger == nil {
 		return
 	}
 	r.logger.Warnf(
-		"global setting parse fallback: category=%s setting_key=%s raw=%q fallback=%q err=%v",
+		"global setting parse fallback: category=%s setting_key=%s err=%v",
 		category,
 		settingKey,
-		raw,
-		fallback,
 		parseErr,
 	)
 }
