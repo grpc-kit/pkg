@@ -1911,8 +1911,8 @@
     },
     "/builtin/admin/api/v1/global/settings": {
       "get": {
-        "summary": "TODO: 补充 ListGlobalSettings 摘要",
-        "description": "接口格式：GET /builtin/admin/api/v1/global/settings。前置条件与业务约束待补充。",
+        "summary": "列出全部全局配置分类",
+        "description": "固定返回全部 13 个分类及其配置；仅 superadmin 可调用。",
         "operationId": "KnownAdmin_ListGlobalSettings",
         "responses": {
           "200": {
@@ -1944,8 +1944,8 @@
     },
     "/builtin/admin/api/v1/global/settings/{category}": {
       "get": {
-        "summary": "TODO: 补充 GetGlobalSettings 摘要",
-        "description": "接口格式：GET /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。",
+        "summary": "获取指定分类的全局配置",
+        "description": "合并返回 registry 内置项与数据库自定义项；仅 superadmin 可调用。",
         "operationId": "KnownAdmin_GetGlobalSettings",
         "responses": {
           "200": {
@@ -1982,9 +1982,63 @@
           "全局设置"
         ]
       },
+      "post": {
+        "summary": "创建自定义全局配置",
+        "description": "在指定分类创建数据库全局配置；仅 superadmin 可调用，配置立即生效。",
+        "operationId": "KnownAdmin_CreateGlobalSetting",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GlobalSetting"
+            },
+            "examples": {
+              "application/json": {
+                "category": "security",
+                "setting_key": "custom.feature_enabled",
+                "setting_value": "true",
+                "value_type": "bool",
+                "description": "自定义功能开关",
+                "protected": false
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "setting",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1GlobalSettingInput"
+            }
+          }
+        ],
+        "tags": [
+          "全局设置"
+        ]
+      },
       "patch": {
-        "summary": "TODO: 补充 UpdateGlobalSettings 摘要",
-        "description": "接口格式：PATCH /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。",
+        "summary": "批量更新全局配置",
+        "description": "以事务方式批量更新内置项或自定义项；仅 superadmin 可调用，配置立即生效。",
         "operationId": "KnownAdmin_UpdateGlobalSettings",
         "responses": {
           "200": {
@@ -2027,6 +2081,54 @@
                 "$ref": "#/definitions/v1UpdateGlobalSetting"
               }
             }
+          }
+        ],
+        "tags": [
+          "全局设置"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/global/settings/{category}/{setting_key}": {
+      "delete": {
+        "summary": "删除自定义全局配置",
+        "description": "删除指定自定义配置；registry 内置项不可删除，仅 superadmin 可调用。",
+        "operationId": "KnownAdmin_DeleteGlobalSetting",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "setting_key",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -8339,6 +8441,23 @@
       },
       "title": "GlobalSettingCategory 全局设置分类，聚合同一 category 下的设置项"
     },
+    "v1GlobalSettingInput": {
+      "type": "object",
+      "properties": {
+        "setting_key": {
+          "type": "string"
+        },
+        "setting_value": {
+          "type": "string"
+        },
+        "value_type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
     "v1Group": {
       "type": "object",
       "properties": {
@@ -10915,6 +11034,12 @@
           "type": "string"
         },
         "setting_value": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "update_mask": {
           "type": "string"
         }
       },

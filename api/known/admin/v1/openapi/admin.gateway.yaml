@@ -14,6 +14,9 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetLocalConfigs
     get: "/builtin/admin/api/v1/local/configs/{name}"
 
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateGlobalSetting
+    post: "/builtin/admin/api/v1/global/settings/{category}"
+    body: "setting"
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetGlobalSettings
     get: "/builtin/admin/api/v1/global/settings/{category}"
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListGlobalSettings
@@ -21,6 +24,8 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGlobalSettings
     patch: "/builtin/admin/api/v1/global/settings/{category}"
     body: "updates"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGlobalSetting
+    delete: "/builtin/admin/api/v1/global/settings/{category}/{setting_key}"
 
     # 认证鉴权
     ## 创建认证令牌

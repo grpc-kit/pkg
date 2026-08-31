@@ -83,12 +83,22 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"security":{"name":"security","enabled":true,"authentication":{"insecure_rpcs":["grpc.health.v1.Health/Check"],"http_users":[{"user_id":"1","username":"admin","groups":["root"],"tenant":"default"}]}}}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateGlobalSetting
+      option:
+        tags:
+          - "全局设置"
+        summary: "创建自定义全局配置"
+        description: "在指定分类创建数据库全局配置；仅 superadmin 可调用，配置立即生效。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"category":"security","setting_key":"custom.feature_enabled","setting_value":"true","value_type":"bool","description":"自定义功能开关","protected":false}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetGlobalSettings
       option:
         tags:
           - "全局设置"
-        summary: "TODO: 补充 GetGlobalSettings 摘要"
-        description: "接口格式：GET /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。"
+        summary: "获取指定分类的全局配置"
+        description: "合并返回 registry 内置项与数据库自定义项；仅 superadmin 可调用。"
         responses:
           "200":
             examples:
@@ -97,8 +107,8 @@ openapiOptions:
       option:
         tags:
           - "全局设置"
-        summary: "TODO: 补充 ListGlobalSettings 摘要"
-        description: "接口格式：GET /builtin/admin/api/v1/global/settings。前置条件与业务约束待补充。"
+        summary: "列出全部全局配置分类"
+        description: "固定返回全部 13 个分类及其配置；仅 superadmin 可调用。"
         responses:
           "200":
             examples:
@@ -107,8 +117,18 @@ openapiOptions:
       option:
         tags:
           - "全局设置"
-        summary: "TODO: 补充 UpdateGlobalSettings 摘要"
-        description: "接口格式：PATCH /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。"
+        summary: "批量更新全局配置"
+        description: "以事务方式批量更新内置项或自定义项；仅 superadmin 可调用，配置立即生效。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGlobalSetting
+      option:
+        tags:
+          - "全局设置"
+        summary: "删除自定义全局配置"
+        description: "删除指定自定义配置；registry 内置项不可删除，仅 superadmin 可调用。"
         responses:
           "200":
             examples:
