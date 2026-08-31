@@ -24,9 +24,11 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	KnownAdmin_ListLocalConfigs_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLocalConfigs"
 	KnownAdmin_GetLocalConfigs_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigs"
+	KnownAdmin_CreateGlobalSetting_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateGlobalSetting"
 	KnownAdmin_GetGlobalSettings_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGlobalSettings"
 	KnownAdmin_ListGlobalSettings_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGlobalSettings"
 	KnownAdmin_UpdateGlobalSettings_FullMethodName      = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGlobalSettings"
+	KnownAdmin_DeleteGlobalSetting_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteGlobalSetting"
 	KnownAdmin_UpsertAuthProviders_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpsertAuthProviders"
 	KnownAdmin_ListAuthProviders_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders"
 	KnownAdmin_ListLoginOptions_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLoginOptions"
@@ -130,9 +132,11 @@ type KnownAdminClient interface {
 	ListLocalConfigs(ctx context.Context, in *ListLocalConfigsRequest, opts ...grpc.CallOption) (*ListLocalConfigsResponse, error)
 	GetLocalConfigs(ctx context.Context, in *GetLocalConfigsRequest, opts ...grpc.CallOption) (*LocalConfigs, error)
 	// 全局设置
+	CreateGlobalSetting(ctx context.Context, in *CreateGlobalSettingRequest, opts ...grpc.CallOption) (*GlobalSetting, error)
 	GetGlobalSettings(ctx context.Context, in *GetGlobalSettingsRequest, opts ...grpc.CallOption) (*GlobalSettingCategory, error)
 	ListGlobalSettings(ctx context.Context, in *ListGlobalSettingsRequest, opts ...grpc.CallOption) (*ListGlobalSettingsResponse, error)
 	UpdateGlobalSettings(ctx context.Context, in *UpdateGlobalSettingsRequest, opts ...grpc.CallOption) (*UpdateGlobalSettingsResponse, error)
+	DeleteGlobalSetting(ctx context.Context, in *DeleteGlobalSettingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 认证鉴权
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 	ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error)
@@ -271,6 +275,16 @@ func (c *knownAdminClient) GetLocalConfigs(ctx context.Context, in *GetLocalConf
 	return out, nil
 }
 
+func (c *knownAdminClient) CreateGlobalSetting(ctx context.Context, in *CreateGlobalSettingRequest, opts ...grpc.CallOption) (*GlobalSetting, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GlobalSetting)
+	err := c.cc.Invoke(ctx, KnownAdmin_CreateGlobalSetting_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) GetGlobalSettings(ctx context.Context, in *GetGlobalSettingsRequest, opts ...grpc.CallOption) (*GlobalSettingCategory, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GlobalSettingCategory)
@@ -295,6 +309,16 @@ func (c *knownAdminClient) UpdateGlobalSettings(ctx context.Context, in *UpdateG
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateGlobalSettingsResponse)
 	err := c.cc.Invoke(ctx, KnownAdmin_UpdateGlobalSettings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteGlobalSetting(ctx context.Context, in *DeleteGlobalSettingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, KnownAdmin_DeleteGlobalSetting_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1239,9 +1263,11 @@ type KnownAdminServer interface {
 	ListLocalConfigs(context.Context, *ListLocalConfigsRequest) (*ListLocalConfigsResponse, error)
 	GetLocalConfigs(context.Context, *GetLocalConfigsRequest) (*LocalConfigs, error)
 	// 全局设置
+	CreateGlobalSetting(context.Context, *CreateGlobalSettingRequest) (*GlobalSetting, error)
 	GetGlobalSettings(context.Context, *GetGlobalSettingsRequest) (*GlobalSettingCategory, error)
 	ListGlobalSettings(context.Context, *ListGlobalSettingsRequest) (*ListGlobalSettingsResponse, error)
 	UpdateGlobalSettings(context.Context, *UpdateGlobalSettingsRequest) (*UpdateGlobalSettingsResponse, error)
+	DeleteGlobalSetting(context.Context, *DeleteGlobalSettingRequest) (*emptypb.Empty, error)
 	// 认证鉴权
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 	ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error)
@@ -1365,6 +1391,9 @@ func (UnimplementedKnownAdminServer) ListLocalConfigs(context.Context, *ListLoca
 func (UnimplementedKnownAdminServer) GetLocalConfigs(context.Context, *GetLocalConfigsRequest) (*LocalConfigs, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetLocalConfigs not implemented")
 }
+func (UnimplementedKnownAdminServer) CreateGlobalSetting(context.Context, *CreateGlobalSettingRequest) (*GlobalSetting, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateGlobalSetting not implemented")
+}
 func (UnimplementedKnownAdminServer) GetGlobalSettings(context.Context, *GetGlobalSettingsRequest) (*GlobalSettingCategory, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetGlobalSettings not implemented")
 }
@@ -1373,6 +1402,9 @@ func (UnimplementedKnownAdminServer) ListGlobalSettings(context.Context, *ListGl
 }
 func (UnimplementedKnownAdminServer) UpdateGlobalSettings(context.Context, *UpdateGlobalSettingsRequest) (*UpdateGlobalSettingsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateGlobalSettings not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteGlobalSetting(context.Context, *DeleteGlobalSettingRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteGlobalSetting not implemented")
 }
 func (UnimplementedKnownAdminServer) UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpsertAuthProviders not implemented")
@@ -1709,6 +1741,24 @@ func _KnownAdmin_GetLocalConfigs_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_CreateGlobalSetting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateGlobalSettingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateGlobalSetting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_CreateGlobalSetting_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateGlobalSetting(ctx, req.(*CreateGlobalSettingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_GetGlobalSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetGlobalSettingsRequest)
 	if err := dec(in); err != nil {
@@ -1759,6 +1809,24 @@ func _KnownAdmin_UpdateGlobalSettings_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).UpdateGlobalSettings(ctx, req.(*UpdateGlobalSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteGlobalSetting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteGlobalSettingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteGlobalSetting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_DeleteGlobalSetting_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteGlobalSetting(ctx, req.(*DeleteGlobalSettingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -3453,6 +3521,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_GetLocalConfigs_Handler,
 		},
 		{
+			MethodName: "CreateGlobalSetting",
+			Handler:    _KnownAdmin_CreateGlobalSetting_Handler,
+		},
+		{
 			MethodName: "GetGlobalSettings",
 			Handler:    _KnownAdmin_GetGlobalSettings_Handler,
 		},
@@ -3463,6 +3535,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateGlobalSettings",
 			Handler:    _KnownAdmin_UpdateGlobalSettings_Handler,
+		},
+		{
+			MethodName: "DeleteGlobalSetting",
+			Handler:    _KnownAdmin_DeleteGlobalSetting_Handler,
 		},
 		{
 			MethodName: "UpsertAuthProviders",
