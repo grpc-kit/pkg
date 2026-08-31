@@ -40,29 +40,87 @@ func dur(v time.Duration) string {
 	return v.String()
 }
 
-func toStruct(v interface{}) *structpb.Struct {
+func toStruct(v any) *structpb.Struct {
 	if v == nil {
 		return nil
 	}
 
-	var m map[string]interface{}
-	if mv, ok := v.(map[string]interface{}); ok {
-		m = mv
-	} else {
-		raw, err := json.Marshal(v)
-		if err != nil {
-			return nil
-		}
-		if err := json.Unmarshal(raw, &m); err != nil {
-			return nil
-		}
+	raw, err := json.Marshal(v)
+	if err != nil {
+		return nil
 	}
+	var m map[string]any
+	if err := json.Unmarshal(raw, &m); err != nil {
+		return nil
+	}
+	m = maskSensitiveConfigMap(m)
 
 	s, err := structpb.NewStruct(m)
 	if err != nil {
 		return nil
 	}
 	return s
+}
+
+func maskSensitiveConfigMap(input map[string]any) map[string]any {
+	if input == nil {
+		return nil
+	}
+	output := make(map[string]any, len(input))
+	for key, value := range input {
+		if isSensitiveConfigKey(key) {
+			output[key] = maskSensitiveConfigValue(value)
+			continue
+		}
+		output[key] = maskNestedConfigValue(value)
+	}
+	return output
+}
+
+func maskNestedConfigValue(value any) any {
+	switch typed := value.(type) {
+	case map[string]any:
+		return maskSensitiveConfigMap(typed)
+	case []any:
+		result := make([]any, len(typed))
+		for i, item := range typed {
+			result[i] = maskNestedConfigValue(item)
+		}
+		return result
+	default:
+		return value
+	}
+}
+
+func maskSensitiveConfigValue(value any) any {
+	if value == nil {
+		return nil
+	}
+	if text, ok := value.(string); ok && text == "" {
+		return ""
+	}
+	return maskedValue
+}
+
+func isSensitiveConfigKey(key string) bool {
+	normalized := strings.ToLower(strings.ReplaceAll(key, "-", "_"))
+	if strings.HasSuffix(normalized, "_file") || strings.HasSuffix(normalized, "_path") {
+		return false
+	}
+	switch normalized {
+	case "password", "password_hash", "passwd", "secret", "token", "api_key", "access_key", "secret_key",
+		"private_key", "client_secret", "security_key", "session_token", "bearer_token", "refresh_token",
+		"access_token", "encryption_key", "credential", "credentials":
+		return true
+	}
+	compact := strings.ReplaceAll(normalized, "_", "")
+	switch compact {
+	case "password", "passwordhash", "clientsecret", "apikey", "accesskey", "secretkey", "privatekey",
+		"securitykey", "sessiontoken", "bearertoken", "refreshtoken", "accesstoken", "encryptionkey":
+		return true
+	default:
+		return false
+	}
 }
 
 func maskHeaders(headers map[string]string) map[string]string {
@@ -236,7 +294,7 @@ func (c *LocalConfig) toAdminSecurityConfig() *adminv1.SecurityConfig {
 			},
 			OpaExternal: &adminv1.OPAExternalConfig{
 				Enabled: ptrBool(c.Security.Authorization.OPAExternal.Enabled, false),
-				Config:  c.Security.Authorization.OPAExternal.Config,
+				Config:  mask(c.Security.Authorization.OPAExternal.Config),
 			},
 			OpaEnvoyPlugin: &adminv1.OPAEnvoyPluginConfig{
 				Enabled: ptrBool(c.Security.Authorization.OPAEnvoyPlugin.Enabled, false),
