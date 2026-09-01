@@ -15,7 +15,8 @@ type CommonClaims struct {
 	jwt.RegisteredClaims
 
 	// --- OIDC Standard Claims（OIDC Core §5.1）---
-	// End-User 信息声明。PhoneNumber 等字段由 userinfo 端点从数据库返回而非 JWT。
+	// End-User 基础身份声明。是否包含在 Token 中由签发方及请求的 scope/claims 决定。
+	// 框架签发的 Access Token 仅承载认证授权所需信息，手机号等用户资料由 userinfo 返回。
 
 	// Email 用户邮箱。
 	Email string `json:"email,omitempty"`
@@ -87,6 +88,12 @@ type IDTokenClaims struct {
 	CommonClaims
 
 	// --- OIDC ID Token 专有声明（OIDC Core §2）---
+	// PhoneNumber 是外部 OIDC Provider 可能在 id_token 中返回的可选 E.164 电话号码，
+	// 仅用于解析外部 Provider 声明；框架签发的 Access Token 不包含该字段。
+	PhoneNumber string `json:"phone_number,omitempty"`
+	// PhoneNumberVerified 表示外部 OIDC Provider 已验证 PhoneNumber。
+	// 只有该值为 true 时，手机号才可用于已验证标识自动关联。
+	PhoneNumberVerified bool `json:"phone_number_verified,omitempty"`
 
 	// Nonce 防重放随机值，由客户端在认证请求中下发并回显。
 	Nonce string `json:"nonce,omitempty"`

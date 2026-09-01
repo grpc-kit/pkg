@@ -1,9 +1,9 @@
 package cfg
 
-// AIConnectorConfig AI 连接器配置
+// AIConnectorConfig 智能连接配置
 // 一期仅包含 MCP Server 配置；LLM Client 配置将在第二阶段添加
 type AIConnectorConfig struct {
-	// 是否启用 AI 连接器（默认 false）
+	// 是否启用智能连接（默认 false）
 	Enable bool `mapstructure:"enable"`
 
 	// MCP Server 配置
@@ -42,8 +42,8 @@ func DefaultAIConnectorConfig() *AIConnectorConfig {
 	}
 }
 
-// initAIConnector 初始化 AI 连接器配置
-// 放在 Init 链最后，因为 AI 连接器可能需要引用其他子系统配置
+// initAIConnector 初始化智能连接配置
+// 放在 Init 链最后，因为智能连接可能需要引用其他子系统配置
 func (c *LocalConfig) initAIConnector() error {
 	if c.AIConnector == nil {
 		c.AIConnector = DefaultAIConnectorConfig()

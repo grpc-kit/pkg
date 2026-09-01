@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -58,17 +57,8 @@ const (
 	FieldDescription = "description"
 	// FieldProtected holds the string denoting the protected field in the database.
 	FieldProtected = "protected"
-	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
-	EdgeLionGroups = "lion_groups"
 	// Table holds the table name of the departments in the database.
 	Table = "lion_departments"
-	// LionGroupsTable is the table that holds the lion_groups relation/edge.
-	LionGroupsTable = "lion_groups"
-	// LionGroupsInverseTable is the table name for the Groups entity.
-	// It exists in this package in order to avoid circular dependency with the "groups" package.
-	LionGroupsInverseTable = "lion_groups"
-	// LionGroupsColumn is the table column denoting the lion_groups relation/edge.
-	LionGroupsColumn = "departments_lion_groups"
 )
 
 // Columns holds all SQL columns for departments fields.
@@ -237,25 +227,4 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 // ByProtected orders the results by the protected field.
 func ByProtected(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProtected, opts...).ToFunc()
-}
-
-// ByLionGroupsCount orders the results by lion_groups count.
-func ByLionGroupsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionGroupsStep(), opts...)
-	}
-}
-
-// ByLionGroups orders the results by lion_groups terms.
-func ByLionGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-func newLionGroupsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionGroupsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionGroupsTable, LionGroupsColumn),
-	)
 }

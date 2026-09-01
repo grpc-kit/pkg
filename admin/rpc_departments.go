@@ -34,6 +34,9 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	if req == nil || req.Department == nil {
 		return result, errs.InvalidArgument(ctx).WithMessage("request body department is nil")
 	}
+	if req.Department.Protected {
+		return result, errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
+	}
 
 	code, err := schema.EnsureCode(req.Department.Code)
 	if err != nil {
@@ -48,7 +51,10 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 
 	// 确认父部门存在并检查权限
 	if req.Department.ParentId != 0 {
-		_, err = tx.Departments.Get(ctx, int(req.Department.ParentId))
+		_, err = tx.Departments.Query().Where(
+			departments.IDEQ(int(req.Department.ParentId)),
+			departments.DeletedAtIsNil(),
+		).Only(ctx)
 		if err != nil {
 			_ = tx.Rollback()
 			return result, errs.InvalidArgument(ctx).WithMessage("department parent id not found")
@@ -84,6 +90,10 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	if req.Department.Visibility == adminv1.Visibility_VISIBILITY_UNSPECIFIED {
 		visibility = int(adminv1.Visibility_VISIBILITY_SUBTREE.Number())
 	}
+	status := int(req.Department.Status)
+	if req.Department.Status == adminv1.Department_STATUS_UNSPECIFIED {
+		status = int(adminv1.Department_ACTIVE)
+	}
 
 	create := tx.Departments.Create().
 		SetParentID(int(req.Department.ParentId)).
@@ -91,7 +101,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		SetDisplayName(displayName).
 		SetSortOrder(sortOrder).
 		SetDepartmentType(int(req.Department.Type)).
-		SetDepartmentStatus(int(req.Department.Status)).
+		SetDepartmentStatus(status).
 		SetVisibility(visibility)
 
 	if req.Department.Description != "" {
@@ -124,32 +134,11 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		return result, err
 	}
 
-	// 返回与 proto Department 一致的完整信息（不含 managers，创建时无成员）
-	result = &adminv1.Department{
-		Id:             int64(dp.ID),
-		ParentId:       int64(dp.ParentID),
-		Code:           dp.Code,
-		DisplayName:    dp.DisplayName,
-		Type:           adminv1.Department_Type(dp.DepartmentType),
-		Status:         adminv1.Department_Status(dp.DepartmentStatus),
-		SortOrder:      int32(dp.SortOrder),
-		Visibility:     adminv1.Visibility(dp.Visibility),
-		Description:    dp.Description,
-		CostCenterCode: dp.CostCenterCode,
-		BudgetItemCode: dp.BudgetItemCode,
-		MaxMembers:     int32(dp.MaxMembers),
-		ExternalId:     dp.ExternalID,
-		Metadata:       dp.Metadata,
-		CreatedBy:      dp.CreatedBy,
-		UpdatedBy:      dp.UpdatedBy,
-		CreatedAt:      timestamppb.New(dp.CreatedAt),
-		UpdatedAt:      timestamppb.New(dp.UpdatedAt),
-		Members:        make([]*adminv1.Membership, 0),
+	if err := tx.Commit(); err != nil {
+		return result, err
 	}
 
-	_ = tx.Commit()
-
-	return result, nil
+	return departmentToProto(dp), nil
 }
 
 // parseListDepartmentsParent 解析 ListDepartments 的 parent 参数。
@@ -179,9 +168,124 @@ func parseListDepartmentsParent(parent string) (parentID int, filterByParent boo
 	return id, true
 }
 
+// parseListDepartmentsFilter implements the minimum AIP-160 subset required by
+// the Department recycle bin while keeping the existing explicit list filters.
+func parseListDepartmentsFilter(filter string) ([]predicate.Departments, bool, error) {
+	filter = strings.TrimSpace(filter)
+	if filter == "" {
+		return nil, false, nil
+	}
+
+	predicates := make([]predicate.Departments, 0)
+	deletedOnly := false
+	for _, clause := range strings.Split(filter, " AND ") {
+		clause = strings.TrimSpace(clause)
+		if clause == "" {
+			return nil, false, fmt.Errorf("empty filter clause")
+		}
+		if strings.EqualFold(strings.ReplaceAll(clause, " ", ""), "deleted_at!=null") {
+			deletedOnly = true
+			continue
+		}
+		idx := strings.Index(clause, "=")
+		if idx <= 0 || (idx > 0 && clause[idx-1] == '!') {
+			return nil, false, fmt.Errorf("unsupported filter clause %q", clause)
+		}
+		key := strings.TrimSpace(strings.Trim(clause[:idx], "\""))
+		value := strings.TrimSpace(strings.Trim(clause[idx+1:], "\""))
+		switch key {
+		case "status", "department_status":
+			n, err := strconv.Atoi(value)
+			if err != nil {
+				return nil, false, fmt.Errorf("status must be int: %s", value)
+			}
+			predicates = append(predicates, departments.DepartmentStatusEQ(n))
+		case "type", "department_type":
+			n, err := strconv.Atoi(value)
+			if err != nil {
+				return nil, false, fmt.Errorf("type must be int: %s", value)
+			}
+			predicates = append(predicates, departments.DepartmentTypeEQ(n))
+		case "parent_id":
+			n, err := strconv.Atoi(value)
+			if err != nil {
+				return nil, false, fmt.Errorf("parent_id must be int: %s", value)
+			}
+			predicates = append(predicates, departments.ParentIDEQ(n))
+		case "code":
+			predicates = append(predicates, departments.CodeContainsFold(value))
+		case "display_name":
+			predicates = append(predicates, departments.DisplayNameContainsFold(value))
+		default:
+			return nil, false, fmt.Errorf("unsupported filter field %q", key)
+		}
+	}
+	return predicates, deletedOnly, nil
+}
+
+func departmentToProto(row *lion.Departments) *adminv1.Department {
+	if row == nil {
+		return nil
+	}
+	result := &adminv1.Department{
+		Id:             int64(row.ID),
+		ParentId:       int64(row.ParentID),
+		Code:           row.Code,
+		DisplayName:    row.DisplayName,
+		Type:           adminv1.Department_Type(row.DepartmentType),
+		Status:         adminv1.Department_Status(row.DepartmentStatus),
+		SortOrder:      int32(row.SortOrder),
+		CostCenterCode: row.CostCenterCode,
+		BudgetItemCode: row.BudgetItemCode,
+		MaxMembers:     int32(row.MaxMembers),
+		ExternalId:     row.ExternalID,
+		Metadata:       row.Metadata,
+		Description:    row.Description,
+		Visibility:     adminv1.Visibility(row.Visibility),
+		Protected:      row.Protected,
+		CreatedBy:      row.CreatedBy,
+		UpdatedBy:      row.UpdatedBy,
+		CreatedAt:      timestamppb.New(row.CreatedAt),
+		UpdatedAt:      timestamppb.New(row.UpdatedAt),
+		Members:        make([]*adminv1.Membership, 0),
+	}
+	if row.DeletedAt != nil {
+		result.DeletedAt = timestamppb.New(*row.DeletedAt)
+	}
+	return result
+}
+
+func requireDepartmentNotDeleted(ctx context.Context, db *lion.Client, departmentID int) error {
+	if departmentID <= 0 {
+		return errs.InvalidArgument(ctx).WithMessage("department id is required")
+	}
+	exists, err := db.Departments.Query().Where(
+		departments.IDEQ(departmentID),
+		departments.DeletedAtIsNil(),
+	).Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return errs.NotFound(ctx).WithMessage("department not found")
+	}
+	return nil
+}
+
 // ListDepartments 列出部门
 func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDepartmentsRequest) (*adminv1.ListDepartmentsResponse, error) {
 	result := &adminv1.ListDepartmentsResponse{}
+	if req == nil {
+		req = &adminv1.ListDepartmentsRequest{}
+	}
+
+	filterPredicates, deletedOnly, err := parseListDepartmentsFilter(req.GetFilter())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid filter: %v", err))
+	}
+	if deletedOnly && !req.GetShowDeleted() {
+		return nil, errs.InvalidArgument(ctx).WithMessage("deleted_at filter requires show_deleted=true")
+	}
 
 	rids, err := a.getUserRoleID(ctx)
 	if err != nil {
@@ -193,7 +297,17 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 		return result, nil
 	}
 
-	allDeps, err := a.config.db.Departments.Query().Select(departments.FieldID).All(ctx)
+	candidateQuery := a.config.db.Departments.Query()
+	if !req.GetShowDeleted() {
+		candidateQuery = candidateQuery.Where(departments.DeletedAtIsNil())
+	}
+	if deletedOnly {
+		candidateQuery = candidateQuery.Where(departments.DeletedAtNotNil())
+	}
+	if len(filterPredicates) > 0 {
+		candidateQuery = candidateQuery.Where(filterPredicates...)
+	}
+	allDeps, err := candidateQuery.Select(departments.FieldID).All(ctx)
 	if err != nil {
 		return result, err
 	}
@@ -323,17 +437,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 
 	// 将 ent 实体转为 proto，并按 structure 返回平铺或树形
 	depToProto := func(m *lion.Departments) *adminv1.Department {
-		menu := &adminv1.Department{
-			Id:          int64(m.ID),
-			ParentId:    int64(m.ParentID),
-			Code:        m.Code,
-			DisplayName: m.DisplayName,
-			SortOrder:   int32(m.SortOrder),
-			Type:        adminv1.Department_Type(m.DepartmentType),
-			Status:      adminv1.Department_Status(m.DepartmentStatus),
-			Visibility:  adminv1.Visibility(m.Visibility),
-			Members:     make([]*adminv1.Membership, 0),
-		}
+		menu := departmentToProto(m)
 		if req.View == adminv1.View_VIEW_FULL {
 			menu.Members = append(menu.Members, departmentMembersByDepartmentID[m.ID]...)
 		}
@@ -384,72 +488,16 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 	return result, nil
 }
 
-// DeleteDepartment 删除部门
-func (a *KnownAdminAPI) DeleteDepartment(ctx context.Context, req *adminv1.DeleteDepartmentRequest) (*emptypb.Empty, error) {
-	empty := &emptypb.Empty{}
-
-	db, err := a.GetLionClient()
-	if err != nil {
-		return empty, err
-	}
-
-	// 检查用户是否有权限操作该部门
-	if err := a.checkDepartmentPermission(ctx, db, int(req.Id)); err != nil {
-		return empty, err
-	}
-
-	deps, err := a.ListDepartments(ctx, &adminv1.ListDepartmentsRequest{})
-	if err != nil {
-		return empty, err
-	}
-
-	hasFound := false
-
-	var checkDep func(childrens []*adminv1.Department) bool
-	checkDep = func(childrens []*adminv1.Department) bool {
-		for _, c := range childrens {
-			// 如果找到匹配的叶子节点，返回 true 提前终止
-			if (c.Id == req.Id) && len(c.Children) == 0 {
-				return true
-			}
-
-			// 递归检查子节点，如果子节点中找到匹配项，立即返回 true
-			if checkDep(c.Children) {
-				return true
-			}
-		}
-
-		// 未找到匹配节点
-		return false
-	}
-
-	hasFound = checkDep(deps.Departments)
-	if hasFound {
-		// TODO; 还需判断该部门下是否有用户
-		/*
-			count := a.config.db.Users.Query().Where(users.DepartmentIDEQ(int(req.Id))).CountX(ctx)
-			if count > 0 {
-				return empty, errs.PermissionDenied(ctx).WithMessage("department has users")
-			}
-
-			_, err = a.config.db.Departments.Delete().
-				Where(
-					departments.ID(int(req.Id)),
-				).Exec(ctx)
-
-			return empty, err
-		*/
-	}
-
-	return empty, errs.PermissionDenied(ctx)
-}
-
 // UpdateDepartment 更新部门
 func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.UpdateDepartmentRequest) (*adminv1.Department, error) {
-	result := &adminv1.Department{}
-
 	if req == nil || req.Department == nil {
-		return result, errs.InvalidArgument(ctx).WithMessage("request body department is nil")
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body department is nil")
+	}
+	if req.Department.Id <= 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("department id is required")
+	}
+	if req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("update_mask is required")
 	}
 
 	db, err := a.GetLionClient()
@@ -459,9 +507,12 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 
 	// 检查用户是否有权限操作该部门
 	if err := a.checkDepartmentPermission(ctx, db, int(req.Department.Id)); err != nil {
-		return result, err
+		return nil, err
 	}
-	currentDepartment, err := db.Departments.Get(ctx, int(req.Department.Id))
+	currentDepartment, err := db.Departments.Query().Where(
+		departments.IDEQ(int(req.Department.Id)),
+		departments.DeletedAtIsNil(),
+	).Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
 			return nil, errs.NotFound(ctx).WithMessage("department not found")
@@ -469,91 +520,108 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 		return nil, err
 	}
 
-	// 如果更新了 parent_id，需要检查新父部门的权限
-	if req.UpdateMask != nil {
-		for _, path := range req.UpdateMask.Paths {
-			if path == departments.FieldParentID {
-				if isBuiltinDepartmentCode(currentDepartment.Code) &&
-					req.Department.ParentId != int64(currentDepartment.ParentID) {
-					return nil, errs.FailedPrecondition(ctx).
-						WithMessage("built-in department parent_id is immutable").Err()
-				}
-				if req.Department.ParentId == int64(currentDepartment.ParentID) {
-					continue
-				}
-				if req.Department.ParentId == req.Department.Id {
-					return nil, errs.InvalidArgument(ctx).WithMessage("parent_id cannot be self")
-				}
+	update := db.Departments.Update().Where(
+		departments.IDEQ(currentDepartment.ID),
+		departments.DeletedAtIsNil(),
+	)
+	for _, path := range req.UpdateMask.Paths {
+		switch path {
+		case departments.FieldCode:
+			if err := validateImmutableString(ctx, "department", "code", currentDepartment.Code, req.Department.Code); err != nil {
+				return nil, err
+			}
+		case departments.FieldProtected:
+			return nil, errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
+		case departments.FieldParentID:
+			if isBuiltinDepartmentCode(currentDepartment.Code) && req.Department.ParentId != int64(currentDepartment.ParentID) {
+				return nil, errs.FailedPrecondition(ctx).WithMessage("built-in department parent_id is immutable")
+			}
+			if req.Department.ParentId == req.Department.Id {
+				return nil, errs.InvalidArgument(ctx).WithMessage("parent_id cannot be self")
+			}
+			if req.Department.ParentId != int64(currentDepartment.ParentID) {
 				if req.Department.ParentId > 0 {
-					subDeptIDs, err := a.getAllSubDeptIDs(ctx, int(req.Department.Id))
+					subDeptIDs, err := a.getAllSubDeptIDs(ctx, currentDepartment.ID)
 					if err != nil {
 						return nil, err
 					}
 					for _, subDeptID := range subDeptIDs {
 						if int64(subDeptID) == req.Department.ParentId {
-							return nil, errs.InvalidArgument(ctx).
-								WithMessage("parent_id cannot be descendant department")
+							return nil, errs.InvalidArgument(ctx).WithMessage("parent_id cannot be descendant department")
 						}
 					}
-				}
-				if req.Department.ParentId != 0 {
-					if err := a.checkDepartmentPermission(ctx, db, int(req.Department.ParentId)); err != nil {
-						return result, err
+					parent, err := db.Departments.Query().Where(
+						departments.IDEQ(int(req.Department.ParentId)),
+						departments.DeletedAtIsNil(),
+					).Only(ctx)
+					if err != nil {
+						return nil, errs.InvalidArgument(ctx).WithMessage("department parent id not found")
 					}
-				} else {
-					// 设置为根部门（parent_id = 0）需要检查用户是否有权限操作根部门
-					if err := a.checkDepartmentPermission(ctx, db, 0); err != nil {
-						return result, err
+					if err := a.checkDepartmentPermission(ctx, db, parent.ID); err != nil {
+						return nil, err
 					}
-				}
-			}
-		}
-	}
-
-	if req.UpdateMask != nil && len(req.UpdateMask.Paths) != 0 {
-		x := db.Departments.Update()
-
-		for _, path := range req.UpdateMask.Paths {
-			switch path {
-			case departments.FieldCode:
-				if err := validateImmutableString(ctx, "department", "code", currentDepartment.Code, req.Department.Code); err != nil {
+				} else if err := a.checkDepartmentPermission(ctx, db, 0); err != nil {
 					return nil, err
 				}
-			case departments.FieldProtected:
-				if isBuiltinDepartmentCode(currentDepartment.Code) &&
-					req.Department.Protected != currentDepartment.Protected {
-					return nil, immutableFieldError(ctx, "department", "protected")
-				}
-			case departments.FieldSortOrder:
-				x.SetSortOrder(int(req.Department.SortOrder))
-			case departments.FieldParentID:
-				if req.Department.ParentId == int64(currentDepartment.ParentID) {
-					continue
-				}
-				if req.Department.ParentId == 0 {
-					continue
-				}
-
-				x.SetParentID(int(req.Department.ParentId))
-			case departments.FieldVisibility:
-				x.SetVisibility(int(req.Department.Visibility))
+				update.SetParentID(int(req.Department.ParentId))
 			}
-		}
-
-		_, err := x.Where(departments.IDEQ(int(req.Department.Id))).Save(ctx)
-		if err != nil {
-			return nil, err
+		case departments.FieldDisplayName:
+			if strings.TrimSpace(req.Department.DisplayName) == "" {
+				return nil, errs.InvalidArgument(ctx).WithMessage("display_name is required")
+			}
+			update.SetDisplayName(req.Department.DisplayName)
+		case departments.FieldDepartmentType:
+			update.SetDepartmentType(int(req.Department.Type))
+		case departments.FieldDepartmentStatus:
+			if req.Department.Status == adminv1.Department_STATUS_UNSPECIFIED {
+				return nil, errs.InvalidArgument(ctx).WithMessage("department status must be specified")
+			}
+			update.SetDepartmentStatus(int(req.Department.Status))
+		case departments.FieldSortOrder:
+			update.SetSortOrder(int(req.Department.SortOrder))
+		case departments.FieldCostCenterCode:
+			update.SetCostCenterCode(req.Department.CostCenterCode)
+		case departments.FieldBudgetItemCode:
+			update.SetBudgetItemCode(req.Department.BudgetItemCode)
+		case departments.FieldMaxMembers:
+			update.SetMaxMembers(int(req.Department.MaxMembers))
+		case departments.FieldExternalID:
+			update.SetExternalID(req.Department.ExternalId)
+		case departments.FieldMetadata:
+			update.SetMetadata(req.Department.Metadata)
+		case departments.FieldDescription:
+			update.SetDescription(req.Department.Description)
+		case departments.FieldVisibility:
+			update.SetVisibility(int(req.Department.Visibility))
+		default:
+			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("unsupported update path %q", path))
 		}
 	}
-
-	return result, nil
+	if actorID, err := GetUserID(ctx); err == nil && actorID > 0 {
+		update.SetUpdatedBy(actorID)
+	}
+	affected, err := update.Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if affected != 1 {
+		return nil, errs.NotFound(ctx).WithMessage("department not found")
+	}
+	updated, err := db.Departments.Query().Where(
+		departments.IDEQ(currentDepartment.ID),
+		departments.DeletedAtIsNil(),
+	).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return departmentToProto(updated), nil
 }
 
 // ListDepartmentMembers 获取部门成员（与 proto Membership 定义对齐）
 func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.ListDepartmentMembersRequest) (*adminv1.ListDepartmentMembersResponse, error) {
 	result := &adminv1.ListDepartmentMembersResponse{}
 
-	if req.Parent == "" {
+	if req == nil || req.Parent == "" {
 		return result, errs.InvalidArgument(ctx).WithMessage("request body parent is empty")
 	}
 
@@ -568,6 +636,9 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 	}
 
 	if err := a.checkDepartmentPermission(ctx, db, departmentID); err != nil {
+		return result, err
+	}
+	if err := requireDepartmentNotDeleted(ctx, db, departmentID); err != nil {
 		return result, err
 	}
 
@@ -664,7 +735,7 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv1.CreateDepartmentMembersRequest) (*adminv1.CreateDepartmentMembersResponse, error) {
 	result := &adminv1.CreateDepartmentMembersResponse{}
 
-	if req.DepartmentId == 0 {
+	if req == nil || req.DepartmentId == 0 {
 		return result, errs.InvalidArgument(ctx).WithMessage("department_id is required")
 	}
 	if len(req.Members) == 0 {
@@ -677,6 +748,9 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 	}
 
 	if err := a.checkDepartmentPermission(ctx, db, int(req.DepartmentId)); err != nil {
+		return result, err
+	}
+	if err := requireDepartmentNotDeleted(ctx, db, int(req.DepartmentId)); err != nil {
 		return result, err
 	}
 
@@ -739,7 +813,7 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv1.UpdateDepartmentMembersRequest) (*adminv1.UpdateDepartmentMembersResponse, error) {
 	result := &adminv1.UpdateDepartmentMembersResponse{}
 
-	if req.DepartmentId == 0 {
+	if req == nil || req.DepartmentId == 0 {
 		return result, errs.InvalidArgument(ctx).WithMessage("department_id is required")
 	}
 	if len(req.Members) == 0 {
@@ -752,6 +826,9 @@ func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv
 	}
 
 	if err := a.checkDepartmentPermission(ctx, db, int(req.DepartmentId)); err != nil {
+		return result, err
+	}
+	if err := requireDepartmentNotDeleted(ctx, db, int(req.DepartmentId)); err != nil {
 		return result, err
 	}
 
@@ -801,6 +878,9 @@ func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv
 
 // DeleteDepartmentMember 删除部门成员
 func (a *KnownAdminAPI) DeleteDepartmentMember(ctx context.Context, req *adminv1.DeleteDepartmentMemberRequest) (*emptypb.Empty, error) {
+	if req == nil || req.DepartmentId <= 0 || req.UserId <= 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("department_id and user_id are required")
+	}
 	departmentID := req.DepartmentId
 	userID := req.UserId
 
@@ -811,6 +891,9 @@ func (a *KnownAdminAPI) DeleteDepartmentMember(ctx context.Context, req *adminv1
 
 	// 检查用户是否有权限操作该部门
 	if err := a.checkDepartmentPermission(ctx, db, int(departmentID)); err != nil {
+		return nil, err
+	}
+	if err := requireDepartmentNotDeleted(ctx, db, int(departmentID)); err != nil {
 		return nil, err
 	}
 
@@ -833,7 +916,7 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 	// 查子部门
 	children, err := a.config.db.Departments.
 		Query().
-		Where(departments.ParentIDEQ(dep.ID)).All(ctx)
+		Where(departments.ParentIDEQ(dep.ID), departments.DeletedAtIsNil()).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -869,7 +952,7 @@ func (a *KnownAdminAPI) getAllSubDeptIDs(ctx context.Context, deptID int) ([]int
 	children, err := a.config.db.Departments.
 		Query().
 		Select(departments.FieldID).
-		Where(departments.ParentID(deptID)).
+		Where(departments.ParentID(deptID), departments.DeletedAtIsNil()).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -924,7 +1007,7 @@ func (a *KnownAdminAPI) getDepartmentAncestorIDs(ctx context.Context, db *lion.C
 		// 查询当前部门的父部门
 		dept, err := db.Departments.Query().
 			Select(departments.FieldID, departments.FieldParentID).
-			Where(departments.IDEQ(currentID)).
+			Where(departments.IDEQ(currentID), departments.DeletedAtIsNil()).
 			Only(ctx)
 		if err != nil {
 			// 如果查询失败或不存在，停止递归
@@ -1117,7 +1200,7 @@ func (a *KnownAdminAPI) getDepartmentAncestorIDsTx(ctx context.Context, tx *lion
 		// 查询当前部门的父部门
 		dept, err := tx.Departments.Query().
 			Select(departments.FieldID, departments.FieldParentID).
-			Where(departments.IDEQ(currentID)).
+			Where(departments.IDEQ(currentID), departments.DeletedAtIsNil()).
 			Only(ctx)
 		if err != nil {
 			// 如果查询失败或不存在，停止递归

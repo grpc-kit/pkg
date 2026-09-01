@@ -98,7 +98,8 @@ func (UserIdentities) Indexes() []ent.Index {
 	return []ent.Index{
 		// 保证在相同平台下 provider 与 user_id 的组合唯一
 		index.Fields("user_id", "provider_id").Unique(),
-		// index.Fields("provider_id", "provider_user_id").Unique(),
+		// 保证同一认证提供方的外部主体只能映射到一个本地用户。
+		index.Fields("provider_id", "provider_user_id").Unique(),
 	}
 }
 

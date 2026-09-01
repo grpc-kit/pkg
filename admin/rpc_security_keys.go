@@ -998,6 +998,7 @@ func (a *KnownAdminAPI) verifyUserPassword(ctx context.Context, username, passwo
 		Where(
 			users.UsernameEQ(username),
 			users.UserStatusEQ(int(adminv1.User_ACTIVE.Number())),
+			users.DeletedAtIsNil(),
 		).
 		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
 			q.Select(
@@ -1258,16 +1259,13 @@ func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empt
 			users.FieldPhoneNumberEncrypted,
 			users.FieldUpdatedAt,
 		).
-		Where(users.IDEQ(int(userID))).
+		Where(users.IDEQ(int(userID)), users.UserStatusEQ(int(adminv1.User_ACTIVE.Number())), users.DeletedAtIsNil()).
 		Only(ctx)
 	if err != nil {
-		// 用户查询失败时降级返回认证上下文中的基础信息，避免 userinfo endpoint 整体不可用。
 		if lion.IsNotFound(err) {
-			a.logger.Infof("oauth2 userinfo: user %d not found, returning authentication context only", userID)
-			return result, nil
+			return nil, errs.Unauthenticated(ctx).WithMessage("oauth2 user is unavailable")
 		}
-		a.logger.Infof("oauth2 userinfo: query user %d failed: %v, returning authentication context only", userID, err)
-		return result, nil
+		return nil, errs.Internal(ctx).WithMessage("query oauth2 user failed")
 	}
 
 	result.Nickname = user.Nickname

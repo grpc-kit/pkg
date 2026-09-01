@@ -2,6 +2,8 @@ package admin
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -11,12 +13,30 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
+	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+const (
+	groupClaimMaxItems = 128
+	groupClaimMaxBytes = 4096
+	activeRuleGroupMax = 256
+)
+
+func loadUserFilterProjection(ctx context.Context, db *lion.Client, userID int) (*lion.Users, error) {
+	return db.Users.Query().Select(
+		users.FieldID,
+		users.FieldUserType,
+		users.FieldUserStatus,
+		users.FieldEmailVerified,
+		users.FieldPhoneNumberVerified,
+		users.FieldDeletedAt,
+	).Where(users.IDEQ(userID), users.DeletedAtIsNil()).Only(ctx)
+}
 
 const (
 	principalTypeUser       = int(adminv1.PrincipalType_USER)
@@ -41,7 +61,7 @@ func normalizePrincipalType(value adminv1.PrincipalType) (int, error) {
 	case adminv1.PrincipalType_DEPARTMENT:
 		return principalTypeDepartment, nil
 	default:
-		return 0, errs.InvalidArgument(context.Background()).WithMessage("principal_type is required")
+		return 0, errs.InvalidArgument(context.Background()).WithMessage("principal_type must be USER, SYSTEM GROUP, or DEPARTMENT")
 	}
 }
 
@@ -67,6 +87,27 @@ func principalRoleMetadata(md map[string]string) map[string]string {
 		dup[key] = value
 	}
 	return dup
+}
+
+func validatePrincipalRoleTarget(ctx context.Context, db *lion.Client, binding *adminv1.PrincipalRoleBinding) error {
+	if binding == nil || binding.GetPrincipalId() <= 0 {
+		return errs.InvalidArgument(ctx).WithMessage("principal_id is required")
+	}
+	if binding.GetPrincipalType() != adminv1.PrincipalType_GROUP {
+		return nil
+	}
+	exists, err := db.Groups.Query().Where(
+		groups.IDEQ(int(binding.GetPrincipalId())),
+		groups.GroupTypeEQ(int(adminv1.Group_SYSTEM)),
+		groups.DeletedAtIsNil(),
+	).Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return errs.InvalidArgument(ctx).WithMessage("Role can bind only GROUP principals whose Group.type is SYSTEM")
+	}
+	return nil
 }
 
 func applyBindingToPrincipalRoleCreate(cb *lion.PrincipalRolesCreate, roleID int, binding *adminv1.PrincipalRoleBinding) (*lion.PrincipalRolesCreate, error) {
@@ -293,7 +334,11 @@ func loadPrincipalDisplays(ctx context.Context, db *lion.Client, bindings []*lio
 	if len(groupIDs) > 0 {
 		rows, err := db.Groups.Query().
 			Select(groups.FieldID, groups.FieldCode, groups.FieldDisplayName).
-			Where(groups.IDIn(groupIDs...)).
+			Where(
+				groups.IDIn(groupIDs...),
+				groups.GroupTypeEQ(int(adminv1.Group_SYSTEM)),
+				groups.DeletedAtIsNil(),
+			).
 			All(ctx)
 		if err != nil {
 			return nil, err
@@ -306,7 +351,7 @@ func loadPrincipalDisplays(ctx context.Context, db *lion.Client, bindings []*lio
 	if len(departmentIDs) > 0 {
 		rows, err := db.Departments.Query().
 			Select(departments.FieldID, departments.FieldCode, departments.FieldDisplayName).
-			Where(departments.IDIn(departmentIDs...)).
+			Where(departments.IDIn(departmentIDs...), departments.DeletedAtIsNil()).
 			All(ctx)
 		if err != nil {
 			return nil, err
@@ -359,7 +404,7 @@ func expandPrincipalRoleBindingsToMembers(ctx context.Context, db *lion.Client, 
 		userMap := map[int]*lion.Users{}
 		rows, err := db.Users.Query().
 			Select(users.FieldID, users.FieldUsername, users.FieldNickname).
-			Where(users.IDIn(directUserIDs...)).
+			Where(users.IDIn(directUserIDs...), users.DeletedAtIsNil()).
 			All(ctx)
 		if err != nil {
 			return nil, err
@@ -375,21 +420,61 @@ func expandPrincipalRoleBindingsToMembers(ctx context.Context, db *lion.Client, 
 	}
 
 	if len(groupIDs) > 0 {
-		rows, err := db.UserMemberships.Query().
-			Where(
-				usermemberships.TargetTypeEQ(membershipTargetGroup),
-				usermemberships.TargetIDIn(groupIDs...),
-			).
-			WithLionUsers(func(query *lion.UsersQuery) {
-				query.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
-			}).
-			All(ctx)
+		groupRows, err := db.Groups.Query().Select(
+			groups.FieldID,
+			groups.FieldConfig,
+		).Where(
+			groups.IDIn(groupIDs...),
+			groups.GroupTypeEQ(int(adminv1.Group_SYSTEM)),
+			groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+			groups.DeletedAtIsNil(),
+		).All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, row := range rows {
-			result = append(result, userMembershipToProto(row))
+		alternatives := make([]predicate.Users, 0, len(groupRows))
+		for _, group := range groupRows {
+			compiled, configErr := decodeStoredUserFilter(group.Config)
+			if configErr != nil {
+				return nil, errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("SYSTEM group %d has invalid rule config", group.ID))
+			}
+			alternatives = append(alternatives, users.And(compiled.predicates()...))
 		}
+		if len(alternatives) > 0 {
+			rows, queryErr := db.Users.Query().Select(
+				users.FieldID,
+				users.FieldUsername,
+				users.FieldNickname,
+			).Where(users.Or(alternatives...)).All(ctx)
+			if queryErr != nil {
+				return nil, queryErr
+			}
+			roleID := 0
+			if len(bindings) > 0 {
+				roleID = bindings[0].RoleID
+			}
+			for _, user := range rows {
+				result = append(result, &adminv1.Membership{
+					UserId:     int64(user.ID),
+					Username:   user.Username,
+					Nickname:   user.Nickname,
+					TargetType: adminv1.Membership_ROLE,
+					TargetId:   int64(roleID),
+				})
+			}
+		}
+	}
+
+	if len(departmentIDs) > 0 {
+		validDepartmentIDs, err := db.Departments.Query().Where(
+			departments.IDIn(departmentIDs...),
+			departments.DepartmentStatusEQ(int(adminv1.Department_ACTIVE)),
+			departments.DeletedAtIsNil(),
+		).IDs(ctx)
+		if err != nil {
+			return nil, err
+		}
+		departmentIDs = validDepartmentIDs
 	}
 
 	if len(departmentIDs) > 0 {
@@ -397,9 +482,11 @@ func expandPrincipalRoleBindingsToMembers(ctx context.Context, db *lion.Client, 
 			Where(
 				usermemberships.TargetTypeEQ(membershipTargetDepartment),
 				usermemberships.TargetIDIn(departmentIDs...),
+				usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
+				usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(now)),
 			).
 			WithLionUsers(func(query *lion.UsersQuery) {
-				query.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
+				query.Select(users.FieldID, users.FieldUsername, users.FieldNickname).Where(users.DeletedAtIsNil())
 			}).
 			All(ctx)
 		if err != nil {
@@ -410,6 +497,19 @@ func expandPrincipalRoleBindingsToMembers(ctx context.Context, db *lion.Client, 
 		}
 	}
 
+	deduplicated := make([]*adminv1.Membership, 0, len(result))
+	seenMembers := make(map[int64]struct{}, len(result))
+	for _, member := range result {
+		if member == nil {
+			continue
+		}
+		if _, exists := seenMembers[member.UserId]; exists {
+			continue
+		}
+		seenMembers[member.UserId] = struct{}{}
+		deduplicated = append(deduplicated, member)
+	}
+	result = deduplicated
 	sort.Slice(result, func(i, j int) bool {
 		if result[i].Id != result[j].Id {
 			return result[i].Id > result[j].Id
@@ -424,6 +524,48 @@ func expandPrincipalRoleBindingsToMembers(ctx context.Context, db *lion.Client, 
 }
 
 func effectiveRoleIDsForUserAt(ctx context.Context, db *lion.Client, userID int, now time.Time) ([]int, error) {
+	return effectiveRoleIDsForUserAtWithProjection(ctx, db, userID, now, nil)
+}
+
+func matchedActiveSystemGroupIDsForUserAt(ctx context.Context, db *lion.Client, userID int, targetUser *lion.Users) ([]int, error) {
+	systemGroups, err := db.Groups.Query().Select(
+		groups.FieldID,
+		groups.FieldGroupType,
+		groups.FieldConfig,
+	).Where(
+		groups.GroupTypeEQ(int(adminv1.Group_SYSTEM)),
+		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+		groups.DeletedAtIsNil(),
+	).Limit(activeRuleGroupMax + 1).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(systemGroups) > activeRuleGroupMax {
+		return nil, errs.ResourceExhausted(ctx).WithMessage("active rule group limit exceeded")
+	}
+	if len(systemGroups) == 0 {
+		return []int{}, nil
+	}
+	if targetUser == nil {
+		targetUser, err = loadUserFilterProjection(ctx, db, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	matchedGroupIDs := make([]int, 0, len(systemGroups))
+	for _, group := range systemGroups {
+		compiled, configErr := decodeStoredUserFilter(group.Config)
+		if configErr != nil {
+			return nil, errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("SYSTEM group %d has invalid rule config", group.ID))
+		}
+		if compiled.matches(targetUser) {
+			matchedGroupIDs = append(matchedGroupIDs, group.ID)
+		}
+	}
+	return matchedGroupIDs, nil
+}
+
+func effectiveRoleIDsForUserAtWithProjection(ctx context.Context, db *lion.Client, userID int, now time.Time, targetUser *lion.Users) ([]int, error) {
 	roleIDs := map[int]struct{}{}
 
 	collect := func(principalType int, principalIDs []int) error {
@@ -451,41 +593,6 @@ func effectiveRoleIDsForUserAt(ctx context.Context, db *lion.Client, userID int,
 	}
 
 	if err := collect(principalTypeUser, []int{userID}); err != nil {
-		return nil, err
-	}
-
-	groupMemberships, err := db.UserMemberships.Query().
-		Select(usermemberships.FieldTargetID).
-		Where(
-			usermemberships.UserIDEQ(userID),
-			usermemberships.TargetTypeEQ(membershipTargetGroup),
-			usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
-			usermemberships.Or(
-				usermemberships.ExpiresAtIsNil(),
-				usermemberships.ExpiresAtGT(now),
-			),
-		).
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	groupIDs := make([]int, 0, len(groupMemberships))
-	for _, row := range groupMemberships {
-		groupIDs = append(groupIDs, row.TargetID)
-	}
-	if len(groupIDs) > 0 {
-		groupIDs, err = db.Groups.Query().
-			Where(
-				groups.IDIn(groupIDs...),
-				groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
-				groups.DeletedAtIsNil(),
-			).
-			IDs(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-	if err := collect(principalTypeGroup, groupIDs); err != nil {
 		return nil, err
 	}
 
@@ -524,54 +631,144 @@ func effectiveRoleIDsForUserAt(ctx context.Context, db *lion.Client, userID int,
 		return nil, err
 	}
 
-	result := make([]int, 0, len(roleIDs))
+	// GROUP principals are deliberately limited to SYSTEM groups. SYSTEM
+	// membership depends only on user_filter, so evaluating it here cannot form
+	// a Role -> Group -> Role cycle.
+	matchedGroupIDs, err := matchedActiveSystemGroupIDsForUserAt(ctx, db, userID, targetUser)
+	if err != nil {
+		return nil, err
+	}
+	if err := collect(principalTypeGroup, matchedGroupIDs); err != nil {
+		return nil, err
+	}
+
+	candidates := make([]int, 0, len(roleIDs))
 	for roleID := range roleIDs {
-		result = append(result, roleID)
+		candidates = append(candidates, roleID)
+	}
+	if len(candidates) == 0 {
+		return []int{}, nil
+	}
+	result, err := db.Roles.Query().Where(
+		roles.IDIn(candidates...),
+		roles.RoleStatusEQ(int(adminv1.Role_ACTIVE)),
+		roles.DeletedAtIsNil(),
+	).IDs(ctx)
+	if err != nil {
+		return nil, err
 	}
 	sort.Ints(result)
 	return result, nil
 }
 
 func effectiveGroupCodesForUserAt(ctx context.Context, db *lion.Client, userID int, now time.Time) ([]string, error) {
-	rows, err := db.UserMemberships.Query().
-		Select(usermemberships.FieldTargetID).
-		Where(
-			usermemberships.UserIDEQ(userID),
-			usermemberships.TargetTypeEQ(membershipTargetGroup),
-			usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
-			usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(now)),
-		).
-		All(ctx)
+	result := make(map[string]struct{})
+	addGroups := func(rows []*lion.Groups) error {
+		for _, row := range rows {
+			code := strings.TrimSpace(row.Code)
+			if code == "" {
+				continue
+			}
+			result[code] = struct{}{}
+			if len(result) > groupClaimMaxItems {
+				return errs.ResourceExhausted(ctx).WithMessage("groups claim exceeds item limit")
+			}
+		}
+		return nil
+	}
+
+	// Apply membership and source validity with EXISTS predicates on the bounded
+	// groups query. This preserves the deterministic overflow check without an
+	// unbounded membership pre-query or an arbitrarily truncated ID slice.
+	directGroups, err := db.Groups.Query().Select(groups.FieldID, groups.FieldCode).Where(
+		groups.GroupTypeIn(
+			int(adminv1.Group_PROJECT),
+			int(adminv1.Group_EXTERNAL),
+			int(adminv1.Group_COMMUNITY),
+		),
+		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+		groups.DeletedAtIsNil(),
+		groupHasDirectMembershipForUser(userID, now),
+	).Order(lion.Asc(groups.FieldCode)).Limit(groupClaimMaxItems + 1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	ids := make([]int, 0, len(rows))
-	seen := make(map[int]struct{}, len(rows))
-	for _, row := range rows {
-		if _, ok := seen[row.TargetID]; ok {
-			continue
-		}
-		seen[row.TargetID] = struct{}{}
-		ids = append(ids, row.TargetID)
+	if err := addGroups(directGroups); err != nil {
+		return nil, err
 	}
-	if len(ids) == 0 {
-		return []string{}, nil
-	}
-	groupRows, err := db.Groups.Query().
-		Select(groups.FieldID, groups.FieldCode).
-		Where(groups.IDIn(ids...), groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)), groups.DeletedAtIsNil()).
-		All(ctx)
+
+	departmentGroups, err := db.Groups.Query().Select(groups.FieldID, groups.FieldCode).Where(
+		groups.GroupTypeEQ(int(adminv1.Group_DEPARTMENT)),
+		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+		groups.DeletedAtIsNil(),
+		groupHasDepartmentMembershipForUser(userID, now),
+	).Order(lion.Asc(groups.FieldCode)).Limit(groupClaimMaxItems + 1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	codes := make([]string, 0, len(groupRows))
-	for _, row := range groupRows {
-		code := strings.TrimSpace(row.Code)
-		if code != "" {
-			codes = append(codes, code)
+	if err := addGroups(departmentGroups); err != nil {
+		return nil, err
+	}
+
+	targetUser, err := loadUserFilterProjection(ctx, db, userID)
+	if err != nil {
+		return nil, err
+	}
+	matchedSystemGroupIDs, err := matchedActiveSystemGroupIDsForUserAt(ctx, db, userID, targetUser)
+	if err != nil {
+		return nil, err
+	}
+	roleGroups, err := db.Groups.Query().Select(groups.FieldID, groups.FieldCode).Where(
+		groups.GroupTypeEQ(int(adminv1.Group_ROLE)),
+		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+		groups.DeletedAtIsNil(),
+		groupHasActiveRoleSource(),
+		groupProjectsEffectiveRoleForUser(userID, matchedSystemGroupIDs, now),
+	).Order(lion.Asc(groups.FieldCode)).Limit(groupClaimMaxItems + 1).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := addGroups(roleGroups); err != nil {
+		return nil, err
+	}
+
+	ruleGroups, err := db.Groups.Query().Select(
+		groups.FieldID, groups.FieldCode, groups.FieldGroupType, groups.FieldConfig,
+	).Where(
+		groups.GroupTypeIn(int(adminv1.Group_DYNAMIC), int(adminv1.Group_SYSTEM)),
+		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
+		groups.DeletedAtIsNil(),
+	).Order(lion.Asc(groups.FieldCode)).Limit(activeRuleGroupMax + 1).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(ruleGroups) > activeRuleGroupMax {
+		return nil, errs.ResourceExhausted(ctx).WithMessage("active rule group limit exceeded")
+	}
+	for _, group := range ruleGroups {
+		compiled, configErr := decodeStoredUserFilter(group.Config)
+		if configErr != nil {
+			return nil, errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("group %d has invalid rule config", group.ID))
 		}
+		if compiled.matches(targetUser) {
+			if err := addGroups([]*lion.Groups{group}); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	codes := make([]string, 0, len(result))
+	for code := range result {
+		codes = append(codes, code)
 	}
 	sort.Strings(codes)
+	payload, err := json.Marshal(codes)
+	if err != nil {
+		return nil, err
+	}
+	if len(payload) > groupClaimMaxBytes {
+		return nil, errs.ResourceExhausted(ctx).WithMessage("groups claim exceeds byte limit")
+	}
 	return codes, nil
 }
 

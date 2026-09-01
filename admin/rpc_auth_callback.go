@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -36,6 +37,18 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 
 	accessToken, err := su.Exchange(ctx, req.GetCode())
 	if err != nil {
+		if errors.Is(err, errExternalEmailAlreadyExists) {
+			return nil, externalEmailAlreadyExistsPublicError(ctx)
+		}
+		if errors.Is(err, errExternalPhoneAlreadyExists) {
+			return nil, externalPhoneAlreadyExistsPublicError(ctx)
+		}
+		if errors.Is(err, errExternalVerifiedIdentifiersConflict) {
+			return nil, externalVerifiedIdentifiersConflictPublicError(ctx)
+		}
+		if errors.Is(err, errExternalIdentityAlreadyBound) {
+			return nil, externalIdentityAlreadyBoundPublicError(ctx)
+		}
 		return nil, err
 	}
 
@@ -44,7 +57,12 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		return nil, errs.Internal(ctx).WithMessage("failed to parse callback access token")
 	}
 
-	authToken, err := a.applyMFAGateAfterPrimaryAuth(ctx, db, userID, username, false, accessToken, issuance)
+	userMFAEnabled, err := hasUserMFAEnabledIdentity(ctx, db, userID)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to query user MFA status")
+	}
+
+	authToken, err := a.applyMFAGateAfterPrimaryAuth(ctx, db, userID, username, userMFAEnabled, accessToken, issuance)
 	if err != nil {
 		return nil, err
 	}

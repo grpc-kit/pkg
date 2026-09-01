@@ -60,7 +60,7 @@ func (a *KnownAdminAPI) GetCurrentUser(ctx context.Context, _ *adminv1.GetCurren
 	}
 	row, err := db.Users.Query().
 		Select(currentUserSelectFields...).
-		Where(users.IDEQ(int(userID))).
+		Where(users.IDEQ(int(userID)), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).
 		Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
@@ -160,7 +160,7 @@ func (a *KnownAdminAPI) UpdateCurrentUser(ctx context.Context, req *adminv1.Upda
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("database client is unavailable").Err()
 	}
-	row, err := db.Users.Query().Select(currentUserSelectFields...).Where(users.IDEQ(int(userID))).Only(ctx)
+	row, err := db.Users.Query().Select(currentUserSelectFields...).Where(users.IDEQ(int(userID)), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
 			return nil, errs.NotFound(ctx).WithMessage("current user not found").Err()
@@ -168,9 +168,9 @@ func (a *KnownAdminAPI) UpdateCurrentUser(ctx context.Context, req *adminv1.Upda
 		return nil, errs.Internal(ctx).WithMessage("query current user failed").Err()
 	}
 	if req.Etag != currentUserETag(row.ID, row.UpdatedAt) {
-		return nil, errs.Aborted(ctx).WithErrorInfo("CURRENT_USER_ETAG_MISMATCH", "grpc-kit.com", nil).WithMessage("current user profile has changed; refresh and retry").Err()
+		return nil, errs.Aborted(ctx).WithMessage("current user profile has changed; refresh and retry").Err()
 	}
-	update := db.Users.Update().Where(users.IDEQ(row.ID), users.UpdatedAtEQ(row.UpdatedAt))
+	update := db.Users.Update().Where(users.IDEQ(row.ID), users.UpdatedAtEQ(row.UpdatedAt), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil())
 	seen := map[string]bool{}
 	for _, path := range req.UpdateMask.Paths {
 		if seen[path] {
@@ -207,17 +207,17 @@ func (a *KnownAdminAPI) UpdateCurrentUser(ctx context.Context, req *adminv1.Upda
 				update.SetWebsite(req.Profile.Website)
 			}
 		case "timezone":
-			if req.Profile.Timezone != "" {
-				if _, err := time.LoadLocation(req.Profile.Timezone); err != nil {
-					return nil, errs.InvalidArgument(ctx).WithMessage("timezone is invalid").Err()
-				}
+			value, err := normalizeUserTimezone(req.Profile.Timezone)
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(err.Error()).Err()
 			}
-			update.SetTimezone(req.Profile.Timezone)
+			update.SetTimezone(value)
 		case "locale":
-			if len(req.Profile.Locale) > 35 {
-				return nil, errs.InvalidArgument(ctx).WithMessage("locale is too long").Err()
+			value, err := normalizeUserLocale(req.Profile.Locale)
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(err.Error()).Err()
 			}
-			update.SetLocale(req.Profile.Locale)
+			update.SetLocale(value)
 		case "gender":
 			if !isSupportedGender(req.Profile.Gender) {
 				return nil, errs.InvalidArgument(ctx).WithMessage("gender is invalid").Err()
@@ -245,9 +245,9 @@ func (a *KnownAdminAPI) UpdateCurrentUser(ctx context.Context, req *adminv1.Upda
 		return nil, errs.Internal(ctx).WithMessage("update current user failed").Err()
 	}
 	if affected == 0 {
-		return nil, errs.Aborted(ctx).WithErrorInfo("CURRENT_USER_ETAG_MISMATCH", "grpc-kit.com", nil).WithMessage("current user profile has changed; refresh and retry").Err()
+		return nil, errs.Aborted(ctx).WithMessage("current user profile has changed; refresh and retry").Err()
 	}
-	row, err = db.Users.Query().Select(currentUserSelectFields...).Where(users.IDEQ(int(userID))).Only(ctx)
+	row, err = db.Users.Query().Select(currentUserSelectFields...).Where(users.IDEQ(int(userID)), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("read updated current user failed").Err()
 	}
@@ -283,15 +283,22 @@ func (a *KnownAdminAPI) ChangeCurrentUserPassword(ctx context.Context, req *admi
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("database client is unavailable").Err()
 	}
+	active, err := db.Users.Query().Where(users.IDEQ(int(userID)), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).Exist(ctx)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("query current user failed").Err()
+	}
+	if !active {
+		return nil, errs.NotFound(ctx).WithMessage("current user not found").Err()
+	}
 	identity, err := db.UserIdentities.Query().Where(useridentities.UserIDEQ(int(userID)), useridentities.PasswordHashNEQ(""), useridentities.HasLionAuthProvidersWith(authproviders.CodeEQ("local"), authproviders.ProviderTypeEQ(int(adminv1.AuthProvider_LOCAL.Number())), authproviders.ProviderStatusEQ(int(adminv1.AuthProvider_ACTIVE.Number())), authproviders.DeletedAtIsNil())).Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
-			return nil, errs.FailedPrecondition(ctx).WithErrorInfo("PASSWORD_CHANGE_NOT_SUPPORTED", "grpc-kit.com", nil).WithMessage("current account has no active local password identity").Err()
+			return nil, errs.FailedPrecondition(ctx).WithMessage("current account has no active local password identity").Err()
 		}
 		return nil, errs.Internal(ctx).WithMessage("query local password identity failed").Err()
 	}
 	if crypto.BcryptCompare(identity.PasswordHash, req.CurrentPasswordHash) != nil {
-		return nil, errs.PermissionDenied(ctx).WithErrorInfo("CURRENT_PASSWORD_INCORRECT", "grpc-kit.com", nil).WithMessage("current password is incorrect").Err()
+		return nil, errs.PermissionDenied(ctx).WithMessage("current password is incorrect").Err()
 	}
 	if _, err := db.UserIdentities.Update().Where(useridentities.IDEQ(identity.ID)).SetPasswordHash(crypto.BcryptHashMust(req.NewPasswordHash)).SetPasswordChangedAt(time.Now()).Save(ctx); err != nil {
 		return nil, errs.Internal(ctx).WithMessage("change current user password failed").Err()

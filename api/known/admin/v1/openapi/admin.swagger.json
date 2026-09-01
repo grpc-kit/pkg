@@ -1219,6 +1219,13 @@
             "required": false,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "show_deleted",
+            "description": "是否允许结果包含已软删除的部门。默认 false 时仅返回未删除部门。\n回收站查询应同时设置 show_deleted=true 和 filter=\"deleted_at != null\"。",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -1332,129 +1339,136 @@
             "format": "int64"
           },
           {
-            "name": "department",
-            "description": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能\n\n字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
+            "name": "body",
             "in": "body",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "parent_id": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "ParentID 父部门ID，构建树形组织结构\n值为 0 表示顶级部门（如：总公司、集团总部）\n支持多级嵌套，建议层级深度不超过 6 级以保证查询性能"
-                },
-                "code": {
-                  "type": "string",
-                  "title": "Code 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号，不允许连续分隔符，以字母或数字结尾\n长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：手动 \"tech.dept\"、\"hr\"；自动 \"a7k2m3x9b5f1\""
-                },
-                "display_name": {
-                  "type": "string",
-                  "title": "DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明\n用于部门名称的多语言显示，提升用户体验和国际化支持"
-                },
-                "type": {
-                  "$ref": "#/definitions/v1DepartmentType"
-                },
-                "status": {
-                  "$ref": "#/definitions/v1DepartmentStatus"
-                },
-                "sort_order": {
-                  "type": "integer",
-                  "format": "int32",
-                  "title": "SortOrder 部门排序顺序，用于同级部门的显示顺序\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
-                },
-                "email": {
-                  "type": "string",
-                  "title": "Email 部门公共邮箱地址，用于对外联系和内部通知\n格式：标准邮箱格式，如 \"tech@company.com\"\n用途：部门公告、外部合作、客户联系等"
-                },
-                "phone_number": {
-                  "$ref": "#/definitions/v1PhoneNumber",
-                  "title": "PhoneNumber 部门联系电话，支持国际化电话号码格式\n包含国家代码、区号、号码等完整信息\n用于紧急联系、业务咨询等场景"
-                },
-                "address": {
-                  "$ref": "#/definitions/v1Address",
-                  "title": "Address 部门办公地址，支持结构化地址信息\n包含国家、省市、详细地址等信息\n用于邮寄、拜访、资产管理等业务场景"
-                },
-                "cost_center_code": {
-                  "type": "string",
-                  "title": "CostCenterCode 成本中心编码，用于财务核算和成本控制\n格式：企业自定义编码规则，如 \"CC-TECH-001\"\n用途：预算分配、成本归集、财务报表等\n与 ERP 系统集成时的重要标识字段"
-                },
-                "budget_item_code": {
-                  "type": "string",
-                  "title": "BudgetCode 预算编码，用于预算管理和费用控制\n格式：与财务系统对应的预算科目编码\n用途：年度预算、费用审批、财务分析等\n支持多维度预算管理（如：人员预算、设备预算等）"
-                },
-                "max_members": {
-                  "type": "integer",
-                  "format": "int32",
-                  "title": "MaxMembers 部门最大成员数限制，用于人员规模控制\n值为 0 表示无限制，正整数表示具体限制\n用途：组织规模控制、人力成本管理、办公空间规划"
-                },
-                "external_id": {
-                  "type": "string",
-                  "title": "ExternalID 外部系统标识符，用于第三方系统集成\n如：ERP 系统部门编码、OA 系统部门 ID 等\n支持数据同步和跨系统业务流程"
-                },
-                "metadata": {
+                "department": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
+                  "properties": {
+                    "parent_id": {
+                      "type": "string",
+                      "format": "int64",
+                      "title": "ParentID 父部门ID，构建树形组织结构\n值为 0 表示顶级部门（如：总公司、集团总部）\n支持多级嵌套，建议层级深度不超过 6 级以保证查询性能"
+                    },
+                    "code": {
+                      "type": "string",
+                      "title": "Code 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号，不允许连续分隔符，以字母或数字结尾\n长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：手动 \"tech.dept\"、\"hr\"；自动 \"a7k2m3x9b5f1\""
+                    },
+                    "display_name": {
+                      "type": "string",
+                      "title": "DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明\n用于部门名称的多语言显示，提升用户体验和国际化支持"
+                    },
+                    "type": {
+                      "$ref": "#/definitions/v1DepartmentType"
+                    },
+                    "status": {
+                      "$ref": "#/definitions/v1DepartmentStatus"
+                    },
+                    "sort_order": {
+                      "type": "integer",
+                      "format": "int32",
+                      "title": "SortOrder 部门排序顺序，用于同级部门的显示顺序\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
+                    },
+                    "email": {
+                      "type": "string",
+                      "title": "Email 部门公共邮箱地址，用于对外联系和内部通知\n格式：标准邮箱格式，如 \"tech@company.com\"\n用途：部门公告、外部合作、客户联系等"
+                    },
+                    "phone_number": {
+                      "$ref": "#/definitions/v1PhoneNumber",
+                      "title": "PhoneNumber 部门联系电话，支持国际化电话号码格式\n包含国家代码、区号、号码等完整信息\n用于紧急联系、业务咨询等场景"
+                    },
+                    "address": {
+                      "$ref": "#/definitions/v1Address",
+                      "title": "Address 部门办公地址，支持结构化地址信息\n包含国家、省市、详细地址等信息\n用于邮寄、拜访、资产管理等业务场景"
+                    },
+                    "cost_center_code": {
+                      "type": "string",
+                      "title": "CostCenterCode 成本中心编码，用于财务核算和成本控制\n格式：企业自定义编码规则，如 \"CC-TECH-001\"\n用途：预算分配、成本归集、财务报表等\n与 ERP 系统集成时的重要标识字段"
+                    },
+                    "budget_item_code": {
+                      "type": "string",
+                      "title": "BudgetCode 预算编码，用于预算管理和费用控制\n格式：与财务系统对应的预算科目编码\n用途：年度预算、费用审批、财务分析等\n支持多维度预算管理（如：人员预算、设备预算等）"
+                    },
+                    "max_members": {
+                      "type": "integer",
+                      "format": "int32",
+                      "title": "MaxMembers 部门最大成员数限制，用于人员规模控制\n值为 0 表示无限制，正整数表示具体限制\n用途：组织规模控制、人力成本管理、办公空间规划"
+                    },
+                    "external_id": {
+                      "type": "string",
+                      "title": "ExternalID 外部系统标识符，用于第三方系统集成\n如：ERP 系统部门编码、OA 系统部门 ID 等\n支持数据同步和跨系统业务流程"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "title": "Metadata 扩展元数据，存储自定义业务属性\n键值对格式，支持灵活的业务扩展需求\n示例：{\"location\": \"北京\", \"floor\": \"15F\", \"capacity\": \"50\"}"
+                    },
+                    "description": {
+                      "type": "string",
+                      "title": "Description 部门描述信息，详细说明部门职责和业务范围\n用于组织介绍、职责说明、业务范围描述等\n建议长度：500 字符以内，支持富文本格式"
+                    },
+                    "visibility": {
+                      "$ref": "#/definitions/v1Visibility",
+                      "title": "Visibility 部门及成员列表的可见性策略（使用公共枚举 Visibility）"
+                    },
+                    "protected": {
+                      "type": "boolean",
+                      "title": "Protected 是否为系统内置/受保护的部门，受保护的部门不可删除"
+                    },
+                    "members": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/v1Membership"
+                      },
+                      "title": "Members 部门成员列表"
+                    },
+                    "children": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/v1Department"
+                      },
+                      "title": "Children 直接子部门列表，用于构建完整的组织树\n仅包含直接下级，避免深度递归查询\n建议在需要完整树结构时通过专门的服务接口获取"
+                    },
+                    "created_by": {
+                      "type": "string",
+                      "format": "int64",
+                      "title": "CreatedBy 创建者用户ID，记录部门创建人\n用于审计追踪和权限验证"
+                    },
+                    "updated_by": {
+                      "type": "string",
+                      "format": "int64",
+                      "title": "UpdatedBy 最后更新者用户ID，记录最近修改人\n用于变更追踪和责任确认"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "title": "CreatedAt 创建时间戳，记录部门建立时间\n使用 UTC 时间，精确到毫秒级别"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "title": "UpdatedAt 最后更新时间戳，记录最近修改时间\n用于数据同步和缓存失效判断"
+                    },
+                    "deleted_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "title": "DeletedAt 软删除时间戳，支持数据恢复\n非空表示已删除，空值表示正常状态\n实现软删除机制，保护重要组织数据"
+                    }
                   },
-                  "title": "Metadata 扩展元数据，存储自定义业务属性\n键值对格式，支持灵活的业务扩展需求\n示例：{\"location\": \"北京\", \"floor\": \"15F\", \"capacity\": \"50\"}"
+                  "description": "字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
+                  "title": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能"
                 },
-                "description": {
-                  "type": "string",
-                  "title": "Description 部门描述信息，详细说明部门职责和业务范围\n用于组织介绍、职责说明、业务范围描述等\n建议长度：500 字符以内，支持富文本格式"
-                },
-                "visibility": {
-                  "$ref": "#/definitions/v1Visibility",
-                  "title": "Visibility 部门及成员列表的可见性策略（使用公共枚举 Visibility）"
-                },
-                "protected": {
-                  "type": "boolean",
-                  "title": "Protected 是否为系统内置/受保护的部门，受保护的部门不可删除"
-                },
-                "members": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1Membership"
-                  },
-                  "title": "Members 部门成员列表"
-                },
-                "children": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1Department"
-                  },
-                  "title": "Children 直接子部门列表，用于构建完整的组织树\n仅包含直接下级，避免深度递归查询\n建议在需要完整树结构时通过专门的服务接口获取"
-                },
-                "created_by": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "CreatedBy 创建者用户ID，记录部门创建人\n用于审计追踪和权限验证"
-                },
-                "updated_by": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "UpdatedBy 最后更新者用户ID，记录最近修改人\n用于变更追踪和责任确认"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "CreatedAt 创建时间戳，记录部门建立时间\n使用 UTC 时间，精确到毫秒级别"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "UpdatedAt 最后更新时间戳，记录最近修改时间\n用于数据同步和缓存失效判断"
-                },
-                "deleted_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "DeletedAt 软删除时间戳，支持数据恢复\n非空表示已删除，空值表示正常状态\n实现软删除机制，保护重要组织数据"
+                "update_mask": {
+                  "type": "string"
                 }
-              },
-              "description": "字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
-              "title": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能"
+              }
             }
           }
         ],
@@ -1627,9 +1641,56 @@
     },
     "/builtin/admin/api/v1/departments/{id}": {
       "delete": {
-        "summary": "删除部门",
-        "description": "接口格式：/builtin/admin/api/v1/departments/{id}。删除指定部门。",
+        "summary": "移至部门回收站",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/departments/{id}。仅叶子、未保护且没有部门群组引用的部门可软删除；成功后状态为 INACTIVE。",
         "operationId": "KnownAdmin_DeleteDepartment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Department"
+            },
+            "examples": {
+              "application/json": {
+                "id": "5001",
+                "code": "risk-center",
+                "status": "INACTIVE",
+                "deleted_at": "2026-08-21T09:00:00Z"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/departments/{id}:expunge": {
+      "post": {
+        "summary": "永久删除部门",
+        "description": "接口格式：POST /builtin/admin/api/v1/departments/{id}:expunge。仅处理已软删除、未保护、无子部门且无部门群组引用的部门；会物理清理部门成员和角色绑定。",
+        "operationId": "KnownAdmin_ExpungeDepartment",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -1661,6 +1722,70 @@
             "required": true,
             "type": "string",
             "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "ExpungeDepartment permanently removes a soft-deleted department and its core bindings."
+            }
+          }
+        ],
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/departments/{id}:undelete": {
+      "post": {
+        "summary": "恢复部门",
+        "description": "接口格式：POST /builtin/admin/api/v1/departments/{id}:undelete。恢复后保持 INACTIVE，须显式更新为 ACTIVE。",
+        "operationId": "KnownAdmin_UndeleteDepartment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Department"
+            },
+            "examples": {
+              "application/json": {
+                "id": "5001",
+                "code": "risk-center",
+                "status": "INACTIVE"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "UndeleteDepartment restores a soft-deleted department in INACTIVE state."
+            }
           }
         ],
         "tags": [
@@ -1786,8 +1911,8 @@
     },
     "/builtin/admin/api/v1/global/settings": {
       "get": {
-        "summary": "TODO: 补充 ListGlobalSettings 摘要",
-        "description": "接口格式：GET /builtin/admin/api/v1/global/settings。前置条件与业务约束待补充。",
+        "summary": "列出全部全局配置分类",
+        "description": "固定返回全部 13 个分类及其配置；仅 superadmin 可调用。",
         "operationId": "KnownAdmin_ListGlobalSettings",
         "responses": {
           "200": {
@@ -1819,8 +1944,8 @@
     },
     "/builtin/admin/api/v1/global/settings/{category}": {
       "get": {
-        "summary": "TODO: 补充 GetGlobalSettings 摘要",
-        "description": "接口格式：GET /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。",
+        "summary": "获取指定分类的全局配置",
+        "description": "合并返回 registry 内置项与数据库自定义项；仅 superadmin 可调用。",
         "operationId": "KnownAdmin_GetGlobalSettings",
         "responses": {
           "200": {
@@ -1857,9 +1982,63 @@
           "全局设置"
         ]
       },
+      "post": {
+        "summary": "创建自定义全局配置",
+        "description": "在指定分类创建数据库全局配置；仅 superadmin 可调用，配置立即生效。",
+        "operationId": "KnownAdmin_CreateGlobalSetting",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GlobalSetting"
+            },
+            "examples": {
+              "application/json": {
+                "category": "security",
+                "setting_key": "custom.feature_enabled",
+                "setting_value": "true",
+                "value_type": "bool",
+                "description": "自定义功能开关",
+                "protected": false
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "setting",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1GlobalSettingInput"
+            }
+          }
+        ],
+        "tags": [
+          "全局设置"
+        ]
+      },
       "patch": {
-        "summary": "TODO: 补充 UpdateGlobalSettings 摘要",
-        "description": "接口格式：PATCH /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。",
+        "summary": "批量更新全局配置",
+        "description": "以事务方式批量更新内置项或自定义项；仅 superadmin 可调用，配置立即生效。",
         "operationId": "KnownAdmin_UpdateGlobalSettings",
         "responses": {
           "200": {
@@ -1909,6 +2088,54 @@
         ]
       }
     },
+    "/builtin/admin/api/v1/global/settings/{category}/{setting_key}": {
+      "delete": {
+        "summary": "删除自定义全局配置",
+        "description": "删除指定自定义配置；registry 内置项不可删除，仅 superadmin 可调用。",
+        "operationId": "KnownAdmin_DeleteGlobalSetting",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "setting_key",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "全局设置"
+        ]
+      }
+    },
     "/builtin/admin/api/v1/groups": {
       "get": {
         "summary": "群组列表",
@@ -1932,9 +2159,7 @@
                     "sort_order": 30,
                     "max_members": 80,
                     "description": "负责线上运行保障",
-                    "visibility": "VISIBLE",
-                    "ref_id": "0",
-                    "ref_expr": ""
+                    "visibility": "VISIBLE"
                   }
                 ],
                 "next_page_token": "groups:21",
@@ -2054,6 +2279,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "show_deleted",
+            "description": "是否允许结果包含已软删除的群组。默认 false 时仅返回未删除群组。\n回收站查询应同时设置 show_deleted=true 和 filter=\"deleted_at != null\"。",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -2083,9 +2315,7 @@
                   "slack_channel": "#ops-alert"
                 },
                 "description": "负责线上运行保障",
-                "visibility": "VISIBLE",
-                "ref_id": "0",
-                "ref_expr": ""
+                "visibility": "VISIBLE"
               }
             }
           },
@@ -2141,9 +2371,7 @@
                   "slack_channel": "#ops-warroom"
                 },
                 "description": "增加应急值班职能",
-                "visibility": "VISIBLE",
-                "ref_id": "0",
-                "ref_expr": ""
+                "visibility": "VISIBLE"
               }
             }
           },
@@ -2210,12 +2438,26 @@
                 "visibility": {
                   "$ref": "#/definitions/v1Visibility"
                 },
-                "ref_id": {
+                "parent_id": {
                   "type": "string",
-                  "format": "int64"
+                  "format": "int64",
+                  "title": "为后续层级扩展保留；0 表示根 Group，普通 API 当前只能写 0。"
                 },
-                "ref_expr": {
-                  "type": "string"
+                "department_config": {
+                  "$ref": "#/definitions/GroupDepartmentConfig"
+                },
+                "role_config": {
+                  "$ref": "#/definitions/GroupRoleConfig"
+                },
+                "dynamic_config": {
+                  "$ref": "#/definitions/GroupDynamicConfig"
+                },
+                "system_config": {
+                  "$ref": "#/definitions/GroupSystemConfig"
+                },
+                "protected": {
+                  "type": "boolean",
+                  "title": "Protected 是否为系统内置/受保护的群组。受保护群组不可删除或永久删除。\n该字段由系统种子或迁移管理，普通 CreateGroup/UpdateGroup 不可修改。"
                 },
                 "created_by": {
                   "type": "string",
@@ -2271,9 +2513,7 @@
                   "slack_channel": "#ops-alert"
                 },
                 "description": "负责线上运行保障",
-                "visibility": "VISIBLE",
-                "ref_id": "0",
-                "ref_expr": ""
+                "visibility": "VISIBLE"
               }
             }
           },
@@ -2332,18 +2572,22 @@
         ]
       },
       "delete": {
-        "summary": "删除群组",
-        "description": "接口格式：/builtin/admin/api/v1/groups/{id}。删除指定群组。",
+        "summary": "软删除群组",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/groups/{id}。群组进入回收站并变为 DISABLED，成员关系和角色绑定保留以便恢复。访问权限由 IAM/OPA 策略控制。",
         "operationId": "KnownAdmin_DeleteGroup",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/v1Group"
             },
             "examples": {
-              "application/json": {}
+              "application/json": {
+                "id": "20",
+                "code": "ops-team",
+                "status": "DISABLED",
+                "deleted_at": "2026-08-20T00:00:00Z"
+              }
             }
           },
           "4xx": {
@@ -2366,6 +2610,103 @@
             "required": true,
             "type": "string",
             "format": "int64"
+          }
+        ],
+        "tags": [
+          "群组管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/groups/{id}:expunge": {
+      "post": {
+        "summary": "永久删除群组",
+        "description": "接口格式：POST /builtin/admin/api/v1/groups/{id}:expunge。仅允许永久删除已软删除且未受保护的叶子群组，并在同一事务清理成员关系和角色绑定；不可恢复。访问权限由 IAM/OPA 策略控制。",
+        "operationId": "KnownAdmin_ExpungeGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "ExpungeGroup permanently removes a soft-deleted group and its core bindings."
+            }
+          }
+        ],
+        "tags": [
+          "群组管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/groups/{id}:undelete": {
+      "post": {
+        "summary": "恢复群组",
+        "description": "接口格式：POST /builtin/admin/api/v1/groups/{id}:undelete。恢复后群组保持 DISABLED，须通过 UpdateGroup 显式启用。访问权限由 IAM/OPA 策略控制。",
+        "operationId": "KnownAdmin_UndeleteGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Group"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "UndeleteGroup restores a soft-deleted group in DISABLED state."
+            }
           }
         ],
         "tags": [
@@ -4359,7 +4700,7 @@
           },
           {
             "name": "principal_type",
-            "description": "可选主体类型过滤，不传则返回全部类型。",
+            "description": "可选主体类型过滤，不传则返回全部类型。\n\n - GROUP: 角色绑定时仅允许 type=SYSTEM 的 Group",
             "in": "query",
             "required": false,
             "type": "string",
@@ -5215,7 +5556,7 @@
       },
       "patch": {
         "summary": "更新当前用户资料",
-        "description": "接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409（reason=CURRENT_USER_ETAG_MISMATCH）。用户名、联系方式、账号状态和身份信息不可由此接口修改。",
+        "description": "接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409。用户名、联系方式、账号状态和身份信息不可由此接口修改。",
         "operationId": "KnownAdmin_UpdateCurrentUser",
         "responses": {
           "200": {
@@ -5733,7 +6074,7 @@
           },
           {
             "name": "filter",
-            "description": "过滤条件，采用 AIP-160 定义的标准 filter 语法。\n示例: `email=\"alice@example.com\" AND state=\"ACTIVE\"`",
+            "description": "过滤条件。当前最小实现支持 `deleted_at != null`，用于在\nshow_deleted=true 时请求仅包含软删除用户的回收站列表。\n其他字段过滤继续使用下方兼容字段，后续再统一扩展 AIP-160 语法。",
             "in": "query",
             "required": false,
             "type": "string"
@@ -5912,6 +6253,140 @@
             "in": "query",
             "required": false,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "用户管理"
+        ]
+      },
+      "delete": {
+        "summary": "软删除用户",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/users/{id}。用户进入回收站并立即变为 DISABLED；不会删除身份、MFA、成员关系或角色绑定。访问权限由 IAM/OPA 策略控制。",
+        "operationId": "KnownAdmin_DeleteUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1User"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/users/{id}:expunge": {
+      "post": {
+        "summary": "永久删除用户",
+        "description": "接口格式：POST /builtin/admin/api/v1/users/{id}:expunge。仅允许永久删除已软删除用户，并在同一事务清理 core 从属数据；不可恢复。访问权限由 IAM/OPA 策略控制。",
+        "operationId": "KnownAdmin_ExpungeUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "ExpungeUser permanently removes a soft-deleted user and its core\ndependent data. This operation cannot target an active user."
+            }
+          }
+        ],
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/users/{id}:undelete": {
+      "post": {
+        "summary": "恢复用户",
+        "description": "接口格式：POST /builtin/admin/api/v1/users/{id}:undelete。恢复后用户保持 DISABLED，须通过 UpdateUser 显式启用。访问权限由 IAM/OPA 策略控制。",
+        "operationId": "KnownAdmin_UndeleteUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1User"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "UndeleteUser restores a soft-deleted user in DISABLED state."
+            }
           }
         ],
         "tags": [
@@ -6115,6 +6590,103 @@
         ]
       }
     },
+    "/builtin/admin/api/v1/users/{user_id}/auth-bindings": {
+      "get": {
+        "summary": "获取用户认证身份绑定",
+        "description": "接口格式：GET /builtin/admin/api/v1/users/{user_id}/auth-bindings。IAM action 为 admin.v1.known:ListUserAuthBindings，由方法级 Policy 在 handler 之前授权。返回认证身份和提供方的只读摘要；credential_configured 表示该绑定所需的用户级认证凭据是否已经配置，当前仅对 LOCAL identity 返回，其他 Provider 省略。用户级 MFA 状态通过 User.mfa_enabled 获取。外部身份标识属于敏感管理信息，响应不会包含密码、MFA、外部令牌或提供方凭据。软删除用户仍可查询；永久不存在的用户返回 404。",
+        "operationId": "KnownAdmin_ListUserAuthBindings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListUserAuthBindingsResponse"
+            },
+            "examples": {
+              "application/json": {
+                "bindings": [
+                  {
+                    "id": "8101",
+                    "user_id": "1001",
+                    "provider_id": "1",
+                    "provider_code": "local",
+                    "provider_display_name": "本地账号密码登录",
+                    "provider_type": "LOCAL",
+                    "provider_status": "ACTIVE",
+                    "provider_icon_url": "",
+                    "provider_user_id": "local-user-1001",
+                    "credential_configured": true,
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2026-08-20T01:15:00Z"
+                  },
+                  {
+                    "id": "8102",
+                    "user_id": "1001",
+                    "provider_id": "7",
+                    "provider_code": "corp-oidc",
+                    "provider_display_name": "企业统一登录",
+                    "provider_type": "OIDC",
+                    "provider_status": "DISABLED",
+                    "provider_icon_url": "https://cdn.example.test/icons/oidc.svg",
+                    "provider_user_id": "oidc-subject-8f31",
+                    "provider_union_id": "directory-person-52",
+                    "created_at": "2026-02-02T02:00:00Z",
+                    "updated_at": "2026-07-03T03:00:00Z"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "user_id 不是正整数",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "IAM Policy 拒绝调用此方法或目标资源",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "用户不存在或已被永久删除",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "认证身份或提供方摘要查询失败",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
     "/builtin/admin/api/v1/users/{user_id}/password": {
       "put": {
         "summary": "更新用户密码",
@@ -6172,6 +6744,50 @@
                 }
               }
             }
+          }
+        ],
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/users/{user_id}/security/mfa": {
+      "delete": {
+        "summary": "重置指定用户 MFA",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/users/{user_id}/security/mfa。删除指定用户全部身份上的 MFA 密钥、恢复码及启用状态；访问权限由系统策略控制。操作幂等，不撤销已经签发的访问令牌。",
+        "operationId": "KnownAdmin_DeleteUserMFA",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "204": {
+            "description": "用户 MFA 配置已删除",
+            "schema": {}
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -6318,6 +6934,42 @@
         }
       },
       "title": "X.509 证书捆绑数据"
+    },
+    "GroupDepartmentConfig": {
+      "type": "object",
+      "properties": {
+        "department_id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "GroupDynamicConfig": {
+      "type": "object",
+      "properties": {
+        "user_filter": {
+          "type": "string",
+          "title": "服务端支持的用户过滤语法。"
+        }
+      }
+    },
+    "GroupRoleConfig": {
+      "type": "object",
+      "properties": {
+        "role_id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "GroupSystemConfig": {
+      "type": "object",
+      "properties": {
+        "user_filter": {
+          "type": "string",
+          "title": "仅由系统种子写入。"
+        }
+      }
     },
     "ListUsersRequestUserView": {
       "type": "string",
@@ -6549,6 +7201,20 @@
         },
         "cache_dir": {
           "type": "string"
+        }
+      }
+    },
+    "v1AIConnectorConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "mcp_server": {
+          "$ref": "#/definitions/v1MCPServerConfig"
         }
       }
     },
@@ -7775,6 +8441,23 @@
       },
       "title": "GlobalSettingCategory 全局设置分类，聚合同一 category 下的设置项"
     },
+    "v1GlobalSettingInput": {
+      "type": "object",
+      "properties": {
+        "setting_key": {
+          "type": "string"
+        },
+        "setting_value": {
+          "type": "string"
+        },
+        "value_type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
     "v1Group": {
       "type": "object",
       "properties": {
@@ -7816,12 +8499,26 @@
         "visibility": {
           "$ref": "#/definitions/v1Visibility"
         },
-        "ref_id": {
+        "parent_id": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "为后续层级扩展保留；0 表示根 Group，普通 API 当前只能写 0。"
         },
-        "ref_expr": {
-          "type": "string"
+        "department_config": {
+          "$ref": "#/definitions/GroupDepartmentConfig"
+        },
+        "role_config": {
+          "$ref": "#/definitions/GroupRoleConfig"
+        },
+        "dynamic_config": {
+          "$ref": "#/definitions/GroupDynamicConfig"
+        },
+        "system_config": {
+          "$ref": "#/definitions/GroupSystemConfig"
+        },
+        "protected": {
+          "type": "boolean",
+          "title": "Protected 是否为系统内置/受保护的群组。受保护群组不可删除或永久删除。\n该字段由系统种子或迁移管理，普通 CreateGroup/UpdateGroup 不可修改。"
         },
         "created_by": {
           "type": "string",
@@ -8058,6 +8755,10 @@
         "group_search_filter": {
           "type": "string",
           "title": "GroupSearchFilter 群组搜索过滤器（可选）\n示例: \"(member={{.UserDN}})\""
+        },
+        "user_id_attribute": {
+          "type": "string",
+          "title": "UserIDAttribute 用于从已认证 LDAP Entry 生成 provider_user_id。\n常见值：uid、uidNumber、entryUUID、objectGUID；特殊值 dn 使用完整 Entry DN。\n新建 LDAP Provider 未提供时默认 uid；历史配置缺失时由服务端继续按 dn 兼容。\n该字段不是本地 users.id，uidNumber 也只能作为外部身份值使用。"
         }
       },
       "title": "LdapConfig LDAP 身份提供商配置"
@@ -8418,6 +9119,18 @@
         }
       }
     },
+    "v1ListUserAuthBindingsResponse": {
+      "type": "object",
+      "properties": {
+        "bindings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1UserAuthBinding"
+          }
+        }
+      }
+    },
     "v1ListUsersResponse": {
       "type": "object",
       "properties": {
@@ -8487,6 +9200,9 @@
         "automations": {
           "$ref": "#/definitions/v1AutomationsConfig"
         },
+        "aiconnector": {
+          "$ref": "#/definitions/v1AIConnectorConfig"
+        },
         "independent": {
           "type": "object"
         }
@@ -8530,6 +9246,26 @@
         }
       },
       "title": "LoginOption 登录页认证提供方选项（最小字段集，不含敏感信息）"
+    },
+    "v1MCPServerConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "path": {
+          "type": "string"
+        },
+        "transport": {
+          "type": "string"
+        },
+        "allowed_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "v1Membership": {
       "type": "object",
@@ -9385,6 +10121,7 @@
         "DEPARTMENT"
       ],
       "default": "PRINCIPAL_TYPE_UNSPECIFIED",
+      "description": "- GROUP: 角色绑定时仅允许 type=SYSTEM 的 Group",
       "title": "PrincipalType 主体类型，用于角色绑定关系"
     },
     "v1PrometheusExporterConfig": {
@@ -10298,6 +11035,12 @@
         },
         "setting_value": {
           "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "update_mask": {
+          "type": "string"
         }
       },
       "title": "UpdateGlobalSetting 单项更新载荷"
@@ -10467,6 +11210,57 @@
       },
       "description": "字段布局约定：标识区 → 基础属性区 → 审计区(时间+操作人连续) → 敏感字段区 → 扩展区 → 关系区\n注意：审计区放在敏感字段之前，保持审计字段的连续性\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
       "title": "User 用户实体，表示系统中的账号信息"
+    },
+    "v1UserAuthBinding": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "provider_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "provider_code": {
+          "type": "string"
+        },
+        "provider_display_name": {
+          "type": "string"
+        },
+        "provider_type": {
+          "$ref": "#/definitions/v1AuthProviderType"
+        },
+        "provider_status": {
+          "$ref": "#/definitions/v1AuthProviderStatus"
+        },
+        "provider_icon_url": {
+          "type": "string"
+        },
+        "provider_user_id": {
+          "type": "string"
+        },
+        "provider_union_id": {
+          "type": "string"
+        },
+        "credential_configured": {
+          "type": "boolean",
+          "description": "Whether the user-level credential required by this provider is configured.\nCurrently this is populated for LOCAL identities only and is absent for\nproviders that do not have a user-level credential in this model."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "UserAuthBinding is a read-only administrator projection. It deliberately\nexcludes password hashes, MFA secrets, external tokens and provider secrets."
     },
     "v1UserStatus": {
       "type": "string",

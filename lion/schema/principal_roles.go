@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"fmt"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
@@ -18,8 +20,13 @@ type PrincipalRoles struct {
 func (PrincipalRoles) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("principal_type").
-			Default(0).
-			Comment("主体类型：0-未指定，1-用户，2-群组，3-部门"),
+			Validate(func(value int) error {
+				if value != 1 && value != 2 && value != 3 {
+					return fmt.Errorf("principal_type must be USER(1), GROUP(2), or DEPARTMENT(3), got %d", value)
+				}
+				return nil
+			}).
+			Comment("主体类型：1-用户，2-SYSTEM 群组，3-部门；GROUP 的子类型约束由领域服务校验"),
 		field.Int("principal_id").
 			Positive().
 			Comment("主体 ID，与 principal_type 配合使用"),

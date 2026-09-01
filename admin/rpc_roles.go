@@ -12,6 +12,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
@@ -307,9 +308,16 @@ func (a *KnownAdminAPI) sortRoleChildren(roles []*adminv1.Role) {
 }
 
 func queryRolePrincipalBindings(ctx context.Context, db *lion.Client, req *adminv1.ListRoleMembersRequest, roleID int) ([]*lion.PrincipalRoles, string, int32, error) {
-	query := db.PrincipalRoles.Query().Where(principalroles.RoleIDEQ(roleID))
-	if req.GetPrincipalType() != adminv1.PrincipalType_PRINCIPAL_TYPE_UNSPECIFIED {
+	query := db.PrincipalRoles.Query().Where(
+		principalroles.RoleIDEQ(roleID),
+		principalroles.PrincipalTypeIn(principalTypeUser, principalTypeGroup, principalTypeDepartment),
+	)
+	switch req.GetPrincipalType() {
+	case adminv1.PrincipalType_PRINCIPAL_TYPE_UNSPECIFIED:
+	case adminv1.PrincipalType_USER, adminv1.PrincipalType_GROUP, adminv1.PrincipalType_DEPARTMENT:
 		query = query.Where(principalroles.PrincipalTypeEQ(int(req.GetPrincipalType())))
+	default:
+		return nil, "", 0, errs.InvalidArgument(ctx).WithMessage("principal_type must be USER, SYSTEM GROUP, or DEPARTMENT")
 	}
 	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
 	case "created_at asc", "create_time asc":
@@ -345,6 +353,25 @@ func queryRolePrincipalBindings(ctx context.Context, db *lion.Client, req *admin
 	rows, err := query.Limit(int(pageSize)).All(ctx)
 	if err != nil {
 		return nil, "", 0, err
+	}
+	groupPrincipalIDs := make([]int, 0)
+	for _, row := range rows {
+		if row.PrincipalType == principalTypeGroup {
+			groupPrincipalIDs = append(groupPrincipalIDs, row.PrincipalID)
+		}
+	}
+	if len(groupPrincipalIDs) > 0 {
+		validIDs, queryErr := db.Groups.Query().Where(
+			groups.IDIn(groupPrincipalIDs...),
+			groups.GroupTypeEQ(int(adminv1.Group_SYSTEM)),
+			groups.DeletedAtIsNil(),
+		).IDs(ctx)
+		if queryErr != nil {
+			return nil, "", 0, queryErr
+		}
+		if len(validIDs) != len(groupPrincipalIDs) {
+			return nil, "", 0, errs.FailedPrecondition(ctx).WithMessage("Role contains a GROUP binding whose Group.type is not SYSTEM")
+		}
 	}
 	nextPageToken := ""
 	if _, ok := req.GetPagination().(*adminv1.ListRoleMembersRequest_PageToken); ok && len(rows) == int(pageSize) && len(rows) > 0 {
@@ -421,6 +448,12 @@ func (a *KnownAdminAPI) DeleteRoleMember(ctx context.Context, req *adminv1.Delet
 	}
 	if req.GetPrincipalId() <= 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("principal_id is required")
+	}
+	if err := validatePrincipalRoleTarget(ctx, db, &adminv1.PrincipalRoleBinding{
+		PrincipalType: req.GetPrincipalType(),
+		PrincipalId:   req.GetPrincipalId(),
+	}); err != nil {
+		return nil, err
 	}
 
 	_, err = db.PrincipalRoles.Delete().
@@ -899,6 +932,12 @@ func (a *KnownAdminAPI) DeleteRole(ctx context.Context, req *adminv1.DeleteRoleR
 	if db.PrincipalRoles.Query().Where(principalroles.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("role has principal binding")
 	}
+	if db.Groups.Query().Where(
+		groups.GroupTypeEQ(int(adminv1.Group_ROLE)),
+		groups.SourceIDEQ(int(req.Id)),
+	).CountX(ctx) > 0 {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("role is referenced by a group")
+	}
 
 	if db.RoleMenus.Query().Where(rolemenus.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("role has menu")
@@ -1084,8 +1123,27 @@ func (a *KnownAdminAPI) CreateRoleMembers(ctx context.Context, req *adminv1.Crea
 		return nil, errs.InvalidArgument(ctx).WithMessage("bindings is empty")
 	}
 
+	tx, err := db.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	txClient := tx.Client()
+	// Validate the complete batch before writing so a later non-SYSTEM GROUP
+	// cannot leave earlier bindings committed.
 	for _, binding := range req.GetBindings() {
-		cb := db.PrincipalRoles.Create()
+		if err := validatePrincipalRoleTarget(ctx, txClient, binding); err != nil {
+			return nil, err
+		}
+		if _, err := normalizePrincipalType(binding.GetPrincipalType()); err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+		}
+		if _, err := normalizeBindingStatus(binding.GetBindingStatus()); err != nil {
+			return nil, err
+		}
+	}
+	for _, binding := range req.GetBindings() {
+		cb := txClient.PrincipalRoles.Create()
 		cb, err = applyBindingToPrincipalRoleCreate(cb, roleID, binding)
 		if err != nil {
 			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
@@ -1096,6 +1154,9 @@ func (a *KnownAdminAPI) CreateRoleMembers(ctx context.Context, req *adminv1.Crea
 		if _, err := cb.Save(ctx); err != nil {
 			return nil, err
 		}
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	return result, nil
@@ -1123,16 +1184,34 @@ func (a *KnownAdminAPI) UpdateRoleMembers(ctx context.Context, req *adminv1.Upda
 		return nil, errs.InvalidArgument(ctx).WithMessage("bindings is empty")
 	}
 
+	tx, err := db.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	txClient := tx.Client()
+	rows := make([]*lion.PrincipalRoles, 0, len(req.GetBindings()))
+	for _, binding := range req.GetBindings() {
+		if err := validatePrincipalRoleTarget(ctx, txClient, binding); err != nil {
+			return nil, err
+		}
+		row, rowErr := a.principalRoleBindingForUpdate(ctx, txClient, roleID, binding)
+		if rowErr != nil {
+			return nil, rowErr
+		}
+		if _, statusErr := normalizeBindingStatus(binding.GetBindingStatus()); statusErr != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(statusErr.Error())
+		}
+		rows = append(rows, row)
+	}
+
 	var actor int64
 	if v, err := GetUserID(ctx); err == nil {
 		actor = v
 	}
 
-	for _, binding := range req.GetBindings() {
-		row, err := a.principalRoleBindingForUpdate(ctx, db, roleID, binding)
-		if err != nil {
-			return nil, err
-		}
+	for index, binding := range req.GetBindings() {
+		row := rows[index]
 		upd := row.Update()
 		upd, err = applyBindingToPrincipalRoleUpdate(upd, binding)
 		if err != nil {
@@ -1144,6 +1223,9 @@ func (a *KnownAdminAPI) UpdateRoleMembers(ctx context.Context, req *adminv1.Upda
 		if _, err := upd.Save(ctx); err != nil {
 			return nil, err
 		}
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	return result, nil

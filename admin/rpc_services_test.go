@@ -1,11 +1,57 @@
 package admin
 
 import (
+	"context"
 	"testing"
+	"testing/fstest"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"google.golang.org/genproto/googleapis/api/annotations"
 )
+
+func TestListUserAuthBindingsActionAndResourceSelector(t *testing.T) {
+	assets := fstest.MapFS{
+		"openapi/microservice.gateway.yaml": {
+			Data: []byte("type: google.api.Service\nconfig_version: 3\ntitle: test\nhttp:\n  rules:\n    - selector: test.api.v1.Test.Get\n      get: /test\n"),
+		},
+		"openapi/microservice.openapiv2.yaml": {Data: []byte("{}\n")},
+	}
+	cfg := &config{}
+	if err := cfg.setMicroserviceGatewayYAML(assets); err != nil {
+		t.Fatalf("setMicroserviceGatewayYAML: %v", err)
+	}
+	api := &KnownAdminAPI{config: cfg}
+
+	response, err := api.ListServiceActions(context.Background(), &adminv1.ListServiceActionsRequest{Parent: "admin.v1.known"})
+	if err != nil {
+		t.Fatalf("ListServiceActions: %v", err)
+	}
+
+	const wantAction = "admin.v1.known:ListUserAuthBindings"
+	var bindingAction *adminv1.Action
+	for _, action := range response.GetActions() {
+		if action.GetCode() == wantAction {
+			bindingAction = action
+			break
+		}
+	}
+	if bindingAction == nil {
+		t.Fatalf("action %q not found", wantAction)
+	}
+	if bindingAction.GetGrpcMethod() != "ListUserAuthBindings" {
+		t.Fatalf("grpc_method = %q, want ListUserAuthBindings", bindingAction.GetGrpcMethod())
+	}
+
+	const wantResource = "grn:${partition}:admin.v1.known:${region_code}:${account_id}:user_id/*"
+	if len(bindingAction.GetResourceSelectors()) != 1 {
+		t.Fatalf("resource selectors = %+v, want one user_id selector", bindingAction.GetResourceSelectors())
+	}
+	selector := bindingAction.GetResourceSelectors()[0]
+	if selector.GetResourceType() != "user_id" || selector.GetPattern() != wantResource {
+		t.Fatalf("resource selector = (%q, %q), want (%q, %q)", selector.GetResourceType(), selector.GetPattern(), "user_id", wantResource)
+	}
+
+}
 
 func TestHTTPRulePathTemplates(t *testing.T) {
 	rule := &annotations.HttpRule{

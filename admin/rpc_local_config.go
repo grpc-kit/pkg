@@ -23,6 +23,7 @@ func defaultLocalConfigSnapshot() *LocalConfigSnapshot {
 		Observables: &adminv1.ObservablesConfig{Name: "可观测性", Enabled: false},
 		Cloudevents: &adminv1.CloudEventsConfig{Name: "消息事件", Enabled: false},
 		Automations: &adminv1.AutomationsConfig{Name: "流程编排", Enabled: false},
+		AIConnector: &adminv1.AIConnectorConfig{Name: "智能连接", Enabled: false},
 	}
 }
 
@@ -50,6 +51,7 @@ func cloneLocalConfigSnapshot(snapshot *LocalConfigSnapshot) *LocalConfigSnapsho
 		Observables: nil,
 		Cloudevents: nil,
 		Automations: nil,
+		AIConnector: nil,
 		Independent: nil,
 	}
 	if snapshot.Discover != nil {
@@ -81,6 +83,9 @@ func cloneLocalConfigSnapshot(snapshot *LocalConfigSnapshot) *LocalConfigSnapsho
 	}
 	if snapshot.Automations != nil {
 		cloned.Automations = proto.Clone(snapshot.Automations).(*adminv1.AutomationsConfig)
+	}
+	if snapshot.AIConnector != nil {
+		cloned.AIConnector = proto.Clone(snapshot.AIConnector).(*adminv1.AIConnectorConfig)
 	}
 	if snapshot.Independent != nil {
 		cloned.Independent = proto.Clone(snapshot.Independent).(*structpb.Struct)
@@ -141,6 +146,9 @@ func (a *KnownAdminAPI) mergeStaticUsers(security *adminv1.SecurityConfig) *admi
 	return security
 }
 func (a *KnownAdminAPI) ListLocalConfigs(ctx context.Context, req *adminv1.ListLocalConfigsRequest) (*adminv1.ListLocalConfigsResponse, error) {
+	if err := requireConfigSuperadmin(ctx); err != nil {
+		return nil, err
+	}
 	snapshot := a.getLocalConfigSnapshot()
 
 	entries := []*adminv1.LocalConfigEntry{
@@ -155,12 +163,17 @@ func (a *KnownAdminAPI) ListLocalConfigs(ctx context.Context, req *adminv1.ListL
 		{Name: "observables", Enabled: snapshot.Observables != nil && snapshot.Observables.Enabled},
 		{Name: "cloudevents", Enabled: snapshot.Cloudevents != nil && snapshot.Cloudevents.Enabled},
 		{Name: "automations", Enabled: snapshot.Automations != nil && snapshot.Automations.Enabled},
+		{Name: "aiconnector", Enabled: snapshot.AIConnector != nil && snapshot.AIConnector.Enabled},
+		{Name: "independent", Enabled: snapshot.Independent != nil},
 	}
 
 	return &adminv1.ListLocalConfigsResponse{Configs: entries}, nil
 }
 
 func (a *KnownAdminAPI) GetLocalConfigs(ctx context.Context, req *adminv1.GetLocalConfigsRequest) (*adminv1.LocalConfigs, error) {
+	if err := requireConfigSuperadmin(ctx); err != nil {
+		return nil, err
+	}
 	if req == nil || req.Name == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("name is required")
 	}
@@ -190,6 +203,8 @@ func (a *KnownAdminAPI) GetLocalConfigs(ctx context.Context, req *adminv1.GetLoc
 		return &adminv1.LocalConfigs{Config: &adminv1.LocalConfigs_Cloudevents{Cloudevents: snapshot.Cloudevents}}, nil
 	case "automations":
 		return &adminv1.LocalConfigs{Config: &adminv1.LocalConfigs_Automations{Automations: snapshot.Automations}}, nil
+	case "aiconnector":
+		return &adminv1.LocalConfigs{Config: &adminv1.LocalConfigs_Aiconnector{Aiconnector: snapshot.AIConnector}}, nil
 	case "independent":
 		return &adminv1.LocalConfigs{Config: &adminv1.LocalConfigs_Independent{Independent: snapshot.Independent}}, nil
 	default:

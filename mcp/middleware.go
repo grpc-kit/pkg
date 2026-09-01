@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -12,6 +13,31 @@ import (
 // 验证成功返回 nil，失败返回 error。
 // pkg/cfg.SecurityConfig.VerifyHTTPRequest 满足此签名。
 type AuthFunc func(r *http.Request) error
+
+// NewOriginProtectionMiddleware 为浏览器发起的 MCP 请求启用同源保护。
+// Go 标准库 CrossOriginProtection 会拒绝不可信跨站请求，同时保持无 Origin
+// 的非浏览器 MCP Client 兼容。可信跨域来源如有需要应通过显式配置另行扩展，
+// 不应在这里使用通配符放行。
+func NewOriginProtectionMiddleware(next http.Handler) http.Handler {
+	protection := http.NewCrossOriginProtection()
+	protected := protection.Handler(next)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// CrossOriginProtection 对 GET/HEAD/OPTIONS 默认放行；MCP 的 SSE/Streamable
+		// HTTP GET 同样会建立长连接，因此在这里对所有方法执行严格同源检查。
+		if fetchSite := r.Header.Get("Sec-Fetch-Site"); fetchSite != "" && fetchSite != "same-origin" && fetchSite != "none" {
+			http.Error(w, "cross-origin MCP request is forbidden", http.StatusForbidden)
+			return
+		}
+		if origin := r.Header.Get("Origin"); origin != "" {
+			parsed, err := url.Parse(origin)
+			if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host != r.Host {
+				http.Error(w, "cross-origin MCP request is forbidden", http.StatusForbidden)
+				return
+			}
+		}
+		protected.ServeHTTP(w, r)
+	})
+}
 
 // authHeaderKey 是用于在 context 中传递原始 Authorization header 的 key。
 // 通过 unexported struct 类型避免与其他包的 context key 冲突。

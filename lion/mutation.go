@@ -4027,9 +4027,6 @@ type DepartmentsMutation struct {
 	description            *string
 	protected              *bool
 	clearedFields          map[string]struct{}
-	lion_groups            map[int]struct{}
-	removedlion_groups     map[int]struct{}
-	clearedlion_groups     bool
 	done                   bool
 	oldValue               func(context.Context) (*Departments, error)
 	predicates             []predicate.Departments
@@ -5217,60 +5214,6 @@ func (m *DepartmentsMutation) ResetProtected() {
 	m.protected = nil
 }
 
-// AddLionGroupIDs adds the "lion_groups" edge to the Groups entity by ids.
-func (m *DepartmentsMutation) AddLionGroupIDs(ids ...int) {
-	if m.lion_groups == nil {
-		m.lion_groups = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.lion_groups[ids[i]] = struct{}{}
-	}
-}
-
-// ClearLionGroups clears the "lion_groups" edge to the Groups entity.
-func (m *DepartmentsMutation) ClearLionGroups() {
-	m.clearedlion_groups = true
-}
-
-// LionGroupsCleared reports if the "lion_groups" edge to the Groups entity was cleared.
-func (m *DepartmentsMutation) LionGroupsCleared() bool {
-	return m.clearedlion_groups
-}
-
-// RemoveLionGroupIDs removes the "lion_groups" edge to the Groups entity by IDs.
-func (m *DepartmentsMutation) RemoveLionGroupIDs(ids ...int) {
-	if m.removedlion_groups == nil {
-		m.removedlion_groups = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.lion_groups, ids[i])
-		m.removedlion_groups[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedLionGroups returns the removed IDs of the "lion_groups" edge to the Groups entity.
-func (m *DepartmentsMutation) RemovedLionGroupsIDs() (ids []int) {
-	for id := range m.removedlion_groups {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// LionGroupsIDs returns the "lion_groups" edge IDs in the mutation.
-func (m *DepartmentsMutation) LionGroupsIDs() (ids []int) {
-	for id := range m.lion_groups {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetLionGroups resets all changes to the "lion_groups" edge.
-func (m *DepartmentsMutation) ResetLionGroups() {
-	m.lion_groups = nil
-	m.clearedlion_groups = false
-	m.removedlion_groups = nil
-}
-
 // Where appends a list predicates to the DepartmentsMutation builder.
 func (m *DepartmentsMutation) Where(ps ...predicate.Departments) {
 	m.predicates = append(m.predicates, ps...)
@@ -5923,85 +5866,49 @@ func (m *DepartmentsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DepartmentsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.lion_groups != nil {
-		edges = append(edges, departments.EdgeLionGroups)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *DepartmentsMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case departments.EdgeLionGroups:
-		ids := make([]ent.Value, 0, len(m.lion_groups))
-		for id := range m.lion_groups {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DepartmentsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedlion_groups != nil {
-		edges = append(edges, departments.EdgeLionGroups)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *DepartmentsMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case departments.EdgeLionGroups:
-		ids := make([]ent.Value, 0, len(m.removedlion_groups))
-		for id := range m.removedlion_groups {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DepartmentsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedlion_groups {
-		edges = append(edges, departments.EdgeLionGroups)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *DepartmentsMutation) EdgeCleared(name string) bool {
-	switch name {
-	case departments.EdgeLionGroups:
-		return m.clearedlion_groups
-	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *DepartmentsMutation) ClearEdge(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Departments unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *DepartmentsMutation) ResetEdge(name string) error {
-	switch name {
-	case departments.EdgeLionGroups:
-		m.ResetLionGroups()
-		return nil
-	}
 	return fmt.Errorf("unknown Departments edge %s", name)
 }
 
@@ -6955,11 +6862,13 @@ type GroupsMutation struct {
 	max_members     *int
 	addmax_members  *int
 	metadata        *map[string]string
-	ref_id          *int
-	addref_id       *int
-	ref_expr        *string
+	source_id       *int
+	addsource_id    *int
+	_config         *json.RawMessage
+	append_config   json.RawMessage
 	visibility      *int
 	addvisibility   *int
+	protected       *bool
 	description     *string
 	clearedFields   map[string]struct{}
 	done            bool
@@ -7714,96 +7623,139 @@ func (m *GroupsMutation) ResetMetadata() {
 	m.metadata = nil
 }
 
-// SetRefID sets the "ref_id" field.
-func (m *GroupsMutation) SetRefID(i int) {
-	m.ref_id = &i
-	m.addref_id = nil
+// SetSourceID sets the "source_id" field.
+func (m *GroupsMutation) SetSourceID(i int) {
+	m.source_id = &i
+	m.addsource_id = nil
 }
 
-// RefID returns the value of the "ref_id" field in the mutation.
-func (m *GroupsMutation) RefID() (r int, exists bool) {
-	v := m.ref_id
+// SourceID returns the value of the "source_id" field in the mutation.
+func (m *GroupsMutation) SourceID() (r int, exists bool) {
+	v := m.source_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRefID returns the old "ref_id" field's value of the Groups entity.
+// OldSourceID returns the old "source_id" field's value of the Groups entity.
 // If the Groups object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GroupsMutation) OldRefID(ctx context.Context) (v int, err error) {
+func (m *GroupsMutation) OldSourceID(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRefID is only allowed on UpdateOne operations")
+		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRefID requires an ID field in the mutation")
+		return v, errors.New("OldSourceID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRefID: %w", err)
+		return v, fmt.Errorf("querying old value for OldSourceID: %w", err)
 	}
-	return oldValue.RefID, nil
+	return oldValue.SourceID, nil
 }
 
-// AddRefID adds i to the "ref_id" field.
-func (m *GroupsMutation) AddRefID(i int) {
-	if m.addref_id != nil {
-		*m.addref_id += i
+// AddSourceID adds i to the "source_id" field.
+func (m *GroupsMutation) AddSourceID(i int) {
+	if m.addsource_id != nil {
+		*m.addsource_id += i
 	} else {
-		m.addref_id = &i
+		m.addsource_id = &i
 	}
 }
 
-// AddedRefID returns the value that was added to the "ref_id" field in this mutation.
-func (m *GroupsMutation) AddedRefID() (r int, exists bool) {
-	v := m.addref_id
+// AddedSourceID returns the value that was added to the "source_id" field in this mutation.
+func (m *GroupsMutation) AddedSourceID() (r int, exists bool) {
+	v := m.addsource_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetRefID resets all changes to the "ref_id" field.
-func (m *GroupsMutation) ResetRefID() {
-	m.ref_id = nil
-	m.addref_id = nil
+// ClearSourceID clears the value of the "source_id" field.
+func (m *GroupsMutation) ClearSourceID() {
+	m.source_id = nil
+	m.addsource_id = nil
+	m.clearedFields[groups.FieldSourceID] = struct{}{}
 }
 
-// SetRefExpr sets the "ref_expr" field.
-func (m *GroupsMutation) SetRefExpr(s string) {
-	m.ref_expr = &s
+// SourceIDCleared returns if the "source_id" field was cleared in this mutation.
+func (m *GroupsMutation) SourceIDCleared() bool {
+	_, ok := m.clearedFields[groups.FieldSourceID]
+	return ok
 }
 
-// RefExpr returns the value of the "ref_expr" field in the mutation.
-func (m *GroupsMutation) RefExpr() (r string, exists bool) {
-	v := m.ref_expr
+// ResetSourceID resets all changes to the "source_id" field.
+func (m *GroupsMutation) ResetSourceID() {
+	m.source_id = nil
+	m.addsource_id = nil
+	delete(m.clearedFields, groups.FieldSourceID)
+}
+
+// SetConfig sets the "config" field.
+func (m *GroupsMutation) SetConfig(jm json.RawMessage) {
+	m._config = &jm
+	m.append_config = nil
+}
+
+// Config returns the value of the "config" field in the mutation.
+func (m *GroupsMutation) Config() (r json.RawMessage, exists bool) {
+	v := m._config
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRefExpr returns the old "ref_expr" field's value of the Groups entity.
+// OldConfig returns the old "config" field's value of the Groups entity.
 // If the Groups object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GroupsMutation) OldRefExpr(ctx context.Context) (v string, err error) {
+func (m *GroupsMutation) OldConfig(ctx context.Context) (v json.RawMessage, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRefExpr is only allowed on UpdateOne operations")
+		return v, errors.New("OldConfig is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRefExpr requires an ID field in the mutation")
+		return v, errors.New("OldConfig requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRefExpr: %w", err)
+		return v, fmt.Errorf("querying old value for OldConfig: %w", err)
 	}
-	return oldValue.RefExpr, nil
+	return oldValue.Config, nil
 }
 
-// ResetRefExpr resets all changes to the "ref_expr" field.
-func (m *GroupsMutation) ResetRefExpr() {
-	m.ref_expr = nil
+// AppendConfig adds jm to the "config" field.
+func (m *GroupsMutation) AppendConfig(jm json.RawMessage) {
+	m.append_config = append(m.append_config, jm...)
+}
+
+// AppendedConfig returns the list of values that were appended to the "config" field in this mutation.
+func (m *GroupsMutation) AppendedConfig() (json.RawMessage, bool) {
+	if len(m.append_config) == 0 {
+		return nil, false
+	}
+	return m.append_config, true
+}
+
+// ClearConfig clears the value of the "config" field.
+func (m *GroupsMutation) ClearConfig() {
+	m._config = nil
+	m.append_config = nil
+	m.clearedFields[groups.FieldConfig] = struct{}{}
+}
+
+// ConfigCleared returns if the "config" field was cleared in this mutation.
+func (m *GroupsMutation) ConfigCleared() bool {
+	_, ok := m.clearedFields[groups.FieldConfig]
+	return ok
+}
+
+// ResetConfig resets all changes to the "config" field.
+func (m *GroupsMutation) ResetConfig() {
+	m._config = nil
+	m.append_config = nil
+	delete(m.clearedFields, groups.FieldConfig)
 }
 
 // SetVisibility sets the "visibility" field.
@@ -7860,6 +7812,42 @@ func (m *GroupsMutation) AddedVisibility() (r int, exists bool) {
 func (m *GroupsMutation) ResetVisibility() {
 	m.visibility = nil
 	m.addvisibility = nil
+}
+
+// SetProtected sets the "protected" field.
+func (m *GroupsMutation) SetProtected(b bool) {
+	m.protected = &b
+}
+
+// Protected returns the value of the "protected" field in the mutation.
+func (m *GroupsMutation) Protected() (r bool, exists bool) {
+	v := m.protected
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtected returns the old "protected" field's value of the Groups entity.
+// If the Groups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupsMutation) OldProtected(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtected requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
+	}
+	return oldValue.Protected, nil
+}
+
+// ResetProtected resets all changes to the "protected" field.
+func (m *GroupsMutation) ResetProtected() {
+	m.protected = nil
 }
 
 // SetDescription sets the "description" field.
@@ -7932,7 +7920,7 @@ func (m *GroupsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupsMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 18)
 	if m.created_at != nil {
 		fields = append(fields, groups.FieldCreatedAt)
 	}
@@ -7972,14 +7960,17 @@ func (m *GroupsMutation) Fields() []string {
 	if m.metadata != nil {
 		fields = append(fields, groups.FieldMetadata)
 	}
-	if m.ref_id != nil {
-		fields = append(fields, groups.FieldRefID)
+	if m.source_id != nil {
+		fields = append(fields, groups.FieldSourceID)
 	}
-	if m.ref_expr != nil {
-		fields = append(fields, groups.FieldRefExpr)
+	if m._config != nil {
+		fields = append(fields, groups.FieldConfig)
 	}
 	if m.visibility != nil {
 		fields = append(fields, groups.FieldVisibility)
+	}
+	if m.protected != nil {
+		fields = append(fields, groups.FieldProtected)
 	}
 	if m.description != nil {
 		fields = append(fields, groups.FieldDescription)
@@ -8018,12 +8009,14 @@ func (m *GroupsMutation) Field(name string) (ent.Value, bool) {
 		return m.MaxMembers()
 	case groups.FieldMetadata:
 		return m.Metadata()
-	case groups.FieldRefID:
-		return m.RefID()
-	case groups.FieldRefExpr:
-		return m.RefExpr()
+	case groups.FieldSourceID:
+		return m.SourceID()
+	case groups.FieldConfig:
+		return m.Config()
 	case groups.FieldVisibility:
 		return m.Visibility()
+	case groups.FieldProtected:
+		return m.Protected()
 	case groups.FieldDescription:
 		return m.Description()
 	}
@@ -8061,12 +8054,14 @@ func (m *GroupsMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldMaxMembers(ctx)
 	case groups.FieldMetadata:
 		return m.OldMetadata(ctx)
-	case groups.FieldRefID:
-		return m.OldRefID(ctx)
-	case groups.FieldRefExpr:
-		return m.OldRefExpr(ctx)
+	case groups.FieldSourceID:
+		return m.OldSourceID(ctx)
+	case groups.FieldConfig:
+		return m.OldConfig(ctx)
 	case groups.FieldVisibility:
 		return m.OldVisibility(ctx)
+	case groups.FieldProtected:
+		return m.OldProtected(ctx)
 	case groups.FieldDescription:
 		return m.OldDescription(ctx)
 	}
@@ -8169,19 +8164,19 @@ func (m *GroupsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMetadata(v)
 		return nil
-	case groups.FieldRefID:
+	case groups.FieldSourceID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRefID(v)
+		m.SetSourceID(v)
 		return nil
-	case groups.FieldRefExpr:
-		v, ok := value.(string)
+	case groups.FieldConfig:
+		v, ok := value.(json.RawMessage)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRefExpr(v)
+		m.SetConfig(v)
 		return nil
 	case groups.FieldVisibility:
 		v, ok := value.(int)
@@ -8189,6 +8184,13 @@ func (m *GroupsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetVisibility(v)
+		return nil
+	case groups.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
 		return nil
 	case groups.FieldDescription:
 		v, ok := value.(string)
@@ -8226,8 +8228,8 @@ func (m *GroupsMutation) AddedFields() []string {
 	if m.addmax_members != nil {
 		fields = append(fields, groups.FieldMaxMembers)
 	}
-	if m.addref_id != nil {
-		fields = append(fields, groups.FieldRefID)
+	if m.addsource_id != nil {
+		fields = append(fields, groups.FieldSourceID)
 	}
 	if m.addvisibility != nil {
 		fields = append(fields, groups.FieldVisibility)
@@ -8254,8 +8256,8 @@ func (m *GroupsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedParentID()
 	case groups.FieldMaxMembers:
 		return m.AddedMaxMembers()
-	case groups.FieldRefID:
-		return m.AddedRefID()
+	case groups.FieldSourceID:
+		return m.AddedSourceID()
 	case groups.FieldVisibility:
 		return m.AddedVisibility()
 	}
@@ -8316,12 +8318,12 @@ func (m *GroupsMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddMaxMembers(v)
 		return nil
-	case groups.FieldRefID:
+	case groups.FieldSourceID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddRefID(v)
+		m.AddSourceID(v)
 		return nil
 	case groups.FieldVisibility:
 		v, ok := value.(int)
@@ -8347,6 +8349,12 @@ func (m *GroupsMutation) ClearedFields() []string {
 	if m.FieldCleared(groups.FieldUpdatedBy) {
 		fields = append(fields, groups.FieldUpdatedBy)
 	}
+	if m.FieldCleared(groups.FieldSourceID) {
+		fields = append(fields, groups.FieldSourceID)
+	}
+	if m.FieldCleared(groups.FieldConfig) {
+		fields = append(fields, groups.FieldConfig)
+	}
 	return fields
 }
 
@@ -8369,6 +8377,12 @@ func (m *GroupsMutation) ClearField(name string) error {
 		return nil
 	case groups.FieldUpdatedBy:
 		m.ClearUpdatedBy()
+		return nil
+	case groups.FieldSourceID:
+		m.ClearSourceID()
+		return nil
+	case groups.FieldConfig:
+		m.ClearConfig()
 		return nil
 	}
 	return fmt.Errorf("unknown Groups nullable field %s", name)
@@ -8417,14 +8431,17 @@ func (m *GroupsMutation) ResetField(name string) error {
 	case groups.FieldMetadata:
 		m.ResetMetadata()
 		return nil
-	case groups.FieldRefID:
-		m.ResetRefID()
+	case groups.FieldSourceID:
+		m.ResetSourceID()
 		return nil
-	case groups.FieldRefExpr:
-		m.ResetRefExpr()
+	case groups.FieldConfig:
+		m.ResetConfig()
 		return nil
 	case groups.FieldVisibility:
 		m.ResetVisibility()
+		return nil
+	case groups.FieldProtected:
+		m.ResetProtected()
 		return nil
 	case groups.FieldDescription:
 		m.ResetDescription()

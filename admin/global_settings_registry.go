@@ -5,16 +5,29 @@ import "time"
 type globalSettingValueType string
 
 const (
-	globalSettingValueTypeBool     globalSettingValueType = "bool"
-	globalSettingValueTypeInt      globalSettingValueType = "int"
-	globalSettingValueTypeFloat    globalSettingValueType = "float"
-	globalSettingValueTypeString   globalSettingValueType = "string"
-	globalSettingValueTypeDuration globalSettingValueType = "duration"
-	globalSettingValueTypeJSON     globalSettingValueType = "json"
+	globalSettingValueTypeBool        globalSettingValueType = "bool"
+	globalSettingValueTypeInt         globalSettingValueType = "int"
+	globalSettingValueTypeFloat       globalSettingValueType = "float"
+	globalSettingValueTypeDuration    globalSettingValueType = "duration"
+	globalSettingValueTypeString      globalSettingValueType = "string"
+	globalSettingValueTypeStringArray globalSettingValueType = "string_array"
+	globalSettingValueTypeJSON        globalSettingValueType = "json"
 )
 
 const (
-	globalSettingsCategorySecurity = "security"
+	globalSettingsCategoryServices    = "services"
+	globalSettingsCategoryDiscover    = "discover"
+	globalSettingsCategorySecurity    = "security"
+	globalSettingsCategoryDatabase    = "database"
+	globalSettingsCategoryCachebox    = "cachebox"
+	globalSettingsCategoryDebugger    = "debugger"
+	globalSettingsCategoryObjstore    = "objstore"
+	globalSettingsCategoryFrontend    = "frontend"
+	globalSettingsCategoryObservables = "observables"
+	globalSettingsCategoryCloudevents = "cloudevents"
+	globalSettingsCategoryAutomations = "automations"
+	globalSettingsCategoryAIConnector = "aiconnector"
+	globalSettingsCategoryIndependent = "independent"
 
 	globalSettingKeyLoginEnforceMFA       = "login.enforce_mfa"
 	globalSettingKeyLoginAccessTokenTTL   = "login.access_token_ttl"
@@ -22,7 +35,40 @@ const (
 	globalSettingKeyMFAMaxVerifyAttempts  = "mfa.max_verify_attempts"
 	globalSettingKeyMFARecoveryCodesCount = "mfa.recovery_codes_count"
 	globalSettingKeyMFATOTPIssuer         = "mfa.totp_issuer"
+	globalSettingKeyIdentityAutoLink      = "identity.auto_link"
 )
+
+var globalSettingsCategories = []string{
+	globalSettingsCategoryServices,
+	globalSettingsCategoryDiscover,
+	globalSettingsCategorySecurity,
+	globalSettingsCategoryDatabase,
+	globalSettingsCategoryCachebox,
+	globalSettingsCategoryDebugger,
+	globalSettingsCategoryObjstore,
+	globalSettingsCategoryFrontend,
+	globalSettingsCategoryObservables,
+	globalSettingsCategoryCloudevents,
+	globalSettingsCategoryAutomations,
+	globalSettingsCategoryAIConnector,
+	globalSettingsCategoryIndependent,
+}
+
+var globalSettingsCategorySet = map[string]struct{}{
+	globalSettingsCategoryServices:    {},
+	globalSettingsCategoryDiscover:    {},
+	globalSettingsCategorySecurity:    {},
+	globalSettingsCategoryDatabase:    {},
+	globalSettingsCategoryCachebox:    {},
+	globalSettingsCategoryDebugger:    {},
+	globalSettingsCategoryObjstore:    {},
+	globalSettingsCategoryFrontend:    {},
+	globalSettingsCategoryObservables: {},
+	globalSettingsCategoryCloudevents: {},
+	globalSettingsCategoryAutomations: {},
+	globalSettingsCategoryAIConnector: {},
+	globalSettingsCategoryIndependent: {},
+}
 
 type globalSettingSpec struct {
 	ValueType    globalSettingValueType
@@ -83,6 +129,12 @@ var globalSettingRegistry = map[string]map[string]globalSettingSpec{
 			Protected:    true,
 			MaxLen:       64,
 		},
+		globalSettingKeyIdentityAutoLink: {
+			ValueType:    globalSettingValueTypeBool,
+			DefaultValue: "true",
+			Description:  "Automatically link external identities to existing users by verified email or phone number.",
+			Protected:    true,
+		},
 	},
 }
 
@@ -96,6 +148,26 @@ func lookupGlobalSettingSpec(category, settingKey string) (globalSettingSpec, bo
 		return globalSettingSpec{}, false
 	}
 	return spec, true
+}
+
+func isGlobalSettingsCategory(category string) bool {
+	_, ok := globalSettingsCategorySet[category]
+	return ok
+}
+
+func isSupportedGlobalSettingValueType(valueType globalSettingValueType) bool {
+	switch valueType {
+	case globalSettingValueTypeBool,
+		globalSettingValueTypeInt,
+		globalSettingValueTypeFloat,
+		globalSettingValueTypeDuration,
+		globalSettingValueTypeString,
+		globalSettingValueTypeStringArray,
+		globalSettingValueTypeJSON:
+		return true
+	default:
+		return false
+	}
 }
 
 func intPtr(value int) *int {

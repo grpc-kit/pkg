@@ -190,6 +190,43 @@ debugger:
   # 日志输出的格式，可取：json、text
   log_format: text
 
+# 对象存储配置
+objstore:
+  enable: true
+  # 类型：s3、proxy
+  type: s3
+  config:
+    bucket: demo
+    endpoint: 127.0.0.1:9000
+    region: ""
+    access_key: ""
+    secret_key: ""
+    session_token: ""
+    insecure: false
+    # 签名版本，可取：v4（默认）、v2
+    signature_version: ""
+    # 列举对象使用的版本，可取：v1、v2（默认）
+    list_objects_version: ""
+    # 寻址风格，可取：auto（默认）、path、virtual-hosted
+    bucket_lookup_type: auto
+    # 分片上传的单片大小，单位 bytes，默认 64Mi
+    part_size: 67108864
+    put_user_metadata: {}
+    put_user_tags: {}
+    # 服务端加密，可取类型：SSE-S3、SSE-KMS、SSE-C
+    sse_config:
+      type: ""
+      kms_key_id: ""
+      kms_encryption_context: {}
+      # SSE-C 时为 32 字节密钥文件的路径
+      encryption_key: ""
+    http_config:
+      tls_client_config:
+        ca_file: ""
+        cert_file: ""
+        key_file: ""
+        insecure_skip_verify: false
+
 # 前端托管配置
 frontend:
   enable: true
@@ -351,7 +388,22 @@ cloudevents:
     event:
       must_succeed: false # 默认必须成功，会阻塞请求
 
-# AI 连接器配置（MCP Server）
+# 流程编排配置
+automations:
+  enable: false
+  # 连接 k8s 集群
+  kubernetes:
+    # kubeconfig 文件路径；与 rest_config 均未配置时使用 InCluster 模式
+    config_path: ""
+    # 结构同 https://pkg.go.dev/k8s.io/client-go@v0.31.2/rest#Config
+    #rest_config:
+    #  host: https://127.0.0.1:6443
+    #  bearer_token: ""
+    #  bearer_token_file: ""
+    #  tls_client_config:
+    #    insecure: false
+
+# 智能连接配置（MCP Server）
 aiconnector:
   enable: false
   mcp_server:

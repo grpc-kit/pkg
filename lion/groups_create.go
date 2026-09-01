@@ -4,6 +4,7 @@ package lion
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -178,31 +179,23 @@ func (_c *GroupsCreate) SetMetadata(v map[string]string) *GroupsCreate {
 	return _c
 }
 
-// SetRefID sets the "ref_id" field.
-func (_c *GroupsCreate) SetRefID(v int) *GroupsCreate {
-	_c.mutation.SetRefID(v)
+// SetSourceID sets the "source_id" field.
+func (_c *GroupsCreate) SetSourceID(v int) *GroupsCreate {
+	_c.mutation.SetSourceID(v)
 	return _c
 }
 
-// SetNillableRefID sets the "ref_id" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableRefID(v *int) *GroupsCreate {
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableSourceID(v *int) *GroupsCreate {
 	if v != nil {
-		_c.SetRefID(*v)
+		_c.SetSourceID(*v)
 	}
 	return _c
 }
 
-// SetRefExpr sets the "ref_expr" field.
-func (_c *GroupsCreate) SetRefExpr(v string) *GroupsCreate {
-	_c.mutation.SetRefExpr(v)
-	return _c
-}
-
-// SetNillableRefExpr sets the "ref_expr" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableRefExpr(v *string) *GroupsCreate {
-	if v != nil {
-		_c.SetRefExpr(*v)
-	}
+// SetConfig sets the "config" field.
+func (_c *GroupsCreate) SetConfig(v json.RawMessage) *GroupsCreate {
+	_c.mutation.SetConfig(v)
 	return _c
 }
 
@@ -216,6 +209,20 @@ func (_c *GroupsCreate) SetVisibility(v int) *GroupsCreate {
 func (_c *GroupsCreate) SetNillableVisibility(v *int) *GroupsCreate {
 	if v != nil {
 		_c.SetVisibility(*v)
+	}
+	return _c
+}
+
+// SetProtected sets the "protected" field.
+func (_c *GroupsCreate) SetProtected(v bool) *GroupsCreate {
+	_c.mutation.SetProtected(v)
+	return _c
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableProtected(v *bool) *GroupsCreate {
+	if v != nil {
+		_c.SetProtected(*v)
 	}
 	return _c
 }
@@ -309,17 +316,13 @@ func (_c *GroupsCreate) defaults() {
 		v := groups.DefaultMetadata
 		_c.mutation.SetMetadata(v)
 	}
-	if _, ok := _c.mutation.RefID(); !ok {
-		v := groups.DefaultRefID
-		_c.mutation.SetRefID(v)
-	}
-	if _, ok := _c.mutation.RefExpr(); !ok {
-		v := groups.DefaultRefExpr
-		_c.mutation.SetRefExpr(v)
-	}
 	if _, ok := _c.mutation.Visibility(); !ok {
 		v := groups.DefaultVisibility
 		_c.mutation.SetVisibility(v)
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		v := groups.DefaultProtected
+		_c.mutation.SetProtected(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := groups.DefaultDescription
@@ -369,19 +372,16 @@ func (_c *GroupsCreate) check() error {
 	if _, ok := _c.mutation.Metadata(); !ok {
 		return &ValidationError{Name: "metadata", err: errors.New(`lion: missing required field "Groups.metadata"`)}
 	}
-	if _, ok := _c.mutation.RefID(); !ok {
-		return &ValidationError{Name: "ref_id", err: errors.New(`lion: missing required field "Groups.ref_id"`)}
-	}
-	if _, ok := _c.mutation.RefExpr(); !ok {
-		return &ValidationError{Name: "ref_expr", err: errors.New(`lion: missing required field "Groups.ref_expr"`)}
-	}
-	if v, ok := _c.mutation.RefExpr(); ok {
-		if err := groups.RefExprValidator(v); err != nil {
-			return &ValidationError{Name: "ref_expr", err: fmt.Errorf(`lion: validator failed for field "Groups.ref_expr": %w`, err)}
+	if v, ok := _c.mutation.SourceID(); ok {
+		if err := groups.SourceIDValidator(v); err != nil {
+			return &ValidationError{Name: "source_id", err: fmt.Errorf(`lion: validator failed for field "Groups.source_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Visibility(); !ok {
 		return &ValidationError{Name: "visibility", err: errors.New(`lion: missing required field "Groups.visibility"`)}
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Groups.protected"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Groups.description"`)}
@@ -464,17 +464,21 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_spec.SetField(groups.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
 	}
-	if value, ok := _c.mutation.RefID(); ok {
-		_spec.SetField(groups.FieldRefID, field.TypeInt, value)
-		_node.RefID = value
+	if value, ok := _c.mutation.SourceID(); ok {
+		_spec.SetField(groups.FieldSourceID, field.TypeInt, value)
+		_node.SourceID = &value
 	}
-	if value, ok := _c.mutation.RefExpr(); ok {
-		_spec.SetField(groups.FieldRefExpr, field.TypeString, value)
-		_node.RefExpr = value
+	if value, ok := _c.mutation.Config(); ok {
+		_spec.SetField(groups.FieldConfig, field.TypeJSON, value)
+		_node.Config = value
 	}
 	if value, ok := _c.mutation.Visibility(); ok {
 		_spec.SetField(groups.FieldVisibility, field.TypeInt, value)
 		_node.Visibility = value
+	}
+	if value, ok := _c.mutation.Protected(); ok {
+		_spec.SetField(groups.FieldProtected, field.TypeBool, value)
+		_node.Protected = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)

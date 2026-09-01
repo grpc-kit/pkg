@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -20,6 +19,7 @@ func (Departments) Fields() []ent.Field {
 			Default(0).
 			Comment("父部门ID，构建树形组织结构，值为 0 表示顶级部门"),
 		field.String("code").
+			Unique().
 			MaxLen(256).
 			NotEmpty().
 			Comment("部门代号，用于系统内部显示和业务逻辑"),
@@ -77,16 +77,6 @@ func (Departments) Fields() []ent.Field {
 		field.Bool("protected").
 			Default(false).
 			Comment("是否为保护资源，保护资源不能被删除，描述等可更改"),
-	}
-}
-
-// Edges of the table.
-func (Departments) Edges() []ent.Edge {
-	return []ent.Edge{
-		// 一个 Menu 可以对应多个 RoleMenu (中间实体)
-		// edge.To("lion_users", Users.Type),
-		// edge.To("lion_role_data_ranges", RoleDataRanges.Type),
-		edge.To("lion_groups", Groups.Type),
 	}
 }
 

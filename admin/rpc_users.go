@@ -75,9 +75,24 @@ func phoneNumberComplete(pn *adminv1.PhoneNumber) bool {
 	return strings.TrimSpace(pn.GetCountryCode()) != "" && strings.TrimSpace(pn.GetNationalNumber()) != ""
 }
 
+// validateCreateUserVerificationState prevents a verification flag from being
+// persisted without the contact value it is supposed to attest to.
+func validateCreateUserVerificationState(user *adminv1.User) error {
+	if user.GetEmailVerified() && strings.TrimSpace(user.GetEmail()) == "" {
+		return fmt.Errorf("email_verified requires email")
+	}
+	if user.GetPhoneNumberVerified() && !phoneNumberComplete(user.GetPhoneNumber()) {
+		return fmt.Errorf("phone_number_verified requires a complete phone_number")
+	}
+	return nil
+}
+
+// isServerManagedUserField 表示由服务端写入、不接受调用方通过 update_mask 指定的字段。
+// email_verified 与 phone_number_verified 不在此列：管理端允许人工置位，
+// 由 UpdateUser 内的联系方式变更重置逻辑保证一致性。
 func isServerManagedUserField(path string) bool {
 	switch path {
-	case "email_verified", "phone_number_verified", users.FieldCreatedBy, users.FieldUpdatedBy,
+	case users.FieldCreatedBy, users.FieldUpdatedBy,
 		users.FieldCreatedAt, users.FieldUpdatedAt, users.FieldDeletedAt:
 		return true
 	default:
@@ -196,7 +211,7 @@ func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, inclu
 				departmentIDs = append(departmentIDs, item.TargetID)
 			}
 			depTargets, err := db.Departments.Query().
-				Where(departments.IDIn(departmentIDs...)).
+				Where(departments.IDIn(departmentIDs...), departments.DeletedAtIsNil()).
 				All(ctx)
 			if err != nil {
 				return nil, errs.Internal(ctx).WithMessage("query user department targets failed").Err()
@@ -207,10 +222,12 @@ func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, inclu
 		}
 		resp.DepartmentMembers = make([]*adminv1.Membership, 0, len(depMembers))
 		for _, item := range depMembers {
-			membership := userMembershipToProto(item)
-			if target := departmentMap[item.TargetID]; target != nil {
-				applyMembershipTargetName(membership, target.DisplayName, target.Code)
+			target := departmentMap[item.TargetID]
+			if target == nil {
+				continue
 			}
+			membership := userMembershipToProto(item)
+			applyMembershipTargetName(membership, target.DisplayName, target.Code)
 			resp.DepartmentMembers = append(resp.DepartmentMembers, membership)
 		}
 
@@ -231,7 +248,7 @@ func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, inclu
 				groupIDs = append(groupIDs, item.TargetID)
 			}
 			groupTargets, err := db.Groups.Query().
-				Where(groups.IDIn(groupIDs...)).
+				Where(groups.IDIn(groupIDs...), groups.DeletedAtIsNil()).
 				All(ctx)
 			if err != nil {
 				return nil, errs.Internal(ctx).WithMessage("query user group targets failed").Err()
@@ -242,10 +259,12 @@ func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, inclu
 		}
 		resp.GroupMembers = make([]*adminv1.Membership, 0, len(grpMembers))
 		for _, item := range grpMembers {
-			membership := userMembershipToProto(item)
-			if target := groupMap[item.TargetID]; target != nil {
-				applyMembershipTargetName(membership, target.DisplayName, target.Code)
+			target := groupMap[item.TargetID]
+			if target == nil {
+				continue
 			}
+			membership := userMembershipToProto(item)
+			applyMembershipTargetName(membership, target.DisplayName, target.Code)
 			resp.GroupMembers = append(resp.GroupMembers, membership)
 		}
 	}
@@ -301,6 +320,13 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	if !isSupportedGender(req.User.GetGender()) {
 		return nil, errs.InvalidArgument(ctx).WithMessage("gender is out of supported range")
 	}
+	if err := validateCreateUserVerificationState(req.User); err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	timezone, locale, err := normalizeUserLocaleFields(req.User.GetTimezone(), req.User.GetLocale())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
 
 	db, err := a.GetLionClient()
 	if err != nil {
@@ -336,8 +362,8 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	userCreate.SetUserType(int(req.User.GetType()))
 	userCreate.SetUserStatus(int(req.User.GetStatus()))
 	userCreate.SetGender(int(req.User.GetGender()))
-	userCreate.SetTimezone(req.User.GetTimezone())
-	userCreate.SetLocale(req.User.GetLocale())
+	userCreate.SetTimezone(timezone)
+	userCreate.SetLocale(locale)
 	if req.User.GetMetadata() != nil {
 		userCreate.SetMetadata(req.User.GetMetadata())
 	}
@@ -373,14 +399,23 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		userCreate.SetWebsite(req.GetUser().GetWebsite())
 	}
 	if req.GetUser().Email != "" {
-		email, err := crypto.EncryptAES(a.config.aesKey, []byte(req.GetUser().GetEmail()))
+		identifier, err := canonicalizeEmailIdentifier(req.GetUser().GetEmail())
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage("invalid email format")
+		}
+		email, err := crypto.EncryptAES(a.config.aesKey, []byte(identifier.StoredValue))
 		if err != nil {
 			return nil, err
 		}
 		userCreate.SetEmailEncrypted(email)
-		userCreate.SetEmailHash(crypto.SHA256([]byte(req.GetUser().GetEmail())))
+		userCreate.SetEmailHash(identifier.Hash)
+		userCreate.SetEmailVerified(req.GetUser().GetEmailVerified())
 	}
 	if phoneNumberComplete(req.GetUser().GetPhoneNumber()) {
+		identifier, err := canonicalizePhoneNumberIdentifier(req.GetUser().GetPhoneNumber())
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+		}
 		tmp, err := proto.Marshal(req.GetUser().GetPhoneNumber())
 		if err != nil {
 			return nil, errs.InvalidArgument(ctx).WithMessage("invalid phone_number format")
@@ -390,7 +425,8 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 			return nil, err
 		}
 		userCreate.SetPhoneNumberEncrypted(phoneNumber)
-		userCreate.SetPhoneNumberHash(crypto.SHA256(tmp))
+		userCreate.SetPhoneNumberHash(identifier.Hash)
+		userCreate.SetPhoneNumberVerified(req.GetUser().GetPhoneNumberVerified())
 	}
 	if req.GetUser().GetAddress() != nil {
 		rawAddress, err := proto.Marshal(req.GetUser().GetAddress())
@@ -458,6 +494,10 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		if _, err := a.requireUserManagePermission(ctx, permissionUsersSensitiveGet); err != nil {
 			return nil, err
 		}
+	}
+	deletedOnly, err := listUsersDeletedOnly(req)
+	if err != nil {
+		return nil, err
 	}
 
 	result := &adminv1.ListUsersResponse{}
@@ -555,6 +595,9 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		}
 		userQuery = userQuery.Where(users.UserStatusEQ(status))
 	}
+	if deletedOnly {
+		userQuery = userQuery.Where(users.DeletedAtNotNil())
+	}
 	if !req.GetShowDeleted() {
 		userQuery = userQuery.Where(users.DeletedAtIsNil())
 	}
@@ -629,6 +672,23 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	}
 
 	return result, nil
+}
+
+// listUsersDeletedOnly implements the minimum AIP-160 subset required by the
+// recycle bin while retaining show_deleted's existing "include deleted"
+// semantics for normal management lists.
+func listUsersDeletedOnly(req *adminv1.ListUsersRequest) (bool, error) {
+	filter := strings.TrimSpace(req.GetFilter())
+	if filter == "" {
+		return false, nil
+	}
+	if filter != "deleted_at != null" {
+		return false, errs.InvalidArgument(context.Background()).WithMessage("unsupported filter")
+	}
+	if !req.GetShowDeleted() {
+		return false, errs.InvalidArgument(context.Background()).WithMessage("deleted_at filter requires show_deleted=true")
+	}
+	return true, nil
 }
 
 // ListUsersV1 列出用户列表
@@ -871,14 +931,26 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 	if req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("update_mask is empty")
 	}
+	maskPaths := make(map[string]bool, len(req.UpdateMask.Paths))
 	for _, path := range req.UpdateMask.Paths {
 		if isServerManagedUserField(path) {
 			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("server-managed update_mask path: %s", path))
 		}
+		maskPaths[path] = true
 	}
 
 	x := a.config.db.Users.Update()
 	x.SetUpdatedBy(operatorID)
+
+	// 联系方式发生变更但本次未显式指定验证状态时，验证状态失效，需重置为未验证，
+	// 避免新的邮箱/手机号继承旧地址的已验证标记。
+	if maskPaths["email"] && !maskPaths["email_verified"] {
+		x.SetEmailVerified(false)
+	}
+	if !maskPaths["phone_number_verified"] &&
+		(maskPaths["phone_number"] || maskPaths["phone_number.country_code"] || maskPaths["phone_number.national_number"]) {
+		x.SetPhoneNumberVerified(false)
+	}
 
 	for _, path := range req.UpdateMask.Paths {
 		switch path {
@@ -893,9 +965,17 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 		case "website":
 			x.SetWebsite(req.User.GetWebsite())
 		case "timezone":
-			x.SetTimezone(req.User.GetTimezone())
+			value, err := normalizeUserTimezone(req.User.GetTimezone())
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+			}
+			x.SetTimezone(value)
 		case "locale":
-			x.SetLocale(req.User.GetLocale())
+			value, err := normalizeUserLocale(req.User.GetLocale())
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+			}
+			x.SetLocale(value)
 		case users.FieldUserType, "type":
 			x.SetUserType(int(req.User.GetType()))
 		case users.FieldUserStatus, "status":
@@ -926,14 +1006,30 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 			x.SetBirthdate(req.User.GetBirthday().AsTime())
 
 		case "email":
-			encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.GetEmail()))
+			if strings.TrimSpace(req.User.GetEmail()) == "" {
+				x.ClearEmailEncrypted()
+				x.ClearEmailHash()
+				x.SetEmailVerified(false)
+				continue
+			}
+			identifier, err := canonicalizeEmailIdentifier(req.User.GetEmail())
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage("invalid email format")
+			}
+			encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(identifier.StoredValue))
 			if err != nil {
 				return nil, err
 			}
 			x.SetEmailEncrypted(encBody)
-			x.SetEmailHash(crypto.SHA256([]byte(req.User.GetEmail())))
+			x.SetEmailHash(identifier.Hash)
+		case "email_verified":
+			x.SetEmailVerified(req.User.GetEmailVerified())
 		case "phone_number", "phone_number.country_code", "phone_number.national_number":
 			if phoneNumberComplete(req.User.GetPhoneNumber()) {
+				identifier, err := canonicalizePhoneNumberIdentifier(req.User.GetPhoneNumber())
+				if err != nil {
+					return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+				}
 				rawBody, err := proto.Marshal(req.User.GetPhoneNumber())
 				if err != nil {
 					return nil, errs.InvalidArgument(ctx).WithMessage("invalid phone_number format")
@@ -943,11 +1039,13 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 					return nil, err
 				}
 				x.SetPhoneNumberEncrypted(encBody)
-				x.SetPhoneNumberHash(crypto.SHA256(rawBody))
+				x.SetPhoneNumberHash(identifier.Hash)
 			} else {
 				x.ClearPhoneNumberEncrypted()
 				x.ClearPhoneNumberHash()
 			}
+		case "phone_number_verified":
+			x.SetPhoneNumberVerified(req.User.GetPhoneNumberVerified())
 		case "address", "address.country", "address.postal_code", "address.region", "address.locality", "address.street_address":
 			rawBody, err := proto.Marshal(req.User.GetAddress())
 			if err != nil {
@@ -965,12 +1063,16 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 		}
 	}
 
-	if _, err := x.Where(users.IDEQ(int(req.User.GetId()))).Save(ctx); err != nil {
+	affected, err := x.Where(users.IDEQ(int(req.User.GetId())), users.DeletedAtIsNil()).Save(ctx)
+	if err != nil {
 		return nil, err
+	}
+	if affected == 0 {
+		return nil, errs.NotFound(ctx).WithMessage("user not found")
 	}
 
 	row, err := a.config.db.Users.Query().
-		Where(users.IDEQ(int(req.User.GetId()))).
+		Where(users.IDEQ(int(req.User.GetId())), users.DeletedAtIsNil()).
 		Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
@@ -1074,7 +1176,7 @@ func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.Upd
 	if targetUserID <= 0 {
 		targetUser, err := db.Users.Query().
 			Select(users.FieldID).
-			Where(users.UsernameEQ(req.GetUsername())).
+			Where(users.UsernameEQ(req.GetUsername()), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).
 			Only(ctx)
 		if err != nil {
 			if lion.IsNotFound(err) {
@@ -1084,6 +1186,15 @@ func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.Upd
 		}
 		targetUserID = targetUser.ID
 	}
+	active, err := db.Users.Query().
+		Where(users.IDEQ(targetUserID), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).
+		Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !active {
+		return nil, errs.NotFound(ctx).WithMessage("user not found")
+	}
 
 	tx, err := db.Tx(ctx)
 	if err != nil {
@@ -1092,6 +1203,15 @@ func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.Upd
 	defer func() {
 		_ = tx.Rollback()
 	}()
+	active, err = tx.Users.Query().
+		Where(users.IDEQ(targetUserID), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).
+		Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !active {
+		return nil, errs.NotFound(ctx).WithMessage("user not found")
+	}
 
 	provider, err := tx.AuthProviders.Query().
 		Select(

@@ -39,12 +39,14 @@ const (
 	FieldMaxMembers = "max_members"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
-	// FieldRefID holds the string denoting the ref_id field in the database.
-	FieldRefID = "ref_id"
-	// FieldRefExpr holds the string denoting the ref_expr field in the database.
-	FieldRefExpr = "ref_expr"
+	// FieldSourceID holds the string denoting the source_id field in the database.
+	FieldSourceID = "source_id"
+	// FieldConfig holds the string denoting the config field in the database.
+	FieldConfig = "config"
 	// FieldVisibility holds the string denoting the visibility field in the database.
 	FieldVisibility = "visibility"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// Table holds the table name of the groups in the database.
@@ -67,27 +69,17 @@ var Columns = []string{
 	FieldParentID,
 	FieldMaxMembers,
 	FieldMetadata,
-	FieldRefID,
-	FieldRefExpr,
+	FieldSourceID,
+	FieldConfig,
 	FieldVisibility,
+	FieldProtected,
 	FieldDescription,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "lion_groups"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"departments_lion_groups",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -121,14 +113,12 @@ var (
 	DefaultMaxMembers int
 	// DefaultMetadata holds the default value on creation for the "metadata" field.
 	DefaultMetadata map[string]string
-	// DefaultRefID holds the default value on creation for the "ref_id" field.
-	DefaultRefID int
-	// DefaultRefExpr holds the default value on creation for the "ref_expr" field.
-	DefaultRefExpr string
-	// RefExprValidator is a validator for the "ref_expr" field. It is called by the builders before save.
-	RefExprValidator func(string) error
+	// SourceIDValidator is a validator for the "source_id" field. It is called by the builders before save.
+	SourceIDValidator func(int) error
 	// DefaultVisibility holds the default value on creation for the "visibility" field.
 	DefaultVisibility int
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -201,19 +191,19 @@ func ByMaxMembers(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMaxMembers, opts...).ToFunc()
 }
 
-// ByRefID orders the results by the ref_id field.
-func ByRefID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRefID, opts...).ToFunc()
-}
-
-// ByRefExpr orders the results by the ref_expr field.
-func ByRefExpr(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRefExpr, opts...).ToFunc()
+// BySourceID orders the results by the source_id field.
+func BySourceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSourceID, opts...).ToFunc()
 }
 
 // ByVisibility orders the results by the visibility field.
 func ByVisibility(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVisibility, opts...).ToFunc()
+}
+
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

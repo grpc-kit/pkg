@@ -83,12 +83,22 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"security":{"name":"security","enabled":true,"authentication":{"insecure_rpcs":["grpc.health.v1.Health/Check"],"http_users":[{"user_id":"1","username":"admin","groups":["root"],"tenant":"default"}]}}}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateGlobalSetting
+      option:
+        tags:
+          - "全局设置"
+        summary: "创建自定义全局配置"
+        description: "在指定分类创建数据库全局配置；仅 superadmin 可调用，配置立即生效。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"category":"security","setting_key":"custom.feature_enabled","setting_value":"true","value_type":"bool","description":"自定义功能开关","protected":false}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetGlobalSettings
       option:
         tags:
           - "全局设置"
-        summary: "TODO: 补充 GetGlobalSettings 摘要"
-        description: "接口格式：GET /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。"
+        summary: "获取指定分类的全局配置"
+        description: "合并返回 registry 内置项与数据库自定义项；仅 superadmin 可调用。"
         responses:
           "200":
             examples:
@@ -97,8 +107,8 @@ openapiOptions:
       option:
         tags:
           - "全局设置"
-        summary: "TODO: 补充 ListGlobalSettings 摘要"
-        description: "接口格式：GET /builtin/admin/api/v1/global/settings。前置条件与业务约束待补充。"
+        summary: "列出全部全局配置分类"
+        description: "固定返回全部 13 个分类及其配置；仅 superadmin 可调用。"
         responses:
           "200":
             examples:
@@ -107,8 +117,18 @@ openapiOptions:
       option:
         tags:
           - "全局设置"
-        summary: "TODO: 补充 UpdateGlobalSettings 摘要"
-        description: "接口格式：PATCH /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。"
+        summary: "批量更新全局配置"
+        description: "以事务方式批量更新内置项或自定义项；仅 superadmin 可调用，配置立即生效。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGlobalSetting
+      option:
+        tags:
+          - "全局设置"
+        summary: "删除自定义全局配置"
+        description: "删除指定自定义配置；registry 内置项不可删除，仅 superadmin 可调用。"
         responses:
           "200":
             examples:
@@ -487,8 +507,28 @@ openapiOptions:
       option:
         tags:
           - "部门管理"
-        summary: "删除部门"
-        description: "接口格式：/builtin/admin/api/v1/departments/{id}。删除指定部门。"
+        summary: "移至部门回收站"
+        description: "接口格式：DELETE /builtin/admin/api/v1/departments/{id}。仅叶子、未保护且没有部门群组引用的部门可软删除；成功后状态为 INACTIVE。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"5001","code":"risk-center","status":"INACTIVE","deleted_at":"2026-08-21T09:00:00Z"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UndeleteDepartment
+      option:
+        tags:
+          - "部门管理"
+        summary: "恢复部门"
+        description: "接口格式：POST /builtin/admin/api/v1/departments/{id}:undelete。恢复后保持 INACTIVE，须显式更新为 ACTIVE。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"5001","code":"risk-center","status":"INACTIVE"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ExpungeDepartment
+      option:
+        tags:
+          - "部门管理"
+        summary: "永久删除部门"
+        description: "接口格式：POST /builtin/admin/api/v1/departments/{id}:expunge。仅处理已软删除、未保护、无子部门且无部门群组引用的部门；会物理清理部门成员和角色绑定。"
         responses:
           "200":
             examples:
@@ -563,7 +603,7 @@ openapiOptions:
         tags:
           - "个人中心"
         summary: "更新当前用户资料"
-        description: '接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409（reason=CURRENT_USER_ETAG_MISMATCH）。用户名、联系方式、账号状态和身份信息不可由此接口修改。'
+        description: '接口格式：PATCH /builtin/admin/api/v1/self/user。仅更新 update_mask 指定的个人资料字段，必须携带 GetCurrentUser 返回的 etag；过期 etag 返回 409。用户名、联系方式、账号状态和身份信息不可由此接口修改。'
         responses:
           "200":
             examples:
@@ -605,6 +645,24 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"users":[{"id":"1001","username":"alice","nickname":"Alice Chen","profile":"资深风控审计员","picture":"https://cdn.example.com/avatars/alice.png","website":"https://intra.example.com/u/alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","phone_number":{"country_code":"86","national_number":"13900001234"},"email":"alice@example.com"},{"id":"1002","username":"bob","nickname":"Bob Li","profile":"平台研发工程师","picture":"https://cdn.example.com/avatars/bob.png","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"MALE","email":"bob@example.com"}],"next_page_token":"users:cursor:2","total_size":2}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteUser
+      option:
+        tags:
+          - "用户管理"
+        summary: "软删除用户"
+        description: "接口格式：DELETE /builtin/admin/api/v1/users/{id}。用户进入回收站并立即变为 DISABLED；不会删除身份、MFA、成员关系或角色绑定。访问权限由 IAM/OPA 策略控制。"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UndeleteUser
+      option:
+        tags:
+          - "用户管理"
+        summary: "恢复用户"
+        description: "接口格式：POST /builtin/admin/api/v1/users/{id}:undelete。恢复后用户保持 DISABLED，须通过 UpdateUser 显式启用。访问权限由 IAM/OPA 策略控制。"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ExpungeUser
+      option:
+        tags:
+          - "用户管理"
+        summary: "永久删除用户"
+        description: "接口格式：POST /builtin/admin/api/v1/users/{id}:expunge。仅允许永久删除已软删除用户，并在同一事务清理 core 从属数据；不可恢复。访问权限由 IAM/OPA 策略控制。"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser
       option:
         tags:
@@ -635,6 +693,36 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"id":"1001","username":"alice","nickname":"Alice Chen","profile":"资深风控审计员","picture":"https://cdn.example.com/avatars/alice.png","website":"https://intra.example.com/u/alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","phone_number":{"country_code":"86","national_number":"13900001234"},"email":"alice@example.com"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListUserAuthBindings
+      option:
+        tags:
+          - "用户管理"
+        summary: "获取用户认证身份绑定"
+        description: "接口格式：GET /builtin/admin/api/v1/users/{user_id}/auth-bindings。IAM action 为 admin.v1.known:ListUserAuthBindings，由方法级 Policy 在 handler 之前授权。返回认证身份和提供方的只读摘要；credential_configured 表示该绑定所需的用户级认证凭据是否已经配置，当前仅对 LOCAL identity 返回，其他 Provider 省略。用户级 MFA 状态通过 User.mfa_enabled 获取。外部身份标识属于敏感管理信息，响应不会包含密码、MFA、外部令牌或提供方凭据。软删除用户仍可查询；永久不存在的用户返回 404。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"bindings":[{"id":"8101","user_id":"1001","provider_id":"1","provider_code":"local","provider_display_name":"本地账号密码登录","provider_type":"LOCAL","provider_status":"ACTIVE","provider_icon_url":"","provider_user_id":"local-user-1001","credential_configured":true,"created_at":"2025-01-01T00:00:00Z","updated_at":"2026-08-20T01:15:00Z"},{"id":"8102","user_id":"1001","provider_id":"7","provider_code":"corp-oidc","provider_display_name":"企业统一登录","provider_type":"OIDC","provider_status":"DISABLED","provider_icon_url":"https://cdn.example.test/icons/oidc.svg","provider_user_id":"oidc-subject-8f31","provider_union_id":"directory-person-52","created_at":"2026-02-02T02:00:00Z","updated_at":"2026-07-03T03:00:00Z"}]}'
+          "400":
+            description: "user_id 不是正整数"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
+          "403":
+            description: "IAM Policy 拒绝调用此方法或目标资源"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
+          "404":
+            description: "用户不存在或已被永久删除"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
+          "500":
+            description: "认证身份或提供方摘要查询失败"
+            schema:
+              jsonSchema:
+                ref: ".grpc_kit.api.known.status.v1.ErrorResponse"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUserPassword
       option:
         tags:
@@ -645,6 +733,15 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteUserMFA
+      option:
+        tags:
+          - "用户管理"
+        summary: "重置指定用户 MFA"
+        description: "接口格式：DELETE /builtin/admin/api/v1/users/{user_id}/security/mfa。删除指定用户全部身份上的 MFA 密钥、恢复码及启用状态；访问权限由系统策略控制。操作幂等，不撤销已经签发的访问令牌。"
+        responses:
+          "204":
+            description: "用户 MFA 配置已删除"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.VerifyAuthMFA
       option:
         tags:
@@ -714,7 +811,7 @@ openapiOptions:
         responses:
           "200":
             examples:
-              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"metadata":{"slack_channel":"#ops-alert"},"description":"负责线上运行保障","visibility":"VISIBLE","ref_id":"0","ref_expr":""}'
+              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"metadata":{"slack_channel":"#ops-alert"},"description":"负责线上运行保障","visibility":"VISIBLE"}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListGroups
       option:
         tags:
@@ -724,7 +821,7 @@ openapiOptions:
         responses:
           "200":
             examples:
-              "application/json": '{"groups":[{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"description":"负责线上运行保障","visibility":"VISIBLE","ref_id":"0","ref_expr":""}],"next_page_token":"groups:21","total_size":14}'
+              "application/json": '{"groups":[{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"description":"负责线上运行保障","visibility":"VISIBLE"}],"next_page_token":"groups:21","total_size":14}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGroup
       option:
         tags:
@@ -734,17 +831,29 @@ openapiOptions:
         responses:
           "200":
             examples:
-              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队（更新）","sort_order":25,"max_members":100,"metadata":{"slack_channel":"#ops-warroom"},"description":"增加应急值班职能","visibility":"VISIBLE","ref_id":"0","ref_expr":""}'
+              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队（更新）","sort_order":25,"max_members":100,"metadata":{"slack_channel":"#ops-warroom"},"description":"增加应急值班职能","visibility":"VISIBLE"}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGroup
       option:
         tags:
           - "群组管理"
-        summary: "删除群组"
-        description: "接口格式：/builtin/admin/api/v1/groups/{id}。删除指定群组。"
+        summary: "软删除群组"
+        description: "接口格式：DELETE /builtin/admin/api/v1/groups/{id}。群组进入回收站并变为 DISABLED，成员关系和角色绑定保留以便恢复。访问权限由 IAM/OPA 策略控制。"
         responses:
           "200":
             examples:
-              "application/json": '{}'
+              "application/json": '{"id":"20","code":"ops-team","status":"DISABLED","deleted_at":"2026-08-20T00:00:00Z"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UndeleteGroup
+      option:
+        tags:
+          - "群组管理"
+        summary: "恢复群组"
+        description: "接口格式：POST /builtin/admin/api/v1/groups/{id}:undelete。恢复后群组保持 DISABLED，须通过 UpdateGroup 显式启用。访问权限由 IAM/OPA 策略控制。"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ExpungeGroup
+      option:
+        tags:
+          - "群组管理"
+        summary: "永久删除群组"
+        description: "接口格式：POST /builtin/admin/api/v1/groups/{id}:expunge。仅允许永久删除已软删除且未受保护的叶子群组，并在同一事务清理成员关系和角色绑定；不可恢复。访问权限由 IAM/OPA 策略控制。"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetGroup
       option:
         tags:
@@ -754,7 +863,7 @@ openapiOptions:
         responses:
           "200":
             examples:
-              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"metadata":{"slack_channel":"#ops-alert"},"description":"负责线上运行保障","visibility":"VISIBLE","ref_id":"0","ref_expr":""}'
+              "application/json": '{"id":"20","code":"ops-team","type":"PROJECT","status":"ACTIVE","display_name":"运维团队","sort_order":30,"max_members":80,"metadata":{"slack_channel":"#ops-alert"},"description":"负责线上运行保障","visibility":"VISIBLE"}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListGroupMembers
       option:
         tags:

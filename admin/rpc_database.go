@@ -14,6 +14,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/principalroles"
@@ -38,6 +39,84 @@ type builtinRoleSeed struct {
 	Description string
 	ParentID    int
 	SortOrder   int
+}
+
+type builtinGroupSeed struct {
+	Code        string
+	DisplayName string
+	Description string
+	UserFilter  string
+	SortOrder   int
+}
+
+func ensureBuiltinGroup(ctx context.Context, tx *lion.Tx, seed builtinGroupSeed) (*lion.Groups, error) {
+	protoGroup := &adminv1.Group{
+		Code:        seed.Code,
+		DisplayName: seed.DisplayName,
+		Description: seed.Description,
+		Type:        adminv1.Group_SYSTEM,
+		Status:      adminv1.Group_ACTIVE,
+		SortOrder:   int32(seed.SortOrder),
+		Config: &adminv1.Group_SystemConfig_{SystemConfig: &adminv1.Group_SystemConfig{
+			UserFilter: seed.UserFilter,
+		}},
+	}
+	validated, err := validateGroupTypeConfig(ctx, tx.Client(), protoGroup, true)
+	if err != nil {
+		return nil, err
+	}
+	group, err := tx.Groups.Query().Where(groups.CodeEQ(seed.Code), groups.DeletedAtIsNil()).Only(ctx)
+	if lion.IsNotFound(err) {
+		// 唯一索引不含 deleted_at：同 code 的回收站行继续占位，直接创建必然冲突；
+		// 与同 code 非 SYSTEM 脏数据处理一致，返回 FailedPrecondition 要求先恢复或
+		// 彻底清除，不原地转换（§3.1/§4.4）。
+		occupied, probeErr := tx.Groups.Query().Where(groups.CodeEQ(seed.Code)).Count(ctx)
+		if probeErr != nil {
+			return nil, probeErr
+		}
+		if occupied > 0 {
+			return nil, errs.FailedPrecondition(ctx).WithMessage(
+				"built-in group code is occupied by a deleted group; undelete or expunge it before initialization")
+		}
+		if err := lockAndCheckActiveRuleGroupCapacity(ctx, tx, 1); err != nil {
+			return nil, err
+		}
+		return tx.Groups.Create().
+			SetCode(seed.Code).
+			SetDisplayName(seed.DisplayName).
+			SetGroupType(int(adminv1.Group_SYSTEM)).
+			SetGroupStatus(int(adminv1.Group_ACTIVE)).
+			SetSortOrder(seed.SortOrder).
+			SetParentID(0).
+			SetMaxMembers(0).
+			SetConfig(validated.config).
+			SetProtected(true).
+			SetDescription(seed.Description).
+			Save(ctx)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if adminv1.Group_Type(group.GroupType) != adminv1.Group_SYSTEM {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("built-in group code is occupied by a non-SYSTEM group")
+	}
+	if group.GroupStatus != int(adminv1.Group_ACTIVE) {
+		if err := lockAndCheckActiveRuleGroupCapacity(ctx, tx, 1); err != nil {
+			return nil, err
+		}
+	}
+	return group.Update().
+		SetDisplayName(seed.DisplayName).
+		SetGroupType(int(adminv1.Group_SYSTEM)).
+		SetGroupStatus(int(adminv1.Group_ACTIVE)).
+		SetSortOrder(seed.SortOrder).
+		SetParentID(0).
+		SetMaxMembers(0).
+		ClearSourceID().
+		SetConfig(validated.config).
+		SetProtected(true).
+		SetDescription(seed.Description).
+		Save(ctx)
 }
 
 func ensureBuiltinRole(ctx context.Context, tx *lion.Tx, seed builtinRoleSeed) (*lion.Roles, error) {
@@ -126,7 +205,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 							DisplayName: "个人中心",
 							RoutePath:   "/user",
 							Icon:        "UserOutlined",
-							SortOrder:   100,
+							SortOrder:   adminMenuSortPersonal,
 							Children: []builtinMenuSeed{
 								{
 									Code:        "admin.user.profile",
@@ -141,13 +220,13 @@ func builtinMenuSeeds() []builtinMenuSeed {
 							DisplayName: "系统设置",
 							RoutePath:   "/setting",
 							Icon:        "SettingOutlined",
-							SortOrder:   200,
+							SortOrder:   adminMenuSortSettings,
 							Children: []builtinMenuSeed{
 								{
 									Code:        "admin.setting.auth",
 									DisplayName: "身份认证",
 									RoutePath:   "/setting/auth",
-									SortOrder:   100,
+									SortOrder:   adminSettingsMenuSortAuth,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.auth.providers", DisplayName: "认证提供方", RoutePath: "/setting/auth/providers", SortOrder: 100},
 										{Code: "admin.setting.auth.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/auth/oauth2-clients", SortOrder: 200},
@@ -158,7 +237,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.departments",
 									DisplayName: "部门管理",
 									RoutePath:   "/setting/departments",
-									SortOrder:   200,
+									SortOrder:   adminSettingsMenuSortDepartments,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.departments.detail", DisplayName: "部门详情", RoutePath: "/setting/departments/detail", SortOrder: 100},
 									},
@@ -167,7 +246,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.menus",
 									DisplayName: "菜单管理",
 									RoutePath:   "/setting/menus",
-									SortOrder:   300,
+									SortOrder:   adminSettingsMenuSortMenus,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.menus.list", DisplayName: "菜单列表", RoutePath: "/setting/menus/list", SortOrder: 100},
 									},
@@ -176,7 +255,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.roles",
 									DisplayName: "角色管理",
 									RoutePath:   "/setting/roles",
-									SortOrder:   400,
+									SortOrder:   adminSettingsMenuSortRoles,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.roles.list", DisplayName: "角色列表", RoutePath: "/setting/roles/list", SortOrder: 100},
 									},
@@ -185,7 +264,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.policies",
 									DisplayName: "权限策略",
 									RoutePath:   "/setting/policies",
-									SortOrder:   500,
+									SortOrder:   adminSettingsMenuSortPolicies,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.policies.list", DisplayName: "策略列表", RoutePath: "/setting/policies/list", SortOrder: 100},
 										{Code: "admin.setting.policies.create", DisplayName: "新建策略", RoutePath: "/setting/policies/create", SortOrder: 200},
@@ -195,7 +274,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.groups",
 									DisplayName: "群组管理",
 									RoutePath:   "/setting/groups",
-									SortOrder:   600,
+									SortOrder:   adminSettingsMenuSortGroups,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.groups.list", DisplayName: "群组列表", RoutePath: "/setting/groups/list", SortOrder: 100},
 									},
@@ -204,45 +283,83 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.users",
 									DisplayName: "用户管理",
 									RoutePath:   "/setting/users",
-									SortOrder:   700,
+									SortOrder:   adminSettingsMenuSortUsers,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.users.list", DisplayName: "用户列表", RoutePath: "/setting/users/list", SortOrder: 100},
 									},
 								},
 								{
-									Code:        "admin.setting.config",
-									DisplayName: "本地配置",
-									RoutePath:   "/setting/config",
-									SortOrder:   900,
+									Code:        "admin.setting.governance",
+									DisplayName: "资源治理",
+									RoutePath:   "/setting/governance",
+									SortOrder:   adminSettingsMenuSortGovernance,
 									Children: []builtinMenuSeed{
-										{Code: "admin.setting.config.security", DisplayName: "认证鉴权", RoutePath: "/setting/config/security", SortOrder: 100},
-										{Code: "admin.setting.config.services", DisplayName: "基础服务", RoutePath: "/setting/config/services", SortOrder: 200},
-										{Code: "admin.setting.config.discover", DisplayName: "服务发现", RoutePath: "/setting/config/discover", SortOrder: 300},
+										{Code: "admin.setting.governance.recycle-bin", DisplayName: "回收站", RoutePath: "/setting/governance/recycle-bin", SortOrder: 100},
+									},
+								},
+								{
+									Code:        "admin.setting.config",
+									DisplayName: "配置管理",
+									RoutePath:   "/setting/config",
+									SortOrder:   adminSettingsMenuSortConfig,
+									// 子菜单排序与 pkg/cfg/app-sample.yaml 的大类保持一致
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.config.services", DisplayName: "基础服务", RoutePath: "/setting/config/services", SortOrder: 100},
+										{Code: "admin.setting.config.discover", DisplayName: "服务发现", RoutePath: "/setting/config/discover", SortOrder: 200},
+										{Code: "admin.setting.config.security", DisplayName: "认证鉴权", RoutePath: "/setting/config/security", SortOrder: 300},
 										{Code: "admin.setting.config.database", DisplayName: "关系存储", RoutePath: "/setting/config/database", SortOrder: 400},
 										{Code: "admin.setting.config.cachebox", DisplayName: "缓存服务", RoutePath: "/setting/config/cachebox", SortOrder: 500},
 										{Code: "admin.setting.config.debugger", DisplayName: "日志调试", RoutePath: "/setting/config/debugger", SortOrder: 600},
 										{Code: "admin.setting.config.objstore", DisplayName: "对象存储", RoutePath: "/setting/config/objstore", SortOrder: 700},
 										{Code: "admin.setting.config.frontend", DisplayName: "前端托管", RoutePath: "/setting/config/frontend", SortOrder: 800},
-										{Code: "admin.setting.config.observables", DisplayName: "可观测性", RoutePath: "/setting/config/observables", SortOrder: 900},
+										{Code: "admin.setting.config.observables", DisplayName: "遥测配置", RoutePath: "/setting/config/observables", SortOrder: 900},
 										{Code: "admin.setting.config.cloudevents", DisplayName: "消息事件", RoutePath: "/setting/config/cloudevents", SortOrder: 1000},
 										{Code: "admin.setting.config.automations", DisplayName: "流程编排", RoutePath: "/setting/config/automations", SortOrder: 1100},
-										{Code: "admin.setting.config.independent", DisplayName: "独立配置", RoutePath: "/setting/config/independent", SortOrder: 1200},
+										{Code: "admin.setting.config.aiconnector", DisplayName: "智能连接", RoutePath: "/setting/config/aiconnector", SortOrder: 1200},
+										{Code: "admin.setting.config.independent", DisplayName: "独立配置", RoutePath: "/setting/config/independent", SortOrder: 1300},
 									},
 								},
 							},
 						},
 						{
-							Code:        "admin.apidocs",
-							DisplayName: "API 文档",
-							RoutePath:   "/apidocs",
+							Code:        "admin.devtools",
+							DisplayName: "开发工具",
+							RoutePath:   "/devtools",
 							Icon:        "SolutionOutlined",
-							SortOrder:   300,
+							SortOrder:   adminMenuSortDevtools,
 							Children: []builtinMenuSeed{
 								{
-									Code:        "admin.apidocs.service",
-									DisplayName: "服务文档",
-									RoutePath:   "/apidocs/service",
+									Code:        "admin.devtools.api",
+									DisplayName: "API 文档",
+									RoutePath:   "/devtools/api",
 									SortOrder:   100,
+								},
+								{
+									Code:        "admin.devtools.mcp",
+									DisplayName: "MCP 调试",
+									RoutePath:   "/devtools/mcp",
+									SortOrder:   200,
+								},
+							},
+						},
+						{
+							Code:        "admin.observability",
+							DisplayName: "可观测性",
+							RoutePath:   "/observability",
+							Icon:        "FundProjectionScreenOutlined",
+							SortOrder:   adminMenuSortObservability,
+							Children: []builtinMenuSeed{
+								{
+									Code:        "admin.observability.metrics",
+									DisplayName: "指标监控",
+									RoutePath:   "/observability/metrics",
+									SortOrder:   100,
+								},
+								{
+									Code:        "admin.observability.traces",
+									DisplayName: "链路追踪",
+									RoutePath:   "/observability/traces",
+									SortOrder:   200,
 								},
 							},
 						},
@@ -353,8 +470,8 @@ func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items 
 // 每次初始化时主动回收这些叶子菜单，保持存量库与当前种子一致，避免残留指向已下线页面的死链入口。
 // 后续下线的内置菜单 code 追加到此列表即可。
 var builtinMenuObsoletes = []string{
-	"admin.setting.auth.tokens", // 令牌管理已并入凭证管理（/setting/auth/credentials）
-	"admin.setting.global-settings", // 全局设置已并入本地配置 > 认证鉴权（/setting/config/security）
+	"admin.setting.auth.tokens",     // 令牌管理已并入凭证管理（/setting/auth/credentials）
+	"admin.setting.global-settings", // 全局设置已并入配置管理 > 认证鉴权（/setting/config/security）
 }
 
 // deleteObsoleteBuiltinMenus 删除已下线的内置菜单。
@@ -403,6 +520,31 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 	rollback := func() { _ = tx.Rollback() }
+	if err := ensureGroupCapacitySetting(ctx, tx); err != nil {
+		rollback()
+		return nil, err
+	}
+	if _, err := ensureBuiltinGroup(ctx, tx, builtinGroupSeed{
+		Code:        "everyone",
+		DisplayName: "Everyone",
+		Description: "All non-deleted users",
+		UserFilter:  "status != DELETED",
+		SortOrder:   10,
+	}); err != nil {
+		rollback()
+		return nil, err
+	}
+
+	// Keep legacy SYSTEM groups protected after the protected column is added.
+	// The update is intentionally idempotent and also repairs direct/manual data
+	// changes before lifecycle routes are exposed.
+	if _, err := tx.Groups.Update().
+		Where(groups.GroupTypeEQ(int(adminv1.Group_SYSTEM))).
+		SetProtected(true).
+		Save(ctx); err != nil {
+		rollback()
+		return nil, err
+	}
 
 	superadminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)
 	superadminRole, err := tx.Roles.Query().Where(roles.CodeEQ(superadminCode)).Only(ctx)

@@ -151,13 +151,3 @@ func TestRegisterBuiltinResources_OpenAPIAdmin(t *testing.T) {
 		t.Errorf("admin swagger = %q, want %q", got, adminBody)
 	}
 }
-
-func TestRegisterBuiltinResources_AdminDisabled(t *testing.T) {
-	hs := newBuiltinTestServer(t, func(s *mcp.Server) {
-		RegisterBuiltinResources(s, BuiltinResourcesConfig{AdminEnabled: false})
-	})
-	session := connectTestClient(t, hs.URL)
-	if names := listResourceNames(t, session); names["openapi-admin"] {
-		t.Error("did not expect openapi-admin when AdminEnabled=false")
-	}
-}

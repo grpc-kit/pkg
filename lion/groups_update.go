@@ -4,12 +4,14 @@ package lion
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
@@ -247,38 +249,48 @@ func (_u *GroupsUpdate) SetMetadata(v map[string]string) *GroupsUpdate {
 	return _u
 }
 
-// SetRefID sets the "ref_id" field.
-func (_u *GroupsUpdate) SetRefID(v int) *GroupsUpdate {
-	_u.mutation.ResetRefID()
-	_u.mutation.SetRefID(v)
+// SetSourceID sets the "source_id" field.
+func (_u *GroupsUpdate) SetSourceID(v int) *GroupsUpdate {
+	_u.mutation.ResetSourceID()
+	_u.mutation.SetSourceID(v)
 	return _u
 }
 
-// SetNillableRefID sets the "ref_id" field if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableRefID(v *int) *GroupsUpdate {
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableSourceID(v *int) *GroupsUpdate {
 	if v != nil {
-		_u.SetRefID(*v)
+		_u.SetSourceID(*v)
 	}
 	return _u
 }
 
-// AddRefID adds value to the "ref_id" field.
-func (_u *GroupsUpdate) AddRefID(v int) *GroupsUpdate {
-	_u.mutation.AddRefID(v)
+// AddSourceID adds value to the "source_id" field.
+func (_u *GroupsUpdate) AddSourceID(v int) *GroupsUpdate {
+	_u.mutation.AddSourceID(v)
 	return _u
 }
 
-// SetRefExpr sets the "ref_expr" field.
-func (_u *GroupsUpdate) SetRefExpr(v string) *GroupsUpdate {
-	_u.mutation.SetRefExpr(v)
+// ClearSourceID clears the value of the "source_id" field.
+func (_u *GroupsUpdate) ClearSourceID() *GroupsUpdate {
+	_u.mutation.ClearSourceID()
 	return _u
 }
 
-// SetNillableRefExpr sets the "ref_expr" field if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableRefExpr(v *string) *GroupsUpdate {
-	if v != nil {
-		_u.SetRefExpr(*v)
-	}
+// SetConfig sets the "config" field.
+func (_u *GroupsUpdate) SetConfig(v json.RawMessage) *GroupsUpdate {
+	_u.mutation.SetConfig(v)
+	return _u
+}
+
+// AppendConfig appends value to the "config" field.
+func (_u *GroupsUpdate) AppendConfig(v json.RawMessage) *GroupsUpdate {
+	_u.mutation.AppendConfig(v)
+	return _u
+}
+
+// ClearConfig clears the value of the "config" field.
+func (_u *GroupsUpdate) ClearConfig() *GroupsUpdate {
+	_u.mutation.ClearConfig()
 	return _u
 }
 
@@ -300,6 +312,20 @@ func (_u *GroupsUpdate) SetNillableVisibility(v *int) *GroupsUpdate {
 // AddVisibility adds value to the "visibility" field.
 func (_u *GroupsUpdate) AddVisibility(v int) *GroupsUpdate {
 	_u.mutation.AddVisibility(v)
+	return _u
+}
+
+// SetProtected sets the "protected" field.
+func (_u *GroupsUpdate) SetProtected(v bool) *GroupsUpdate {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableProtected(v *bool) *GroupsUpdate {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
 	return _u
 }
 
@@ -370,9 +396,9 @@ func (_u *GroupsUpdate) check() error {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Groups.display_name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.RefExpr(); ok {
-		if err := groups.RefExprValidator(v); err != nil {
-			return &ValidationError{Name: "ref_expr", err: fmt.Errorf(`lion: validator failed for field "Groups.ref_expr": %w`, err)}
+	if v, ok := _u.mutation.SourceID(); ok {
+		if err := groups.SourceIDValidator(v); err != nil {
+			return &ValidationError{Name: "source_id", err: fmt.Errorf(`lion: validator failed for field "Groups.source_id": %w`, err)}
 		}
 	}
 	return nil
@@ -456,20 +482,34 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(groups.FieldMetadata, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.RefID(); ok {
-		_spec.SetField(groups.FieldRefID, field.TypeInt, value)
+	if value, ok := _u.mutation.SourceID(); ok {
+		_spec.SetField(groups.FieldSourceID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedRefID(); ok {
-		_spec.AddField(groups.FieldRefID, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedSourceID(); ok {
+		_spec.AddField(groups.FieldSourceID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.RefExpr(); ok {
-		_spec.SetField(groups.FieldRefExpr, field.TypeString, value)
+	if _u.mutation.SourceIDCleared() {
+		_spec.ClearField(groups.FieldSourceID, field.TypeInt)
+	}
+	if value, ok := _u.mutation.Config(); ok {
+		_spec.SetField(groups.FieldConfig, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedConfig(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, groups.FieldConfig, value)
+		})
+	}
+	if _u.mutation.ConfigCleared() {
+		_spec.ClearField(groups.FieldConfig, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Visibility(); ok {
 		_spec.SetField(groups.FieldVisibility, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedVisibility(); ok {
 		_spec.AddField(groups.FieldVisibility, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(groups.FieldProtected, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
@@ -713,38 +753,48 @@ func (_u *GroupsUpdateOne) SetMetadata(v map[string]string) *GroupsUpdateOne {
 	return _u
 }
 
-// SetRefID sets the "ref_id" field.
-func (_u *GroupsUpdateOne) SetRefID(v int) *GroupsUpdateOne {
-	_u.mutation.ResetRefID()
-	_u.mutation.SetRefID(v)
+// SetSourceID sets the "source_id" field.
+func (_u *GroupsUpdateOne) SetSourceID(v int) *GroupsUpdateOne {
+	_u.mutation.ResetSourceID()
+	_u.mutation.SetSourceID(v)
 	return _u
 }
 
-// SetNillableRefID sets the "ref_id" field if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableRefID(v *int) *GroupsUpdateOne {
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableSourceID(v *int) *GroupsUpdateOne {
 	if v != nil {
-		_u.SetRefID(*v)
+		_u.SetSourceID(*v)
 	}
 	return _u
 }
 
-// AddRefID adds value to the "ref_id" field.
-func (_u *GroupsUpdateOne) AddRefID(v int) *GroupsUpdateOne {
-	_u.mutation.AddRefID(v)
+// AddSourceID adds value to the "source_id" field.
+func (_u *GroupsUpdateOne) AddSourceID(v int) *GroupsUpdateOne {
+	_u.mutation.AddSourceID(v)
 	return _u
 }
 
-// SetRefExpr sets the "ref_expr" field.
-func (_u *GroupsUpdateOne) SetRefExpr(v string) *GroupsUpdateOne {
-	_u.mutation.SetRefExpr(v)
+// ClearSourceID clears the value of the "source_id" field.
+func (_u *GroupsUpdateOne) ClearSourceID() *GroupsUpdateOne {
+	_u.mutation.ClearSourceID()
 	return _u
 }
 
-// SetNillableRefExpr sets the "ref_expr" field if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableRefExpr(v *string) *GroupsUpdateOne {
-	if v != nil {
-		_u.SetRefExpr(*v)
-	}
+// SetConfig sets the "config" field.
+func (_u *GroupsUpdateOne) SetConfig(v json.RawMessage) *GroupsUpdateOne {
+	_u.mutation.SetConfig(v)
+	return _u
+}
+
+// AppendConfig appends value to the "config" field.
+func (_u *GroupsUpdateOne) AppendConfig(v json.RawMessage) *GroupsUpdateOne {
+	_u.mutation.AppendConfig(v)
+	return _u
+}
+
+// ClearConfig clears the value of the "config" field.
+func (_u *GroupsUpdateOne) ClearConfig() *GroupsUpdateOne {
+	_u.mutation.ClearConfig()
 	return _u
 }
 
@@ -766,6 +816,20 @@ func (_u *GroupsUpdateOne) SetNillableVisibility(v *int) *GroupsUpdateOne {
 // AddVisibility adds value to the "visibility" field.
 func (_u *GroupsUpdateOne) AddVisibility(v int) *GroupsUpdateOne {
 	_u.mutation.AddVisibility(v)
+	return _u
+}
+
+// SetProtected sets the "protected" field.
+func (_u *GroupsUpdateOne) SetProtected(v bool) *GroupsUpdateOne {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableProtected(v *bool) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
 	return _u
 }
 
@@ -849,9 +913,9 @@ func (_u *GroupsUpdateOne) check() error {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Groups.display_name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.RefExpr(); ok {
-		if err := groups.RefExprValidator(v); err != nil {
-			return &ValidationError{Name: "ref_expr", err: fmt.Errorf(`lion: validator failed for field "Groups.ref_expr": %w`, err)}
+	if v, ok := _u.mutation.SourceID(); ok {
+		if err := groups.SourceIDValidator(v); err != nil {
+			return &ValidationError{Name: "source_id", err: fmt.Errorf(`lion: validator failed for field "Groups.source_id": %w`, err)}
 		}
 	}
 	return nil
@@ -952,20 +1016,34 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(groups.FieldMetadata, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.RefID(); ok {
-		_spec.SetField(groups.FieldRefID, field.TypeInt, value)
+	if value, ok := _u.mutation.SourceID(); ok {
+		_spec.SetField(groups.FieldSourceID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedRefID(); ok {
-		_spec.AddField(groups.FieldRefID, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedSourceID(); ok {
+		_spec.AddField(groups.FieldSourceID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.RefExpr(); ok {
-		_spec.SetField(groups.FieldRefExpr, field.TypeString, value)
+	if _u.mutation.SourceIDCleared() {
+		_spec.ClearField(groups.FieldSourceID, field.TypeInt)
+	}
+	if value, ok := _u.mutation.Config(); ok {
+		_spec.SetField(groups.FieldConfig, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedConfig(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, groups.FieldConfig, value)
+		})
+	}
+	if _u.mutation.ConfigCleared() {
+		_spec.ClearField(groups.FieldConfig, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Visibility(); ok {
 		_spec.SetField(groups.FieldVisibility, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedVisibility(); ok {
 		_spec.AddField(groups.FieldVisibility, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(groups.FieldProtected, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)

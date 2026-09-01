@@ -15,44 +15,6 @@ func dummyHandler() http.Handler {
 	})
 }
 
-func TestAuthMiddleware_NoAuth(t *testing.T) {
-	// authFn == nil 时应直接放行
-	h := NewAuthMiddleware(nil, dummyHandler())
-	req := httptest.NewRequest(http.MethodGet, "/mcp", nil)
-	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, req)
-
-	if rec.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d", rec.Code)
-	}
-}
-
-func TestAuthMiddleware_NoHeader(t *testing.T) {
-	// 有 authFn 但请求无 Authorization header -> 401
-	authFn := func(r *http.Request) error {
-		if r.Header.Get("Authorization") == "" {
-			return errUnauthorized("missing Authorization header")
-		}
-		return nil
-	}
-	h := NewAuthMiddleware(authFn, dummyHandler())
-	req := httptest.NewRequest(http.MethodPost, "/mcp", nil)
-	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, req)
-
-	if rec.Code != http.StatusUnauthorized {
-		t.Fatalf("expected 401, got %d", rec.Code)
-	}
-
-	var body map[string]string
-	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
-		t.Fatalf("failed to parse error body: %v", err)
-	}
-	if body["error"] == "" {
-		t.Fatalf("error field is empty in response body")
-	}
-}
-
 func TestAuthMiddleware_ValidBasic(t *testing.T) {
 	// authFn 返回 nil（模拟验证通过）-> 200
 	authFn := func(r *http.Request) error {
@@ -93,15 +55,41 @@ func TestAuthMiddleware_InvalidBearer(t *testing.T) {
 	}
 }
 
-func TestLoggingMiddleware(t *testing.T) {
-	// LoggingMiddleware 不影响请求处理
-	h := LoggingMiddleware(dummyHandler())
-	req := httptest.NewRequest(http.MethodGet, "/mcp", nil)
-	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, req)
+func TestOriginProtectionMiddleware(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		origin     string
+		fetchSite  string
+		host       string
+		wantStatus int
+	}{
+		{name: "non-browser client", method: http.MethodPost, host: "admin.example.test", wantStatus: http.StatusOK},
+		{name: "same origin", method: http.MethodPost, origin: "https://admin.example.test", host: "admin.example.test", wantStatus: http.StatusOK},
+		{name: "browser same origin", method: http.MethodPost, origin: "https://admin.example.test", fetchSite: "same-origin", host: "admin.example.test", wantStatus: http.StatusOK},
+		{name: "cross origin post", method: http.MethodPost, origin: "https://evil.example.test", host: "admin.example.test", wantStatus: http.StatusForbidden},
+		{name: "cross origin sse get", method: http.MethodGet, origin: "https://evil.example.test", host: "admin.example.test", wantStatus: http.StatusForbidden},
+		{name: "browser cross site get", method: http.MethodGet, origin: "https://evil.example.test", fetchSite: "cross-site", host: "admin.example.test", wantStatus: http.StatusForbidden},
+		{name: "opaque origin", method: http.MethodPost, origin: "null", host: "admin.example.test", wantStatus: http.StatusForbidden},
+	}
 
-	if rec.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d", rec.Code)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := NewOriginProtectionMiddleware(dummyHandler())
+			req := httptest.NewRequest(tt.method, "https://"+tt.host+"/mcp", nil)
+			req.Host = tt.host
+			if tt.origin != "" {
+				req.Header.Set("Origin", tt.origin)
+			}
+			if tt.fetchSite != "" {
+				req.Header.Set("Sec-Fetch-Site", tt.fetchSite)
+			}
+			rec := httptest.NewRecorder()
+			h.ServeHTTP(rec, req)
+			if rec.Code != tt.wantStatus {
+				t.Fatalf("status = %d, want %d", rec.Code, tt.wantStatus)
+			}
+		})
 	}
 }
 

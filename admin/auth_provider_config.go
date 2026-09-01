@@ -27,6 +27,9 @@ type ldapConfigData struct {
 	DisplayNameAttribute string `json:"display_name_attribute,omitempty"`
 	GroupSearchBase      string `json:"group_search_base,omitempty"`
 	GroupSearchFilter    string `json:"group_search_filter,omitempty"`
+	// Pointer preserves the difference between legacy JSON where the field is
+	// absent (effective value: dn) and an explicitly configured value.
+	UserIDAttribute *string `json:"user_id_attribute,omitempty"`
 }
 
 // oauthConfigData OAuth2 系非敏感配置，用于 JSON 列存储
@@ -65,6 +68,14 @@ func protoToDBConfig(p *adminv1.AuthProvider, aesKey []byte) (configJSON json.Ra
 	switch cfg := p.GetConfig().(type) {
 	case *adminv1.AuthProvider_LdapConfig:
 		lc := cfg.LdapConfig
+		var userIDAttribute *string
+		if lc.UserIdAttribute != nil {
+			normalized, normalizeErr := normalizeLDAPUserIDAttributeName(lc.GetUserIdAttribute())
+			if normalizeErr != nil {
+				return nil, nil, normalizeErr
+			}
+			userIDAttribute = &normalized
+		}
 		secret = lc.GetBindPassword()
 		data := &ldapConfigData{
 			Host:                 lc.GetHost(),
@@ -80,6 +91,7 @@ func protoToDBConfig(p *adminv1.AuthProvider, aesKey []byte) (configJSON json.Ra
 			DisplayNameAttribute: lc.GetDisplayNameAttribute(),
 			GroupSearchBase:      lc.GetGroupSearchBase(),
 			GroupSearchFilter:    lc.GetGroupSearchFilter(),
+			UserIDAttribute:      userIDAttribute,
 		}
 		configJSON, err = json.Marshal(data)
 		if err != nil {
@@ -209,6 +221,10 @@ func dbToProtoAuthProvider(row *lion.AuthProviders, aesKey []byte, withSecret bo
 				DisplayNameAttribute: data.DisplayNameAttribute,
 				GroupSearchBase:      data.GroupSearchBase,
 				GroupSearchFilter:    data.GroupSearchFilter,
+			}
+			if data.UserIDAttribute != nil {
+				value := *data.UserIDAttribute
+				lc.UserIdAttribute = &value
 			}
 			if withSecret {
 				lc.BindPassword = secret

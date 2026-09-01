@@ -83,6 +83,18 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 	defer func() {
 		_ = tx.Rollback()
 	}()
+	active, err := tx.Users.Query().Where(
+		users.IDEQ(challenge.UserID),
+		users.UserStatusEQ(int(adminv1.User_ACTIVE)),
+		users.DeletedAtIsNil(),
+	).Exist(ctx)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to query MFA user")
+	}
+	if !active {
+		a.mfaChallenges.Delete(req.ChallengeId)
+		return nil, errs.Unauthenticated(ctx).WithMessage("MFA user is unavailable")
+	}
 
 	query := tx.UserIdentities.Query().
 		Select(
@@ -182,7 +194,7 @@ func (a *KnownAdminAPI) SetupCurrentUserMFA(ctx context.Context, _ *adminv1.Setu
 
 	u, err := db.Users.Query().
 		Select(users.FieldID, users.FieldUsername).
-		Where(users.IDEQ(int(operatorID))).
+		Where(users.IDEQ(int(operatorID)), users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()).
 		Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
@@ -290,6 +302,18 @@ func (a *KnownAdminAPI) ConfirmCurrentUserMFA(ctx context.Context, req *adminv1.
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("database unavailable")
 	}
+	active, err := db.Users.Query().Where(
+		users.IDEQ(challenge.UserID),
+		users.UserStatusEQ(int(adminv1.User_ACTIVE)),
+		users.DeletedAtIsNil(),
+	).Exist(ctx)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to query user")
+	}
+	if !active {
+		a.mfaChallenges.Delete(req.ChallengeId)
+		return nil, errs.NotFound(ctx).WithMessage("user not found")
+	}
 
 	secretEnc, err := crypto.EncryptAES(a.config.aesKey, []byte(challenge.TempSecret))
 	if err != nil {
@@ -368,6 +392,17 @@ func (a *KnownAdminAPI) DisableCurrentUserMFA(ctx context.Context, req *adminv1.
 	defer func() {
 		_ = tx.Rollback()
 	}()
+	active, err := tx.Users.Query().Where(
+		users.IDEQ(int(operatorID)),
+		users.UserStatusEQ(int(adminv1.User_ACTIVE)),
+		users.DeletedAtIsNil(),
+	).Exist(ctx)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to query user")
+	}
+	if !active {
+		return nil, errs.NotFound(ctx).WithMessage("user not found")
+	}
 
 	identity, err := tx.UserIdentities.Query().
 		Select(
@@ -521,6 +556,18 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("database unavailable")
+	}
+	active, err := db.Users.Query().Where(
+		users.IDEQ(challenge.UserID),
+		users.UserStatusEQ(int(adminv1.User_ACTIVE)),
+		users.DeletedAtIsNil(),
+	).Exist(ctx)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to query user")
+	}
+	if !active {
+		a.mfaChallenges.Delete(req.SetupChallengeId)
+		return nil, errs.Unauthenticated(ctx).WithMessage("MFA user is unavailable")
 	}
 	_, localProviderID, pErr := a.getLocalMFAPolicy(ctx, db)
 	if pErr != nil {

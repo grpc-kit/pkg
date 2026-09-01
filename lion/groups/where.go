@@ -114,19 +114,19 @@ func MaxMembers(v int) predicate.Groups {
 	return predicate.Groups(sql.FieldEQ(FieldMaxMembers, v))
 }
 
-// RefID applies equality check predicate on the "ref_id" field. It's identical to RefIDEQ.
-func RefID(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldRefID, v))
-}
-
-// RefExpr applies equality check predicate on the "ref_expr" field. It's identical to RefExprEQ.
-func RefExpr(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldRefExpr, v))
+// SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
+func SourceID(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldSourceID, v))
 }
 
 // Visibility applies equality check predicate on the "visibility" field. It's identical to VisibilityEQ.
 func Visibility(v int) predicate.Groups {
 	return predicate.Groups(sql.FieldEQ(FieldVisibility, v))
+}
+
+// Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
+func Protected(v bool) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldProtected, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
@@ -694,109 +694,64 @@ func MaxMembersLTE(v int) predicate.Groups {
 	return predicate.Groups(sql.FieldLTE(FieldMaxMembers, v))
 }
 
-// RefIDEQ applies the EQ predicate on the "ref_id" field.
-func RefIDEQ(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldRefID, v))
+// SourceIDEQ applies the EQ predicate on the "source_id" field.
+func SourceIDEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldSourceID, v))
 }
 
-// RefIDNEQ applies the NEQ predicate on the "ref_id" field.
-func RefIDNEQ(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldNEQ(FieldRefID, v))
+// SourceIDNEQ applies the NEQ predicate on the "source_id" field.
+func SourceIDNEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldSourceID, v))
 }
 
-// RefIDIn applies the In predicate on the "ref_id" field.
-func RefIDIn(vs ...int) predicate.Groups {
-	return predicate.Groups(sql.FieldIn(FieldRefID, vs...))
+// SourceIDIn applies the In predicate on the "source_id" field.
+func SourceIDIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldSourceID, vs...))
 }
 
-// RefIDNotIn applies the NotIn predicate on the "ref_id" field.
-func RefIDNotIn(vs ...int) predicate.Groups {
-	return predicate.Groups(sql.FieldNotIn(FieldRefID, vs...))
+// SourceIDNotIn applies the NotIn predicate on the "source_id" field.
+func SourceIDNotIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldSourceID, vs...))
 }
 
-// RefIDGT applies the GT predicate on the "ref_id" field.
-func RefIDGT(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldGT(FieldRefID, v))
+// SourceIDGT applies the GT predicate on the "source_id" field.
+func SourceIDGT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldSourceID, v))
 }
 
-// RefIDGTE applies the GTE predicate on the "ref_id" field.
-func RefIDGTE(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldGTE(FieldRefID, v))
+// SourceIDGTE applies the GTE predicate on the "source_id" field.
+func SourceIDGTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldSourceID, v))
 }
 
-// RefIDLT applies the LT predicate on the "ref_id" field.
-func RefIDLT(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldLT(FieldRefID, v))
+// SourceIDLT applies the LT predicate on the "source_id" field.
+func SourceIDLT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldSourceID, v))
 }
 
-// RefIDLTE applies the LTE predicate on the "ref_id" field.
-func RefIDLTE(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldLTE(FieldRefID, v))
+// SourceIDLTE applies the LTE predicate on the "source_id" field.
+func SourceIDLTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldSourceID, v))
 }
 
-// RefExprEQ applies the EQ predicate on the "ref_expr" field.
-func RefExprEQ(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldRefExpr, v))
+// SourceIDIsNil applies the IsNil predicate on the "source_id" field.
+func SourceIDIsNil() predicate.Groups {
+	return predicate.Groups(sql.FieldIsNull(FieldSourceID))
 }
 
-// RefExprNEQ applies the NEQ predicate on the "ref_expr" field.
-func RefExprNEQ(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldNEQ(FieldRefExpr, v))
+// SourceIDNotNil applies the NotNil predicate on the "source_id" field.
+func SourceIDNotNil() predicate.Groups {
+	return predicate.Groups(sql.FieldNotNull(FieldSourceID))
 }
 
-// RefExprIn applies the In predicate on the "ref_expr" field.
-func RefExprIn(vs ...string) predicate.Groups {
-	return predicate.Groups(sql.FieldIn(FieldRefExpr, vs...))
+// ConfigIsNil applies the IsNil predicate on the "config" field.
+func ConfigIsNil() predicate.Groups {
+	return predicate.Groups(sql.FieldIsNull(FieldConfig))
 }
 
-// RefExprNotIn applies the NotIn predicate on the "ref_expr" field.
-func RefExprNotIn(vs ...string) predicate.Groups {
-	return predicate.Groups(sql.FieldNotIn(FieldRefExpr, vs...))
-}
-
-// RefExprGT applies the GT predicate on the "ref_expr" field.
-func RefExprGT(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldGT(FieldRefExpr, v))
-}
-
-// RefExprGTE applies the GTE predicate on the "ref_expr" field.
-func RefExprGTE(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldGTE(FieldRefExpr, v))
-}
-
-// RefExprLT applies the LT predicate on the "ref_expr" field.
-func RefExprLT(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldLT(FieldRefExpr, v))
-}
-
-// RefExprLTE applies the LTE predicate on the "ref_expr" field.
-func RefExprLTE(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldLTE(FieldRefExpr, v))
-}
-
-// RefExprContains applies the Contains predicate on the "ref_expr" field.
-func RefExprContains(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldContains(FieldRefExpr, v))
-}
-
-// RefExprHasPrefix applies the HasPrefix predicate on the "ref_expr" field.
-func RefExprHasPrefix(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldHasPrefix(FieldRefExpr, v))
-}
-
-// RefExprHasSuffix applies the HasSuffix predicate on the "ref_expr" field.
-func RefExprHasSuffix(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldHasSuffix(FieldRefExpr, v))
-}
-
-// RefExprEqualFold applies the EqualFold predicate on the "ref_expr" field.
-func RefExprEqualFold(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldEqualFold(FieldRefExpr, v))
-}
-
-// RefExprContainsFold applies the ContainsFold predicate on the "ref_expr" field.
-func RefExprContainsFold(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldContainsFold(FieldRefExpr, v))
+// ConfigNotNil applies the NotNil predicate on the "config" field.
+func ConfigNotNil() predicate.Groups {
+	return predicate.Groups(sql.FieldNotNull(FieldConfig))
 }
 
 // VisibilityEQ applies the EQ predicate on the "visibility" field.
@@ -837,6 +792,16 @@ func VisibilityLT(v int) predicate.Groups {
 // VisibilityLTE applies the LTE predicate on the "visibility" field.
 func VisibilityLTE(v int) predicate.Groups {
 	return predicate.Groups(sql.FieldLTE(FieldVisibility, v))
+}
+
+// ProtectedEQ applies the EQ predicate on the "protected" field.
+func ProtectedEQ(v bool) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldProtected, v))
+}
+
+// ProtectedNEQ applies the NEQ predicate on the "protected" field.
+func ProtectedNEQ(v bool) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldProtected, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.

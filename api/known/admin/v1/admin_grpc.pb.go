@@ -24,9 +24,11 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	KnownAdmin_ListLocalConfigs_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLocalConfigs"
 	KnownAdmin_GetLocalConfigs_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigs"
+	KnownAdmin_CreateGlobalSetting_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateGlobalSetting"
 	KnownAdmin_GetGlobalSettings_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGlobalSettings"
 	KnownAdmin_ListGlobalSettings_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGlobalSettings"
 	KnownAdmin_UpdateGlobalSettings_FullMethodName      = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGlobalSettings"
+	KnownAdmin_DeleteGlobalSetting_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteGlobalSetting"
 	KnownAdmin_UpsertAuthProviders_FullMethodName       = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpsertAuthProviders"
 	KnownAdmin_ListAuthProviders_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders"
 	KnownAdmin_ListLoginOptions_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLoginOptions"
@@ -74,6 +76,8 @@ const (
 	KnownAdmin_CreateDepartment_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartment"
 	KnownAdmin_ListDepartments_FullMethodName           = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListDepartments"
 	KnownAdmin_DeleteDepartment_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteDepartment"
+	KnownAdmin_UndeleteDepartment_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/UndeleteDepartment"
+	KnownAdmin_ExpungeDepartment_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/ExpungeDepartment"
 	KnownAdmin_UpdateDepartment_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartment"
 	KnownAdmin_ListDepartmentMembers_FullMethodName     = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListDepartmentMembers"
 	KnownAdmin_CreateDepartmentMembers_FullMethodName   = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartmentMembers"
@@ -83,14 +87,21 @@ const (
 	KnownAdmin_UpdateCurrentUser_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateCurrentUser"
 	KnownAdmin_ChangeCurrentUserPassword_FullMethodName = "/grpc_kit.api.known.admin.v1.KnownAdmin/ChangeCurrentUserPassword"
 	KnownAdmin_GetUser_FullMethodName                   = "/grpc_kit.api.known.admin.v1.KnownAdmin/GetUser"
+	KnownAdmin_ListUserAuthBindings_FullMethodName      = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUserAuthBindings"
 	KnownAdmin_CreateUser_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateUser"
 	KnownAdmin_UpdateUser_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUser"
 	KnownAdmin_ListUsers_FullMethodName                 = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers"
+	KnownAdmin_DeleteUser_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteUser"
+	KnownAdmin_UndeleteUser_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/UndeleteUser"
+	KnownAdmin_ExpungeUser_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/ExpungeUser"
 	KnownAdmin_UpdateUserPassword_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUserPassword"
+	KnownAdmin_DeleteUserMFA_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteUserMFA"
 	KnownAdmin_CreateGroup_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateGroup"
 	KnownAdmin_ListGroups_FullMethodName                = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGroups"
 	KnownAdmin_UpdateGroup_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGroup"
 	KnownAdmin_DeleteGroup_FullMethodName               = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteGroup"
+	KnownAdmin_UndeleteGroup_FullMethodName             = "/grpc_kit.api.known.admin.v1.KnownAdmin/UndeleteGroup"
+	KnownAdmin_ExpungeGroup_FullMethodName              = "/grpc_kit.api.known.admin.v1.KnownAdmin/ExpungeGroup"
 	KnownAdmin_ListGroupMembers_FullMethodName          = "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGroupMembers"
 	KnownAdmin_CreateGroupMembers_FullMethodName        = "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateGroupMembers"
 	KnownAdmin_DeleteGroupMember_FullMethodName         = "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteGroupMember"
@@ -121,9 +132,11 @@ type KnownAdminClient interface {
 	ListLocalConfigs(ctx context.Context, in *ListLocalConfigsRequest, opts ...grpc.CallOption) (*ListLocalConfigsResponse, error)
 	GetLocalConfigs(ctx context.Context, in *GetLocalConfigsRequest, opts ...grpc.CallOption) (*LocalConfigs, error)
 	// 全局设置
+	CreateGlobalSetting(ctx context.Context, in *CreateGlobalSettingRequest, opts ...grpc.CallOption) (*GlobalSetting, error)
 	GetGlobalSettings(ctx context.Context, in *GetGlobalSettingsRequest, opts ...grpc.CallOption) (*GlobalSettingCategory, error)
 	ListGlobalSettings(ctx context.Context, in *ListGlobalSettingsRequest, opts ...grpc.CallOption) (*ListGlobalSettingsResponse, error)
 	UpdateGlobalSettings(ctx context.Context, in *UpdateGlobalSettingsRequest, opts ...grpc.CallOption) (*UpdateGlobalSettingsResponse, error)
+	DeleteGlobalSetting(ctx context.Context, in *DeleteGlobalSettingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 认证鉴权
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 	ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error)
@@ -179,7 +192,9 @@ type KnownAdminClient interface {
 	// 部门管理
 	CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
-	DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
+	UndeleteDepartment(ctx context.Context, in *UndeleteDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
+	ExpungeDepartment(ctx context.Context, in *ExpungeDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateDepartment(ctx context.Context, in *UpdateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartmentMembers(ctx context.Context, in *ListDepartmentMembersRequest, opts ...grpc.CallOption) (*ListDepartmentMembersResponse, error)
 	CreateDepartmentMembers(ctx context.Context, in *CreateDepartmentMembersRequest, opts ...grpc.CallOption) (*CreateDepartmentMembersResponse, error)
@@ -190,16 +205,23 @@ type KnownAdminClient interface {
 	UpdateCurrentUser(ctx context.Context, in *UpdateCurrentUserRequest, opts ...grpc.CallOption) (*CurrentUserProfile, error)
 	ChangeCurrentUserPassword(ctx context.Context, in *ChangeCurrentUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
+	ListUserAuthBindings(ctx context.Context, in *ListUserAuthBindingsRequest, opts ...grpc.CallOption) (*ListUserAuthBindingsResponse, error)
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
+	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*User, error)
+	UndeleteUser(ctx context.Context, in *UndeleteUserRequest, opts ...grpc.CallOption) (*User, error)
+	ExpungeUser(ctx context.Context, in *ExpungeUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateUserPassword(ctx context.Context, in *UpdateUserPasswordRequest, opts ...grpc.CallOption) (*UpdateUserPasswordResponse, error)
+	DeleteUserMFA(ctx context.Context, in *DeleteUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// rpc CreateUserIdentity(CreateUserIdentityRequest) returns(User);
 	// 群组相关
 	CreateGroup(ctx context.Context, in *CreateGroupRequest, opts ...grpc.CallOption) (*Group, error)
 	ListGroups(ctx context.Context, in *ListGroupsRequest, opts ...grpc.CallOption) (*ListGroupsResponse, error)
 	UpdateGroup(ctx context.Context, in *UpdateGroupRequest, opts ...grpc.CallOption) (*Group, error)
-	DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*Group, error)
+	UndeleteGroup(ctx context.Context, in *UndeleteGroupRequest, opts ...grpc.CallOption) (*Group, error)
+	ExpungeGroup(ctx context.Context, in *ExpungeGroupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListGroupMembers(ctx context.Context, in *ListGroupMembersRequest, opts ...grpc.CallOption) (*ListGroupMembersResponse, error)
 	CreateGroupMembers(ctx context.Context, in *CreateGroupMembersRequest, opts ...grpc.CallOption) (*CreateGroupMembersResponse, error)
 	DeleteGroupMember(ctx context.Context, in *DeleteGroupMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -253,6 +275,16 @@ func (c *knownAdminClient) GetLocalConfigs(ctx context.Context, in *GetLocalConf
 	return out, nil
 }
 
+func (c *knownAdminClient) CreateGlobalSetting(ctx context.Context, in *CreateGlobalSettingRequest, opts ...grpc.CallOption) (*GlobalSetting, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GlobalSetting)
+	err := c.cc.Invoke(ctx, KnownAdmin_CreateGlobalSetting_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) GetGlobalSettings(ctx context.Context, in *GetGlobalSettingsRequest, opts ...grpc.CallOption) (*GlobalSettingCategory, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GlobalSettingCategory)
@@ -277,6 +309,16 @@ func (c *knownAdminClient) UpdateGlobalSettings(ctx context.Context, in *UpdateG
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateGlobalSettingsResponse)
 	err := c.cc.Invoke(ctx, KnownAdmin_UpdateGlobalSettings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteGlobalSetting(ctx context.Context, in *DeleteGlobalSettingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, KnownAdmin_DeleteGlobalSetting_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -743,10 +785,30 @@ func (c *knownAdminClient) ListDepartments(ctx context.Context, in *ListDepartme
 	return out, nil
 }
 
-func (c *knownAdminClient) DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *knownAdminClient) DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*Department, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Department)
+	err := c.cc.Invoke(ctx, KnownAdmin_DeleteDepartment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UndeleteDepartment(ctx context.Context, in *UndeleteDepartmentRequest, opts ...grpc.CallOption) (*Department, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Department)
+	err := c.cc.Invoke(ctx, KnownAdmin_UndeleteDepartment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ExpungeDepartment(ctx context.Context, in *ExpungeDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, KnownAdmin_DeleteDepartment_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, KnownAdmin_ExpungeDepartment_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -843,6 +905,16 @@ func (c *knownAdminClient) GetUser(ctx context.Context, in *GetUserRequest, opts
 	return out, nil
 }
 
+func (c *knownAdminClient) ListUserAuthBindings(ctx context.Context, in *ListUserAuthBindingsRequest, opts ...grpc.CallOption) (*ListUserAuthBindingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListUserAuthBindingsResponse)
+	err := c.cc.Invoke(ctx, KnownAdmin_ListUserAuthBindings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(User)
@@ -873,10 +945,50 @@ func (c *knownAdminClient) ListUsers(ctx context.Context, in *ListUsersRequest, 
 	return out, nil
 }
 
+func (c *knownAdminClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, KnownAdmin_DeleteUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UndeleteUser(ctx context.Context, in *UndeleteUserRequest, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, KnownAdmin_UndeleteUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ExpungeUser(ctx context.Context, in *ExpungeUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, KnownAdmin_ExpungeUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) UpdateUserPassword(ctx context.Context, in *UpdateUserPasswordRequest, opts ...grpc.CallOption) (*UpdateUserPasswordResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateUserPasswordResponse)
 	err := c.cc.Invoke(ctx, KnownAdmin_UpdateUserPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteUserMFA(ctx context.Context, in *DeleteUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, KnownAdmin_DeleteUserMFA_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -913,10 +1025,30 @@ func (c *knownAdminClient) UpdateGroup(ctx context.Context, in *UpdateGroupReque
 	return out, nil
 }
 
-func (c *knownAdminClient) DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *knownAdminClient) DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*Group, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Group)
+	err := c.cc.Invoke(ctx, KnownAdmin_DeleteGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UndeleteGroup(ctx context.Context, in *UndeleteGroupRequest, opts ...grpc.CallOption) (*Group, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Group)
+	err := c.cc.Invoke(ctx, KnownAdmin_UndeleteGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ExpungeGroup(ctx context.Context, in *ExpungeGroupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, KnownAdmin_DeleteGroup_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, KnownAdmin_ExpungeGroup_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1131,9 +1263,11 @@ type KnownAdminServer interface {
 	ListLocalConfigs(context.Context, *ListLocalConfigsRequest) (*ListLocalConfigsResponse, error)
 	GetLocalConfigs(context.Context, *GetLocalConfigsRequest) (*LocalConfigs, error)
 	// 全局设置
+	CreateGlobalSetting(context.Context, *CreateGlobalSettingRequest) (*GlobalSetting, error)
 	GetGlobalSettings(context.Context, *GetGlobalSettingsRequest) (*GlobalSettingCategory, error)
 	ListGlobalSettings(context.Context, *ListGlobalSettingsRequest) (*ListGlobalSettingsResponse, error)
 	UpdateGlobalSettings(context.Context, *UpdateGlobalSettingsRequest) (*UpdateGlobalSettingsResponse, error)
+	DeleteGlobalSetting(context.Context, *DeleteGlobalSettingRequest) (*emptypb.Empty, error)
 	// 认证鉴权
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 	ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error)
@@ -1189,7 +1323,9 @@ type KnownAdminServer interface {
 	// 部门管理
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
-	DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*emptypb.Empty, error)
+	DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*Department, error)
+	UndeleteDepartment(context.Context, *UndeleteDepartmentRequest) (*Department, error)
+	ExpungeDepartment(context.Context, *ExpungeDepartmentRequest) (*emptypb.Empty, error)
 	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error)
 	ListDepartmentMembers(context.Context, *ListDepartmentMembersRequest) (*ListDepartmentMembersResponse, error)
 	CreateDepartmentMembers(context.Context, *CreateDepartmentMembersRequest) (*CreateDepartmentMembersResponse, error)
@@ -1200,16 +1336,23 @@ type KnownAdminServer interface {
 	UpdateCurrentUser(context.Context, *UpdateCurrentUserRequest) (*CurrentUserProfile, error)
 	ChangeCurrentUserPassword(context.Context, *ChangeCurrentUserPasswordRequest) (*emptypb.Empty, error)
 	GetUser(context.Context, *GetUserRequest) (*User, error)
+	ListUserAuthBindings(context.Context, *ListUserAuthBindingsRequest) (*ListUserAuthBindingsResponse, error)
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
+	DeleteUser(context.Context, *DeleteUserRequest) (*User, error)
+	UndeleteUser(context.Context, *UndeleteUserRequest) (*User, error)
+	ExpungeUser(context.Context, *ExpungeUserRequest) (*emptypb.Empty, error)
 	UpdateUserPassword(context.Context, *UpdateUserPasswordRequest) (*UpdateUserPasswordResponse, error)
+	DeleteUserMFA(context.Context, *DeleteUserMFARequest) (*emptypb.Empty, error)
 	// rpc CreateUserIdentity(CreateUserIdentityRequest) returns(User);
 	// 群组相关
 	CreateGroup(context.Context, *CreateGroupRequest) (*Group, error)
 	ListGroups(context.Context, *ListGroupsRequest) (*ListGroupsResponse, error)
 	UpdateGroup(context.Context, *UpdateGroupRequest) (*Group, error)
-	DeleteGroup(context.Context, *DeleteGroupRequest) (*emptypb.Empty, error)
+	DeleteGroup(context.Context, *DeleteGroupRequest) (*Group, error)
+	UndeleteGroup(context.Context, *UndeleteGroupRequest) (*Group, error)
+	ExpungeGroup(context.Context, *ExpungeGroupRequest) (*emptypb.Empty, error)
 	ListGroupMembers(context.Context, *ListGroupMembersRequest) (*ListGroupMembersResponse, error)
 	CreateGroupMembers(context.Context, *CreateGroupMembersRequest) (*CreateGroupMembersResponse, error)
 	DeleteGroupMember(context.Context, *DeleteGroupMemberRequest) (*emptypb.Empty, error)
@@ -1248,6 +1391,9 @@ func (UnimplementedKnownAdminServer) ListLocalConfigs(context.Context, *ListLoca
 func (UnimplementedKnownAdminServer) GetLocalConfigs(context.Context, *GetLocalConfigsRequest) (*LocalConfigs, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetLocalConfigs not implemented")
 }
+func (UnimplementedKnownAdminServer) CreateGlobalSetting(context.Context, *CreateGlobalSettingRequest) (*GlobalSetting, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateGlobalSetting not implemented")
+}
 func (UnimplementedKnownAdminServer) GetGlobalSettings(context.Context, *GetGlobalSettingsRequest) (*GlobalSettingCategory, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetGlobalSettings not implemented")
 }
@@ -1256,6 +1402,9 @@ func (UnimplementedKnownAdminServer) ListGlobalSettings(context.Context, *ListGl
 }
 func (UnimplementedKnownAdminServer) UpdateGlobalSettings(context.Context, *UpdateGlobalSettingsRequest) (*UpdateGlobalSettingsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateGlobalSettings not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteGlobalSetting(context.Context, *DeleteGlobalSettingRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteGlobalSetting not implemented")
 }
 func (UnimplementedKnownAdminServer) UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpsertAuthProviders not implemented")
@@ -1395,8 +1544,14 @@ func (UnimplementedKnownAdminServer) CreateDepartment(context.Context, *CreateDe
 func (UnimplementedKnownAdminServer) ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListDepartments not implemented")
 }
-func (UnimplementedKnownAdminServer) DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*emptypb.Empty, error) {
+func (UnimplementedKnownAdminServer) DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*Department, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteDepartment not implemented")
+}
+func (UnimplementedKnownAdminServer) UndeleteDepartment(context.Context, *UndeleteDepartmentRequest) (*Department, error) {
+	return nil, status.Error(codes.Unimplemented, "method UndeleteDepartment not implemented")
+}
+func (UnimplementedKnownAdminServer) ExpungeDepartment(context.Context, *ExpungeDepartmentRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExpungeDepartment not implemented")
 }
 func (UnimplementedKnownAdminServer) UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateDepartment not implemented")
@@ -1425,6 +1580,9 @@ func (UnimplementedKnownAdminServer) ChangeCurrentUserPassword(context.Context, 
 func (UnimplementedKnownAdminServer) GetUser(context.Context, *GetUserRequest) (*User, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
 }
+func (UnimplementedKnownAdminServer) ListUserAuthBindings(context.Context, *ListUserAuthBindingsRequest) (*ListUserAuthBindingsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListUserAuthBindings not implemented")
+}
 func (UnimplementedKnownAdminServer) CreateUser(context.Context, *CreateUserRequest) (*User, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateUser not implemented")
 }
@@ -1434,8 +1592,20 @@ func (UnimplementedKnownAdminServer) UpdateUser(context.Context, *UpdateUserRequ
 func (UnimplementedKnownAdminServer) ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListUsers not implemented")
 }
+func (UnimplementedKnownAdminServer) DeleteUser(context.Context, *DeleteUserRequest) (*User, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteUser not implemented")
+}
+func (UnimplementedKnownAdminServer) UndeleteUser(context.Context, *UndeleteUserRequest) (*User, error) {
+	return nil, status.Error(codes.Unimplemented, "method UndeleteUser not implemented")
+}
+func (UnimplementedKnownAdminServer) ExpungeUser(context.Context, *ExpungeUserRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExpungeUser not implemented")
+}
 func (UnimplementedKnownAdminServer) UpdateUserPassword(context.Context, *UpdateUserPasswordRequest) (*UpdateUserPasswordResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateUserPassword not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteUserMFA(context.Context, *DeleteUserMFARequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteUserMFA not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateGroup(context.Context, *CreateGroupRequest) (*Group, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateGroup not implemented")
@@ -1446,8 +1616,14 @@ func (UnimplementedKnownAdminServer) ListGroups(context.Context, *ListGroupsRequ
 func (UnimplementedKnownAdminServer) UpdateGroup(context.Context, *UpdateGroupRequest) (*Group, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateGroup not implemented")
 }
-func (UnimplementedKnownAdminServer) DeleteGroup(context.Context, *DeleteGroupRequest) (*emptypb.Empty, error) {
+func (UnimplementedKnownAdminServer) DeleteGroup(context.Context, *DeleteGroupRequest) (*Group, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteGroup not implemented")
+}
+func (UnimplementedKnownAdminServer) UndeleteGroup(context.Context, *UndeleteGroupRequest) (*Group, error) {
+	return nil, status.Error(codes.Unimplemented, "method UndeleteGroup not implemented")
+}
+func (UnimplementedKnownAdminServer) ExpungeGroup(context.Context, *ExpungeGroupRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExpungeGroup not implemented")
 }
 func (UnimplementedKnownAdminServer) ListGroupMembers(context.Context, *ListGroupMembersRequest) (*ListGroupMembersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListGroupMembers not implemented")
@@ -1565,6 +1741,24 @@ func _KnownAdmin_GetLocalConfigs_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_CreateGlobalSetting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateGlobalSettingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateGlobalSetting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_CreateGlobalSetting_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateGlobalSetting(ctx, req.(*CreateGlobalSettingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_GetGlobalSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetGlobalSettingsRequest)
 	if err := dec(in); err != nil {
@@ -1615,6 +1809,24 @@ func _KnownAdmin_UpdateGlobalSettings_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).UpdateGlobalSettings(ctx, req.(*UpdateGlobalSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteGlobalSetting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteGlobalSettingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteGlobalSetting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_DeleteGlobalSetting_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteGlobalSetting(ctx, req.(*DeleteGlobalSettingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2465,6 +2677,42 @@ func _KnownAdmin_DeleteDepartment_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_UndeleteDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UndeleteDepartmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UndeleteDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_UndeleteDepartment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UndeleteDepartment(ctx, req.(*UndeleteDepartmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ExpungeDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExpungeDepartmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ExpungeDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_ExpungeDepartment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ExpungeDepartment(ctx, req.(*ExpungeDepartmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_UpdateDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateDepartmentRequest)
 	if err := dec(in); err != nil {
@@ -2627,6 +2875,24 @@ func _KnownAdmin_GetUser_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_ListUserAuthBindings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserAuthBindingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListUserAuthBindings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_ListUserAuthBindings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListUserAuthBindings(ctx, req.(*ListUserAuthBindingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateUserRequest)
 	if err := dec(in); err != nil {
@@ -2681,6 +2947,60 @@ func _KnownAdmin_ListUsers_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_DeleteUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteUser(ctx, req.(*DeleteUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UndeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UndeleteUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UndeleteUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_UndeleteUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UndeleteUser(ctx, req.(*UndeleteUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ExpungeUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExpungeUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ExpungeUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_ExpungeUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ExpungeUser(ctx, req.(*ExpungeUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_UpdateUserPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateUserPasswordRequest)
 	if err := dec(in); err != nil {
@@ -2695,6 +3015,24 @@ func _KnownAdmin_UpdateUserPassword_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).UpdateUserPassword(ctx, req.(*UpdateUserPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteUserMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteUserMFARequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteUserMFA(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_DeleteUserMFA_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteUserMFA(ctx, req.(*DeleteUserMFARequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2767,6 +3105,42 @@ func _KnownAdmin_DeleteGroup_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).DeleteGroup(ctx, req.(*DeleteGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UndeleteGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UndeleteGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UndeleteGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_UndeleteGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UndeleteGroup(ctx, req.(*UndeleteGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ExpungeGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExpungeGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ExpungeGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnownAdmin_ExpungeGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ExpungeGroup(ctx, req.(*ExpungeGroupRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -3147,6 +3521,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_GetLocalConfigs_Handler,
 		},
 		{
+			MethodName: "CreateGlobalSetting",
+			Handler:    _KnownAdmin_CreateGlobalSetting_Handler,
+		},
+		{
 			MethodName: "GetGlobalSettings",
 			Handler:    _KnownAdmin_GetGlobalSettings_Handler,
 		},
@@ -3157,6 +3535,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateGlobalSettings",
 			Handler:    _KnownAdmin_UpdateGlobalSettings_Handler,
+		},
+		{
+			MethodName: "DeleteGlobalSetting",
+			Handler:    _KnownAdmin_DeleteGlobalSetting_Handler,
 		},
 		{
 			MethodName: "UpsertAuthProviders",
@@ -3347,6 +3729,14 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_DeleteDepartment_Handler,
 		},
 		{
+			MethodName: "UndeleteDepartment",
+			Handler:    _KnownAdmin_UndeleteDepartment_Handler,
+		},
+		{
+			MethodName: "ExpungeDepartment",
+			Handler:    _KnownAdmin_ExpungeDepartment_Handler,
+		},
+		{
 			MethodName: "UpdateDepartment",
 			Handler:    _KnownAdmin_UpdateDepartment_Handler,
 		},
@@ -3383,6 +3773,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_GetUser_Handler,
 		},
 		{
+			MethodName: "ListUserAuthBindings",
+			Handler:    _KnownAdmin_ListUserAuthBindings_Handler,
+		},
+		{
 			MethodName: "CreateUser",
 			Handler:    _KnownAdmin_CreateUser_Handler,
 		},
@@ -3395,8 +3789,24 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_ListUsers_Handler,
 		},
 		{
+			MethodName: "DeleteUser",
+			Handler:    _KnownAdmin_DeleteUser_Handler,
+		},
+		{
+			MethodName: "UndeleteUser",
+			Handler:    _KnownAdmin_UndeleteUser_Handler,
+		},
+		{
+			MethodName: "ExpungeUser",
+			Handler:    _KnownAdmin_ExpungeUser_Handler,
+		},
+		{
 			MethodName: "UpdateUserPassword",
 			Handler:    _KnownAdmin_UpdateUserPassword_Handler,
+		},
+		{
+			MethodName: "DeleteUserMFA",
+			Handler:    _KnownAdmin_DeleteUserMFA_Handler,
 		},
 		{
 			MethodName: "CreateGroup",
@@ -3413,6 +3823,14 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteGroup",
 			Handler:    _KnownAdmin_DeleteGroup_Handler,
+		},
+		{
+			MethodName: "UndeleteGroup",
+			Handler:    _KnownAdmin_UndeleteGroup_Handler,
+		},
+		{
+			MethodName: "ExpungeGroup",
+			Handler:    _KnownAdmin_ExpungeGroup_Handler,
 		},
 		{
 			MethodName: "ListGroupMembers",
