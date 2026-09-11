@@ -20,6 +20,9 @@ func prepareLDAPProviderConfigForCreate(ctx context.Context, provider *adminv1.A
 	if config == nil {
 		return errs.InvalidArgument(ctx).WithMessage("ldap_config is required for LDAP provider")
 	}
+	if err := prepareLDAPPhoneNumberConfig(ctx, config); err != nil {
+		return err
+	}
 
 	if config.UserIdAttribute == nil {
 		value := defaultLDAPUserIDAttribute
@@ -48,6 +51,9 @@ func prepareLDAPProviderConfigForUpdate(
 	config := requested.GetLdapConfig()
 	if config == nil {
 		return errs.InvalidArgument(ctx).WithMessage("ldap_config is required when updating an LDAP provider configuration")
+	}
+	if err := prepareLDAPPhoneNumberConfig(ctx, config); err != nil {
+		return err
 	}
 
 	var stored ldapConfigData
@@ -91,5 +97,24 @@ func prepareLDAPProviderConfigForUpdate(
 			"LDAP user_id_attribute cannot be changed while identities exist; run a controlled identity migration first",
 		)
 	}
+	return nil
+}
+
+func prepareLDAPPhoneNumberConfig(ctx context.Context, config *adminv1.LdapConfig) error {
+	attribute, err := normalizeLDAPPhoneNumberAttributeName(config.GetPhoneNumberAttribute())
+	if err != nil {
+		return errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	config.PhoneNumberAttribute = attribute
+	if attribute == "" {
+		config.PhoneNumberDefaultRegion = ""
+		return nil
+	}
+
+	region, err := normalizePhoneNumberDefaultRegion(config.GetPhoneNumberDefaultRegion())
+	if err != nil {
+		return errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	config.PhoneNumberDefaultRegion = region
 	return nil
 }

@@ -14,19 +14,21 @@ import (
 // ldapConfigData LDAP 非敏感配置，用于 JSON 列存储
 // bind_password 不在此处，单独存储在 secret_encrypted 列
 type ldapConfigData struct {
-	Host                 string `json:"host,omitempty"`
-	Port                 int32  `json:"port,omitempty"`
-	UseTLS               bool   `json:"use_tls,omitempty"`
-	StartTLS             bool   `json:"start_tls,omitempty"`
-	InsecureSkipVerify   bool   `json:"insecure_skip_verify,omitempty"`
-	BindDN               string `json:"bind_dn,omitempty"`
-	UserSearchBase       string `json:"user_search_base,omitempty"`
-	UserSearchFilter     string `json:"user_search_filter,omitempty"`
-	UsernameAttribute    string `json:"username_attribute,omitempty"`
-	EmailAttribute       string `json:"email_attribute,omitempty"`
-	DisplayNameAttribute string `json:"display_name_attribute,omitempty"`
-	GroupSearchBase      string `json:"group_search_base,omitempty"`
-	GroupSearchFilter    string `json:"group_search_filter,omitempty"`
+	Host                     string `json:"host,omitempty"`
+	Port                     int32  `json:"port,omitempty"`
+	UseTLS                   bool   `json:"use_tls,omitempty"`
+	StartTLS                 bool   `json:"start_tls,omitempty"`
+	InsecureSkipVerify       bool   `json:"insecure_skip_verify,omitempty"`
+	BindDN                   string `json:"bind_dn,omitempty"`
+	UserSearchBase           string `json:"user_search_base,omitempty"`
+	UserSearchFilter         string `json:"user_search_filter,omitempty"`
+	UsernameAttribute        string `json:"username_attribute,omitempty"`
+	EmailAttribute           string `json:"email_attribute,omitempty"`
+	DisplayNameAttribute     string `json:"display_name_attribute,omitempty"`
+	PhoneNumberAttribute     string `json:"phone_number_attribute,omitempty"`
+	PhoneNumberDefaultRegion string `json:"phone_number_default_region,omitempty"`
+	GroupSearchBase          string `json:"group_search_base,omitempty"`
+	GroupSearchFilter        string `json:"group_search_filter,omitempty"`
 	// Pointer preserves the difference between legacy JSON where the field is
 	// absent (effective value: dn) and an explicitly configured value.
 	UserIDAttribute *string `json:"user_id_attribute,omitempty"`
@@ -78,20 +80,22 @@ func protoToDBConfig(p *adminv1.AuthProvider, aesKey []byte) (configJSON json.Ra
 		}
 		secret = lc.GetBindPassword()
 		data := &ldapConfigData{
-			Host:                 lc.GetHost(),
-			Port:                 lc.GetPort(),
-			UseTLS:               lc.GetUseTls(),
-			StartTLS:             lc.GetStartTls(),
-			InsecureSkipVerify:   lc.GetInsecureSkipVerify(),
-			BindDN:               lc.GetBindDn(),
-			UserSearchBase:       lc.GetUserSearchBase(),
-			UserSearchFilter:     lc.GetUserSearchFilter(),
-			UsernameAttribute:    lc.GetUsernameAttribute(),
-			EmailAttribute:       lc.GetEmailAttribute(),
-			DisplayNameAttribute: lc.GetDisplayNameAttribute(),
-			GroupSearchBase:      lc.GetGroupSearchBase(),
-			GroupSearchFilter:    lc.GetGroupSearchFilter(),
-			UserIDAttribute:      userIDAttribute,
+			Host:                     lc.GetHost(),
+			Port:                     lc.GetPort(),
+			UseTLS:                   lc.GetUseTls(),
+			StartTLS:                 lc.GetStartTls(),
+			InsecureSkipVerify:       lc.GetInsecureSkipVerify(),
+			BindDN:                   lc.GetBindDn(),
+			UserSearchBase:           lc.GetUserSearchBase(),
+			UserSearchFilter:         lc.GetUserSearchFilter(),
+			UsernameAttribute:        lc.GetUsernameAttribute(),
+			EmailAttribute:           lc.GetEmailAttribute(),
+			DisplayNameAttribute:     lc.GetDisplayNameAttribute(),
+			PhoneNumberAttribute:     lc.GetPhoneNumberAttribute(),
+			PhoneNumberDefaultRegion: lc.GetPhoneNumberDefaultRegion(),
+			GroupSearchBase:          lc.GetGroupSearchBase(),
+			GroupSearchFilter:        lc.GetGroupSearchFilter(),
+			UserIDAttribute:          userIDAttribute,
 		}
 		configJSON, err = json.Marshal(data)
 		if err != nil {
@@ -208,19 +212,21 @@ func dbToProtoAuthProvider(row *lion.AuthProviders, aesKey []byte, withSecret bo
 				return nil, fmt.Errorf("unmarshal ldap config: %w", err)
 			}
 			lc := &adminv1.LdapConfig{
-				Host:                 data.Host,
-				Port:                 data.Port,
-				UseTls:               data.UseTLS,
-				StartTls:             data.StartTLS,
-				InsecureSkipVerify:   data.InsecureSkipVerify,
-				BindDn:               data.BindDN,
-				UserSearchBase:       data.UserSearchBase,
-				UserSearchFilter:     data.UserSearchFilter,
-				UsernameAttribute:    data.UsernameAttribute,
-				EmailAttribute:       data.EmailAttribute,
-				DisplayNameAttribute: data.DisplayNameAttribute,
-				GroupSearchBase:      data.GroupSearchBase,
-				GroupSearchFilter:    data.GroupSearchFilter,
+				Host:                     data.Host,
+				Port:                     data.Port,
+				UseTls:                   data.UseTLS,
+				StartTls:                 data.StartTLS,
+				InsecureSkipVerify:       data.InsecureSkipVerify,
+				BindDn:                   data.BindDN,
+				UserSearchBase:           data.UserSearchBase,
+				UserSearchFilter:         data.UserSearchFilter,
+				UsernameAttribute:        data.UsernameAttribute,
+				EmailAttribute:           data.EmailAttribute,
+				DisplayNameAttribute:     data.DisplayNameAttribute,
+				PhoneNumberAttribute:     data.PhoneNumberAttribute,
+				PhoneNumberDefaultRegion: data.PhoneNumberDefaultRegion,
+				GroupSearchBase:          data.GroupSearchBase,
+				GroupSearchFilter:        data.GroupSearchFilter,
 			}
 			if data.UserIDAttribute != nil {
 				value := *data.UserIDAttribute

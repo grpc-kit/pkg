@@ -8759,6 +8759,14 @@
         "user_id_attribute": {
           "type": "string",
           "title": "UserIDAttribute 用于从已认证 LDAP Entry 生成 provider_user_id。\n常见值：uid、uidNumber、entryUUID、objectGUID；特殊值 dn 使用完整 Entry DN。\n新建 LDAP Provider 未提供时默认 uid；历史配置缺失时由服务端继续按 dn 兼容。\n该字段不是本地 users.id，uidNumber 也只能作为外部身份值使用。"
+        },
+        "phone_number_attribute": {
+          "type": "string",
+          "title": "PhoneNumberAttribute 是 LDAP Entry 中映射用户手机号的属性。\n常见值：mobile、telephoneNumber。留空表示不读取和同步手机号。"
+        },
+        "phone_number_default_region": {
+          "type": "string",
+          "title": "PhoneNumberDefaultRegion 是解析非国际格式号码时使用的 ISO 3166-1 alpha-2 地区代码，\n例如 CN、US。LDAP 值已带 '+' 时不依赖该字段；留空时只接受国际格式号码。"
         }
       },
       "title": "LdapConfig LDAP 身份提供商配置"

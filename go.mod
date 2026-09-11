@@ -20,6 +20,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.57
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/modelcontextprotocol/go-sdk v1.7.0
+	github.com/nyaruka/phonenumbers/v2 v2.0.7
 	github.com/open-policy-agent/opa v1.18.2
 	github.com/pquerna/otp v1.5.0
 	github.com/prometheus/client_golang v1.23.2

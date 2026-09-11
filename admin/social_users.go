@@ -22,6 +22,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion"
@@ -489,6 +490,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		return &passwordCheckResult{}, nil
 	}
 	s.logger.Infof("ldap login debug: user bind success, provider=%s username=%s user_dn=%s", s.ProviderName, username, maskLDAPDN(userDN))
+	normalizedPhone := s.normalizeLDAPUserPhone(resolvedUser.Attrs)
 
 	ldapIdentity, err := s.db.UserIdentities.Query().
 		Select(
@@ -519,17 +521,15 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			maskLDAPDN(userDN),
 			localUserID,
 		)
-		// 已有用户二次登录：用最新 LDAP 属性刷新本地用户表。
-		s.syncLDAPUserAttrs(ctx, localUserID, resolvedUser.Attrs)
 	} else {
 		s.logger.Warnf(
-			"ldap login debug: identity miss, start verified email resolve or provision, provider=%s username=%s resolved_username=%s user_dn=%s",
+			"ldap login debug: identity miss, start verified identifier resolve or provision, provider=%s username=%s resolved_username=%s user_dn=%s",
 			s.ProviderName,
 			username,
 			resolvedUser.Username,
 			maskLDAPDN(userDN),
 		)
-		localUserID, err = s.provisionLDAPUserOnFirstLogin(ctx, resolvedUser.ProviderUserID, resolvedUser.Username, resolvedUser.Attrs)
+		localUserID, err = s.provisionLDAPUserOnFirstLogin(ctx, resolvedUser.ProviderUserID, resolvedUser.Username, resolvedUser.Attrs, normalizedPhone)
 		if err != nil {
 			s.logger.Errorf(
 				"ldap login failed: auto provision error, provider=%s username=%s resolved_username=%s user_dn=%s err=%v",
@@ -548,6 +548,8 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			localUserID,
 		)
 	}
+	// 无论 identity 是已有、自动关联还是首次创建，都从同一入口同步最新的非空 LDAP 属性。
+	s.syncLDAPUserAttrs(ctx, localUserID, resolvedUser.Attrs, normalizedPhone)
 
 	userEntity, err := s.db.Users.Query().
 		Select(
@@ -605,9 +607,15 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	}, nil
 }
 
-func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, providerUserID, ldapUsername string, attrs *ldapUserAttrs) (int, error) {
+func (s *socialUsers) provisionLDAPUserOnFirstLogin(
+	ctx context.Context,
+	providerUserID string,
+	ldapUsername string,
+	attrs *ldapUserAttrs,
+	phone *normalizedPhoneNumber,
+) (int, error) {
 	autoLinkEnabled := false
-	if attrs != nil && strings.TrimSpace(attrs.Email) != "" {
+	if (attrs != nil && strings.TrimSpace(attrs.Email) != "") || phone != nil {
 		var settingErr error
 		autoLinkEnabled, settingErr = s.identityAutoLinkEnabled(ctx)
 		if settingErr != nil {
@@ -625,11 +633,20 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 	if attrs != nil {
 		assertedEmail = attrs.Email
 	}
+	var assertedPhone string
+	if phone != nil {
+		assertedPhone = phone.Identifier.StoredValue
+	}
 	linkedUserID, linked, err := s.linkExternalIdentityByVerifiedIdentifiers(
 		ctx,
 		tx,
 		providerUserID,
-		verifiedIdentityClaims{Email: assertedEmail, EmailVerified: true},
+		verifiedIdentityClaims{
+			Email:               assertedEmail,
+			EmailVerified:       assertedEmail != "",
+			PhoneNumber:         assertedPhone,
+			PhoneNumberVerified: assertedPhone != "",
+		},
 		autoLinkEnabled,
 		nil,
 	)
@@ -638,7 +655,7 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 	}
 	if linked {
 		if err := tx.Commit(); err != nil {
-			return 0, fmt.Errorf("commit LDAP verified email binding: %w", err)
+			return 0, fmt.Errorf("commit LDAP verified identifier binding: %w", err)
 		}
 		return linkedUserID, nil
 	}
@@ -680,6 +697,16 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 			userCreate.SetEmailVerified(true)
 		}
 	}
+	if phone != nil {
+		phoneEnc, encErr := s.encryptPhoneNumber(phone.Proto)
+		if encErr != nil {
+			_ = tx.Rollback()
+			return 0, fmt.Errorf("encrypt ldap phone number: %w", encErr)
+		}
+		userCreate.SetPhoneNumberEncrypted(phoneEnc)
+		userCreate.SetPhoneNumberHash(phone.Identifier.Hash)
+		userCreate.SetPhoneNumberVerified(true)
+	}
 
 	newUser, err := userCreate.Save(ctx)
 	if err != nil {
@@ -689,6 +716,13 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 				Where(users.EmailHashEQ(emailIdentifier.Hash)).
 				OnlyID(ctx); queryErr == nil {
 				return 0, errExternalEmailAlreadyExists
+			}
+		}
+		if phone != nil && lion.IsConstraintError(err) {
+			if _, queryErr := s.db.Users.Query().
+				Where(users.PhoneNumberHashEQ(phone.Identifier.Hash)).
+				OnlyID(ctx); queryErr == nil {
+				return 0, errExternalPhoneAlreadyExists
 			}
 		}
 		return 0, err
@@ -733,7 +767,7 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 
 // syncLDAPUserAttrs 在已有用户二次登录时，用最新 LDAP 属性刷新本地用户表。
 // 仅当 LDAP 侧返回了非空值时才覆盖对应字段，避免用空值清掉已有数据。
-func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *ldapUserAttrs) {
+func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *ldapUserAttrs, phone *normalizedPhoneNumber) {
 	if attrs == nil {
 		return
 	}
@@ -762,15 +796,65 @@ func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *
 		}
 	}
 
-	if !updated {
+	if updated {
+		if n, err := userUpdate.Save(ctx); err != nil {
+			s.logger.Warnf("ldap sync attrs: update user failed, provider=%s user_id=%d affected=%d err=%v", s.ProviderName, userID, n, err)
+		} else {
+			s.logger.Infof("ldap sync attrs: update user success, provider=%s user_id=%d affected=%d", s.ProviderName, userID, n)
+		}
+	}
+
+	if phone != nil {
+		s.syncLDAPUserPhone(ctx, userID, phone)
+	}
+}
+
+func (s *socialUsers) syncLDAPUserPhone(ctx context.Context, userID int, phone *normalizedPhoneNumber) {
+	phoneEnc, err := s.encryptPhoneNumber(phone.Proto)
+	if err != nil {
+		s.logger.Warnf("ldap phone sync failed: encrypt phone number, provider=%s user_id=%d err=%v", s.ProviderName, userID, err)
 		return
 	}
 
-	if n, err := userUpdate.Save(ctx); err != nil {
-		s.logger.Warnf("ldap sync attrs: update user failed, provider=%s user_id=%d affected=%d err=%v", s.ProviderName, userID, n, err)
-	} else {
-		s.logger.Infof("ldap sync attrs: update user success, provider=%s user_id=%d affected=%d", s.ProviderName, userID, n)
+	n, err := s.db.Users.Update().
+		Where(
+			users.IDEQ(userID),
+			users.UserStatusEQ(int(adminv1.User_ACTIVE.Number())),
+			users.DeletedAtIsNil(),
+		).
+		SetPhoneNumberEncrypted(phoneEnc).
+		SetPhoneNumberHash(phone.Identifier.Hash).
+		SetPhoneNumberVerified(true).
+		Save(ctx)
+	if err != nil {
+		if lion.IsConstraintError(err) {
+			s.logger.Warnf("ldap phone sync skipped: phone number conflict, provider=%s user_id=%d", s.ProviderName, userID)
+			return
+		}
+		s.logger.Warnf("ldap phone sync failed: update user, provider=%s user_id=%d affected=%d err=%v", s.ProviderName, userID, n, err)
+		return
 	}
+	s.logger.Infof("ldap phone sync success: provider=%s user_id=%d affected=%d", s.ProviderName, userID, n)
+}
+
+func (s *socialUsers) encryptPhoneNumber(phone *adminv1.PhoneNumber) ([]byte, error) {
+	raw, err := proto.Marshal(phone)
+	if err != nil {
+		return nil, fmt.Errorf("marshal phone number: %w", err)
+	}
+	return crypto.EncryptAES(s.aesKey, raw)
+}
+
+func (s *socialUsers) normalizeLDAPUserPhone(attrs *ldapUserAttrs) *normalizedPhoneNumber {
+	if attrs == nil || strings.TrimSpace(attrs.PhoneNumber) == "" {
+		return nil
+	}
+	phone, err := normalizeExternalPhoneNumber(attrs.PhoneNumber, s.ldapCfg.PhoneNumberDefaultRegion)
+	if err != nil {
+		s.logger.Warnf("ldap phone ignored: invalid phone number, provider=%s", s.ProviderName)
+		return nil
+	}
+	return &phone
 }
 
 func buildLDAPLocalUsernameBase(providerCode, ldapUsername string) string {
@@ -893,6 +977,7 @@ func (s *socialUsers) newLDAPConn() (*ldap.Conn, error) {
 type ldapUserAttrs struct {
 	Email       string
 	DisplayName string
+	PhoneNumber string
 }
 
 type ldapResolvedUser struct {
@@ -919,8 +1004,8 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 		return nil, err
 	}
 
-	// 构建请求属性列表：始终包含 username 属性，按配置追加主体、email、display_name。
-	attributes := make([]string, 0, 4)
+	// 构建请求属性列表：始终包含 username 属性，按配置追加主体和资料属性。
+	attributes := make([]string, 0, 5)
 	appendAttribute := func(attribute string) {
 		attribute = strings.TrimSpace(attribute)
 		if attribute == "" || strings.EqualFold(attribute, legacyLDAPUserIDAttribute) {
@@ -937,8 +1022,13 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 	appendAttribute(userIDAttribute)
 	emailAttribute := strings.TrimSpace(s.ldapCfg.EmailAttribute)
 	displayNameAttribute := strings.TrimSpace(s.ldapCfg.DisplayNameAttribute)
+	phoneNumberAttribute, err := normalizeLDAPPhoneNumberAttributeName(s.ldapCfg.PhoneNumberAttribute)
+	if err != nil {
+		return nil, err
+	}
 	appendAttribute(emailAttribute)
 	appendAttribute(displayNameAttribute)
+	appendAttribute(phoneNumberAttribute)
 
 	escapedUsername := ldap.EscapeFilter(username)
 	filterTemplate := strings.TrimSpace(s.ldapCfg.UserSearchFilter)
@@ -1009,6 +1099,14 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 	if displayNameAttribute != "" {
 		attrs.DisplayName = strings.TrimSpace(entry.GetEqualFoldAttributeValue(displayNameAttribute))
 	}
+	if phoneNumberAttribute != "" {
+		phoneNumber, phoneErr := singleLDAPAttributeValue(entry, phoneNumberAttribute)
+		if phoneErr != nil {
+			s.logger.Warnf("ldap phone ignored: attribute must be single-valued, provider=%s", s.ProviderName)
+		} else {
+			attrs.PhoneNumber = phoneNumber
+		}
+	}
 
 	return &ldapResolvedUser{
 		DN:             entry.DN,
@@ -1016,6 +1114,25 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 		ProviderUserID: providerUserID,
 		Attrs:          attrs,
 	}, nil
+}
+
+func singleLDAPAttributeValue(entry *ldap.Entry, attribute string) (string, error) {
+	if entry == nil || strings.TrimSpace(attribute) == "" {
+		return "", nil
+	}
+
+	var result string
+	for _, value := range entry.GetEqualFoldAttributeValues(attribute) {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		if result != "" {
+			return "", fmt.Errorf("ldap attribute must contain at most one non-empty value")
+		}
+		result = trimmed
+	}
+	return result, nil
 }
 
 func maskLDAPDN(dn string) string {

@@ -48,6 +48,35 @@ func TestNormalizeLDAPUserIDAttributeName(t *testing.T) {
 	}
 }
 
+func TestNormalizeLDAPPhoneNumberAttributeName(t *testing.T) {
+	for _, tt := range []struct {
+		input   string
+		want    string
+		wantErr bool
+	}{
+		{input: "", want: ""},
+		{input: " MOBILE ", want: "mobile"},
+		{input: "telephonenumber", want: "telephoneNumber"},
+		{input: "employee-Mobile", want: "employee-Mobile"},
+		{input: "dn", wantErr: true},
+		{input: "mobile name", wantErr: true},
+	} {
+		got, err := normalizeLDAPPhoneNumberAttributeName(tt.input)
+		if tt.wantErr {
+			if err == nil {
+				t.Fatalf("normalizeLDAPPhoneNumberAttributeName(%q) error = nil", tt.input)
+			}
+			continue
+		}
+		if err != nil {
+			t.Fatalf("normalizeLDAPPhoneNumberAttributeName(%q): %v", tt.input, err)
+		}
+		if got != tt.want {
+			t.Fatalf("normalizeLDAPPhoneNumberAttributeName(%q) = %q, want %q", tt.input, got, tt.want)
+		}
+	}
+}
+
 func TestResolveLDAPProviderUserID(t *testing.T) {
 	objectGUIDRaw := []byte{
 		0x33, 0x22, 0x11, 0x00,
@@ -111,14 +140,20 @@ func TestResolveLDAPProviderUserIDRejectsMissingAndMultipleValues(t *testing.T) 
 
 func TestLDAPProviderConfigPresence(t *testing.T) {
 	provider := &adminv1.AuthProvider{
-		Type:   adminv1.AuthProvider_LDAP,
-		Config: &adminv1.AuthProvider_LdapConfig{LdapConfig: &adminv1.LdapConfig{}},
+		Type: adminv1.AuthProvider_LDAP,
+		Config: &adminv1.AuthProvider_LdapConfig{LdapConfig: &adminv1.LdapConfig{
+			PhoneNumberAttribute:     " MOBILE ",
+			PhoneNumberDefaultRegion: " cn ",
+		}},
 	}
 	if err := prepareLDAPProviderConfigForCreate(context.Background(), provider); err != nil {
 		t.Fatalf("prepareLDAPProviderConfigForCreate: %v", err)
 	}
 	if provider.GetLdapConfig().UserIdAttribute == nil || provider.GetLdapConfig().GetUserIdAttribute() != "uid" {
 		t.Fatalf("new LDAP provider user_id_attribute = %#v, want explicit uid", provider.GetLdapConfig().UserIdAttribute)
+	}
+	if provider.GetLdapConfig().GetPhoneNumberAttribute() != "mobile" || provider.GetLdapConfig().GetPhoneNumberDefaultRegion() != "CN" {
+		t.Fatalf("normalized LDAP phone config = %#v", provider.GetLdapConfig())
 	}
 
 	configJSON, _, err := protoToDBConfig(provider, []byte("0123456789abcdef0123456789abcdef"))
@@ -132,10 +167,69 @@ func TestLDAPProviderConfigPresence(t *testing.T) {
 	if stored.UserIDAttribute == nil || *stored.UserIDAttribute != "uid" {
 		t.Fatalf("stored user_id_attribute = %#v, want explicit uid", stored.UserIDAttribute)
 	}
+	if stored.PhoneNumberAttribute != "mobile" || stored.PhoneNumberDefaultRegion != "CN" {
+		t.Fatalf("stored LDAP phone config = %#v", stored)
+	}
+	row := &lion.AuthProviders{
+		ProviderType: int(adminv1.AuthProvider_LDAP.Number()),
+		Config:       configJSON,
+	}
+	decodedProvider, err := dbToProtoAuthProvider(row, nil, false)
+	if err != nil {
+		t.Fatalf("dbToProtoAuthProvider: %v", err)
+	}
+	if decodedProvider.GetLdapConfig().GetPhoneNumberAttribute() != "mobile" || decodedProvider.GetLdapConfig().GetPhoneNumberDefaultRegion() != "CN" {
+		t.Fatalf("decoded LDAP phone config = %#v", decodedProvider.GetLdapConfig())
+	}
 
 	legacy := ldapConfigData{}
 	if got := effectiveLDAPUserIDAttribute(&legacy); got != "dn" {
 		t.Fatalf("legacy effective attribute = %q, want dn", got)
+	}
+}
+
+func TestPrepareLDAPPhoneNumberConfig(t *testing.T) {
+	t.Run("empty attribute clears region", func(t *testing.T) {
+		config := &adminv1.LdapConfig{PhoneNumberDefaultRegion: "CN"}
+		if err := prepareLDAPPhoneNumberConfig(t.Context(), config); err != nil {
+			t.Fatalf("prepareLDAPPhoneNumberConfig: %v", err)
+		}
+		if config.GetPhoneNumberDefaultRegion() != "" {
+			t.Fatalf("default region = %q, want empty", config.GetPhoneNumberDefaultRegion())
+		}
+	})
+
+	for _, config := range []*adminv1.LdapConfig{
+		{PhoneNumberAttribute: "dn"},
+		{PhoneNumberAttribute: "mobile name"},
+		{PhoneNumberAttribute: "mobile", PhoneNumberDefaultRegion: "XX"},
+	} {
+		if err := prepareLDAPPhoneNumberConfig(t.Context(), config); err == nil {
+			t.Fatalf("prepareLDAPPhoneNumberConfig(%+v) error = nil", config)
+		}
+	}
+}
+
+func TestSingleLDAPAttributeValue(t *testing.T) {
+	entry := &ldap.Entry{
+		Attributes: []*ldap.EntryAttribute{
+			{Name: "mobile", Values: []string{"", " +8613900001234 "}},
+			{Name: "otherTelephone", Values: []string{"+8613900001234", "+8613800001234"}},
+		},
+	}
+
+	got, err := singleLDAPAttributeValue(entry, "MOBILE")
+	if err != nil {
+		t.Fatalf("singleLDAPAttributeValue: %v", err)
+	}
+	if got != "+8613900001234" {
+		t.Fatalf("singleLDAPAttributeValue = %q, want +8613900001234", got)
+	}
+	if _, err := singleLDAPAttributeValue(entry, "otherTelephone"); err == nil {
+		t.Fatal("multi-valued LDAP phone attribute must fail")
+	}
+	if got, err := singleLDAPAttributeValue(entry, "missing"); err != nil || got != "" {
+		t.Fatalf("missing attribute = %q, %v; want empty, nil", got, err)
 	}
 }
 
