@@ -512,8 +512,10 @@ func buildToolAnnotations(httpMethod string) *mcp.ToolAnnotations {
 	}
 }
 
-// pathParamRegex 匹配 path template 中的 {param} 占位符。
-var pathParamRegex = regexp.MustCompile(`\{([a-zA-Z_][a-zA-Z0-9_]*)\}`)
+// pathParamRegex 匹配 path template 中的 protobuf field path 占位符。
+// 每个 segment 都遵循 protobuf 标识符规则，例如 {id}、{model.id}。
+// 带模式的变量（如 {name=projects/*}）不在此解析器的支持范围内。
+var pathParamRegex = regexp.MustCompile(`\{([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)\}`)
 
 // swaggerMethod 描述 OpenAPI 方法配置。
 type swaggerMethod struct {
@@ -789,7 +791,8 @@ func rawToString(raw json.RawMessage) string {
 // substitutePathParams 替换 path template 中的 {param} 占位符。
 //
 // 缺失参数时返回 ("", missingParamName)；空参数视为缺失。
-// 支持 string / number / boolean 类型的参数值，统一转为字符串用于 URL path。
+// 支持 string / number / boolean 类型的参数值，统一转为字符串并按单个
+// URL path segment 转义，避免参数中的 '/' 改变 gateway 路由语义。
 func substitutePathParams(pathTemplate string, args map[string]json.RawMessage) (string, string) {
 	missing := ""
 	out := pathParamRegex.ReplaceAllStringFunc(pathTemplate, func(token string) string {
@@ -808,7 +811,7 @@ func substitutePathParams(pathTemplate string, args map[string]json.RawMessage) 
 			missing = name
 			return token
 		}
-		return s
+		return url.PathEscape(s)
 	})
 	if missing != "" {
 		return "", missing

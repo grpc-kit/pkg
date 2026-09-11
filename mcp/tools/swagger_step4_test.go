@@ -155,6 +155,27 @@ func TestBuildRequestBody_PathExcluded(t *testing.T) {
 	}
 }
 
+// TestBuildRequestBody_NestedPathExcluded 验证点分 path 参数不会泄漏进 body。
+func TestBuildRequestBody_NestedPathExcluded(t *testing.T) {
+	body, ok := buildRequestBody(
+		rawArgs("model.id", `"team-gemma"`, "model", `{"id":"team-gemma","name":"Team Gemma"}`),
+		nil,
+		"/api/models/{model.id}",
+		"*",
+	)
+	if !ok {
+		t.Fatal("expected ok")
+	}
+	m := parseBody(t, body)
+	if _, leaked := m["model.id"]; leaked {
+		t.Errorf("nested path param model.id must not appear in body: %v", m)
+	}
+	model, _ := m["model"].(map[string]any)
+	if model["id"] != "team-gemma" || model["name"] != "Team Gemma" {
+		t.Errorf("body model = %v", model)
+	}
+}
+
 // TestAppendQueryParams_Basic 验证 query 参数构建（命名、值编码）。
 func TestAppendQueryParams_Basic(t *testing.T) {
 	op := &swaggerOperation{
@@ -210,6 +231,22 @@ func TestAppendQueryParams_NilOp(t *testing.T) {
 	}
 	if !strings.Contains(out, "a=1") || !strings.Contains(out, "b=x") {
 		t.Errorf("non-path args should be query: %q", out)
+	}
+}
+
+// TestAppendQueryParams_NestedPathExcluded 验证点分 path 参数不会泄漏进 query。
+func TestAppendQueryParams_NestedPathExcluded(t *testing.T) {
+	out := appendQueryParams(
+		"http://x/api/models/team-gemma",
+		"/api/models/{model.id}",
+		nil,
+		rawArgs("model.id", `"team-gemma"`, "view", `"full"`),
+	)
+	if strings.Contains(out, "model.id=") || strings.Contains(out, "model.id%3D") {
+		t.Errorf("nested path param must not appear in query: %q", out)
+	}
+	if !strings.Contains(out, "view=full") {
+		t.Errorf("non-path arg should remain in query: %q", out)
 	}
 }
 

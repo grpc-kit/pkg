@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/genproto/googleapis/api/serviceconfig"
 
@@ -174,6 +176,7 @@ func TestBuildInputSchema(t *testing.T) {
 	}{
 		{"/v1/items", false, ""},
 		{"/v1/items/{id}", true, "id"},
+		{"/v1/models/{model.id}", true, "model.id"},
 		{"/v1/{a}/{b}/items/{a}", true, "a"}, // 去重
 	}
 	for _, tc := range tests {
@@ -272,6 +275,58 @@ func TestSubstitutePathParams(t *testing.T) {
 			wantPath:    "",
 			wantMissing: "id",
 		},
+		{
+			name:        "nested field path",
+			tmpl:        "/api/models/{model.id}",
+			args:        map[string]json.RawMessage{"model.id": json.RawMessage(`"team-gemma"`)},
+			wantPath:    "/api/models/team-gemma",
+			wantMissing: "",
+		},
+		{
+			name:        "nested field path missing",
+			tmpl:        "/api/models/{model.id}",
+			args:        map[string]json.RawMessage{},
+			wantPath:    "",
+			wantMissing: "model.id",
+		},
+		{
+			name:        "nested field path null",
+			tmpl:        "/api/models/{model.id}",
+			args:        map[string]json.RawMessage{"model.id": json.RawMessage(`null`)},
+			wantPath:    "",
+			wantMissing: "model.id",
+		},
+		{
+			name:        "nested field path empty",
+			tmpl:        "/api/models/{model.id}",
+			args:        map[string]json.RawMessage{"model.id": json.RawMessage(`""`)},
+			wantPath:    "",
+			wantMissing: "model.id",
+		},
+		{
+			name: "simple and nested parameters",
+			tmpl: "/v1/{parent.id}/children/{id}",
+			args: map[string]json.RawMessage{
+				"parent.id": json.RawMessage(`"parent-1"`),
+				"id":        json.RawMessage(`"child-1"`),
+			},
+			wantPath:    "/v1/parent-1/children/child-1",
+			wantMissing: "",
+		},
+		{
+			name:        "first missing parameter",
+			tmpl:        "/v1/{parent.id}/children/{id}",
+			args:        map[string]json.RawMessage{},
+			wantPath:    "",
+			wantMissing: "parent.id",
+		},
+		{
+			name:        "path segment is escaped",
+			tmpl:        "/v1/models/{model.id}",
+			args:        map[string]json.RawMessage{"model.id": json.RawMessage(`"team/gemma 100%"`)},
+			wantPath:    "/v1/models/team%2Fgemma%20100%25",
+			wantMissing: "",
+		},
 	}
 
 	for _, tt := range tests {
@@ -285,6 +340,65 @@ func TestSubstitutePathParams(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPathParamNames(t *testing.T) {
+	got := pathParamNames("/v1/{parent.id}/children/{id}/{credential.uuid}")
+	for _, name := range []string{"parent.id", "id", "credential.uuid"} {
+		if _, ok := got[name]; !ok {
+			t.Errorf("pathParamNames missing %q: %v", name, got)
+		}
+	}
+	if len(got) != 3 {
+		t.Errorf("pathParamNames = %v, want exactly 3 entries", got)
+	}
+}
+
+func TestBridgeHandlerNestedPathParamMissing(t *testing.T) {
+	transport := &countingErrorTransport{}
+	client := &http.Client{Transport: transport}
+	logger := logrus.NewEntry(logrus.New())
+
+	for _, arguments := range []json.RawMessage{
+		json.RawMessage(`{}`),
+		json.RawMessage(`{"model.id":null}`),
+		json.RawMessage(`{"model.id":""}`),
+	} {
+		result, err := bridgeHandler(
+			context.Background(),
+			&mcp.CallToolRequest{Params: &mcp.CallToolParamsRaw{Arguments: arguments}},
+			client,
+			"http://gateway.test",
+			"PUT",
+			"/api/models/{model.id}",
+			"*",
+			nil,
+			"update_model",
+			logger,
+		)
+		if err != nil {
+			t.Fatalf("bridgeHandler(%s): %v", arguments, err)
+		}
+		if !result.IsError {
+			t.Fatalf("bridgeHandler(%s) should return an error result", arguments)
+		}
+		textContent, ok := result.Content[0].(*mcp.TextContent)
+		if !ok || !strings.Contains(textContent.Text, "missing path parameter: model.id") {
+			t.Errorf("bridgeHandler(%s) error = %v", arguments, result.Content)
+		}
+	}
+	if transport.calls != 0 {
+		t.Errorf("gateway transport called %d times for missing path parameters", transport.calls)
+	}
+}
+
+type countingErrorTransport struct {
+	calls int
+}
+
+func (t *countingErrorTransport) RoundTrip(*http.Request) (*http.Response, error) {
+	t.calls++
+	return nil, errors.New("unexpected gateway request")
 }
 
 func TestRawToString(t *testing.T) {
@@ -691,6 +805,93 @@ func TestAutoBridge_ToolCall(t *testing.T) {
 	}
 	if !strings.Contains(tc.Text, `"id":"42"`) {
 		t.Errorf("unexpected response body: %s", tc.Text)
+	}
+}
+
+func TestAutoBridge_NestedPathParam(t *testing.T) {
+	type gatewayRequest struct {
+		path string
+		body map[string]any
+	}
+	requests := make(chan gatewayRequest, 1)
+
+	gwSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Errorf("decode gateway request body: %v", err)
+		}
+		requests <- gatewayRequest{path: r.URL.Path, body: body}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"id":"team-gemma","name":"Team Gemma"}`))
+	}))
+	defer gwSrv.Close()
+
+	mcpSrv, err := mcpserver.NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+	cfg := makeGatewayCfg(&annotations.HttpRule{
+		Selector: "grpc_kit.api.test.v1.TestService.UpdateModel",
+		Pattern:  &annotations.HttpRule_Put{Put: "/api/models/{model.id}"},
+		Body:     "*",
+	})
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil, "", nil, nil); err != nil {
+		t.Fatalf("AutoBridge: %v", err)
+	}
+
+	httpServer := httptest.NewServer(mcpSrv.Handler())
+	defer httpServer.Close()
+	ctx := context.Background()
+	client := mcp.NewClient(&mcp.Implementation{Name: "test-client", Version: "0.0.1"}, nil)
+	session, err := client.Connect(ctx, &mcp.StreamableClientTransport{Endpoint: httpServer.URL}, nil)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	defer session.Close()
+
+	result, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name: "update_model",
+		Arguments: map[string]any{
+			"model.id": "team-gemma",
+			"model": map[string]any{
+				"id":   "team-gemma",
+				"name": "Team Gemma",
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("CallTool: %v", err)
+	}
+	if result.IsError {
+		t.Fatalf("unexpected tool error: %v", result.Content)
+	}
+
+	got := <-requests
+	if got.path != "/api/models/team-gemma" {
+		t.Errorf("gateway path = %q, want /api/models/team-gemma", got.path)
+	}
+	if _, leaked := got.body["model.id"]; leaked {
+		t.Errorf("nested path parameter leaked into body: %v", got.body)
+	}
+	model, _ := got.body["model"].(map[string]any)
+	if model["id"] != "team-gemma" || model["name"] != "Team Gemma" {
+		t.Errorf("gateway body model = %v", model)
+	}
+
+	result, err = session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      "update_model",
+		Arguments: map[string]any{"model": map[string]any{"id": "team-gemma"}},
+	})
+	if err != nil {
+		t.Fatalf("CallTool without model.id: %v", err)
+	}
+	if !result.IsError {
+		t.Fatalf("missing model.id should return a tool error: %v", result.Content)
+	}
+	select {
+	case unexpected := <-requests:
+		t.Fatalf("gateway received request for missing model.id: %+v", unexpected)
+	default:
 	}
 }
 
