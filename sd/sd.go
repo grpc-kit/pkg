@@ -3,8 +3,9 @@ package sd
 import (
 	"context"
 	"errors"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
+	"github.com/grpc-kit/pkg/logging"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -42,7 +43,7 @@ type Registry interface {
 
 // Connector 连接器
 type Connector struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 	Driver int
 	Hosts  string
 	TLS    *TLSInfo
@@ -84,10 +85,10 @@ func Register(conn *Connector, name, addr, val string, ttl int64) (Registry, err
 	return nil, errNotSupportDriver
 }
 
-// NewConnector 用于注册的属性设置
-func NewConnector(logger *logrus.Entry, driver int, hosts string) (*Connector, error) {
+// NewConnectorWithSlog 用于注册的属性设置
+func NewConnectorWithSlog(logger *slog.Logger, driver int, hosts string) (*Connector, error) {
 	return &Connector{
-		logger: logger,
+		logger: logging.OrFallback(logger),
 		Driver: driver,
 		Hosts:  hosts,
 	}, nil

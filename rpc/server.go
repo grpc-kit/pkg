@@ -7,11 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log/slog"
 	"net"
 	"net/http"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/acme/autocert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -21,7 +21,7 @@ import (
 
 // Server server instance
 type Server struct {
-	logger  *logrus.Entry
+	logger  *slog.Logger
 	config  *Config
 	server  *grpc.Server
 	opts    []grpc.ServerOption
@@ -143,7 +143,7 @@ func (s *Server) StartBackground() error {
 
 	go func() {
 		if s.config.DisableGRPCServer {
-			s.logger.Warnf("Disable gRPC server")
+			s.logger.Warn("Disable gRPC server")
 			return
 		}
 
@@ -161,7 +161,7 @@ func (s *Server) StartBackground() error {
 
 	go func() {
 		if s.config.DisableHTTPServer {
-			s.logger.Warnf("Disable gateway server")
+			s.logger.Warn("Disable gateway server")
 			return
 		}
 
@@ -189,20 +189,20 @@ func (s *Server) StartBackground() error {
 // Shutdown graceful stop server
 func (s *Server) Shutdown(ctx context.Context) error {
 	if s.gateway != nil {
-		s.logger.Debugf("Shutdown gateway server start")
+		s.logger.DebugContext(ctx, "Shutdown gateway server start")
 
 		if err := s.gateway.Shutdown(ctx); err != nil {
 			return err
 		}
 
-		s.logger.Debugf("Shutdown gateway server end")
+		s.logger.DebugContext(ctx, "Shutdown gateway server end")
 	}
 
-	s.logger.Debugf("Shutdown gRPC server start")
+	s.logger.DebugContext(ctx, "Shutdown gRPC server start")
 
 	s.server.GracefulStop()
 
-	s.logger.Debugf("Shutdown gRPC server end")
+	s.logger.DebugContext(ctx, "Shutdown gRPC server end")
 
 	return nil
 }

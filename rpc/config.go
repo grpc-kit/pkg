@@ -1,15 +1,16 @@
 package rpc
 
 import (
+	"log/slog"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"github.com/grpc-kit/pkg/logging"
 	"google.golang.org/grpc"
 )
 
 // Config server config
 type Config struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 
 	GRPCAddress string
 	HTTPAddress string
@@ -50,15 +51,11 @@ type TLSConfig struct {
 	ACMECacheDir string
 }
 
-// NewConfig xx
-func NewConfig(l *logrus.Entry) *Config {
+// NewConfigWithSlog returns a Config backed by logger.
+func NewConfigWithSlog(logger *slog.Logger) *Config {
 	c := &Config{
-		logger: l,
+		logger: logging.OrFallback(logger),
 		opts:   []grpc.ServerOption{},
-	}
-
-	if c.logger == nil {
-		c.logger = logrus.NewEntry(logrus.New())
 	}
 
 	// default values
