@@ -4,21 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"math"
 	"strconv"
 	"time"
 
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/globalsettings"
-	"github.com/sirupsen/logrus"
 )
 
 type globalSettingsReader struct {
 	db     *lion.Client
-	logger *logrus.Entry
+	logger *slog.Logger
 }
 
-func newGlobalSettingsReader(logger *logrus.Entry, db *lion.Client) *globalSettingsReader {
+func newGlobalSettingsReader(logger *slog.Logger, db *lion.Client) *globalSettingsReader {
 	return &globalSettingsReader{db: db, logger: logger}
 }
 
@@ -37,7 +37,7 @@ func (r *globalSettingsReader) GetBool(ctx context.Context, category, settingKey
 	if !builtIn {
 		return false, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
 	}
-	r.warnParseFallback(category, settingKey, parseErr)
+	r.warnParseFallback(ctx, category, settingKey, parseErr)
 	parsed, _ = strconv.ParseBool(spec.DefaultValue)
 	return parsed, false, nil
 }
@@ -57,7 +57,7 @@ func (r *globalSettingsReader) GetInt(ctx context.Context, category, settingKey 
 	if !builtIn {
 		return 0, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
 	}
-	r.warnParseFallback(category, settingKey, parseErr)
+	r.warnParseFallback(ctx, category, settingKey, parseErr)
 	parsed, _ = strconv.Atoi(spec.DefaultValue)
 	return parsed, false, nil
 }
@@ -77,7 +77,7 @@ func (r *globalSettingsReader) GetFloat(ctx context.Context, category, settingKe
 	if !builtIn {
 		return 0, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
 	}
-	r.warnParseFallback(category, settingKey, parseErr)
+	r.warnParseFallback(ctx, category, settingKey, parseErr)
 	parsed, _ = strconv.ParseFloat(spec.DefaultValue, 64)
 	return parsed, false, nil
 }
@@ -97,7 +97,7 @@ func (r *globalSettingsReader) GetDuration(ctx context.Context, category, settin
 	if !builtIn {
 		return 0, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
 	}
-	r.warnParseFallback(category, settingKey, parseErr)
+	r.warnParseFallback(ctx, category, settingKey, parseErr)
 	parsed, _ = time.ParseDuration(spec.DefaultValue)
 	return parsed, false, nil
 }
@@ -179,11 +179,11 @@ func globalSettingTypeMismatch(category, settingKey string, expected, actual glo
 	return fmt.Errorf("global setting type mismatch for %s/%s: expected %s, got %s", category, settingKey, expected, actual)
 }
 
-func (r *globalSettingsReader) warnParseFallback(category, settingKey string, parseErr error) {
+func (r *globalSettingsReader) warnParseFallback(ctx context.Context, category, settingKey string, parseErr error) {
 	if r == nil || r.logger == nil {
 		return
 	}
-	r.logger.Warnf(
+	logWarnf(ctx, r.logger,
 		"global setting parse fallback: category=%s setting_key=%s err=%v",
 		category,
 		settingKey,
@@ -198,11 +198,11 @@ func (a *KnownAdminAPI) globalSettingsReader() *globalSettingsReader {
 	return newGlobalSettingsReader(a.logger, a.config.db)
 }
 
-func loginAccessTokenTTLFrom(logger *logrus.Entry, db *lion.Client) time.Duration {
-	ttl, _, err := newGlobalSettingsReader(logger, db).GetDuration(context.Background(), globalSettingsCategorySecurity, globalSettingKeyLoginAccessTokenTTL)
+func loginAccessTokenTTLFrom(ctx context.Context, logger *slog.Logger, db *lion.Client) time.Duration {
+	ttl, _, err := newGlobalSettingsReader(logger, db).GetDuration(ctx, globalSettingsCategorySecurity, globalSettingKeyLoginAccessTokenTTL)
 	if err != nil {
 		if logger != nil {
-			logger.Warnf("failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyLoginAccessTokenTTL, err)
+			logWarnf(ctx, logger, "failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyLoginAccessTokenTTL, err)
 		}
 		return 24 * time.Hour
 	}
@@ -210,14 +210,14 @@ func loginAccessTokenTTLFrom(logger *logrus.Entry, db *lion.Client) time.Duratio
 }
 
 func (a *KnownAdminAPI) getLoginAccessTokenTTL(ctx context.Context) time.Duration {
-	return loginAccessTokenTTLFrom(a.logger, a.config.db)
+	return loginAccessTokenTTLFrom(ctx, a.logger, a.config.db)
 }
 
 func (a *KnownAdminAPI) getMFAChallengeTTL(ctx context.Context) time.Duration {
 	ttl, _, err := a.globalSettingsReader().GetDuration(ctx, globalSettingsCategorySecurity, globalSettingKeyMFAChallengeTTL)
 	if err != nil {
 		if a != nil && a.logger != nil {
-			a.logger.Warnf("failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFAChallengeTTL, err)
+			logWarnf(ctx, a.logger, "failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFAChallengeTTL, err)
 		}
 		return 5 * time.Minute
 	}
@@ -228,7 +228,7 @@ func (a *KnownAdminAPI) getMFAMaxVerifyAttempts(ctx context.Context) int {
 	value, _, err := a.globalSettingsReader().GetInt(ctx, globalSettingsCategorySecurity, globalSettingKeyMFAMaxVerifyAttempts)
 	if err != nil {
 		if a != nil && a.logger != nil {
-			a.logger.Warnf("failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFAMaxVerifyAttempts, err)
+			logWarnf(ctx, a.logger, "failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFAMaxVerifyAttempts, err)
 		}
 		return 5
 	}
@@ -239,7 +239,7 @@ func (a *KnownAdminAPI) getMFARecoveryCodesCount(ctx context.Context) int {
 	value, _, err := a.globalSettingsReader().GetInt(ctx, globalSettingsCategorySecurity, globalSettingKeyMFARecoveryCodesCount)
 	if err != nil {
 		if a != nil && a.logger != nil {
-			a.logger.Warnf("failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFARecoveryCodesCount, err)
+			logWarnf(ctx, a.logger, "failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFARecoveryCodesCount, err)
 		}
 		return 8
 	}
@@ -250,7 +250,7 @@ func (a *KnownAdminAPI) getMFATOTPIssuer(ctx context.Context) string {
 	value, _, err := a.globalSettingsReader().GetString(ctx, globalSettingsCategorySecurity, globalSettingKeyMFATOTPIssuer)
 	if err != nil {
 		if a != nil && a.logger != nil {
-			a.logger.Warnf("failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFATOTPIssuer, err)
+			logWarnf(ctx, a.logger, "failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFATOTPIssuer, err)
 		}
 		return "KnownAdmin"
 	}

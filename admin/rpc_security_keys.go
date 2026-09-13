@@ -1126,7 +1126,7 @@ func (a *KnownAdminAPI) RevealCredentialSecret(ctx context.Context, req *adminv1
 
 	// 审计日志
 	userID, _ := GetUserID(ctx)
-	a.config.logger.Infof("credential secret revealed: credential_id=%d, credential_code=%s, credential_type=%d, operator=%s(%d)",
+	logInfof(ctx, a.config.logger, "credential secret revealed: credential_id=%d, credential_code=%s, credential_type=%d, operator=%s(%d)",
 		row.ID, row.Code, row.CredentialType, username, userID)
 
 	return result, nil
@@ -1189,7 +1189,7 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 	for _, sk := range sks {
 		pubInterface, err := x509.ParsePKIXPublicKey(sk.PublicKey)
 		if err != nil {
-			a.logger.Errorf("oauth2 jwks: failed to parse public_key (len=%d, firstByte=0x%02x): %v", len(sk.PublicKey), firstByte(sk.PublicKey), err)
+			logErrorf(ctx, a.logger, "oauth2 jwks: failed to parse public_key (len=%d, firstByte=0x%02x): %v", len(sk.PublicKey), firstByte(sk.PublicKey), err)
 			return nil, errs.Internal(ctx).WithMessage("failed to parse JWKS public key").Err()
 		}
 

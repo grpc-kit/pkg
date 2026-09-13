@@ -104,14 +104,14 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 
 		passwordPayload := req.PasswordHash
 		if providerType == adminv1.AuthProvider_LDAP {
-			a.logger.Infof(
+			logInfof(ctx, a.logger,
 				"ldap login debug: received password payload, provider_code=%s encoded_len=%d",
 				providerCode,
 				len(req.PasswordHash),
 			)
 			decodedPassword, decErr := base64.StdEncoding.DecodeString(req.PasswordHash)
 			if decErr != nil {
-				a.logger.Warnf(
+				logWarnf(ctx, a.logger,
 					"ldap login debug: invalid base64 payload, provider_code=%s err=%v",
 					providerCode,
 					decErr,
@@ -119,10 +119,10 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 				return nil, errs.InvalidArgument(ctx).WithMessage("password_hash must be valid base64 for LDAP provider")
 			}
 			if len(decodedPassword) == 0 {
-				a.logger.Warnf("ldap login debug: empty decoded password payload, provider_code=%s", providerCode)
+				logWarnf(ctx, a.logger, "ldap login debug: empty decoded password payload, provider_code=%s", providerCode)
 				return nil, errs.InvalidArgument(ctx).WithMessage("ldap password payload is empty")
 			}
-			a.logger.Infof(
+			logInfof(ctx, a.logger,
 				"ldap login debug: base64 decode success, provider_code=%s decoded_len=%d",
 				providerCode,
 				len(decodedPassword),
@@ -147,7 +147,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			if lion.IsNotFound(err) {
 				return nil, errs.Unauthenticated(ctx)
 			}
-			a.logger.Errorf(
+			logErrorf(ctx, a.logger,
 				"password login failed: provider_code=%s provider_type=%s err=%v",
 				providerCode,
 				providerType.String(),
@@ -1037,7 +1037,7 @@ func (a *KnownAdminAPI) enrichOAuthEndpoints(ctx context.Context, oc *adminv1.OA
 
 	provider, err := oidc.NewProvider(discoverCtx, oc.Issuer)
 	if err != nil {
-		a.logger.Warnf("OIDC discovery failed for issuer %s: %v", oc.Issuer, err)
+		logWarnf(ctx, a.logger, "OIDC discovery failed for issuer %s: %v", oc.Issuer, err)
 		return
 	}
 

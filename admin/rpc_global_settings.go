@@ -435,22 +435,24 @@ func (a *KnownAdminAPI) auditGlobalSettingMutation(action, category, settingKey 
 	if a == nil || a.logger == nil {
 		return
 	}
-	a.logger.
-		WithField("action", action).
-		WithField("category", category).
-		WithField("setting_key", settingKey).
-		WithField("actor", actor).
-		WithField("result", result).
-		Info("global setting mutation")
+	a.logger.Info(
+		"global setting mutation",
+		"action", action,
+		"category", category,
+		"setting_key", settingKey,
+		"actor", actor,
+		"result", result,
+	)
 }
 
 func (a *KnownAdminAPI) logCorruptGlobalSetting(category, settingKey, reason string) {
 	if a == nil || a.logger == nil {
 		return
 	}
-	a.logger.
-		WithField("category", category).
-		WithField("setting_key", settingKey).
-		WithField("reason", reason).
-		Warn("invalid stored global setting")
+	a.logger.Warn(
+		"invalid stored global setting",
+		"category", category,
+		"setting_key", settingKey,
+		"reason", reason,
+	)
 }

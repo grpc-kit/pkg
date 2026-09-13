@@ -154,7 +154,7 @@ func (s *socialUsers) linkExternalIdentityByVerifiedIdentifiers(
 		return 0, false, fmt.Errorf("create verified identifier identity binding: %w", err)
 	}
 	if s.logger != nil {
-		s.logger.Infof(
+		logInfof(ctx, s.logger,
 			"external identity verified identifier auto-link success: provider=%s user_id=%d",
 			s.ProviderName,
 			targetUserID,
@@ -169,7 +169,7 @@ func (s *socialUsers) canonicalVerifiedIdentifierHashes(claims verifiedIdentityC
 		identifier, err := canonicalizeEmailIdentifier(claims.Email)
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Warnf("ignore invalid verified email claim: provider=%s err=%v", s.ProviderName, err)
+				logWarnf(context.Background(), s.logger, "ignore invalid verified email claim: provider=%s err=%v", s.ProviderName, err)
 			}
 		} else {
 			hashes.email = identifier.Hash
@@ -179,7 +179,7 @@ func (s *socialUsers) canonicalVerifiedIdentifierHashes(claims verifiedIdentityC
 		identifier, err := canonicalizeE164PhoneIdentifier(claims.PhoneNumber)
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Warnf("ignore invalid verified phone claim: provider=%s err=%v", s.ProviderName, err)
+				logWarnf(context.Background(), s.logger, "ignore invalid verified phone claim: provider=%s err=%v", s.ProviderName, err)
 			}
 		} else {
 			hashes.phone = identifier.Hash

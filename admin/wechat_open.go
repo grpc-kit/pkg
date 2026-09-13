@@ -1,16 +1,16 @@
 package admin
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
-
-	"github.com/sirupsen/logrus"
 )
 
 type wechatOpen struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 
 	appid     string
 	appSecret string
@@ -24,7 +24,7 @@ type wechatCode2SessionResponse struct {
 	Errcode    int32  `json:"errcode"`
 }
 
-func newWechatOpen(logger *logrus.Entry, appid, appSecret string) *wechatOpen {
+func newWechatOpen(logger *slog.Logger, appid, appSecret string) *wechatOpen {
 	return &wechatOpen{
 		logger:    logger,
 		appid:     appid,
@@ -44,20 +44,20 @@ func (w *wechatOpen) code2Session(endpoint, jsCode string) (*wechatCode2SessionR
 
 	resp, err := http.Get(requestURL)
 	if err != nil {
-		w.logger.Errorf("wechat login error: %v", err)
+		logErrorf(context.Background(), w.logger, "wechat login error: %v", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		w.logger.Errorf("wechat login error: %v", err)
+		logErrorf(context.Background(), w.logger, "wechat login error: %v", err)
 		return nil, err
 	}
 
 	var result wechatCode2SessionResponse
 	if err = json.Unmarshal(body, &result); err != nil {
-		w.logger.Errorf("wechat login error: %v", err)
+		logErrorf(context.Background(), w.logger, "wechat login error: %v", err)
 		return nil, err
 	}
 

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"regexp"
@@ -20,7 +21,6 @@ import (
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"google.golang.org/protobuf/proto"
 
@@ -30,7 +30,7 @@ import (
 )
 
 type socialUsers struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 	db     *lion.Client
 
 	aesKey     []byte
@@ -51,7 +51,7 @@ type socialUsers struct {
 	issuanceContext AccessTokenIssuanceContext
 }
 
-func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
+func newSocialUsers(ctx context.Context, logger *slog.Logger, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
 	ap, err := db.AuthProviders.Query().
 		Select(
 			authproviders.FieldID,
@@ -421,14 +421,14 @@ func (s *socialUsers) PasswordCheckLocal(ctx context.Context, username, password
 
 func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordPlain string) (*passwordCheckResult, error) {
 	if strings.TrimSpace(username) == "" || passwordPlain == "" {
-		s.logger.Warnf("ldap login skipped: empty username or password, provider=%s", s.ProviderName)
+		logWarnf(ctx, s.logger, "ldap login skipped: empty username or password, provider=%s", s.ProviderName)
 		return &passwordCheckResult{}, nil
 	}
 	if s.ldapCfg == nil {
-		s.logger.Errorf("ldap login failed: ldap config not initialized, provider=%s", s.ProviderName)
+		logErrorf(ctx, s.logger, "ldap login failed: ldap config not initialized, provider=%s", s.ProviderName)
 		return nil, fmt.Errorf("ldap config not initialized")
 	}
-	s.logger.Infof(
+	logInfof(ctx, s.logger,
 		"ldap login start: provider=%s username=%s host=%s port=%d use_tls=%t start_tls=%t",
 		s.ProviderName,
 		username,
@@ -440,7 +440,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 
 	conn, err := s.newLDAPConn()
 	if err != nil {
-		s.logger.Errorf("ldap login failed: connect failed, provider=%s err=%v", s.ProviderName, err)
+		logErrorf(ctx, s.logger, "ldap login failed: connect failed, provider=%s err=%v", s.ProviderName, err)
 		return nil, err
 	}
 	defer conn.Close()
@@ -449,7 +449,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	bindDN := strings.TrimSpace(s.ldapCfg.BindDN)
 	if bindDN != "" || s.secret != "" {
 		if err := conn.Bind(bindDN, s.secret); err != nil {
-			s.logger.Errorf(
+			logErrorf(ctx, s.logger,
 				"ldap login failed: service bind failed, provider=%s bind_dn=%s err=%v",
 				s.ProviderName,
 				maskLDAPDN(bindDN),
@@ -457,20 +457,20 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			)
 			return nil, fmt.Errorf("ldap bind service account failed")
 		}
-		s.logger.Infof("ldap login debug: service bind success, provider=%s bind_dn=%s", s.ProviderName, maskLDAPDN(bindDN))
+		logInfof(ctx, s.logger, "ldap login debug: service bind success, provider=%s bind_dn=%s", s.ProviderName, maskLDAPDN(bindDN))
 	}
 
-	resolvedUser, err := s.findLDAPUser(conn, username)
+	resolvedUser, err := s.findLDAPUser(ctx, conn, username)
 	if err != nil {
-		s.logger.Errorf("ldap login failed: user search failed, provider=%s username=%s err=%v", s.ProviderName, username, err)
+		logErrorf(ctx, s.logger, "ldap login failed: user search failed, provider=%s username=%s err=%v", s.ProviderName, username, err)
 		return nil, err
 	}
 	if resolvedUser == nil || resolvedUser.DN == "" {
-		s.logger.Warnf("ldap login failed: user not found in ldap, provider=%s username=%s", s.ProviderName, username)
+		logWarnf(ctx, s.logger, "ldap login failed: user not found in ldap, provider=%s username=%s", s.ProviderName, username)
 		return &passwordCheckResult{}, nil
 	}
 	userDN := resolvedUser.DN
-	s.logger.Infof(
+	logInfof(ctx, s.logger,
 		"ldap login debug: user found, provider=%s username=%s resolved_username=%s user_dn=%s",
 		s.ProviderName,
 		username,
@@ -480,7 +480,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 
 	// 用户口令校验：二次 bind。
 	if err := conn.Bind(userDN, passwordPlain); err != nil {
-		s.logger.Warnf(
+		logWarnf(ctx, s.logger,
 			"ldap login failed: user bind failed, provider=%s username=%s user_dn=%s err=%v",
 			s.ProviderName,
 			username,
@@ -489,8 +489,8 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		)
 		return &passwordCheckResult{}, nil
 	}
-	s.logger.Infof("ldap login debug: user bind success, provider=%s username=%s user_dn=%s", s.ProviderName, username, maskLDAPDN(userDN))
-	normalizedPhone := s.normalizeLDAPUserPhone(resolvedUser.Attrs)
+	logInfof(ctx, s.logger, "ldap login debug: user bind success, provider=%s username=%s user_dn=%s", s.ProviderName, username, maskLDAPDN(userDN))
+	normalizedPhone := s.normalizeLDAPUserPhone(ctx, resolvedUser.Attrs)
 
 	ldapIdentity, err := s.db.UserIdentities.Query().
 		Select(
@@ -503,7 +503,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		).
 		Only(ctx)
 	if err != nil && !lion.IsNotFound(err) {
-		s.logger.Errorf(
+		logErrorf(ctx, s.logger,
 			"ldap login failed: query identity error, provider=%s user_dn=%s err=%v",
 			s.ProviderName,
 			maskLDAPDN(userDN),
@@ -515,14 +515,14 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	var localUserID int
 	if ldapIdentity != nil {
 		localUserID = ldapIdentity.UserID
-		s.logger.Infof(
+		logInfof(ctx, s.logger,
 			"ldap login debug: identity hit, provider=%s user_dn=%s local_user_id=%d",
 			s.ProviderName,
 			maskLDAPDN(userDN),
 			localUserID,
 		)
 	} else {
-		s.logger.Warnf(
+		logWarnf(ctx, s.logger,
 			"ldap login debug: identity miss, start verified identifier resolve or provision, provider=%s username=%s resolved_username=%s user_dn=%s",
 			s.ProviderName,
 			username,
@@ -531,7 +531,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		)
 		localUserID, err = s.provisionLDAPUserOnFirstLogin(ctx, resolvedUser.ProviderUserID, resolvedUser.Username, resolvedUser.Attrs, normalizedPhone)
 		if err != nil {
-			s.logger.Errorf(
+			logErrorf(ctx, s.logger,
 				"ldap login failed: auto provision error, provider=%s username=%s resolved_username=%s user_dn=%s err=%v",
 				s.ProviderName,
 				username,
@@ -541,7 +541,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			)
 			return nil, err
 		}
-		s.logger.Infof(
+		logInfof(ctx, s.logger,
 			"ldap login debug: identity resolve or provision success, provider=%s user_dn=%s local_user_id=%d",
 			s.ProviderName,
 			maskLDAPDN(userDN),
@@ -565,7 +565,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
-			s.logger.Warnf(
+			logWarnf(ctx, s.logger,
 				"ldap login failed: local user not active or not found, provider=%s local_user_id=%d user_dn=%s",
 				s.ProviderName,
 				localUserID,
@@ -573,7 +573,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			)
 			return &passwordCheckResult{}, nil
 		}
-		s.logger.Errorf(
+		logErrorf(ctx, s.logger,
 			"ldap login failed: local user query error, provider=%s local_user_id=%d err=%v",
 			s.ProviderName,
 			localUserID,
@@ -685,7 +685,7 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(
 		var identifierErr error
 		emailIdentifier, identifierErr = canonicalizeEmailIdentifier(attrs.Email)
 		if identifierErr != nil {
-			s.logger.Warnf("ignore invalid LDAP email: provider=%s err=%v", s.ProviderName, identifierErr)
+			logWarnf(ctx, s.logger, "ignore invalid LDAP email: provider=%s err=%v", s.ProviderName, identifierErr)
 		} else {
 			emailEnc, encErr := crypto.EncryptAES(s.aesKey, []byte(emailIdentifier.StoredValue))
 			if encErr != nil {
@@ -782,11 +782,11 @@ func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *
 	if attrs.Email != "" {
 		identifier, err := canonicalizeEmailIdentifier(attrs.Email)
 		if err != nil {
-			s.logger.Warnf("ldap sync attrs: ignore invalid email, provider=%s user_id=%d err=%v", s.ProviderName, userID, err)
+			logWarnf(ctx, s.logger, "ldap sync attrs: ignore invalid email, provider=%s user_id=%d err=%v", s.ProviderName, userID, err)
 		} else {
 			emailEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(identifier.StoredValue))
 			if encryptErr != nil {
-				s.logger.Warnf("ldap sync attrs: encrypt email failed, provider=%s user_id=%d err=%v", s.ProviderName, userID, encryptErr)
+				logWarnf(ctx, s.logger, "ldap sync attrs: encrypt email failed, provider=%s user_id=%d err=%v", s.ProviderName, userID, encryptErr)
 			} else {
 				userUpdate.SetEmailEncrypted(emailEnc)
 				userUpdate.SetEmailHash(identifier.Hash)
@@ -798,9 +798,9 @@ func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *
 
 	if updated {
 		if n, err := userUpdate.Save(ctx); err != nil {
-			s.logger.Warnf("ldap sync attrs: update user failed, provider=%s user_id=%d affected=%d err=%v", s.ProviderName, userID, n, err)
+			logWarnf(ctx, s.logger, "ldap sync attrs: update user failed, provider=%s user_id=%d affected=%d err=%v", s.ProviderName, userID, n, err)
 		} else {
-			s.logger.Infof("ldap sync attrs: update user success, provider=%s user_id=%d affected=%d", s.ProviderName, userID, n)
+			logInfof(ctx, s.logger, "ldap sync attrs: update user success, provider=%s user_id=%d affected=%d", s.ProviderName, userID, n)
 		}
 	}
 
@@ -812,7 +812,7 @@ func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *
 func (s *socialUsers) syncLDAPUserPhone(ctx context.Context, userID int, phone *normalizedPhoneNumber) {
 	phoneEnc, err := s.encryptPhoneNumber(phone.Proto)
 	if err != nil {
-		s.logger.Warnf("ldap phone sync failed: encrypt phone number, provider=%s user_id=%d err=%v", s.ProviderName, userID, err)
+		logWarnf(ctx, s.logger, "ldap phone sync failed: encrypt phone number, provider=%s user_id=%d err=%v", s.ProviderName, userID, err)
 		return
 	}
 
@@ -828,13 +828,13 @@ func (s *socialUsers) syncLDAPUserPhone(ctx context.Context, userID int, phone *
 		Save(ctx)
 	if err != nil {
 		if lion.IsConstraintError(err) {
-			s.logger.Warnf("ldap phone sync skipped: phone number conflict, provider=%s user_id=%d", s.ProviderName, userID)
+			logWarnf(ctx, s.logger, "ldap phone sync skipped: phone number conflict, provider=%s user_id=%d", s.ProviderName, userID)
 			return
 		}
-		s.logger.Warnf("ldap phone sync failed: update user, provider=%s user_id=%d affected=%d err=%v", s.ProviderName, userID, n, err)
+		logWarnf(ctx, s.logger, "ldap phone sync failed: update user, provider=%s user_id=%d affected=%d err=%v", s.ProviderName, userID, n, err)
 		return
 	}
-	s.logger.Infof("ldap phone sync success: provider=%s user_id=%d affected=%d", s.ProviderName, userID, n)
+	logInfof(ctx, s.logger, "ldap phone sync success: provider=%s user_id=%d affected=%d", s.ProviderName, userID, n)
 }
 
 func (s *socialUsers) encryptPhoneNumber(phone *adminv1.PhoneNumber) ([]byte, error) {
@@ -845,13 +845,13 @@ func (s *socialUsers) encryptPhoneNumber(phone *adminv1.PhoneNumber) ([]byte, er
 	return crypto.EncryptAES(s.aesKey, raw)
 }
 
-func (s *socialUsers) normalizeLDAPUserPhone(attrs *ldapUserAttrs) *normalizedPhoneNumber {
+func (s *socialUsers) normalizeLDAPUserPhone(ctx context.Context, attrs *ldapUserAttrs) *normalizedPhoneNumber {
 	if attrs == nil || strings.TrimSpace(attrs.PhoneNumber) == "" {
 		return nil
 	}
 	phone, err := normalizeExternalPhoneNumber(attrs.PhoneNumber, s.ldapCfg.PhoneNumberDefaultRegion)
 	if err != nil {
-		s.logger.Warnf("ldap phone ignored: invalid phone number, provider=%s", s.ProviderName)
+		logWarnf(ctx, s.logger, "ldap phone ignored: invalid phone number, provider=%s", s.ProviderName)
 		return nil
 	}
 	return &phone
@@ -987,10 +987,10 @@ type ldapResolvedUser struct {
 	Attrs          *ldapUserAttrs
 }
 
-func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResolvedUser, error) {
+func (s *socialUsers) findLDAPUser(ctx context.Context, conn *ldap.Conn, username string) (*ldapResolvedUser, error) {
 	searchBase := strings.TrimSpace(s.ldapCfg.UserSearchBase)
 	if searchBase == "" {
-		s.logger.Errorf("ldap search failed: empty user_search_base, provider=%s username=%s", s.ProviderName, username)
+		logErrorf(ctx, s.logger, "ldap search failed: empty user_search_base, provider=%s username=%s", s.ProviderName, username)
 		return nil, fmt.Errorf("ldap user_search_base is required")
 	}
 
@@ -1043,7 +1043,7 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 	default:
 		filter = fmt.Sprintf("(&%s(%s=%s))", filterTemplate, usernameAttribute, escapedUsername)
 	}
-	s.logger.Infof(
+	logInfof(ctx, s.logger,
 		"ldap search debug: provider=%s username=%s search_base=%s username_attr=%s user_id_attr=%s",
 		s.ProviderName,
 		username,
@@ -1065,10 +1065,10 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 	)
 	searchResp, err := conn.Search(searchReq)
 	if err != nil {
-		s.logger.Errorf("ldap search failed: provider=%s username=%s err=%v", s.ProviderName, username, err)
+		logErrorf(ctx, s.logger, "ldap search failed: provider=%s username=%s err=%v", s.ProviderName, username, err)
 		return nil, err
 	}
-	s.logger.Infof(
+	logInfof(ctx, s.logger,
 		"ldap search debug: provider=%s username=%s entry_count=%d",
 		s.ProviderName,
 		username,
@@ -1078,7 +1078,7 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 		return nil, nil
 	}
 	if len(searchResp.Entries) > 1 {
-		s.logger.Warnf("ldap search failed: multiple entries, provider=%s username=%s entry_count=%d", s.ProviderName, username, len(searchResp.Entries))
+		logWarnf(ctx, s.logger, "ldap search failed: multiple entries, provider=%s username=%s entry_count=%d", s.ProviderName, username, len(searchResp.Entries))
 		return nil, fmt.Errorf("ldap user search returned multiple entries")
 	}
 
@@ -1102,7 +1102,7 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 	if phoneNumberAttribute != "" {
 		phoneNumber, phoneErr := singleLDAPAttributeValue(entry, phoneNumberAttribute)
 		if phoneErr != nil {
-			s.logger.Warnf("ldap phone ignored: attribute must be single-valued, provider=%s", s.ProviderName)
+			logWarnf(ctx, s.logger, "ldap phone ignored: attribute must be single-valued, provider=%s", s.ProviderName)
 		} else {
 			attrs.PhoneNumber = phoneNumber
 		}
@@ -1175,7 +1175,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 
 		tx, err := s.db.Tx(ctx)
 		if err != nil {
-			s.logger.Errorf("create external user: provider=%s err=%v", s.ProviderName, err)
+			logErrorf(ctx, s.logger, "create external user: provider=%s err=%v", s.ProviderName, err)
 			return 0, fmt.Errorf("create user failed")
 		}
 		defer func() { _ = tx.Rollback() }()
@@ -1209,7 +1209,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		}
 		username, err := findAvailableUsername(ctx, tx, buildLDAPLocalUsernameBase(s.ProviderName, usernameSource))
 		if err != nil {
-			s.logger.Errorf("allocate external username: provider=%s err=%v", s.ProviderName, err)
+			logErrorf(ctx, s.logger, "allocate external username: provider=%s err=%v", s.ProviderName, err)
 			return 0, fmt.Errorf("create user failed")
 		}
 
@@ -1219,7 +1219,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			var identifierErr error
 			emailIdentifier, identifierErr = canonicalizeEmailIdentifier(profile.Email)
 			if identifierErr != nil {
-				s.logger.Warnf("ignore invalid external email: provider=%s err=%v", s.ProviderName, identifierErr)
+				logWarnf(ctx, s.logger, "ignore invalid external email: provider=%s err=%v", s.ProviderName, identifierErr)
 			} else {
 				emailEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(emailIdentifier.StoredValue))
 				if encryptErr != nil {
@@ -1242,7 +1242,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 				}
 			}
 
-			s.logger.Errorf("create user: %v, to save err: %v", username, err)
+			logErrorf(ctx, s.logger, "create user: %v, to save err: %v", username, err)
 			return 0, fmt.Errorf("create user failed")
 		}
 
@@ -1272,7 +1272,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		if err != nil {
 			_ = tx.Rollback()
 
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			logErrorf(ctx, s.logger, "create user: %v, err: %v", username, err)
 			return 0, fmt.Errorf("create user failed")
 		}
 
@@ -1511,7 +1511,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		if conflict {
 			// UnionID 不参与当前登录匹配。发生冲突时保留已存值，避免在尚未建模
 			// 微信开放平台账号信任域之前错误覆盖跨应用身份标识。
-			s.logger.Warnf(
+			logWarnf(ctx, s.logger,
 				"wechat unionid mismatch: provider=%s identity_id=%d; keeping stored value",
 				s.ProviderName,
 				existIdentity.ID,
@@ -1534,13 +1534,13 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		// 首先确保 "lion_users" 不存在这个用户，开启一个事务
 		tx, err := s.db.Tx(ctx)
 		if err != nil {
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			logErrorf(ctx, s.logger, "create user: %v, err: %v", username, err)
 			return 0, fmt.Errorf("create user failed")
 		}
 
 		_, err = tx.Users.Query().Where(users.UsernameEQ(username)).OnlyID(ctx)
 		if !lion.IsNotFound(err) {
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			logErrorf(ctx, s.logger, "create user: %v, err: %v", username, err)
 			return 0, fmt.Errorf("create user failed")
 		}
 
@@ -1550,7 +1550,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		if err != nil {
 			_ = tx.Rollback()
 
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			logErrorf(ctx, s.logger, "create user: %v, err: %v", username, err)
 			return 0, fmt.Errorf("create user failed")
 		}
 
@@ -1575,7 +1575,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		if err != nil {
 			_ = tx.Rollback()
 
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			logErrorf(ctx, s.logger, "create user: %v, err: %v", username, err)
 			return 0, fmt.Errorf("create user failed")
 		}
 
