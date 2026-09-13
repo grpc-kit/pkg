@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -14,8 +15,8 @@ import (
 	"time"
 
 	"github.com/grpc-kit/pkg/admin/openapiconfig"
+	"github.com/grpc-kit/pkg/logging"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/genproto/googleapis/api/serviceconfig"
 )
@@ -163,7 +164,7 @@ func formatDescription(tags []string, description string) string {
 	return prefix + " " + description
 }
 
-// AutoBridge 将已注册的 gRPC 方法自动转换为 MCP Tools。
+// AutoBridgeWithSlog 将已注册的 gRPC 方法自动转换为 MCP Tools。
 //
 // 工作流程：
 //  1. 构建 selector -> swagger Operation 映射表（用于提取 description / tags）
@@ -182,8 +183,10 @@ func formatDescription(tags []string, description string) string {
 //   - swaggerCfg == nil: 仍注册 tool，但 description 为空
 //   - httpClient == nil: 使用 http.DefaultClient 兜底
 //
-// AutoBridge 永远不会因配置缺失而 panic；遇到无法识别的规则时记录警告并跳过。
-func AutoBridge(
+// AutoBridgeWithSlog 永远不会因配置缺失而 panic；遇到无法识别的规则时记录警告并跳过。
+//
+// 该函数名仅用于分阶段迁移；v0.5.0 将恢复为 AutoBridge，并接收 *slog.Logger。
+func AutoBridgeWithSlog(
 	server *mcp.Server,
 	connFn GRPCConnFunc,
 	httpClient *http.Client,
@@ -193,14 +196,14 @@ func AutoBridge(
 	assets fs.FS,
 	swaggerAssetName string,
 	allowedTags []string,
-	logger *logrus.Entry,
+	logger *slog.Logger,
 ) error {
 	_ = connFn // 暂未使用，预留 gRPC reflection 优化
 	if server == nil {
 		return nil
 	}
 	if logger == nil {
-		logger = logrus.StandardLogger().WithField("component", "mcp-bridge")
+		logger = logging.Fallback().With("component", "mcp-bridge")
 	}
 	if gatewayCfg == nil {
 		return nil
@@ -323,17 +326,17 @@ func bridgeHandler(
 	httpBaseURL, httpMethod, pathTemplate, bodyField string,
 	op *swaggerOperation,
 	toolName string,
-	logger *logrus.Entry,
+	logger *slog.Logger,
 ) (*mcp.CallToolResult, error) {
 	args := parseArguments(req.Params.Arguments)
 
-	logger.Infof("tool=%s invoked method=%s args=%s\n",
-		toolName, httpMethod, truncateForLog(mustJSON(args), debugMaxBodyLen))
+	logger.InfoContext(ctx, fmt.Sprintf("tool=%s invoked method=%s args=%s\n",
+		toolName, httpMethod, truncateForLog(mustJSON(args), debugMaxBodyLen)))
 
 	// 替换 path 参数
 	path, missing := substitutePathParams(pathTemplate, args)
 	if missing != "" {
-		logger.Debugf("tool=%s abort: missing path parameter %q", toolName, missing)
+		logger.DebugContext(ctx, fmt.Sprintf("tool=%s abort: missing path parameter %q", toolName, missing))
 		return errorResult("missing path parameter: " + missing), nil
 	}
 
@@ -358,7 +361,7 @@ func bridgeHandler(
 
 	httpReq, err := http.NewRequestWithContext(ctx, httpMethod, url, bodyReader)
 	if err != nil {
-		logger.Debugf("tool=%s abort: build request error: %v", toolName, err)
+		logger.DebugContext(ctx, fmt.Sprintf("tool=%s abort: build request error: %v", toolName, err))
 		return errorResult("build request: " + err.Error()), nil
 	}
 	if contentSet {
@@ -388,28 +391,28 @@ func bridgeHandler(
 	// 发送前打点：若此日志出现而「gateway responded」未出现，说明阻塞在 httpClient.Do
 	// （gateway 未响应 / 代理劫持 / TLS 握手卡住等）。httpClient.Timeout=30s 兜底，
 	// 超时后会打印 "http call failed after 30s"。
-	logger.Debugf("tool=%s forwarding to gateway: %s %s body=%s auth=%v",
-		toolName, httpMethod, url, truncateForLog(string(bodyBytes), debugMaxBodyLen), authSet)
+	logger.DebugContext(ctx, fmt.Sprintf("tool=%s forwarding to gateway: %s %s body=%s auth=%v",
+		toolName, httpMethod, url, truncateForLog(string(bodyBytes), debugMaxBodyLen), authSet))
 
 	start := time.Now()
 	resp, err := httpClient.Do(httpReq)
 	callDur := time.Since(start)
 	if err != nil {
-		logger.Debugf("tool=%s http call failed after %v: %v", toolName, callDur, err)
+		logger.DebugContext(ctx, fmt.Sprintf("tool=%s http call failed after %v: %v", toolName, callDur, err))
 		return errorResult("http call: " + err.Error()), nil
 	}
 	defer resp.Body.Close()
 
-	logger.Debugf("tool=%s gateway responded status=%d after %v", toolName, resp.StatusCode, callDur)
+	logger.DebugContext(ctx, fmt.Sprintf("tool=%s gateway responded status=%d after %v", toolName, resp.StatusCode, callDur))
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		logger.Debugf("tool=%s read response error after %v: %v", toolName, time.Since(start), err)
+		logger.DebugContext(ctx, fmt.Sprintf("tool=%s read response error after %v: %v", toolName, time.Since(start), err))
 		return errorResult("read response: " + err.Error()), nil
 	}
 
-	logger.Debugf("tool=%s response body (%d bytes): %s",
-		toolName, len(respBody), truncateForLog(string(respBody), debugMaxBodyLen))
+	logger.DebugContext(ctx, fmt.Sprintf("tool=%s response body (%d bytes): %s",
+		toolName, len(respBody), truncateForLog(string(respBody), debugMaxBodyLen)))
 
 	if resp.StatusCode >= 400 {
 		return &mcp.CallToolResult{
