@@ -51,8 +51,8 @@ type TLSConfig struct {
 	ACMECacheDir string
 }
 
-// NewConfigWithSlog returns a Config backed by logger.
-func NewConfigWithSlog(logger *slog.Logger) *Config {
+// NewConfig returns a Config backed by logger.
+func NewConfig(logger *slog.Logger) *Config {
 	c := &Config{
 		logger: logging.OrFallback(logger),
 		opts:   []grpc.ServerOption{},

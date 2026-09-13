@@ -164,7 +164,7 @@ func formatDescription(tags []string, description string) string {
 	return prefix + " " + description
 }
 
-// AutoBridgeWithSlog 将已注册的 gRPC 方法自动转换为 MCP Tools。
+// AutoBridge 将已注册的 gRPC 方法自动转换为 MCP Tools。
 //
 // 工作流程：
 //  1. 构建 selector -> swagger Operation 映射表（用于提取 description / tags）
@@ -183,10 +183,8 @@ func formatDescription(tags []string, description string) string {
 //   - swaggerCfg == nil: 仍注册 tool，但 description 为空
 //   - httpClient == nil: 使用 http.DefaultClient 兜底
 //
-// AutoBridgeWithSlog 永远不会因配置缺失而 panic；遇到无法识别的规则时记录警告并跳过。
-//
-// 该函数名仅用于分阶段迁移；v0.5.0 将恢复为 AutoBridge，并接收 *slog.Logger。
-func AutoBridgeWithSlog(
+// AutoBridge 永远不会因配置缺失而 panic；遇到无法识别的规则时记录警告并跳过。
+func AutoBridge(
 	server *mcp.Server,
 	connFn GRPCConnFunc,
 	httpClient *http.Client,

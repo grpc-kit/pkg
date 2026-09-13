@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -16,7 +17,6 @@ import (
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/rpc"
-	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -110,7 +110,7 @@ func (c *LocalConfig) initSecurity() error {
 
 			provider, err := oidc.NewProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer)
 			if err != nil {
-				c.logger.Debugf("oidc new provider failed will be retry: %v", err)
+				logDebugf(ctx, c.logger, "oidc new provider failed will be retry: %v", err)
 				// 这里返回错误后，就不会触发后续的重试
 				return false, nil
 			}
@@ -134,10 +134,10 @@ func (c *LocalConfig) initSecurity() error {
 
 				return initVerifierFn()
 			}); err != nil {
-				c.logger.Errorf("oidc new provider verifier failed, initializing plugin exit err: %v", err)
+				logErrorf(ctx, c.logger, "oidc new provider verifier failed, initializing plugin exit err: %v", err)
 			}
 
-			c.logger.Infof("oid verifier is ready and polling for /.well-known/openid-configuration has been stopped")
+			logInfof(ctx, c.logger, "oid verifier is ready and polling for /.well-known/openid-configuration has been stopped")
 		}(initVerifierFn)
 	}
 
@@ -346,7 +346,7 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 }
 
 // initAuthClient 用于初始化 opa 客户端
-func (s *SecurityConfig) initAuthClient(ctx context.Context, logger *logrus.Entry, pkgName string, regoBody, dataBody []byte) error {
+func (s *SecurityConfig) initAuthClient(ctx context.Context, logger *slog.Logger, pkgName string, regoBody, dataBody []byte) error {
 	ac := &auth.Config{
 		PackageName: pkgName,
 	}

@@ -64,10 +64,8 @@ type config struct {
 // Options xx
 type Options func(c *config)
 
-// WithSlogLogger 返回一个 Options，用于设置 KnownAdminAPI 的日志记录器。
-//
-// 该函数名仅用于分阶段迁移；v0.5.0 将恢复为 WithLogger，并接收 *slog.Logger。
-func WithSlogLogger(logger *slog.Logger) Options {
+// WithLogger 返回一个 Options，用于设置 KnownAdminAPI 的日志记录器。
+func WithLogger(logger *slog.Logger) Options {
 	return func(c *config) {
 		c.logger = logging.OrFallback(logger)
 	}

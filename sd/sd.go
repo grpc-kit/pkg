@@ -85,8 +85,8 @@ func Register(conn *Connector, name, addr, val string, ttl int64) (Registry, err
 	return nil, errNotSupportDriver
 }
 
-// NewConnectorWithSlog 用于注册的属性设置
-func NewConnectorWithSlog(logger *slog.Logger, driver int, hosts string) (*Connector, error) {
+// NewConnector 用于注册的属性设置
+func NewConnector(logger *slog.Logger, driver int, hosts string) (*Connector, error) {
 	return &Connector{
 		logger: logging.OrFallback(logger),
 		Driver: driver,

@@ -157,14 +157,14 @@ func (c *LocalConfig) runAutoBridge() {
 	}
 
 	if c.rpcConfig == nil || c.rpcConfig.HTTPAddress == "" {
-		c.logger.Infoln("[mcp] HTTPAddress is empty; skip AutoBridge")
+		logInfof(context.Background(), c.logger, "%s\n", "[mcp] HTTPAddress is empty; skip AutoBridge")
 		return
 	}
 
 	// 解析 HTTP 监听地址（getHTTPListenHostPort 内部已将 0.0.0.0 归一化为 127.0.0.1）
 	httpHost, httpPort, addrErr := c.Services.getHTTPListenHostPort()
 	if addrErr != nil {
-		c.logger.Errorf("[mcp] parse HTTP address: %v; skip AutoBridge", addrErr)
+		logErrorf(context.Background(), c.logger, "[mcp] parse HTTP address: %v; skip AutoBridge", addrErr)
 		return
 	}
 	// 检测 HTTP 网关是否启用了 TLS（手动证书或 ACME 自动证书）。
@@ -206,23 +206,23 @@ func (c *LocalConfig) runAutoBridge() {
 		var gwErr, swErr error
 		gatewayCfg, gwErr = c.adminServer.GetMicroserviceGatewayServiceConfig()
 		if gwErr != nil {
-			c.logger.Errorf("[mcp] get gateway service config: %v", gwErr)
+			logErrorf(context.Background(), c.logger, "[mcp] get gateway service config: %v", gwErr)
 		}
 		swaggerCfg, swErr = c.adminServer.GetMicroserviceGatewaySwagger()
 		if swErr != nil {
-			c.logger.Errorf("[mcp] get gateway swagger: %v", swErr)
+			logErrorf(context.Background(), c.logger, "[mcp] get gateway swagger: %v", swErr)
 		}
 		// swagger.json 资产（Phase 6）：用于 AutoBridge 生成完整 input schema（含 body/query 字段）。
 		// 未加载时 assets=nil，AutoBridge 降级为仅 path 参数。
 		swaggerAssets, swaggerAssetName = c.adminServer.GetMicroserviceGatewaySwaggerJSON()
 	} else {
-		c.logger.Infoln("[mcp] adminServer is nil; AutoBridge skipped (no gateway config available)")
+		logInfof(context.Background(), c.logger, "%s\n", "[mcp] adminServer is nil; AutoBridge skipped (no gateway config available)")
 	}
 
 	server := c.mcpServer.MCPServer()
 	allowedTags := c.AllowedTagsForMCP()
 	if err := mcptools.AutoBridge(server, nil, httpClient, httpBaseURL, gatewayCfg, swaggerCfg, swaggerAssets, swaggerAssetName, allowedTags, c.logger); err != nil {
-		c.logger.Errorf("[mcp] autobridge: %v", err)
+		logErrorf(context.Background(), c.logger, "[mcp] autobridge: %v", err)
 	}
 }
 
@@ -635,57 +635,19 @@ func (c *LocalConfig) GetClientDialOption(customOpts ...grpc.DialOption) []grpc.
 
 // GetClientUnaryInterceptor 获取客户端默认一元拦截器
 func (c *LocalConfig) GetClientUnaryInterceptor() []grpc.UnaryClientInterceptor {
-	/*
-		// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
-		logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
-			return false
-		}
-
-		// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
-		logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-			// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-			rpcName := path.Base(fullMethodName)
-			switch rpcName {
-			case "HealthCheck":
-				return false
-			case "Check", "Watch":
-				return false
-			default:
-				return true
-			}
-		})}
-	*/
-
 	var opts []grpc.UnaryClientInterceptor
 	// opts = append(opts, otelgrpc.UnaryClientInterceptor())
 	//opts = append(opts, grpcprometheus.UnaryClientInterceptor)
 	// opts = append(opts, grpcopentracing.UnaryClientInterceptor())
-	// opts = append(opts, grpclogrus.UnaryClientInterceptor(c.logger, logReqFilterOpts...))
-	// opts = append(opts, grpclogrus.PayloadUnaryClientInterceptor(c.logger, logPayloadFilterFunc))
 	return opts
 }
 
 // GetClientStreamInterceptor 获取客户端默认流拦截器
 func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientInterceptor {
-	/*
-		// TODO; 根据 fullMethodName 进行过滤哪些需要记录 payload 的，返回 false 表示不记录
-		logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
-			return false
-		}
-
-		// TODO; 根据 fullMethodName 进行过滤哪些需要记录请求状态的，返回 false 表示不记录
-		logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-			// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-			return err == nil && path.Base(fullMethodName) != "HealthCheck"
-		})}
-	*/
-
 	var opts []grpc.StreamClientInterceptor
 	opts = append(opts, otelgrpc.StreamClientInterceptor())
 	//opts = append(opts, grpcprometheus.StreamClientInterceptor)
 	// opts = append(opts, grpcopentracing.StreamClientInterceptor())
-	// opts = append(opts, grpclogrus.StreamClientInterceptor(c.logger, logReqFilterOpts...))
-	// opts = append(opts, grpclogrus.PayloadStreamClientInterceptor(c.logger, logPayloadFilterFunc))
 	return opts
 }
 
@@ -804,9 +766,9 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			idToken, err := c.Security.verifyBearerToken(ctx, bearerToken)
 			if err != nil {
 				if idToken.Subject != "" || idToken.Email != "" {
-					c.logger.Warnf("bearer token sub: %v email: %v verify err: %v", idToken.Subject, idToken.Email, err)
+					logWarnf(ctx, c.logger, "bearer token sub: %v email: %v verify err: %v", idToken.Subject, idToken.Email, err)
 				} else {
-					c.logger.Warnf("bearer token verify err: %v", err)
+					logWarnf(ctx, c.logger, "bearer token verify err: %v", err)
 				}
 
 				return ctx, errs.Unauthenticated(ctx).Err()
@@ -847,7 +809,7 @@ func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles 
 	// allowed_groups is retained for compatibility; both names contain role codes.
 	allowedRoles, consistent := c.Security.Authorization.effectiveAllowedRoles()
 	if !consistent {
-		c.logger.Errorf("authorization allowed_groups and allowed_roles differ")
+		logErrorf(ctx, c.logger, "authorization allowed_groups and allowed_roles differ")
 		return errs.PermissionDenied(ctx).WithMessage("authorization role allow-lists conflict").Err()
 	}
 	if len(allowedRoles) > 0 && !isSelfService {
@@ -870,7 +832,7 @@ func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles 
 	// 基于 opa 项目进行鉴权
 	allow, err := c.Security.policyAllow(ctx)
 	if err != nil {
-		c.logger.Errorf("check opa policy err: %v", err)
+		logErrorf(ctx, c.logger, "check opa policy err: %v", err)
 		return errs.PermissionDenied(ctx).Err()
 	}
 	if !allow {

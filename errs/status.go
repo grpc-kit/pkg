@@ -104,8 +104,8 @@ func (s *Status) Error() string {
 	return fmt.Sprintf("rpc error: code = %v desc = %s", s.Status, s.Message)
 }
 
-// WithSlogLogger 服务端后台输出错误日志，如果开启 debug 模式则带到接口 detail 返回中
-func (s *Status) WithSlogLogger(logger *slog.Logger, format string, err error) *Status {
+// WithLogger 服务端后台输出错误日志，如果开启 debug 模式则带到接口 detail 返回中
+func (s *Status) WithLogger(logger *slog.Logger, format string, err error) *Status {
 	logger = logging.OrFallback(logger)
 	message := fmt.Sprintf(format, err)
 	// 仅在后端服务输出错误信息

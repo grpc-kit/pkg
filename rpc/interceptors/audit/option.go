@@ -118,8 +118,8 @@ func (o *interceptorOption) auditRequired(grpcService, grpcMethod string) bool {
 // Option is a functional option for audit.
 type Option func(o *interceptorOption)
 
-// WithSlogLogger 调试日志组件
-func WithSlogLogger(logger *slog.Logger) Option {
+// WithLogger 调试日志组件
+func WithLogger(logger *slog.Logger) Option {
 	logger = logging.OrFallback(logger)
 	return func(o *interceptorOption) {
 		o.logger = logger

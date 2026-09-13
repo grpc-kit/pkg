@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
-	"github.com/sirupsen/logrus"
 )
 
 // ProxyConfig xx
@@ -26,7 +26,7 @@ const (
 
 // ProxyBucket xx
 type ProxyBucket struct {
-	logger   *logrus.Entry
+	logger   *slog.Logger
 	client   *http.Client
 	endpoint string
 }

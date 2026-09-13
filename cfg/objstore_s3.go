@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"mime"
 	"os"
 	"path"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/encrypt"
-	"github.com/sirupsen/logrus"
 )
 
 // SSEConfig 用于配置对象存储服务端加密
@@ -45,7 +45,7 @@ type S3Config struct {
 
 // S3Bucket 用于实现 ObjstoreBucket 简化对象存储接口的使用
 type S3Bucket struct {
-	logger          *logrus.Entry
+	logger          *slog.Logger
 	name            string
 	client          *minio.Client
 	defaultSSE      encrypt.ServerSide
@@ -164,7 +164,7 @@ func (b *S3Bucket) Exists(ctx context.Context, objectKey string) (bool, error) {
 func (b *S3Bucket) Upload(ctx context.Context, objectKey string, r io.Reader) (ObjstoreAttributes, error) {
 	size, err := b.tryToGetSize(r)
 	if err != nil {
-		b.logger.Errorf("could not guess file size for multipart upload; upload might be not optimized, name: %v, err: %v", objectKey, err)
+		logErrorf(ctx, b.logger, "could not guess file size for multipart upload; upload might be not optimized, name: %v, err: %v", objectKey, err)
 		size = -1
 	}
 

@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	pklogging "github.com/grpc-kit/pkg/logging"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/encrypt"
-	"github.com/sirupsen/logrus"
 )
 
 // URLStyle 对象存储访问的 url 风格类型
@@ -31,7 +32,7 @@ type ObjstoreConfig struct {
 	Type   string   `mapstructure:"type"`
 	Config S3Config `mapstructure:"config"`
 
-	logger *logrus.Entry
+	logger *slog.Logger
 	bucket ObjstoreBucket // 对象存储更上一层的抽象化
 	client *minio.Client  // 对象存储 minio 的客户端
 }
@@ -213,7 +214,7 @@ func (o *ObjstoreConfig) getS3Bucket() (*S3Bucket, error) {
 			}
 			sse, err = encrypt.NewSSEKMS(o.Config.SSEConfig.KMSKeyID, o.Config.SSEConfig.KMSEncryptionContext)
 			if err != nil {
-				o.logger.Errorln(err)
+				o.logger.Error(fmt.Sprintln(err))
 				return nil, fmt.Errorf("initialize s3 client SSE-KMS error")
 			}
 		case "SSE-C":
@@ -223,7 +224,7 @@ func (o *ObjstoreConfig) getS3Bucket() (*S3Bucket, error) {
 			}
 			sse, err = encrypt.NewSSEC(key)
 			if err != nil {
-				o.logger.Errorln(err)
+				o.logger.Error(fmt.Sprintln(err))
 				return nil, fmt.Errorf("initialize s3 client SSE-C")
 			}
 		case "SSE-S3":
@@ -289,13 +290,9 @@ func (o *ObjstoreConfig) getProxyBucket() (*ProxyBucket, error) {
 }
 
 // BucketClient 获取对象存储客户端实例
-func (o *ObjstoreConfig) BucketClient(logger *logrus.Entry) (ObjstoreBucket, error) {
+func (o *ObjstoreConfig) BucketClient(logger *slog.Logger) (ObjstoreBucket, error) {
 	// 标准步骤：初始化日志组件
-	if logger != nil {
-		o.logger = logger
-	} else {
-		o.logger = logrus.NewEntry(logrus.New())
-	}
+	o.logger = pklogging.OrFallback(logger)
 
 	// 标准步骤：验证配置是否合法
 	bucket, err := o.validAndBucket()

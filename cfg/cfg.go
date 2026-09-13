@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -26,7 +27,6 @@ import (
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
 	"github.com/redis/go-redis/v9"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
@@ -75,7 +75,7 @@ type LocalConfig struct {
 	AIConnector *AIConnectorConfig `json:",omitempty"` // 智能连接配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
-	logger      *logrus.Entry
+	logger      *slog.Logger
 	srvdis      sd.Registry
 	rpcConfig   *rpc.Config
 	rpcServer   *rpc.Server
@@ -390,7 +390,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 	if c.Services.hasEnableIntegrationAdminServer() {
 		client, err := c.GetAdminDatabaseLion()
 		if err != nil {
-			c.logger.Infof("known admin service enabled but database not, some /builtin API will be unavailable.")
+			logInfof(ctx, c.logger, "known admin service enabled but database not, some /builtin API will be unavailable.")
 		}
 
 		admOpts := []admin.Options{
@@ -430,7 +430,7 @@ func (c *LocalConfig) Deregister() error {
 	// 关闭 MCP Server 活跃 sessions（在 HTTP server 关闭前）
 	if c.mcpServer != nil {
 		if err := c.mcpServer.Close(); err != nil {
-			c.logger.Warnf("close mcp server: %v", err)
+			logWarnf(ctx, c.logger, "close mcp server: %v", err)
 		}
 	}
 
@@ -815,13 +815,13 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 			time.Sleep(3 * time.Second)
 
 			if err := tryConnect(c.Services.PublicAddress); err != nil {
-				c.logger.Errorf("register service the grpc health check err: %v, retry_count: %v, retry_max: %v",
+				logErrorf(ctx, c.logger, "register service the grpc health check err: %v, retry_count: %v, retry_max: %v",
 					err, retryCount, retryMax)
 
 				continue
 			}
 
-			c.logger.Infof("register service the grpc health check public_address: %v success",
+			logInfof(ctx, c.logger, "register service the grpc health check public_address: %v success",
 				c.Services.PublicAddress)
 			break
 		}
@@ -829,7 +829,7 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 		if retryCount >= retryMax {
 			allowRegistry = false
 
-			c.logger.Errorf("register service the grpc health check fail public_address: %v will not public to registry",
+			logErrorf(ctx, c.logger, "register service the grpc health check fail public_address: %v will not public to registry",
 				c.Services.PublicAddress)
 
 			// TODO; 达到最大检测次数，但后端服务端口还未正常，此时应该发送信号退出应用，不允许注册
@@ -839,7 +839,7 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 		if allowRegistry {
 			reg, err := sd.Register(connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
 			if err != nil {
-				c.logger.Errorf("register service err: %v%v", err, "\n")
+				logErrorf(ctx, c.logger, "register service err: %v%v", err, "\n")
 			}
 
 			c.srvdis = reg

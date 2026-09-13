@@ -261,10 +261,8 @@ func (c *Client) Allow(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
-// WithSlogLoggerOption 设置日志记录器。
-//
-// 该方法仅用于分阶段迁移；v0.5.0 将恢复为 WithLoggerOption，并接收 *slog.Logger。
-func (c *Client) WithSlogLoggerOption(logger *slog.Logger) *Client {
+// WithLoggerOption 设置日志记录器。
+func (c *Client) WithLoggerOption(logger *slog.Logger) *Client {
 	c.logger = logging.OrFallback(logger)
 
 	return c
