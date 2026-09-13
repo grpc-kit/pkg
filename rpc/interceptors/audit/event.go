@@ -194,12 +194,12 @@ func (e *EventData) sendEvent(ctx context.Context) error {
 				if cloudevents.IsUndelivered(e.opt.client.Send(ctx, ce)) {
 					rpc.MetricAuditEventSendErrorsIncr(ctx)
 
-					e.opt.logger.Warnf("unable to send audit event, this request %v will be not audited", e.GRPCMethod)
+					e.opt.logger.WarnContext(ctx, fmt.Sprintf("unable to send audit event, this request %v will be not audited", e.GRPCMethod))
 				}
 			} else {
 				rpc.MetricAuditEventSendErrorsIncr(ctx)
 
-				e.opt.logger.Warnf("failed to set event data: %v", err)
+				e.opt.logger.WarnContext(ctx, fmt.Sprintf("failed to set event data: %v", err))
 			}
 		}()
 
@@ -210,7 +210,7 @@ func (e *EventData) sendEvent(ctx context.Context) error {
 	if err != nil {
 		rpc.MetricAuditEventSendErrorsIncr(ctx)
 
-		e.opt.logger.Errorf("failed to set event data: %v", err)
+		e.opt.logger.ErrorContext(ctx, fmt.Sprintf("failed to set event data: %v", err))
 	}
 
 	return fmt.Errorf("unable to send audit event, this request will be aborted")

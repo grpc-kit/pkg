@@ -3,19 +3,21 @@ package audit
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/cloudevents/sdk-go/v2/client"
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/protobuf/encoding/protojson"
 	"k8s.io/utils/pointer"
+
+	"github.com/grpc-kit/pkg/logging"
 )
 
 var (
 	defaultOption = &interceptorOption{
-		logger:      logrus.NewEntry(logrus.StandardLogger()),
+		logger:      logging.Fallback(),
 		level:       LevelRequest,
 		serviceName: "unknown",
 		marshal:     protojson.MarshalOptions{},
@@ -24,7 +26,7 @@ var (
 )
 
 type interceptorOption struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 	client client.Client
 
 	level Level
@@ -69,10 +71,10 @@ func (o *interceptorOption) sendAuditEvent(ctx context.Context, data *EventData)
 		go func() {
 			if err := ce.SetData(event.ApplicationJSON, data); err == nil {
 				if cloudevents.IsUndelivered(o.client.Send(ctx, ce)) {
-					o.logger.Warnf("unable to send audit event, this request %v will be not audited", data.GRPCMethod)
+					o.logger.WarnContext(ctx, fmt.Sprintf("unable to send audit event, this request %v will be not audited", data.GRPCMethod))
 				}
 			} else {
-				o.logger.Warnf("failed to set event data: %v", err)
+				o.logger.WarnContext(ctx, fmt.Sprintf("failed to set event data: %v", err))
 			}
 		}()
 
@@ -116,8 +118,9 @@ func (o *interceptorOption) auditRequired(grpcService, grpcMethod string) bool {
 // Option is a functional option for audit.
 type Option func(o *interceptorOption)
 
-// WithLogger 调试日志组件
-func WithLogger(logger *logrus.Entry) Option {
+// WithSlogLogger 调试日志组件
+func WithSlogLogger(logger *slog.Logger) Option {
+	logger = logging.OrFallback(logger)
 	return func(o *interceptorOption) {
 		o.logger = logger
 	}

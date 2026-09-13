@@ -6,17 +6,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	rbacv3 "github.com/envoyproxy/go-control-plane/envoy/config/rbac/v3"
 	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
+	"github.com/grpc-kit/pkg/logging"
 	"github.com/open-policy-agent/opa/v1/rego"
 	"github.com/open-policy-agent/opa/v1/sdk"
 	"github.com/open-policy-agent/opa/v1/storage/inmem"
 	"github.com/open-policy-agent/opa/v1/util"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -24,7 +25,7 @@ import (
 
 // Client 认证鉴权客户端
 type Client struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 	config *Config
 
 	envoy    *envoyProxy
@@ -42,7 +43,7 @@ func NewClient(ctx context.Context, config *Config) (*Client, error) {
 	c := &Client{
 		config:   config,
 		envoy:    &envoyProxy{},
-		logger:   logrus.NewEntry(logrus.New()),
+		logger:   logging.Fallback(),
 		rbacData: &rbacv3.RBAC{},
 	}
 
@@ -86,13 +87,13 @@ func (c *Client) initOPARego(ctx context.Context) error {
 	if c.config.OPARego.DataProviderFunc != nil {
 		dynData, provErr := c.config.OPARego.DataProviderFunc(ctx)
 		if provErr != nil {
-			c.logger.Warnf("opa dynamic data provider error, fallback to static config: %v", provErr)
+			c.logger.WarnContext(ctx, fmt.Sprintf("opa dynamic data provider error, fallback to static config: %v", provErr))
 		} else {
 			dynNCL, _ := c.nonCommentLineLength(dynData)
 			if dynNCL > 0 {
 				dataRBAC = dynData
 			} else {
-				c.logger.Warn("opa dynamic data provider returned empty data, fallback to static config")
+				c.logger.WarnContext(ctx, "opa dynamic data provider returned empty data, fallback to static config")
 			}
 		}
 	}
@@ -212,7 +213,7 @@ func (c *Client) Allow(ctx context.Context) (bool, error) {
 		return false, err
 	}
 
-	c.logger.Debugf("opa auth input: %s", string(util.MustMarshalJSON(input)))
+	c.logger.DebugContext(ctx, fmt.Sprintf("opa auth input: %s", string(util.MustMarshalJSON(input))))
 
 	if c.config.OPARego != nil {
 		var rs rego.ResultSet
@@ -260,11 +261,11 @@ func (c *Client) Allow(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
-// WithLoggerOption 设置日志记录器
-func (c *Client) WithLoggerOption(logger *logrus.Entry) *Client {
-	if logger != nil {
-		c.logger = logger
-	}
+// WithSlogLoggerOption 设置日志记录器。
+//
+// 该方法仅用于分阶段迁移；v0.5.0 将恢复为 WithLoggerOption，并接收 *slog.Logger。
+func (c *Client) WithSlogLoggerOption(logger *slog.Logger) *Client {
+	c.logger = logging.OrFallback(logger)
 
 	return c
 }

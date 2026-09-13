@@ -3,9 +3,9 @@ package errs
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,6 +16,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
+	"github.com/grpc-kit/pkg/logging"
 )
 
 // Status 统一错误响应内容
@@ -103,20 +104,18 @@ func (s *Status) Error() string {
 	return fmt.Sprintf("rpc error: code = %v desc = %s", s.Status, s.Message)
 }
 
-// WithLogger 服务端后台输出错误日志，如果开启 debug 模式则带到接口 detail 返回中
-func (s *Status) WithLogger(logger *logrus.Entry, format string, err error) *Status {
-	if logger == nil {
-		return s
-	}
-
+// WithSlogLogger 服务端后台输出错误日志，如果开启 debug 模式则带到接口 detail 返回中
+func (s *Status) WithSlogLogger(logger *slog.Logger, format string, err error) *Status {
+	logger = logging.OrFallback(logger)
+	message := fmt.Sprintf(format, err)
 	// 仅在后端服务输出错误信息
-	logger.Errorf(format, err)
+	logger.Error(message)
 
 	// 判断是否为开启 debug 模式，如是则填充至 anyType 中
-	if logger.Logger != nil && logger.Logger.Level.String() == "debug" {
+	if logger.Enabled(context.Background(), slog.LevelDebug) {
 		l := &errdetails.DebugInfo{
 			StackEntries: nil,
-			Detail:       fmt.Sprintf(format, err),
+			Detail:       message,
 		}
 
 		s.anyType = append(s.anyType, l)
