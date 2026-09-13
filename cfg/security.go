@@ -44,7 +44,7 @@ type OPAEnvoyPlugin struct {
 }
 
 // initSecurity 初始化认证
-func (c *LocalConfig) initSecurity() error {
+func (c *LocalConfig) initSecurity(ctx context.Context) error {
 	if c.Security == nil {
 		c.Security = &SecurityConfig{Enable: false}
 	}
@@ -86,8 +86,6 @@ func (c *LocalConfig) initSecurity() error {
 		if c.Security.Authentication.OIDCProvider.Issuer == "" {
 			return fmt.Errorf("security authentication not found oidc issuer")
 		}
-
-		ctx := context.TODO()
 
 		initVerifierFn := func() (done bool, err error) {
 			oidcConfig := &oidc.Config{}
@@ -416,7 +414,7 @@ func (s *SecurityConfig) addHTTPHandler(handler http.Handler) http.Handler {
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.TODO()
+		ctx := r.Context()
 		ctx = s.injectAuthHTTPHeader(ctx, r)
 
 		ok, err := s.policyAllow(ctx)
@@ -425,7 +423,7 @@ func (s *SecurityConfig) addHTTPHandler(handler http.Handler) http.Handler {
 			return
 		}
 
-		handler.ServeHTTP(w, r)
+		handler.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
@@ -494,8 +492,7 @@ func (s *SecurityConfig) VerifyHTTPRequest(r *http.Request) error {
 			return fmt.Errorf("empty bearer token")
 		}
 
-		ctx := context.TODO()
-		_, err := s.verifyBearerToken(ctx, bearerToken)
+		_, err := s.verifyBearerToken(r.Context(), bearerToken)
 		if err != nil {
 			return fmt.Errorf("invalid bearer token: %w", err)
 		}

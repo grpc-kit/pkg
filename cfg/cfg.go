@@ -307,6 +307,11 @@ func New(v *viper.Viper) (*LocalConfig, error) {
 
 // Init 用于根据配置初始化各个实例，初始化需注意空指针判断
 func (c *LocalConfig) Init() error {
+	return c.InitContext(context.Background())
+}
+
+// InitContext 使用调用方上下文根据配置初始化各个实例。
+func (c *LocalConfig) InitContext(ctx context.Context) error {
 	if err := c.initDebugger(); err != nil {
 		return err
 	}
@@ -315,7 +320,7 @@ func (c *LocalConfig) Init() error {
 		return err
 	}
 
-	if err := c.initSecurity(); err != nil {
+	if err := c.initSecurity(ctx); err != nil {
 		return err
 	}
 
@@ -327,7 +332,7 @@ func (c *LocalConfig) Init() error {
 		return err
 	}
 
-	if err := c.initObservables(); err != nil {
+	if err := c.initObservables(ctx); err != nil {
 		return err
 	}
 
@@ -448,7 +453,7 @@ func (c *LocalConfig) DeregisterContext(ctx context.Context) error {
 		return nil
 	}
 
-	return c.srvdis.Deregister()
+	return c.srvdis.Deregister(ctx)
 }
 
 // GetIndependent 用于获取各个微服务独立的配置
@@ -822,7 +827,11 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 		for retryCount < retryMax {
 			retryCount += 1
 
-			time.Sleep(3 * time.Second)
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(3 * time.Second):
+			}
 
 			if err := tryConnect(c.Services.PublicAddress); err != nil {
 				logErrorf(ctx, c.logger, "register service the grpc health check err: %v, retry_count: %v, retry_max: %v",
@@ -847,7 +856,7 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 
 		// TODO; 如果后端grpc服务未正常注册，前端必须配合http健康检测，http状态码为503
 		if allowRegistry {
-			reg, err := sd.Register(connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
+			reg, err := sd.RegisterContext(ctx, connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
 			if err != nil {
 				logErrorf(ctx, c.logger, "register service err: %v%v", err, "\n")
 			}
