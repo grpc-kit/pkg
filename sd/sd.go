@@ -33,8 +33,8 @@ var (
 type Registry interface {
 	// Register 注册服务信息至etcd等
 	Register(ctx context.Context, name, addr, val string, ttl int64) error
-	// Deregister 删除服务信息至etcd等
-	Deregister() error
+	// Deregister 使用调用方上下文删除服务信息至etcd等
+	Deregister(ctx context.Context) error
 	// Build 实现 resolver.Builder
 	Build(resolver.Target, resolver.ClientConn, resolver.BuildOptions) (resolver.Resolver, error)
 	// Scheme 实现 resolver.Builder
@@ -64,6 +64,11 @@ func Home(prefix, namespace string) {
 
 // Register 注册一个服务
 func Register(conn *Connector, name, addr, val string, ttl int64) (Registry, error) {
+	return RegisterContext(context.Background(), conn, name, addr, val, ttl)
+}
+
+// RegisterContext 使用调用方上下文注册一个服务。
+func RegisterContext(ctx context.Context, conn *Connector, name, addr, val string, ttl int64) (Registry, error) {
 	if conn == nil {
 		return nil, errConnectorIsNil
 	}
@@ -75,7 +80,7 @@ func Register(conn *Connector, name, addr, val string, ttl int64) (Registry, err
 			return client, err
 		}
 
-		if err := client.Register(context.TODO(), name, addr, val, ttl); err != nil {
+		if err := client.Register(ctx, name, addr, val, ttl); err != nil {
 			return client, err
 		}
 

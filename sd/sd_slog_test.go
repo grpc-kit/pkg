@@ -2,12 +2,16 @@ package sd
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"log/slog"
 	"strings"
 	"testing"
 
 	pklogging "github.com/grpc-kit/pkg/logging"
 )
+
+var _ Registry = (*etcdv3Client)(nil)
 
 func TestNewConnector(t *testing.T) {
 	var output bytes.Buffer
@@ -37,5 +41,48 @@ func TestNewConnectorNilUsesFallback(t *testing.T) {
 	}
 	if connector.logger != pklogging.Fallback() {
 		t.Fatal("nil slog logger did not use logging.Fallback")
+	}
+}
+
+func TestRegisterContextRejectsCanceledContext(t *testing.T) {
+	connector, err := NewConnector(nil, ETCDV3, "127.0.0.1:2379")
+	if err != nil {
+		t.Fatalf("NewConnector() error = %v", err)
+	}
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+
+	registry, err := RegisterContext(ctx, connector, "service", "127.0.0.1:10081", "{}", 30)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("RegisterContext() error = %v, want context.Canceled", err)
+	}
+	if client, ok := registry.(*etcdv3Client); ok {
+		if closeErr := client.client.Close(); closeErr != nil {
+			t.Errorf("close etcd client: %v", closeErr)
+		}
+	}
+}
+
+func TestEtcdv3DeregisterUsesCanceledContext(t *testing.T) {
+	connector, err := NewConnector(nil, ETCDV3, "127.0.0.1:2379")
+	if err != nil {
+		t.Fatalf("NewConnector() error = %v", err)
+	}
+	client, err := newEtcdv3Client("service", "default", connector)
+	if err != nil {
+		t.Fatalf("newEtcdv3Client() error = %v", err)
+	}
+	t.Cleanup(func() {
+		if closeErr := client.client.Close(); closeErr != nil {
+			t.Errorf("close etcd client: %v", closeErr)
+		}
+	})
+	client.serviceName = "service"
+	client.serviceAddr = "127.0.0.1:10081"
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+
+	if err := client.Deregister(ctx); !errors.Is(err, context.Canceled) {
+		t.Fatalf("Deregister() error = %v, want context.Canceled", err)
 	}
 }

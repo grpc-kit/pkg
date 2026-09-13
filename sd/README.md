@@ -34,10 +34,12 @@ https://node3.example.com:2379
 ```go
 
 import (
+    "context"
     "log/slog"
     "os"
 )
 
+ctx := context.Background()
 serviceName := "opensearch.v1.monitors"
 publicAddress := "lb.example.com:10080"
 
@@ -59,12 +61,12 @@ tls := &sd.TLSInfo{
 connector.WithTLSInfo(tls)
 */
 
-reg, err := sd.Register(connector, serviceName, publicAddress, "register value", 30)
+reg, err := sd.RegisterContext(ctx, connector, serviceName, publicAddress, "register value", 30)
 if err != nil {
 }
 
 defer func() {
-    if err := reg.Deregister(); err != nil {
+    if err := reg.Deregister(ctx); err != nil {
         return
     }
 }()

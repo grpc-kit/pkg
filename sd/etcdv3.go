@@ -70,6 +70,10 @@ func newEtcdv3Client(prefix, namespace string, conn *Connector) (*etcdv3Client, 
 
 // Register 注册服务
 func (e *etcdv3Client) Register(ctx context.Context, name, addr, val string, ttl int64) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	e.serviceName = name
 	e.serviceAddr = addr
 
@@ -79,11 +83,18 @@ func (e *etcdv3Client) Register(ctx context.Context, name, addr, val string, ttl
 			if err == nil {
 				err = e.eatKeepAliveMessage(ctx, kap)
 			}
+			if ctx.Err() != nil {
+				return
+			}
 
 			e.logger.ErrorContext(ctx, fmt.Sprintf("etcdv3 registry found fails, will be retry later, reason: %v", err))
 
 			// TODO; 是否提取为变量
-			time.Sleep(5 * time.Second)
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(5 * time.Second):
+			}
 		}
 	}()
 
@@ -91,8 +102,8 @@ func (e *etcdv3Client) Register(ctx context.Context, name, addr, val string, ttl
 }
 
 // Deregister 取消注册
-func (e *etcdv3Client) Deregister() error {
-	_, err := e.client.Delete(context.Background(), e.regEndpointPath())
+func (e *etcdv3Client) Deregister(ctx context.Context) error {
+	_, err := e.client.Delete(ctx, e.regEndpointPath())
 	if err != nil {
 		return err
 	}
