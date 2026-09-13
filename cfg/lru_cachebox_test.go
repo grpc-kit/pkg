@@ -1,16 +1,36 @@
 package cfg
 
 import (
+	"bytes"
 	"context"
+	"log/slog"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	pklogging "github.com/grpc-kit/pkg/logging"
 )
 
 func newTestMemoryCache() *memoryCache {
-	logger := logrus.NewEntry(logrus.New())
-	return newMemoryCache(logger, 100)
+	return newMemoryCache(pklogging.Fallback(), 100)
+}
+
+func TestNewRedisCacheInvalidTLSLogsThenPanics(t *testing.T) {
+	var output bytes.Buffer
+	logger := pklogging.New(&output, pklogging.FormatJSON, &slog.HandlerOptions{Level: slog.LevelDebug})
+	config := RedisCacheboxConfig{TLSClientConfig: &TLSConfig{CertFile: "client.crt"}}
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("newRedisCache did not preserve panic behavior")
+		}
+		if !strings.Contains(output.String(), `"level":"panic"`) ||
+			!strings.Contains(output.String(), `"msg":"redis tls config error:`) {
+			t.Fatalf("panic log output = %q", output.String())
+		}
+	}()
+
+	newRedisCache(logger, config)
 }
 
 func TestMemoryCache_SetValue_NeverExpires(t *testing.T) {

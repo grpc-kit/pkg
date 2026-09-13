@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +13,6 @@ import (
 
 	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/genproto/googleapis/api/serviceconfig"
 
@@ -357,7 +358,7 @@ func TestPathParamNames(t *testing.T) {
 func TestBridgeHandlerNestedPathParamMissing(t *testing.T) {
 	transport := &countingErrorTransport{}
 	client := &http.Client{Transport: transport}
-	logger := logrus.NewEntry(logrus.New())
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 	for _, arguments := range []json.RawMessage{
 		json.RawMessage(`{}`),
