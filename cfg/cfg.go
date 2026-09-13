@@ -22,6 +22,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion"
+	pklogging "github.com/grpc-kit/pkg/logging"
 	"github.com/grpc-kit/pkg/mcp"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
@@ -388,7 +389,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 	}
 
 	if c.Services.hasEnableIntegrationAdminServer() {
-		client, err := c.GetAdminDatabaseLion()
+		client, err := c.getAdminDatabaseLion(ctx)
 		if err != nil {
 			logInfof(ctx, c.logger, "known admin service enabled but database not, some /builtin API will be unavailable.")
 		}
@@ -424,13 +425,17 @@ func (c *LocalConfig) Register(ctx context.Context,
 
 // Deregister 用于撤销注册中心上的服务信息
 func (c *LocalConfig) Deregister() error {
+	return c.DeregisterContext(context.Background())
+}
+
+// DeregisterContext 用于使用调用方上下文撤销注册中心上的服务信息。
+func (c *LocalConfig) DeregisterContext(ctx context.Context) error {
 	// TODO; 释放各总资源
-	ctx := context.TODO()
 
 	// 关闭 MCP Server 活跃 sessions（在 HTTP server 关闭前）
 	if c.mcpServer != nil {
 		if err := c.mcpServer.Close(); err != nil {
-			logWarnf(ctx, c.logger, "close mcp server: %v", err)
+			pklogging.OrFallback(c.logger).WarnContext(ctx, "close mcp server", "error", err)
 		}
 	}
 
@@ -500,6 +505,11 @@ func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
 
 // HTTPHandlerFrontend 用于处理前端相关服务
 func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) error {
+	return c.HTTPHandlerFrontendContext(context.Background(), mux, assets)
+}
+
+// HTTPHandlerFrontendContext 使用调用方上下文处理前端静态数据及 MCP 自动桥接。
+func (c *LocalConfig) HTTPHandlerFrontendContext(ctx context.Context, mux *http.ServeMux, assets fs.FS) error {
 	if c.adminServer != nil {
 		if err := c.adminServer.SetMicroserviceGatewayYAML(assets); err != nil {
 			return err
@@ -508,7 +518,7 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 	// AutoBridge / BuiltinResources 不依赖 adminServer 是否启用：
 	// adminServer 为 nil 时底层函数对 nil 安全降级（AutoBridge 跳过、version resource
 	// 和 getting_started prompt 仍注册），使 MCP 可独立于 admin 后台使用（方案 C）。
-	c.runAutoBridge()
+	c.runAutoBridge(ctx)
 	c.runMCPBuiltinResources()
 
 	if !*c.Frontend.Enable {

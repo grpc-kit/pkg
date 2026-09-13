@@ -20,9 +20,9 @@ func NewHandler(w io.Writer, format Format, options *slog.HandlerOptions) slog.H
 	configured.ReplaceAttr = chainReplaceAttr(configured.ReplaceAttr)
 
 	if format == FormatJSON {
-		return &reservedHandler{handler: slog.NewJSONHandler(w, configured), root: true}
+		return &reservedHandler{handler: &traceContextHandler{handler: slog.NewJSONHandler(w, configured)}, root: true}
 	}
-	return &reservedHandler{handler: slog.NewTextHandler(w, configured), root: true}
+	return &reservedHandler{handler: &traceContextHandler{handler: slog.NewTextHandler(w, configured)}, root: true}
 }
 
 // New constructs a logger backed by NewHandler.

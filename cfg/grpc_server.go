@@ -43,6 +43,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/errs"
+	pklogging "github.com/grpc-kit/pkg/logging"
 	"github.com/grpc-kit/pkg/mcp"
 	mcptools "github.com/grpc-kit/pkg/mcp/tools"
 	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
@@ -151,20 +152,21 @@ func (c *LocalConfig) MCPServerInstance() *mcp.Server {
 // AutoBridge 安全跳过（零 tool 注册）。MCP Server 本身仍可对外服务，
 // 用户可通过 MCPServerInstance() 扩展点自行注册自定义 Tool。
 // 幂等：server.AddTool 对同名 tool 为覆盖语义，可安全重复调用。
-func (c *LocalConfig) runAutoBridge() {
+func (c *LocalConfig) runAutoBridge(ctx context.Context) {
 	if c.mcpServer == nil {
 		return
 	}
+	logger := pklogging.OrFallback(c.logger)
 
 	if c.rpcConfig == nil || c.rpcConfig.HTTPAddress == "" {
-		logInfof(context.Background(), c.logger, "%s\n", "[mcp] HTTPAddress is empty; skip AutoBridge")
+		logger.InfoContext(ctx, "[mcp] HTTPAddress is empty; skip AutoBridge")
 		return
 	}
 
 	// 解析 HTTP 监听地址（getHTTPListenHostPort 内部已将 0.0.0.0 归一化为 127.0.0.1）
 	httpHost, httpPort, addrErr := c.Services.getHTTPListenHostPort()
 	if addrErr != nil {
-		logErrorf(context.Background(), c.logger, "[mcp] parse HTTP address: %v; skip AutoBridge", addrErr)
+		logger.ErrorContext(ctx, "[mcp] parse HTTP address; skip AutoBridge", "error", addrErr)
 		return
 	}
 	// 检测 HTTP 网关是否启用了 TLS（手动证书或 ACME 自动证书）。
@@ -206,23 +208,23 @@ func (c *LocalConfig) runAutoBridge() {
 		var gwErr, swErr error
 		gatewayCfg, gwErr = c.adminServer.GetMicroserviceGatewayServiceConfig()
 		if gwErr != nil {
-			logErrorf(context.Background(), c.logger, "[mcp] get gateway service config: %v", gwErr)
+			logger.ErrorContext(ctx, "[mcp] get gateway service config", "error", gwErr)
 		}
 		swaggerCfg, swErr = c.adminServer.GetMicroserviceGatewaySwagger()
 		if swErr != nil {
-			logErrorf(context.Background(), c.logger, "[mcp] get gateway swagger: %v", swErr)
+			logger.ErrorContext(ctx, "[mcp] get gateway swagger", "error", swErr)
 		}
 		// swagger.json 资产（Phase 6）：用于 AutoBridge 生成完整 input schema（含 body/query 字段）。
 		// 未加载时 assets=nil，AutoBridge 降级为仅 path 参数。
 		swaggerAssets, swaggerAssetName = c.adminServer.GetMicroserviceGatewaySwaggerJSON()
 	} else {
-		logInfof(context.Background(), c.logger, "%s\n", "[mcp] adminServer is nil; AutoBridge skipped (no gateway config available)")
+		logger.InfoContext(ctx, "[mcp] adminServer is nil; AutoBridge skipped (no gateway config available)")
 	}
 
 	server := c.mcpServer.MCPServer()
 	allowedTags := c.AllowedTagsForMCP()
 	if err := mcptools.AutoBridge(server, nil, httpClient, httpBaseURL, gatewayCfg, swaggerCfg, swaggerAssets, swaggerAssetName, allowedTags, c.logger); err != nil {
-		logErrorf(context.Background(), c.logger, "[mcp] autobridge: %v", err)
+		logger.ErrorContext(ctx, "[mcp] autobridge", "error", err)
 	}
 }
 

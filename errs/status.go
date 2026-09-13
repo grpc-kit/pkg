@@ -106,13 +106,18 @@ func (s *Status) Error() string {
 
 // WithLogger 服务端后台输出错误日志，如果开启 debug 模式则带到接口 detail 返回中
 func (s *Status) WithLogger(logger *slog.Logger, format string, err error) *Status {
+	return s.WithLoggerContext(context.Background(), logger, format, err)
+}
+
+// WithLoggerContext 使用调用方上下文输出服务端错误日志，如果开启 debug 模式则带到接口 detail 返回中。
+func (s *Status) WithLoggerContext(ctx context.Context, logger *slog.Logger, format string, err error) *Status {
 	logger = logging.OrFallback(logger)
 	message := fmt.Sprintf(format, err)
 	// 仅在后端服务输出错误信息
-	logger.Error(message)
+	logger.ErrorContext(ctx, message)
 
 	// 判断是否为开启 debug 模式，如是则填充至 anyType 中
-	if logger.Enabled(context.Background(), slog.LevelDebug) {
+	if logger.Enabled(ctx, slog.LevelDebug) {
 		l := &errdetails.DebugInfo{
 			StackEntries: nil,
 			Detail:       message,

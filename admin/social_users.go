@@ -1484,7 +1484,7 @@ func (s *socialUsers) weixinExchange(ctx context.Context, code string) (*wechatC
 	}
 
 	wx := newWechatOpen(s.logger, s.oauthCfg.ClientID, s.secret)
-	return wx.code2Session(s.oauthCfg.AuthorizationEndpoint, code)
+	return wx.code2Session(ctx, s.oauthCfg.AuthorizationEndpoint, code)
 }
 
 func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2SessionResponse) (int, error) {
