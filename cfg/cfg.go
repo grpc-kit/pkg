@@ -305,13 +305,8 @@ func New(v *viper.Viper) (*LocalConfig, error) {
 	return &lc, nil
 }
 
-// Init 用于根据配置初始化各个实例，初始化需注意空指针判断
-func (c *LocalConfig) Init() error {
-	return c.InitContext(context.Background())
-}
-
-// InitContext 使用调用方上下文根据配置初始化各个实例。
-func (c *LocalConfig) InitContext(ctx context.Context) error {
+// Init 使用调用方上下文根据配置初始化各个实例，初始化需注意空指针判断。
+func (c *LocalConfig) Init(ctx context.Context) error {
 	if err := c.initDebugger(); err != nil {
 		return err
 	}
@@ -324,7 +319,7 @@ func (c *LocalConfig) InitContext(ctx context.Context) error {
 		return err
 	}
 
-	if err := c.initDatabase(); err != nil {
+	if err := c.initDatabase(ctx); err != nil {
 		return err
 	}
 
@@ -428,13 +423,8 @@ func (c *LocalConfig) Register(ctx context.Context,
 	return c.registerGateway(ctx, gw, opts...)
 }
 
-// Deregister 用于撤销注册中心上的服务信息
-func (c *LocalConfig) Deregister() error {
-	return c.DeregisterContext(context.Background())
-}
-
-// DeregisterContext 用于使用调用方上下文撤销注册中心上的服务信息。
-func (c *LocalConfig) DeregisterContext(ctx context.Context) error {
+// Deregister 使用调用方上下文撤销注册中心上的服务信息。
+func (c *LocalConfig) Deregister(ctx context.Context) error {
 	// TODO; 释放各总资源
 
 	// 关闭 MCP Server 活跃 sessions（在 HTTP server 关闭前）
@@ -508,13 +498,8 @@ func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
 	return handler
 }
 
-// HTTPHandlerFrontend 用于处理前端相关服务
-func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) error {
-	return c.HTTPHandlerFrontendContext(context.Background(), mux, assets)
-}
-
-// HTTPHandlerFrontendContext 使用调用方上下文处理前端静态数据及 MCP 自动桥接。
-func (c *LocalConfig) HTTPHandlerFrontendContext(ctx context.Context, mux *http.ServeMux, assets fs.FS) error {
+// HTTPHandlerFrontend 使用调用方上下文处理前端静态数据及 MCP 自动桥接。
+func (c *LocalConfig) HTTPHandlerFrontend(ctx context.Context, mux *http.ServeMux, assets fs.FS) error {
 	if c.adminServer != nil {
 		if err := c.adminServer.SetMicroserviceGatewayYAML(assets); err != nil {
 			return err
@@ -856,7 +841,7 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 
 		// TODO; 如果后端grpc服务未正常注册，前端必须配合http健康检测，http状态码为503
 		if allowRegistry {
-			reg, err := sd.RegisterContext(ctx, connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
+			reg, err := sd.Register(ctx, connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
 			if err != nil {
 				logErrorf(ctx, c.logger, "register service err: %v%v", err, "\n")
 			}

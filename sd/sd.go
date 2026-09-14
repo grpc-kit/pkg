@@ -62,13 +62,8 @@ func Home(prefix, namespace string) {
 	Namespace = namespace
 }
 
-// Register 注册一个服务
-func Register(conn *Connector, name, addr, val string, ttl int64) (Registry, error) {
-	return RegisterContext(context.Background(), conn, name, addr, val, ttl)
-}
-
-// RegisterContext 使用调用方上下文注册一个服务。
-func RegisterContext(ctx context.Context, conn *Connector, name, addr, val string, ttl int64) (Registry, error) {
+// Register 使用调用方上下文注册一个服务。
+func Register(ctx context.Context, conn *Connector, name, addr, val string, ttl int64) (Registry, error) {
 	if conn == nil {
 		return nil, errConnectorIsNil
 	}

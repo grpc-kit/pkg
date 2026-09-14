@@ -35,7 +35,7 @@ const (
 )
 
 // initDatabase 用于初始化数据库
-func (c *LocalConfig) initDatabase() error {
+func (c *LocalConfig) initDatabase(ctx context.Context) error {
 	if c.Database == nil {
 		c.Database = &DatabaseConfig{Enable: false}
 	}
@@ -103,7 +103,8 @@ func (c *LocalConfig) initDatabase() error {
 	db.SetConnMaxIdleTime(maxIdleTime)
 	db.SetMaxOpenConns(maxOpenConns)
 
-	if err := db.Ping(); err != nil {
+	if err := db.PingContext(ctx); err != nil {
+		_ = db.Close()
 		return err
 	}
 
