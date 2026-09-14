@@ -4,6 +4,7 @@
 package compatibility
 
 import (
+	"context"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -22,14 +23,19 @@ import (
 )
 
 var (
-	_ func(*cfg.LocalConfig) *slog.Logger                                 = (*cfg.LocalConfig).GetLogger
-	_ func(*cfg.ObjstoreConfig, *slog.Logger) (cfg.ObjstoreBucket, error) = (*cfg.ObjstoreConfig).BucketClient
-	_ func(*slog.Logger) admin.Options                                    = admin.WithLogger
-	_ func(*slog.Logger) *rpc.Config                                      = rpc.NewConfig
-	_ func(*slog.Logger) audit.Option                                     = audit.WithLogger
-	_ func(*auth.Client, *slog.Logger) *auth.Client                       = (*auth.Client).WithLoggerOption
-	_ func(*slog.Logger, int, string) (*sd.Connector, error)              = sd.NewConnector
-	_ func(*errs.Status, *slog.Logger, string, error) *errs.Status        = (*errs.Status).WithLogger
+	_ func(*cfg.LocalConfig, context.Context) error                                            = (*cfg.LocalConfig).Init
+	_ func(*cfg.LocalConfig, context.Context) error                                            = (*cfg.LocalConfig).Deregister
+	_ func(*cfg.LocalConfig, context.Context, *http.ServeMux, fs.FS) error                     = (*cfg.LocalConfig).HTTPHandlerFrontend
+	_ func(*cfg.LocalConfig) *slog.Logger                                                      = (*cfg.LocalConfig).GetLogger
+	_ func(*cfg.ObjstoreConfig, *slog.Logger) (cfg.ObjstoreBucket, error)                      = (*cfg.ObjstoreConfig).BucketClient
+	_ func(*slog.Logger) admin.Options                                                         = admin.WithLogger
+	_ func(*slog.Logger) *rpc.Config                                                           = rpc.NewConfig
+	_ func(*slog.Logger) audit.Option                                                          = audit.WithLogger
+	_ func(*auth.Client, *slog.Logger) *auth.Client                                            = (*auth.Client).WithLoggerOption
+	_ func(*slog.Logger, int, string) (*sd.Connector, error)                                   = sd.NewConnector
+	_ func(context.Context, *sd.Connector, string, string, string, int64) (sd.Registry, error) = sd.Register
+	_ func(sd.Registry, context.Context) error                                                 = sd.Registry.Deregister
+	_ func(*errs.Status, context.Context, *slog.Logger, string, error) *errs.Status            = (*errs.Status).WithLogger
 	_ func(
 		*mcp.Server,
 		mcptools.GRPCConnFunc,

@@ -45,7 +45,7 @@ func TestHTTPHandlerFrontend_DisabledStillInitializesMCP(t *testing.T) {
 	disabled := false
 	c.Frontend = &FrontendConfig{Enable: &disabled}
 
-	if err := c.HTTPHandlerFrontend(http.NewServeMux(), nil); err != nil {
+	if err := c.HTTPHandlerFrontend(t.Context(), http.NewServeMux(), nil); err != nil {
 		t.Fatalf("HTTPHandlerFrontend: %v", err)
 	}
 

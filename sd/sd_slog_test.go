@@ -44,7 +44,7 @@ func TestNewConnectorNilUsesFallback(t *testing.T) {
 	}
 }
 
-func TestRegisterContextRejectsCanceledContext(t *testing.T) {
+func TestRegisterRejectsCanceledContext(t *testing.T) {
 	connector, err := NewConnector(nil, ETCDV3, "127.0.0.1:2379")
 	if err != nil {
 		t.Fatalf("NewConnector() error = %v", err)
@@ -52,9 +52,9 @@ func TestRegisterContextRejectsCanceledContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
 
-	registry, err := RegisterContext(ctx, connector, "service", "127.0.0.1:10081", "{}", 30)
+	registry, err := Register(ctx, connector, "service", "127.0.0.1:10081", "{}", 30)
 	if !errors.Is(err, context.Canceled) {
-		t.Fatalf("RegisterContext() error = %v, want context.Canceled", err)
+		t.Fatalf("Register() error = %v, want context.Canceled", err)
 	}
 	if client, ok := registry.(*etcdv3Client); ok {
 		if closeErr := client.client.Close(); closeErr != nil {

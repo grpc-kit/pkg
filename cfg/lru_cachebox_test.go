@@ -30,7 +30,7 @@ func TestNewRedisCacheInvalidTLSLogsThenPanics(t *testing.T) {
 		}
 	}()
 
-	newRedisCache(logger, config)
+	newRedisCache(t.Context(), logger, config)
 }
 
 func TestMemoryCache_SetValue_NeverExpires(t *testing.T) {
