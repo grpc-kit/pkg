@@ -391,7 +391,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 	if c.Services.hasEnableIntegrationAdminServer() {
 		client, err := c.getAdminDatabaseLion(ctx)
 		if err != nil {
-			logInfof(ctx, c.logger, "known admin service enabled but database not, some /builtin API will be unavailable.")
+			logAdminDatabaseUnavailable(ctx, c.logger)
 		}
 
 		admOpts := []admin.Options{
@@ -819,22 +819,19 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 			}
 
 			if err := tryConnect(c.Services.PublicAddress); err != nil {
-				logErrorf(ctx, c.logger, "register service the grpc health check err: %v, retry_count: %v, retry_max: %v",
-					err, retryCount, retryMax)
+				logRegistryHealthCheckFailed(ctx, c.logger, err, retryCount, retryMax)
 
 				continue
 			}
 
-			logInfof(ctx, c.logger, "register service the grpc health check public_address: %v success",
-				c.Services.PublicAddress)
+			logRegistryHealthCheckSucceeded(ctx, c.logger, retryCount, retryMax)
 			break
 		}
 
 		if retryCount >= retryMax {
 			allowRegistry = false
 
-			logErrorf(ctx, c.logger, "register service the grpc health check fail public_address: %v will not public to registry",
-				c.Services.PublicAddress)
+			logRegistryHealthCheckRetriesExhausted(ctx, c.logger, retryCount, retryMax)
 
 			// TODO; 达到最大检测次数，但后端服务端口还未正常，此时应该发送信号退出应用，不允许注册
 		}
@@ -843,7 +840,7 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 		if allowRegistry {
 			reg, err := sd.Register(ctx, connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
 			if err != nil {
-				logErrorf(ctx, c.logger, "register service err: %v%v", err, "\n")
+				logServiceRegistrationFailed(ctx, c.logger, err)
 			}
 
 			c.srvdis = reg
