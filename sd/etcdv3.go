@@ -87,7 +87,7 @@ func (e *etcdv3Client) Register(ctx context.Context, name, addr, val string, ttl
 				return
 			}
 
-			e.logger.ErrorContext(ctx, fmt.Sprintf("etcdv3 registry found fails, will be retry later, reason: %v", err))
+			logRegistrationRetry(ctx, e.logger, err)
 
 			// TODO; 是否提取为变量
 			select {
@@ -131,12 +131,12 @@ func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opt
 	endpointKey := fmt.Sprintf("%v/%v/endpoints", e.basePath(), target.Endpoint())
 	resp, err := e.getKey(ctx, endpointKey)
 	if err != nil {
-		e.logger.ErrorContext(ctx, fmt.Sprintf("resolver build getkey err: %v, will use last resolver address", err))
+		logResolverLookupFailed(ctx, e.logger, err)
 
 		// 如果查询超时，则返回内存中最近一次可用的地址
 		err = e.updateState(target.Endpoint(), resolver.State{})
 		if err != nil {
-			e.logger.ErrorContext(ctx, fmt.Sprintf("resolver build update state err: %v", err))
+			logResolverStateRestoreFailed(ctx, e.logger, err)
 		}
 
 		return e, nil
@@ -151,7 +151,7 @@ func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opt
 	// 最近一次解析服务地址存入内存以便获取失败时使用
 	err = e.updateState(target.Endpoint(), state)
 	if err != nil {
-		e.logger.ErrorContext(ctx, fmt.Sprintf("resolver build update state err: %v", err))
+		logResolverStateUpdateFailed(ctx, e.logger, len(state.Addresses), err)
 		return nil, err
 	}
 
@@ -205,7 +205,7 @@ func (e *etcdv3Client) register(ctx context.Context, val string, ttl int64) (<-c
 		return nil, err
 	}
 
-	e.logger.DebugContext(ctx, fmt.Sprintf("etcdv3 reg path: %v, ttl: %v, resp id: %v", e.regEndpointPath(), ttl, resp.ID))
+	logRegistrationSucceeded(ctx, e.logger, ttl, int64(resp.ID))
 
 	kap, err := e.client.KeepAlive(ctx, resp.ID)
 	if err != nil {
@@ -227,7 +227,7 @@ func (e *etcdv3Client) eatKeepAliveMessage(ctx context.Context, kap <-chan *clie
 			if x == nil {
 				return fmt.Errorf("keepalive channel is closed")
 			}
-			e.logger.DebugContext(ctx, fmt.Sprintf("etcdv3 keepalive: %v", x))
+			logKeepaliveReceived(ctx, e.logger, x.TTL, int64(x.ID))
 		case <-ctx.Done():
 			// 接收到被取消的信号
 			return fmt.Errorf("keepalive receiver cancel")
@@ -257,7 +257,7 @@ func (e *etcdv3Client) updateState(endpoint string, state resolver.State) error 
 		state = memState
 	}
 
-	e.logger.Debug(fmt.Sprintf("etcdv3 registry update endpoint: %v, state addrs: %v", endpoint, state.Addresses))
+	logResolverStateUpdated(e.logger, len(state.Addresses))
 
 	e.targetState[endpoint] = state
 	return e.cc.UpdateState(state)
