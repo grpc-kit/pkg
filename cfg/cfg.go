@@ -307,11 +307,11 @@ func New(v *viper.Viper) (*LocalConfig, error) {
 
 // Init 使用调用方上下文根据配置初始化各个实例，初始化需注意空指针判断。
 func (c *LocalConfig) Init(ctx context.Context) error {
-	if err := c.initDebugger(); err != nil {
+	if err := c.initDebugger(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initServices(); err != nil {
+	if err := c.initServices(ctx); err != nil {
 		return err
 	}
 
@@ -323,7 +323,7 @@ func (c *LocalConfig) Init(ctx context.Context) error {
 		return err
 	}
 
-	if err := c.initCachebox(); err != nil {
+	if err := c.initCachebox(ctx); err != nil {
 		return err
 	}
 
@@ -331,28 +331,28 @@ func (c *LocalConfig) Init(ctx context.Context) error {
 		return err
 	}
 
-	if err := c.initCloudEvents(); err != nil {
+	if err := c.initCloudEvents(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initRPCConfig(); err != nil {
+	if err := c.initRPCConfig(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initObjstore(); err != nil {
+	if err := c.initObjstore(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initFrontend(); err != nil {
+	if err := c.initFrontend(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initAutomations(); err != nil {
+	if err := c.initAutomations(ctx); err != nil {
 		return err
 	}
 
 	// AIConnector 初始化放在最后，依赖其他子系统已就绪
-	if err := c.initAIConnector(); err != nil {
+	if err := c.initAIConnector(ctx); err != nil {
 		return fmt.Errorf("init aiconnector: %w", err)
 	}
 

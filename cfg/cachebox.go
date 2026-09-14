@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
@@ -41,7 +42,11 @@ type RedisCacheboxConfig struct {
 	TLSClientConfig *TLSConfig `mapstructure:"tls_client_config"`
 }
 
-func (c *LocalConfig) initCachebox() error {
+func (c *LocalConfig) initCachebox(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	if c.Cachebox == nil {
 		c.Cachebox = &CacheboxConfig{
 			Enable: false,
@@ -58,7 +63,7 @@ func (c *LocalConfig) initCachebox() error {
 	case "memory":
 		c.Cachebox.lruCache = newMemoryCache(c.logger, c.Cachebox.Memory.MaxEntry)
 	case "redis":
-		r := newRedisCache(c.logger, c.Cachebox.Redis)
+		r := newRedisCache(ctx, c.logger, c.Cachebox.Redis)
 		c.Cachebox.lruCache = r
 		c.Cachebox.redisClient = r.cache
 	default:

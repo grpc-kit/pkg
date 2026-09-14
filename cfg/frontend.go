@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -66,7 +67,11 @@ func (f customFileSystem) Open(name string) (http.File, error) {
 }
 
 // initFrontend 初始化前端服务
-func (c *LocalConfig) initFrontend() error {
+func (c *LocalConfig) initFrontend(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	var enableVal = true
 
 	if c.Frontend == nil {

@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/fs"
@@ -45,7 +46,11 @@ type FlowClientConfig struct {
 	Appname   string
 }
 
-func (c *LocalConfig) initAutomations() error {
+func (c *LocalConfig) initAutomations(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	if c.Automations == nil {
 		c.Automations = &AutomationsConfig{Enable: false}
 	}

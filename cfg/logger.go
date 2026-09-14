@@ -12,7 +12,11 @@ import (
 )
 
 // initDebugger 用于初始化日志实例。
-func (c *LocalConfig) initDebugger() error {
+func (c *LocalConfig) initDebugger(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	c.logger = c.newDebuggerLogger(os.Stdout)
 	return nil
 }

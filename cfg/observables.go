@@ -140,6 +140,10 @@ type ExportersConfig struct {
 
 // initObservables 初始化可观测性配置
 func (c *LocalConfig) initObservables(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	if c.Observables == nil {
 		c.Observables = &ObservablesConfig{}
 	}

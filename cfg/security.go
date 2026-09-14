@@ -45,6 +45,10 @@ type OPAEnvoyPlugin struct {
 
 // initSecurity 初始化认证
 func (c *LocalConfig) initSecurity(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	if c.Security == nil {
 		c.Security = &SecurityConfig{Enable: false}
 	}

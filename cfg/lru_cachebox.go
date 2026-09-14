@@ -59,7 +59,7 @@ func newMemoryCache(logger *slog.Logger, size int) *memoryCache {
 }
 
 // NewRedisCache 创建 Redis 缓存实例
-func newRedisCache(logger *slog.Logger, config RedisCacheboxConfig) *redisCache {
+func newRedisCache(ctx context.Context, logger *slog.Logger, config RedisCacheboxConfig) *redisCache {
 	logger = pklogging.OrFallback(logger)
 	opt := &redis.UniversalOptions{
 		ClientName:       vars.Appname,
@@ -76,7 +76,7 @@ func newRedisCache(logger *slog.Logger, config RedisCacheboxConfig) *redisCache 
 		tlsConfig, err := NewTLSConfig(config.TLSClientConfig)
 		if err != nil {
 			message := fmt.Sprintf("redis tls config error: %v\n", err)
-			logger.Log(context.Background(), pklogging.LevelPanic, message)
+			logger.Log(ctx, pklogging.LevelPanic, message)
 			panic(message)
 		}
 

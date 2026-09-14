@@ -1,14 +1,20 @@
 package cfg
 
 import (
+	"context"
 	"fmt"
+
 	"github.com/grpc-kit/pkg/rpc"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 )
 
 // initRPCConfig 用于初始化rpc客户端、服务端配置
-func (c *LocalConfig) initRPCConfig() error {
+func (c *LocalConfig) initRPCConfig(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	r := rpc.NewConfig(c.logger)
 
 	r.Authority = c.Services.Namespace

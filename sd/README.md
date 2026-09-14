@@ -61,7 +61,7 @@ tls := &sd.TLSInfo{
 connector.WithTLSInfo(tls)
 */
 
-reg, err := sd.RegisterContext(ctx, connector, serviceName, publicAddress, "register value", 30)
+reg, err := sd.Register(ctx, connector, serviceName, publicAddress, "register value", 30)
 if err != nil {
 }
 
