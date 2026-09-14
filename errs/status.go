@@ -104,17 +104,12 @@ func (s *Status) Error() string {
 	return fmt.Sprintf("rpc error: code = %v desc = %s", s.Status, s.Message)
 }
 
-// WithLogger 服务端后台输出错误日志，如果开启 debug 模式则带到接口 detail 返回中
-func (s *Status) WithLogger(logger *slog.Logger, format string, err error) *Status {
-	return s.WithLoggerContext(context.Background(), logger, format, err)
-}
-
-// WithLoggerContext 使用调用方上下文输出服务端错误日志，如果开启 debug 模式则带到接口 detail 返回中。
-func (s *Status) WithLoggerContext(ctx context.Context, logger *slog.Logger, format string, err error) *Status {
+// WithLogger 使用调用方上下文输出服务端错误日志，如果开启 debug 模式则带到接口 detail 返回中。
+func (s *Status) WithLogger(ctx context.Context, logger *slog.Logger, format string, err error) *Status {
 	logger = logging.OrFallback(logger)
 	message := fmt.Sprintf(format, err)
 	// 仅在后端服务输出错误信息
-	logger.ErrorContext(ctx, message)
+	logger.LogAttrs(ctx, slog.LevelError, message, slog.Any("error", err))
 
 	// 判断是否为开启 debug 模式，如是则填充至 anyType 中
 	if logger.Enabled(ctx, slog.LevelDebug) {
