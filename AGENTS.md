@@ -6,7 +6,7 @@
 
 ## 项目结构
 
-- `pkg/rpc`、`pkg/errs`、`pkg/crypto`、`pkg/extension`、`pkg/file`、`pkg/sd`、
+- `pkg/rpc`、`pkg/errs`、`pkg/crypto`、`pkg/file`、`pkg/sd`、
   `pkg/signal`、`pkg/vars` 提供底层或通用能力。
 - `pkg/auth` 提供认证相关能力；`pkg/cfg` 负责配置和运行时组合；`pkg/admin`
   提供管理业务；`pkg/lion` 提供 Ent 数据访问层；`pkg/api` 保存生成的协议代码。
