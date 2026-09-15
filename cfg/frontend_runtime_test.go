@@ -35,7 +35,7 @@ func TestHTTPHandlerFrontendServesPkgAdminSwaggerWhenProjectAssetMissing(t *test
 	}
 
 	mux := http.NewServeMux()
-	if err := config.HTTPHandlerFrontend(mux, publicAssets); err != nil {
+	if err := config.HTTPHandlerFrontend(t.Context(), mux, publicAssets); err != nil {
 		t.Fatalf("register frontend handlers: %v", err)
 	}
 
@@ -77,7 +77,7 @@ func TestHTTPHandlerFrontendServesPkgAdminSwaggerEvenWhenProjectAssetExists(t *t
 	}
 
 	mux := http.NewServeMux()
-	if err := config.HTTPHandlerFrontend(mux, publicAssets); err != nil {
+	if err := config.HTTPHandlerFrontend(t.Context(), mux, publicAssets); err != nil {
 		t.Fatalf("register frontend handlers: %v", err)
 	}
 
@@ -113,7 +113,7 @@ func TestHTTPHandlerFrontendDoesNotFallbackToPkgForOtherOpenapiFiles(t *testing.
 	}
 
 	mux := http.NewServeMux()
-	if err := config.HTTPHandlerFrontend(mux, publicAssets); err != nil {
+	if err := config.HTTPHandlerFrontend(t.Context(), mux, publicAssets); err != nil {
 		t.Fatalf("register frontend handlers: %v", err)
 	}
 

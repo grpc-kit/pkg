@@ -134,7 +134,7 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 			for {
 				counter.Add(ctx, 1)
 				time.Sleep(10 * time.Second)
-				c.logger.Infof("add metrics")
+				logInfof(ctx, c.logger, "add metrics")
 			}
 		}()
 	*/

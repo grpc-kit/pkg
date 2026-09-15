@@ -4,18 +4,19 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"log/slog"
 
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/roles"
+	"github.com/grpc-kit/pkg/logging"
 	"github.com/grpc-kit/pkg/rpc"
-	"github.com/sirupsen/logrus"
 )
 
 // KnownAdminAPI xx
 type KnownAdminAPI struct {
 	config        *config
-	logger        *logrus.Entry
+	logger        *slog.Logger
 	mfaChallenges *mfaChallengeStore
 }
 
@@ -29,7 +30,7 @@ func New(opts ...Options) *KnownAdminAPI {
 
 	// TODO; 默认值设置
 	if c.logger == nil {
-		c.logger = logrus.NewEntry(logrus.New())
+		c.logger = logging.Fallback()
 	}
 
 	return &KnownAdminAPI{

@@ -1,6 +1,8 @@
 package cfg
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -40,7 +42,7 @@ func testDatabaseInit(t *testing.T) {
 	if os.Getenv(cfgDatabaseIntegrationEnv) == "" {
 		t.Skipf("skip external database integration test; set %s=1 to enable", cfgDatabaseIntegrationEnv)
 	}
-	if err := lc.initDatabase(); err != nil {
+	if err := lc.initDatabase(t.Context()); err != nil {
 		t.Errorf("database init err=%v", err)
 	}
 }
@@ -75,7 +77,7 @@ func BenchmarkDatabaseInsert(b *testing.B) {
 	if os.Getenv(cfgDatabaseIntegrationEnv) == "" {
 		b.Skipf("skip external database benchmark; set %s=1 to enable", cfgDatabaseIntegrationEnv)
 	}
-	if err := lc.initDatabase(); err != nil {
+	if err := lc.initDatabase(b.Context()); err != nil {
 		b.Errorf("init database err=%v", err)
 	}
 	db, err := lc.GetDatabase()
@@ -89,11 +91,13 @@ func BenchmarkDatabaseInsert(b *testing.B) {
 	}
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	i := 0
+	for b.Loop() {
 		insertSQL := `INSERT INTO t_code(id, code) VALUES(?, ?)`
 		if _, err := db.Exec(insertSQL, i, fmt.Sprintf("code-%v", i)); err != nil {
 			b.Errorf("insert into err = %v", err)
 		}
+		i++
 	}
 	b.StopTimer()
 
@@ -104,5 +108,25 @@ func BenchmarkDatabaseInsert(b *testing.B) {
 
 	if err := db.Close(); err != nil {
 		b.Errorf("database close err = %v", err)
+	}
+}
+
+func TestInitDatabaseHonorsCanceledContext(t *testing.T) {
+	config := &LocalConfig{Database: &DatabaseConfig{
+		Enable:   true,
+		Driver:   DatabaseDriverMysql,
+		Address:  "127.0.0.1:1",
+		DBName:   "test",
+		Username: "test",
+		Password: "test",
+	}}
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+
+	if err := config.initDatabase(ctx); !errors.Is(err, context.Canceled) {
+		t.Fatalf("initDatabase() error = %v, want context.Canceled", err)
+	}
+	if config.Database.db != nil {
+		t.Fatal("database retained a client after canceled ping")
 	}
 }

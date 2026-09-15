@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
 
 // Client 客户端
 type Client struct {
-	logger           *logrus.Entry
 	config           *Config
 	opts             []grpc.DialOption
 	unaryIntercepts  []grpc.UnaryClientInterceptor

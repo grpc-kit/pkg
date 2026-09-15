@@ -20,7 +20,7 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 		// "/default.api.oneops.netdev.v1.OneopsNetdev/DisplaySwitchPortVlans"
 		grpcService, grpcMethod, err := opt.parseGRPCMethod(info.FullMethod)
 		if err != nil {
-			opt.logger.Warn(err.Error())
+			logAuditGRPCMethodParseFailed(ctx, opt.logger, info.FullMethod, err)
 			return handler(ctx, req)
 		}
 
@@ -66,7 +66,7 @@ func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 		// "/default.api.oneops.netdev.v1.OneopsNetdev/DisplaySwitchPortVlans"
 		grpcService, grpcMethod, err := opt.parseGRPCMethod(info.FullMethod)
 		if err != nil {
-			opt.logger.Warn(err.Error())
+			logAuditGRPCMethodParseFailed(ss.Context(), opt.logger, info.FullMethod, err)
 			return handler(srv, ss)
 		}
 

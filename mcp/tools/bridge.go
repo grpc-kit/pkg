@@ -7,15 +7,15 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/grpc-kit/pkg/admin/openapiconfig"
+	"github.com/grpc-kit/pkg/logging"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/genproto/googleapis/api/serviceconfig"
 )
@@ -193,14 +193,14 @@ func AutoBridge(
 	assets fs.FS,
 	swaggerAssetName string,
 	allowedTags []string,
-	logger *logrus.Entry,
+	logger *slog.Logger,
 ) error {
 	_ = connFn // 暂未使用，预留 gRPC reflection 优化
 	if server == nil {
 		return nil
 	}
 	if logger == nil {
-		logger = logrus.StandardLogger().WithField("component", "mcp-bridge")
+		logger = logging.Fallback().With("component", "mcp-bridge")
 	}
 	if gatewayCfg == nil {
 		return nil
@@ -290,9 +290,8 @@ func AutoBridge(
 			tmpl := pathTemplate
 			bf := bodyField
 			opCapture := op
-			tn := toolName
 			handler := func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-				return bridgeHandler(ctx, req, httpClient, httpBaseURL, method, tmpl, bf, opCapture, tn, logger)
+				return bridgeHandler(ctx, req, httpClient, httpBaseURL, method, tmpl, bf, opCapture, logger)
 			}
 
 			server.AddTool(&mcp.Tool{
@@ -310,8 +309,8 @@ func AutoBridge(
 // bridgeHandler 实际执行 HTTP 调用的 handler。
 //
 // 调试日志：使用注入的 logger（component=mcp-bridge，由 cfg 层传入），在全局 log_level=debug
-// 时按阶段打印转发到 grpc-gateway 的请求/响应日志（tool 名、method、URL、body、状态码、
-// 耗时），用于排查 MCP tool 调用阻塞点。日志按以下阶段输出，缺失的那一段即指示阻塞位置：
+// 时按阶段打印固定消息，用于排查 MCP tool 调用阻塞点。日志不包含参数、URL、请求体、
+// 响应体、认证信息或底层错误。缺失的阶段即指示阻塞位置：
 //   - invoked:           handler 被调用（若缺失 -> 阻塞在 SDK session / 中间件）
 //   - forwarding:        请求已构造，即将发送到 gateway（若缺失 -> 阻塞在请求构造）
 //   - gateway responded: httpClient.Do 返回（若缺失 -> 阻塞在 HTTP 调用，含超时）
@@ -322,18 +321,16 @@ func bridgeHandler(
 	httpClient *http.Client,
 	httpBaseURL, httpMethod, pathTemplate, bodyField string,
 	op *swaggerOperation,
-	toolName string,
-	logger *logrus.Entry,
+	logger *slog.Logger,
 ) (*mcp.CallToolResult, error) {
 	args := parseArguments(req.Params.Arguments)
 
-	logger.Infof("tool=%s invoked method=%s args=%s\n",
-		toolName, httpMethod, truncateForLog(mustJSON(args), debugMaxBodyLen))
+	logger.DebugContext(ctx, "MCP tool invocation received")
 
 	// 替换 path 参数
 	path, missing := substitutePathParams(pathTemplate, args)
 	if missing != "" {
-		logger.Debugf("tool=%s abort: missing path parameter %q", toolName, missing)
+		logger.DebugContext(ctx, "MCP tool invocation rejected: missing path parameter")
 		return errorResult("missing path parameter: " + missing), nil
 	}
 
@@ -344,13 +341,11 @@ func bridgeHandler(
 	var (
 		bodyReader io.Reader
 		contentSet bool
-		bodyBytes  []byte
 	)
 	// 非幂等方法（POST/PATCH）或有 body 映射（PUT 等）时构建请求体
 	if !isIdempotentMethod(httpMethod) || bodyField != "" {
 		body, ok := buildRequestBody(args, op, pathTemplate, bodyField)
 		if ok {
-			bodyBytes = body
 			bodyReader = bytes.NewReader(body)
 			contentSet = true
 		}
@@ -358,7 +353,7 @@ func bridgeHandler(
 
 	httpReq, err := http.NewRequestWithContext(ctx, httpMethod, url, bodyReader)
 	if err != nil {
-		logger.Debugf("tool=%s abort: build request error: %v", toolName, err)
+		logger.DebugContext(ctx, "MCP gateway request construction failed")
 		return errorResult("build request: " + err.Error()), nil
 	}
 	if contentSet {
@@ -377,39 +372,33 @@ func bridgeHandler(
 	// （ContextWithAuthHeader/AuthHeaderFromContext），作为未来扩展点（如 OPA per-tool
 	// 鉴权中间件链）预留。但 bridgeHandler 不依赖 context 路径，避免 pkg/mcp/tools
 	// -> pkg/mcp 的测试期循环依赖。
-	authSet := false
 	if req != nil && req.Extra != nil && req.Extra.Header != nil {
 		if authHeader := req.Extra.Header.Get("Authorization"); authHeader != "" {
 			httpReq.Header.Set("Authorization", authHeader)
-			authSet = true
 		}
 	}
 
 	// 发送前打点：若此日志出现而「gateway responded」未出现，说明阻塞在 httpClient.Do
 	// （gateway 未响应 / 代理劫持 / TLS 握手卡住等）。httpClient.Timeout=30s 兜底，
-	// 超时后会打印 "http call failed after 30s"。
-	logger.Debugf("tool=%s forwarding to gateway: %s %s body=%s auth=%v",
-		toolName, httpMethod, url, truncateForLog(string(bodyBytes), debugMaxBodyLen), authSet)
+	// 超时后会打印请求失败阶段。
+	logger.DebugContext(ctx, "MCP gateway request forwarding started")
 
-	start := time.Now()
 	resp, err := httpClient.Do(httpReq)
-	callDur := time.Since(start)
 	if err != nil {
-		logger.Debugf("tool=%s http call failed after %v: %v", toolName, callDur, err)
+		logger.DebugContext(ctx, "MCP gateway request failed")
 		return errorResult("http call: " + err.Error()), nil
 	}
 	defer resp.Body.Close()
 
-	logger.Debugf("tool=%s gateway responded status=%d after %v", toolName, resp.StatusCode, callDur)
+	logger.DebugContext(ctx, "MCP gateway response received")
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		logger.Debugf("tool=%s read response error after %v: %v", toolName, time.Since(start), err)
+		logger.DebugContext(ctx, "MCP gateway response read failed")
 		return errorResult("read response: " + err.Error()), nil
 	}
 
-	logger.Debugf("tool=%s response body (%d bytes): %s",
-		toolName, len(respBody), truncateForLog(string(respBody), debugMaxBodyLen))
+	logger.DebugContext(ctx, "MCP gateway response body read")
 
 	if resp.StatusCode >= 400 {
 		return &mcp.CallToolResult{
@@ -436,19 +425,8 @@ func bridgeHandler(
 // bridgeHandler 转发到 grpc-gateway 的请求/响应调试日志使用由 cfg 层注入的 logger
 // （pkg/cfg/logger.go 的 initDebugger 统一配置 level/format/output），在全局
 // log_level=debug 时输出。按 invoked / forwarding / gateway responded / response
-// body 四阶段打印（含耗时），缺失的那一段即指示阻塞位置。详见 bridgeHandler 文档注释。
+// body 四阶段打印固定消息，缺失的那一段即指示阻塞位置。详见 bridgeHandler 文档注释。
 // ----------------------------------------------------------------------------
-
-// debugMaxBodyLen 限制调试日志中 body 文本的长度，避免超长 body 撑爆日志。
-const debugMaxBodyLen = 2048
-
-// truncateForLog 截断字符串到 n 字节，超出则追加 "...(truncated, len=N)"。
-func truncateForLog(s string, n int) string {
-	if len(s) <= n {
-		return s
-	}
-	return s[:n] + fmt.Sprintf("...(truncated, len=%d)", len(s))
-}
 
 // errorResult 构造错误返回结果。
 func errorResult(msg string) *mcp.CallToolResult {
@@ -512,8 +490,10 @@ func buildToolAnnotations(httpMethod string) *mcp.ToolAnnotations {
 	}
 }
 
-// pathParamRegex 匹配 path template 中的 {param} 占位符。
-var pathParamRegex = regexp.MustCompile(`\{([a-zA-Z_][a-zA-Z0-9_]*)\}`)
+// pathParamRegex 匹配 path template 中的 protobuf field path 占位符。
+// 每个 segment 都遵循 protobuf 标识符规则，例如 {id}、{model.id}。
+// 带模式的变量（如 {name=projects/*}）不在此解析器的支持范围内。
+var pathParamRegex = regexp.MustCompile(`\{([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)\}`)
 
 // swaggerMethod 描述 OpenAPI 方法配置。
 type swaggerMethod struct {
@@ -789,7 +769,8 @@ func rawToString(raw json.RawMessage) string {
 // substitutePathParams 替换 path template 中的 {param} 占位符。
 //
 // 缺失参数时返回 ("", missingParamName)；空参数视为缺失。
-// 支持 string / number / boolean 类型的参数值，统一转为字符串用于 URL path。
+// 支持 string / number / boolean 类型的参数值，统一转为字符串并按单个
+// URL path segment 转义，避免参数中的 '/' 改变 gateway 路由语义。
 func substitutePathParams(pathTemplate string, args map[string]json.RawMessage) (string, string) {
 	missing := ""
 	out := pathParamRegex.ReplaceAllStringFunc(pathTemplate, func(token string) string {
@@ -808,7 +789,7 @@ func substitutePathParams(pathTemplate string, args map[string]json.RawMessage) 
 			missing = name
 			return token
 		}
-		return s
+		return url.PathEscape(s)
 	})
 	if missing != "" {
 		return "", missing

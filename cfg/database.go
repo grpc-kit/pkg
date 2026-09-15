@@ -10,6 +10,7 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/grpc-kit/pkg/lion"
+	pklogging "github.com/grpc-kit/pkg/logging"
 	_ "github.com/lib/pq"
 )
 
@@ -34,7 +35,11 @@ const (
 )
 
 // initDatabase 用于初始化数据库
-func (c *LocalConfig) initDatabase() error {
+func (c *LocalConfig) initDatabase(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	if c.Database == nil {
 		c.Database = &DatabaseConfig{Enable: false}
 	}
@@ -102,7 +107,8 @@ func (c *LocalConfig) initDatabase() error {
 	db.SetConnMaxIdleTime(maxIdleTime)
 	db.SetMaxOpenConns(maxOpenConns)
 
-	if err := db.Ping(); err != nil {
+	if err := db.PingContext(ctx); err != nil {
+		_ = db.Close()
 		return err
 	}
 
@@ -149,6 +155,10 @@ func dropLegacyLionAuthzTables(ctx context.Context, db *sql.DB) error {
 // GetAdminDatabaseLion 用于测试 Lion 配置
 // TODO: 这里用于测试 lion 数据库
 func (c *LocalConfig) GetAdminDatabaseLion() (*lion.Client, error) {
+	return c.getAdminDatabaseLion(context.Background())
+}
+
+func (c *LocalConfig) getAdminDatabaseLion(ctx context.Context) (*lion.Client, error) {
 	if c.lionClient != nil {
 		return c.lionClient, nil
 	}
@@ -157,7 +167,7 @@ func (c *LocalConfig) GetAdminDatabaseLion() (*lion.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := dropLegacyLionAuthzTables(context.TODO(), rawDB); err != nil {
+	if err := dropLegacyLionAuthzTables(ctx, rawDB); err != nil {
 		return nil, err
 	}
 
@@ -167,8 +177,8 @@ func (c *LocalConfig) GetAdminDatabaseLion() (*lion.Client, error) {
 	}
 
 	db := lion.NewClient(lion.Driver(driver))
-	if err = db.Schema.Create(context.TODO()); err != nil {
-		c.logger.Warnf("lion migrate err: %v", err)
+	if err = db.Schema.Create(ctx); err != nil {
+		pklogging.OrFallback(c.logger).WarnContext(ctx, "lion migrate error", "error", err)
 	}
 
 	return db, nil

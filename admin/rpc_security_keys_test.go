@@ -367,21 +367,6 @@ func TestParseListCredentialsFilter_Fingerprint(t *testing.T) {
 	}
 }
 
-func TestFirstByte(t *testing.T) {
-	if firstByte(nil) != 0 {
-		t.Error("expected 0 for empty slice")
-	}
-	if firstByte([]byte{}) != 0 {
-		t.Error("expected 0 for empty slice")
-	}
-	if firstByte([]byte{0xFF}) != 0xFF {
-		t.Error("expected 0xFF")
-	}
-	if firstByte([]byte{0x30, 0x82}) != 0x30 {
-		t.Error("expected 0x30")
-	}
-}
-
 // Test that proto Timestamp fields are properly mapped
 func TestCredentialToProto_Timestamps(t *testing.T) {
 	now := time.Now()

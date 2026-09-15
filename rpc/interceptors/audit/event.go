@@ -178,40 +178,38 @@ func (e *EventData) sendEvent(ctx context.Context) error {
 
 	e.StageTimestamp = time.Now()
 
-	var err error
-
 	if e.opt.mustSucceed == nil || *e.opt.mustSucceed {
-		if err = ce.SetData(event.ApplicationJSON, e); err == nil {
-			if cloudevents.IsACK(e.opt.client.Send(ctx, ce)) {
-				return nil
-			} else {
-				err = fmt.Errorf("send audit event not ack")
-			}
+		if err := ce.SetData(event.ApplicationJSON, e); err != nil {
+			rpc.MetricAuditEventSendErrorsIncr(ctx)
+			logAuditEventEncodingError(ctx, e.opt.logger, e.GRPCMethod, err)
+			return fmt.Errorf("unable to send audit event, this request will be aborted")
 		}
+
+		result := e.opt.client.Send(ctx, ce)
+		if cloudevents.IsACK(result) {
+			return nil
+		}
+		rpc.MetricAuditEventSendErrorsIncr(ctx)
+		logAuditEventDeliveryError(ctx, e.opt.logger, e.GRPCMethod, result)
+
+		return fmt.Errorf("unable to send audit event, this request will be aborted")
 	} else {
 		go func() {
-			if err = ce.SetData(event.ApplicationJSON, e); err == nil {
-				if cloudevents.IsUndelivered(e.opt.client.Send(ctx, ce)) {
+			if setDataErr := ce.SetData(event.ApplicationJSON, e); setDataErr == nil {
+				result := e.opt.client.Send(ctx, ce)
+				if cloudevents.IsUndelivered(result) {
 					rpc.MetricAuditEventSendErrorsIncr(ctx)
 
-					e.opt.logger.Warnf("unable to send audit event, this request %v will be not audited", e.GRPCMethod)
+					logAuditEventDeliveryFailed(ctx, e.opt.logger, e.GRPCMethod, result)
 				}
 			} else {
 				rpc.MetricAuditEventSendErrorsIncr(ctx)
 
-				e.opt.logger.Warnf("failed to set event data: %v", err)
+				logAuditEventEncodingFailed(ctx, e.opt.logger, e.GRPCMethod, setDataErr)
 			}
 		}()
 
 		// 审计日志推送失败，无需终止本次请求
 		return nil
 	}
-
-	if err != nil {
-		rpc.MetricAuditEventSendErrorsIncr(ctx)
-
-		e.opt.logger.Errorf("failed to set event data: %v", err)
-	}
-
-	return fmt.Errorf("unable to send audit event, this request will be aborted")
 }

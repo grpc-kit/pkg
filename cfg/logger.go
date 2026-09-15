@@ -2,21 +2,26 @@ package cfg
 
 import (
 	"context"
-	"fmt"
+	"io"
+	"log/slog"
 	"os"
 	"strings"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
-	"github.com/sirupsen/logrus"
+	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	pklogging "github.com/grpc-kit/pkg/logging"
 )
 
-// initDebugger 用于初始化日志实例
-func (c *LocalConfig) initDebugger() error {
-	logger := logrus.WithFields(
-		logrus.Fields{
-			"service_name": c.GetServiceName(),
-		})
+// initDebugger 用于初始化日志实例。
+func (c *LocalConfig) initDebugger(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 
+	c.logger = c.newDebuggerLogger(os.Stdout)
+	return nil
+}
+
+func (c *LocalConfig) newDebuggerLogger(w io.Writer) *slog.Logger {
 	if c.Debugger == nil {
 		c.Debugger = &DebuggerConfig{
 			LogLevel:    "info",
@@ -26,93 +31,67 @@ func (c *LocalConfig) initDebugger() error {
 	}
 
 	logLevel := c.Debugger.LogLevel
-	logFormat := c.Debugger.LogFormat
-
 	if logLevel == "" {
 		logLevel = "error"
 	}
+	level, ok := pklogging.ParseLevel(logLevel)
+	if !ok {
+		level = slog.LevelWarn
+	}
+
+	logFormat := c.Debugger.LogFormat
 	if logFormat == "" {
-		logFormat = "text"
+		logFormat = string(pklogging.FormatText)
+	}
+	format, ok := pklogging.ParseFormat(logFormat)
+	if !ok {
+		format = pklogging.FormatText
 	}
 
-	switch logLevel {
-	case "panic":
-		logrus.SetLevel(logrus.PanicLevel)
-	case "fatal":
-		logrus.SetLevel(logrus.FatalLevel)
-	case "error":
-		logrus.SetLevel(logrus.ErrorLevel)
-	case "warn":
-		logrus.SetLevel(logrus.WarnLevel)
-	case "info":
-		logrus.SetLevel(logrus.InfoLevel)
-	case "debug":
-		logrus.SetLevel(logrus.DebugLevel)
-	default:
-		logrus.SetLevel(logrus.WarnLevel)
-	}
-
-	switch logFormat {
-	case "json":
-		logrus.SetFormatter(&logrus.JSONFormatter{})
-	case "text":
-		logrus.SetFormatter(&logrus.TextFormatter{
-			DisableColors: true,
-		})
-	default:
-		logrus.SetFormatter(&logrus.TextFormatter{})
-	}
-
-	logrus.SetOutput(os.Stdout)
-
-	c.logger = logger
-
-	return nil
+	return pklogging.New(w, format, &slog.HandlerOptions{Level: level}).With(
+		slog.String("service_name", c.GetServiceName()),
+	)
 }
 
-// GetLogger 用于获取全局日志
-func (c *LocalConfig) GetLogger() *logrus.Entry {
+// GetLogger 用于获取当前配置的日志记录器。
+func (c *LocalConfig) GetLogger() *slog.Logger {
 	return c.logger
 }
 
-func (c *LocalConfig) interceptorLogger(l logrus.FieldLogger) logging.Logger {
-	return logging.LoggerFunc(func(_ context.Context, lvl logging.Level, msg string, fields ...any) {
-		f := make(map[string]any, len(fields)/2)
+func (c *LocalConfig) interceptorLogger(logger *slog.Logger) grpclogging.Logger {
+	logger = pklogging.OrFallback(logger)
 
-		i := logging.Fields(fields).Iterator()
-		for i.Next() {
-			k, v := i.At()
-			f[k] = v
-		}
-		l := l.WithFields(f)
-
-		// 忽略特殊 grpc method 不记录日志
-		tmp, ok := f["grpc.method"]
-		if ok {
-			val, ok := tmp.(string)
-			if ok {
-				switch strings.TrimSpace(val) {
-				case "Check":
-					return
-				case "Watch":
-					return
-				case "HealthCheck":
-					return
+	return grpclogging.LoggerFunc(func(ctx context.Context, level grpclogging.Level, msg string, fields ...any) {
+		attrs := make([]slog.Attr, 0, (len(fields)+1)/2+1)
+		iterator := grpclogging.Fields(fields).Iterator()
+		for iterator.Next() {
+			key, value := iterator.At()
+			if key == "grpc.method" {
+				method, ok := value.(string)
+				if ok {
+					switch strings.TrimSpace(method) {
+					case "Check", "Watch", "HealthCheck":
+						return
+					}
 				}
 			}
+			attrs = append(attrs, slog.Any(key, value))
 		}
 
-		switch lvl {
-		case logging.LevelDebug:
-			l.Debug(msg)
-		case logging.LevelInfo:
-			l.Info(msg)
-		case logging.LevelWarn:
-			l.Warn(msg)
-		case logging.LevelError:
-			l.Error(msg)
+		slogLevel := slog.LevelError
+		switch level {
+		case grpclogging.LevelDebug:
+			slogLevel = slog.LevelDebug
+		case grpclogging.LevelInfo:
+			slogLevel = slog.LevelInfo
+		case grpclogging.LevelWarn:
+			slogLevel = slog.LevelWarn
+		case grpclogging.LevelError:
+			slogLevel = slog.LevelError
 		default:
-			panic(fmt.Sprintf("unknown level %v", lvl))
+			attrs = append(attrs, slog.Any("grpc.logger_level", level))
 		}
+
+		logger.LogAttrs(ctx, slogLevel, msg, attrs...)
 	})
 }

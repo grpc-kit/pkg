@@ -16,7 +16,7 @@ func TestMCPServerInstance_Disabled(t *testing.T) {
 			},
 		},
 	}
-	if err := c.initAIConnector(); err != nil {
+	if err := c.initAIConnector(t.Context()); err != nil {
 		t.Fatalf("initAIConnector() error: %v", err)
 	}
 	// registerGateway 在 AIConnector.MCPServer.Enable=false 时不会创建 mcpServer
@@ -38,7 +38,7 @@ func TestMCPServerInstance_BeforeRegister(t *testing.T) {
 			},
 		},
 	}
-	if err := c.initAIConnector(); err != nil {
+	if err := c.initAIConnector(t.Context()); err != nil {
 		t.Fatalf("initAIConnector() error: %v", err)
 	}
 	// Enable=true 但 registerGateway 未执行，mcpServer 仍为 nil
@@ -66,7 +66,7 @@ func TestMCPServerInstance_Enabled(t *testing.T) {
 			},
 		},
 	}
-	if err := c.initAIConnector(); err != nil {
+	if err := c.initAIConnector(t.Context()); err != nil {
 		t.Fatalf("initAIConnector() error: %v", err)
 	}
 

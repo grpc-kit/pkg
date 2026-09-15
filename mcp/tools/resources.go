@@ -44,7 +44,7 @@ const (
 	builtinOpenAPIMicroserviceName = "openapi-microservice"
 	builtinOpenAPIAdminName        = "openapi-admin"
 
-	mimeJSON            = "application/json"
+	mimeJSON              = "application/json"
 	adminSwaggerAssetPath = "openapi/admin.swagger.json"
 )
 
@@ -63,7 +63,7 @@ const (
 // RegisterBuiltinResources 注册框架内置 Resources：version + openapi-spec(microservice[/admin])。
 //
 // 这些 resource 镜像已公开的 HTTP 端点（/version、/openapi-spec），不引入新安全面
-//（与被移除的 get_config 内部运行配置暴露本质不同，见 ADR-009）。
+// （与被移除的 get_config 内部运行配置暴露本质不同，见 ADR-009）。
 //
 // nil/缺失保护：
 //   - server == nil：直接返回。

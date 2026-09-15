@@ -2,11 +2,12 @@ package admin
 
 import (
 	"io/fs"
+	"log/slog"
 
 	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/sirupsen/logrus"
+	"github.com/grpc-kit/pkg/logging"
 	"google.golang.org/genproto/googleapis/api/serviceconfig"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -30,7 +31,7 @@ type LocalConfigSnapshot struct {
 
 // config 配置信息
 type config struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 	db     *lion.Client
 
 	aesKey []byte
@@ -63,12 +64,10 @@ type config struct {
 // Options xx
 type Options func(c *config)
 
-// WithLogger 返回一个 AdminAPIOption，用于设置 AdminAPI 的日志记录器。
-// 参数 logger 是一个指向 logrus.Entry 的指针，表示要使用的日志记录器。
-// 返回值是一个 AdminAPIOption，用于配置 AdminAPI 的日志记录器。
-func WithLogger(logger *logrus.Entry) Options {
+// WithLogger 返回一个 Options，用于设置 KnownAdminAPI 的日志记录器。
+func WithLogger(logger *slog.Logger) Options {
 	return func(c *config) {
-		c.logger = logger
+		c.logger = logging.OrFallback(logger)
 	}
 }
 

@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -258,7 +259,11 @@ type SaramaConfig struct {
 }
 
 // initCloudEvents 初始化 cloudevents 数据实例
-func (c *LocalConfig) initCloudEvents() error {
+func (c *LocalConfig) initCloudEvents(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	if c.CloudEvents == nil {
 		c.CloudEvents = &CloudEventsConfig{
 			Enable: false,

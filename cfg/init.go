@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"os"
@@ -11,7 +12,11 @@ import (
 )
 
 // initServices 用于基础服务初始化配置检查
-func (c *LocalConfig) initServices() error {
+func (c *LocalConfig) initServices(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	// 验证 service_code 关键属性是否在
 	if c.Services == nil || c.Services.ServiceCode == "" {
 		return fmt.Errorf("unknow service_code")

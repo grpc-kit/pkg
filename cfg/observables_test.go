@@ -29,7 +29,7 @@ func TestObservables(t *testing.T) {
 	config.Observables.Telemetry.Traces.Exporters.Logging = &disabled
 	previousTracerProvider := otel.GetTracerProvider()
 	previousMeterProvider := otel.GetMeterProvider()
-	if err := config.initObservables(); err != nil {
+	if err := config.initObservables(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 

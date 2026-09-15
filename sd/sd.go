@@ -3,8 +3,9 @@ package sd
 import (
 	"context"
 	"errors"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
+	"github.com/grpc-kit/pkg/logging"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -32,8 +33,8 @@ var (
 type Registry interface {
 	// Register 注册服务信息至etcd等
 	Register(ctx context.Context, name, addr, val string, ttl int64) error
-	// Deregister 删除服务信息至etcd等
-	Deregister() error
+	// Deregister 使用调用方上下文删除服务信息至etcd等
+	Deregister(ctx context.Context) error
 	// Build 实现 resolver.Builder
 	Build(resolver.Target, resolver.ClientConn, resolver.BuildOptions) (resolver.Resolver, error)
 	// Scheme 实现 resolver.Builder
@@ -42,7 +43,7 @@ type Registry interface {
 
 // Connector 连接器
 type Connector struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 	Driver int
 	Hosts  string
 	TLS    *TLSInfo
@@ -61,20 +62,20 @@ func Home(prefix, namespace string) {
 	Namespace = namespace
 }
 
-// Register 注册一个服务
-func Register(conn *Connector, name, addr, val string, ttl int64) (Registry, error) {
+// Register 使用调用方上下文注册一个服务。
+func Register(ctx context.Context, conn *Connector, name, addr, val string, ttl int64) (Registry, error) {
 	if conn == nil {
 		return nil, errConnectorIsNil
 	}
 
 	switch conn.Driver {
 	case ETCDV3:
-		client, err := newEtcdv3Client(Prefix, Namespace, conn)
+		client, err := newEtcdv3Client(ctx, Prefix, Namespace, conn)
 		if err != nil {
 			return client, err
 		}
 
-		if err := client.Register(context.TODO(), name, addr, val, ttl); err != nil {
+		if err := client.Register(ctx, name, addr, val, ttl); err != nil {
 			return client, err
 		}
 
@@ -85,9 +86,9 @@ func Register(conn *Connector, name, addr, val string, ttl int64) (Registry, err
 }
 
 // NewConnector 用于注册的属性设置
-func NewConnector(logger *logrus.Entry, driver int, hosts string) (*Connector, error) {
+func NewConnector(logger *slog.Logger, driver int, hosts string) (*Connector, error) {
 	return &Connector{
-		logger: logger,
+		logger: logging.OrFallback(logger),
 		Driver: driver,
 		Hosts:  hosts,
 	}, nil

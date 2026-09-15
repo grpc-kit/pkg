@@ -24,6 +24,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
+	pklogging "github.com/grpc-kit/pkg/logging"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -1124,10 +1125,7 @@ func (a *KnownAdminAPI) RevealCredentialSecret(ctx context.Context, req *adminv1
 		return nil, errs.InvalidArgument(ctx).WithMessage("unsupported credential type for reveal")
 	}
 
-	// 审计日志
-	userID, _ := GetUserID(ctx)
-	a.config.logger.Infof("credential secret revealed: credential_id=%d, credential_code=%s, credential_type=%d, operator=%s(%d)",
-		row.ID, row.Code, row.CredentialType, username, userID)
+	pklogging.OrFallback(a.config.logger).InfoContext(ctx, "credential secret revealed")
 
 	return result, nil
 }
@@ -1189,7 +1187,7 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 	for _, sk := range sks {
 		pubInterface, err := x509.ParsePKIXPublicKey(sk.PublicKey)
 		if err != nil {
-			a.logger.Errorf("oauth2 jwks: failed to parse public_key (len=%d, firstByte=0x%02x): %v", len(sk.PublicKey), firstByte(sk.PublicKey), err)
+			pklogging.OrFallback(a.logger).ErrorContext(ctx, "OAuth2 JWKS public key parsing failed")
 			return nil, errs.Internal(ctx).WithMessage("failed to parse JWKS public key").Err()
 		}
 
@@ -1355,14 +1353,6 @@ func oauth2UserinfoClaimsFromContext(ctx context.Context) (*auth.CommonClaims, b
 		claims.SetSubject(strconv.FormatInt(userID, 10))
 	}
 	return claims, true
-}
-
-// firstByte 返回字节切片的首字节，空切片返回 0。
-func firstByte(b []byte) byte {
-	if len(b) == 0 {
-		return 0
-	}
-	return b[0]
 }
 
 // timePtr 返回给定 time.Time 的指针

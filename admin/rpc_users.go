@@ -444,7 +444,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		_ = tx.Rollback()
 		if strings.Contains(err.Error(), "duplicate key value") {
 			return nil, errs.AlreadyExists(ctx).
-				WithLogger(a.logger, "create user err: %v", err).
+				WithLogger(ctx, a.logger, "create user err: %v", err).
 				WithMessage("user already exists").
 				WithMessageZHCN("你好，已存在!").Err()
 		}

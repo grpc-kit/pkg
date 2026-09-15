@@ -26,7 +26,7 @@ func TestCanonicalVerifiedIdentifierHashes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := s.canonicalVerifiedIdentifierHashes(tt.claims)
+			got := s.canonicalVerifiedIdentifierHashes(t.Context(), tt.claims)
 			if (got.email != "") != tt.wantEmail || (got.phone != "") != tt.wantPhone {
 				t.Fatalf("hashes = %+v, want email=%v phone=%v", got, tt.wantEmail, tt.wantPhone)
 			}

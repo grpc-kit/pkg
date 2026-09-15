@@ -31,13 +31,21 @@ https://node3.example.com:2379
 
 # 2 - 使用示例
 
-```
+```go
+
+import (
+    "context"
+    "log/slog"
+    "os"
+)
+
+ctx := context.Background()
 serviceName := "opensearch.v1.monitors"
 publicAddress := "lb.example.com:10080"
 
 sd.Home("service", "namespace")
 
-logger := logrus.WithFields(logrus.Fields{"service_name": serviceName})
+logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service_name", serviceName)
 
 connector, err := sd.NewConnector(logger, sd.ETCDV3, "http://127.0.0.1:2379")
 if err != nil {
@@ -53,12 +61,12 @@ tls := &sd.TLSInfo{
 connector.WithTLSInfo(tls)
 */
 
-reg, err := sd.Register(connector, serviceName, publicAddress, "register value", 30)
+reg, err := sd.Register(ctx, connector, serviceName, publicAddress, "register value", 30)
 if err != nil {
 }
 
 defer func() {
-    if err := reg.Deregister(); err != nil {
+    if err := reg.Deregister(ctx); err != nil {
         return
     }
 }()

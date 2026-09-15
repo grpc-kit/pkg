@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/sirupsen/logrus"
 
+	pklogging "github.com/grpc-kit/pkg/logging"
 	mcpserver "github.com/grpc-kit/pkg/mcp"
 	"github.com/grpc-kit/pkg/rpc"
 )
@@ -27,7 +27,7 @@ func newMCPRuntimeConfig(t *testing.T) *LocalConfig {
 
 	return &LocalConfig{
 		mcpServer: srv,
-		logger:    logrus.NewEntry(logrus.New()),
+		logger:    pklogging.Fallback(),
 		rpcConfig: &rpc.Config{
 			HTTPAddress: "127.0.0.1:18099",
 		},
@@ -45,7 +45,7 @@ func TestHTTPHandlerFrontend_DisabledStillInitializesMCP(t *testing.T) {
 	disabled := false
 	c.Frontend = &FrontendConfig{Enable: &disabled}
 
-	if err := c.HTTPHandlerFrontend(http.NewServeMux(), nil); err != nil {
+	if err := c.HTTPHandlerFrontend(t.Context(), http.NewServeMux(), nil); err != nil {
 		t.Fatalf("HTTPHandlerFrontend: %v", err)
 	}
 
@@ -104,7 +104,7 @@ func TestRunAutoBridge_NoAdminServer(t *testing.T) {
 	c := newMCPRuntimeConfig(t)
 
 	// adminServer 保持 nil，调用 runAutoBridge 不应 panic
-	c.runAutoBridge()
+	c.runAutoBridge(t.Context())
 
 	// 通过 MCP 协议验证：无 tool 注册
 	session := connectMCPSession(t, c.mcpServer)

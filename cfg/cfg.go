@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -21,12 +22,12 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion"
+	pklogging "github.com/grpc-kit/pkg/logging"
 	"github.com/grpc-kit/pkg/mcp"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
 	"github.com/redis/go-redis/v9"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
@@ -75,7 +76,7 @@ type LocalConfig struct {
 	AIConnector *AIConnectorConfig `json:",omitempty"` // 智能连接配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
-	logger      *logrus.Entry
+	logger      *slog.Logger
 	srvdis      sd.Registry
 	rpcConfig   *rpc.Config
 	rpcServer   *rpc.Server
@@ -304,54 +305,54 @@ func New(v *viper.Viper) (*LocalConfig, error) {
 	return &lc, nil
 }
 
-// Init 用于根据配置初始化各个实例，初始化需注意空指针判断
-func (c *LocalConfig) Init() error {
-	if err := c.initDebugger(); err != nil {
+// Init 使用调用方上下文根据配置初始化各个实例，初始化需注意空指针判断。
+func (c *LocalConfig) Init(ctx context.Context) error {
+	if err := c.initDebugger(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initServices(); err != nil {
+	if err := c.initServices(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initSecurity(); err != nil {
+	if err := c.initSecurity(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initDatabase(); err != nil {
+	if err := c.initDatabase(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initCachebox(); err != nil {
+	if err := c.initCachebox(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initObservables(); err != nil {
+	if err := c.initObservables(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initCloudEvents(); err != nil {
+	if err := c.initCloudEvents(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initRPCConfig(); err != nil {
+	if err := c.initRPCConfig(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initObjstore(); err != nil {
+	if err := c.initObjstore(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initFrontend(); err != nil {
+	if err := c.initFrontend(ctx); err != nil {
 		return err
 	}
 
-	if err := c.initAutomations(); err != nil {
+	if err := c.initAutomations(ctx); err != nil {
 		return err
 	}
 
 	// AIConnector 初始化放在最后，依赖其他子系统已就绪
-	if err := c.initAIConnector(); err != nil {
+	if err := c.initAIConnector(ctx); err != nil {
 		return fmt.Errorf("init aiconnector: %w", err)
 	}
 
@@ -388,9 +389,9 @@ func (c *LocalConfig) Register(ctx context.Context,
 	}
 
 	if c.Services.hasEnableIntegrationAdminServer() {
-		client, err := c.GetAdminDatabaseLion()
+		client, err := c.getAdminDatabaseLion(ctx)
 		if err != nil {
-			c.logger.Infof("known admin service enabled but database not, some /builtin API will be unavailable.")
+			pklogging.OrFallback(c.logger).InfoContext(ctx, "admin service database unavailable")
 		}
 
 		admOpts := []admin.Options{
@@ -422,15 +423,14 @@ func (c *LocalConfig) Register(ctx context.Context,
 	return c.registerGateway(ctx, gw, opts...)
 }
 
-// Deregister 用于撤销注册中心上的服务信息
-func (c *LocalConfig) Deregister() error {
+// Deregister 使用调用方上下文撤销注册中心上的服务信息。
+func (c *LocalConfig) Deregister(ctx context.Context) error {
 	// TODO; 释放各总资源
-	ctx := context.TODO()
 
 	// 关闭 MCP Server 活跃 sessions（在 HTTP server 关闭前）
 	if c.mcpServer != nil {
 		if err := c.mcpServer.Close(); err != nil {
-			c.logger.Warnf("close mcp server: %v", err)
+			pklogging.OrFallback(c.logger).WarnContext(ctx, "close mcp server", "error", err)
 		}
 	}
 
@@ -443,7 +443,7 @@ func (c *LocalConfig) Deregister() error {
 		return nil
 	}
 
-	return c.srvdis.Deregister()
+	return c.srvdis.Deregister(ctx)
 }
 
 // GetIndependent 用于获取各个微服务独立的配置
@@ -498,8 +498,8 @@ func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
 	return handler
 }
 
-// HTTPHandlerFrontend 用于处理前端相关服务
-func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) error {
+// HTTPHandlerFrontend 使用调用方上下文处理前端静态数据及 MCP 自动桥接。
+func (c *LocalConfig) HTTPHandlerFrontend(ctx context.Context, mux *http.ServeMux, assets fs.FS) error {
 	if c.adminServer != nil {
 		if err := c.adminServer.SetMicroserviceGatewayYAML(assets); err != nil {
 			return err
@@ -508,7 +508,7 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 	// AutoBridge / BuiltinResources 不依赖 adminServer 是否启用：
 	// adminServer 为 nil 时底层函数对 nil 安全降级（AutoBridge 跳过、version resource
 	// 和 getting_started prompt 仍注册），使 MCP 可独立于 admin 后台使用（方案 C）。
-	c.runAutoBridge()
+	c.runAutoBridge(ctx)
 	c.runMCPBuiltinResources()
 
 	if !*c.Frontend.Enable {
@@ -812,34 +812,35 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 		for retryCount < retryMax {
 			retryCount += 1
 
-			time.Sleep(3 * time.Second)
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(3 * time.Second):
+			}
 
 			if err := tryConnect(c.Services.PublicAddress); err != nil {
-				c.logger.Errorf("register service the grpc health check err: %v, retry_count: %v, retry_max: %v",
-					err, retryCount, retryMax)
+				pklogging.OrFallback(c.logger).ErrorContext(ctx, "service registry health check failed")
 
 				continue
 			}
 
-			c.logger.Infof("register service the grpc health check public_address: %v success",
-				c.Services.PublicAddress)
+			pklogging.OrFallback(c.logger).InfoContext(ctx, "service registry health check succeeded")
 			break
 		}
 
 		if retryCount >= retryMax {
 			allowRegistry = false
 
-			c.logger.Errorf("register service the grpc health check fail public_address: %v will not public to registry",
-				c.Services.PublicAddress)
+			pklogging.OrFallback(c.logger).ErrorContext(ctx, "service registry health check retries exhausted")
 
 			// TODO; 达到最大检测次数，但后端服务端口还未正常，此时应该发送信号退出应用，不允许注册
 		}
 
 		// TODO; 如果后端grpc服务未正常注册，前端必须配合http健康检测，http状态码为503
 		if allowRegistry {
-			reg, err := sd.Register(connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
+			reg, err := sd.Register(ctx, connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
 			if err != nil {
-				c.logger.Errorf("register service err: %v%v", err, "\n")
+				pklogging.OrFallback(c.logger).ErrorContext(ctx, "service registration failed")
 			}
 
 			c.srvdis = reg

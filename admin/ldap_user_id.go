@@ -49,6 +49,28 @@ func normalizeLDAPUserIDAttributeName(raw string) (string, error) {
 	return attribute, nil
 }
 
+func normalizeLDAPPhoneNumberAttributeName(raw string) (string, error) {
+	attribute := strings.TrimSpace(raw)
+	if attribute == "" {
+		return "", nil
+	}
+	if strings.EqualFold(attribute, legacyLDAPUserIDAttribute) {
+		return "", fmt.Errorf("ldap phone_number_attribute must be an LDAP entry attribute, not dn")
+	}
+	if !ldapAttributeDescriptionPattern.MatchString(attribute) {
+		return "", fmt.Errorf("ldap phone_number_attribute is not a valid LDAP attribute description")
+	}
+
+	switch {
+	case strings.EqualFold(attribute, "mobile"):
+		return "mobile", nil
+	case strings.EqualFold(attribute, "telephoneNumber"):
+		return "telephoneNumber", nil
+	default:
+		return attribute, nil
+	}
+}
+
 func effectiveLDAPUserIDAttribute(config *ldapConfigData) string {
 	if config == nil || config.UserIDAttribute == nil {
 		return legacyLDAPUserIDAttribute

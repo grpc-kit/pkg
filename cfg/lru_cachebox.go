@@ -6,13 +6,14 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"fmt"
+	"log/slog"
 	"reflect"
 	"time"
 
+	pklogging "github.com/grpc-kit/pkg/logging"
 	"github.com/grpc-kit/pkg/vars"
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
-	"github.com/sirupsen/logrus"
 	"k8s.io/utils/lru"
 )
 
@@ -30,13 +31,13 @@ type LRUCachebox interface {
 
 // memory 实现
 type memoryCache struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 	cache  *lru.Cache
 }
 
 // redis 缓存实现
 type redisCache struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 	cache  redis.UniversalClient
 }
 
@@ -52,13 +53,14 @@ func (e cacheEntry) isExpired() bool {
 }
 
 // NewMemoryCache 创建内存缓存实例
-func newMemoryCache(logger *logrus.Entry, size int) *memoryCache {
+func newMemoryCache(logger *slog.Logger, size int) *memoryCache {
 	// size 限制缓存条目数量，为 0 则不限制
-	return &memoryCache{logger: logger, cache: lru.New(size)}
+	return &memoryCache{logger: pklogging.OrFallback(logger), cache: lru.New(size)}
 }
 
 // NewRedisCache 创建 Redis 缓存实例
-func newRedisCache(logger *logrus.Entry, config RedisCacheboxConfig) *redisCache {
+func newRedisCache(ctx context.Context, logger *slog.Logger, config RedisCacheboxConfig) *redisCache {
+	logger = pklogging.OrFallback(logger)
 	opt := &redis.UniversalOptions{
 		ClientName:       vars.Appname,
 		Addrs:            config.Endpoints,
@@ -73,7 +75,9 @@ func newRedisCache(logger *logrus.Entry, config RedisCacheboxConfig) *redisCache
 	if config.TLSClientConfig != nil {
 		tlsConfig, err := NewTLSConfig(config.TLSClientConfig)
 		if err != nil {
-			logger.Panicf("redis tls config error: %v\n", err)
+			message := fmt.Sprintf("redis tls config error: %v\n", err)
+			logger.Log(ctx, pklogging.LevelPanic, "redis TLS configuration failed")
+			panic(message)
 		}
 
 		opt.TLSConfig = tlsConfig
@@ -154,14 +158,14 @@ func (c *redisCache) GetStructValue(ctx context.Context, key string, ptr any) bo
 
 	data, err := base64.StdEncoding.DecodeString(val)
 	if err != nil {
-		c.logger.Errorf("redis cache decode error (key: %s): %v\n", key, err)
+		c.logger.ErrorContext(ctx, "redis cache base64 decoding failed")
 		return false
 	}
 
 	// gob.Register(reflect.TypeOf(ptr).Elem())
 	decoder := gob.NewDecoder(bytes.NewReader(data))
 	if err := decoder.Decode(ptr); err != nil {
-		c.logger.Errorf("redis cache decode error (key: %s): %v\n", key, err)
+		c.logger.ErrorContext(ctx, "redis cache gob decoding failed")
 		return false
 	}
 
@@ -173,14 +177,14 @@ func (c *redisCache) SetValue(ctx context.Context, key string, value any) bool {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 	if err := encoder.Encode(value); err != nil {
-		c.logger.Errorf("redis cache failed to encode value for key %v: %v", key, err)
+		c.logger.ErrorContext(ctx, "redis cache value encoding failed")
 		return false
 	}
 
 	encoded := base64.StdEncoding.EncodeToString(buffer.Bytes())
 	err := c.cache.Set(ctx, getCacheKey(key), encoded, 0).Err()
 	if err != nil {
-		c.logger.Errorf("redis cache failed to set value for key %v: %v", key, err)
+		c.logger.ErrorContext(ctx, "redis cache write failed")
 		return false
 	}
 
@@ -192,13 +196,13 @@ func (c *redisCache) SetValueWithTTL(ctx context.Context, key string, value any,
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 	if err := encoder.Encode(value); err != nil {
-		c.logger.Errorf("redis cache failed to encode value for key %v: %v", key, err)
+		c.logger.ErrorContext(ctx, "redis cache value encoding failed")
 		return false
 	}
 
 	encoded := base64.StdEncoding.EncodeToString(buffer.Bytes())
 	if err := c.cache.Set(ctx, getCacheKey(key), encoded, ttl).Err(); err != nil {
-		c.logger.Errorf("redis cache failed to set value for key %v: %v", key, err)
+		c.logger.ErrorContext(ctx, "redis cache write failed")
 		return false
 	}
 

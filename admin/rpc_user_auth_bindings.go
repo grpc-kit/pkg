@@ -87,7 +87,7 @@ func (a *KnownAdminAPI) ListUserAuthBindings(ctx context.Context, req *adminv1.L
 			return nil, errs.NotFound(ctx).WithMessage("user not found").Err()
 		}
 		if a.logger != nil {
-			a.logger.WithError(err).Error("query user existence failed")
+			a.logger.ErrorContext(ctx, "query user existence failed", "error", err)
 		}
 		return nil, errs.Internal(ctx).WithMessage("query user failed").Err()
 	}
@@ -118,7 +118,7 @@ func (a *KnownAdminAPI) ListUserAuthBindings(ctx context.Context, req *adminv1.L
 		All(ctx)
 	if err != nil {
 		if a.logger != nil {
-			a.logger.WithError(err).Error("query user authentication bindings failed")
+			a.logger.ErrorContext(ctx, "query user authentication bindings failed", "error", err)
 		}
 		return nil, errs.Internal(ctx).WithMessage("query user authentication bindings failed").Err()
 	}

@@ -18,6 +18,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	pklogging "github.com/grpc-kit/pkg/logging"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -104,29 +105,13 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 
 		passwordPayload := req.PasswordHash
 		if providerType == adminv1.AuthProvider_LDAP {
-			a.logger.Infof(
-				"ldap login debug: received password payload, provider_code=%s encoded_len=%d",
-				providerCode,
-				len(req.PasswordHash),
-			)
 			decodedPassword, decErr := base64.StdEncoding.DecodeString(req.PasswordHash)
 			if decErr != nil {
-				a.logger.Warnf(
-					"ldap login debug: invalid base64 payload, provider_code=%s err=%v",
-					providerCode,
-					decErr,
-				)
 				return nil, errs.InvalidArgument(ctx).WithMessage("password_hash must be valid base64 for LDAP provider")
 			}
 			if len(decodedPassword) == 0 {
-				a.logger.Warnf("ldap login debug: empty decoded password payload, provider_code=%s", providerCode)
 				return nil, errs.InvalidArgument(ctx).WithMessage("ldap password payload is empty")
 			}
-			a.logger.Infof(
-				"ldap login debug: base64 decode success, provider_code=%s decoded_len=%d",
-				providerCode,
-				len(decodedPassword),
-			)
 			passwordPayload = string(decodedPassword)
 		}
 
@@ -147,12 +132,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			if lion.IsNotFound(err) {
 				return nil, errs.Unauthenticated(ctx)
 			}
-			a.logger.Errorf(
-				"password login failed: provider_code=%s provider_type=%s err=%v",
-				providerCode,
-				providerType.String(),
-				err,
-			)
+			pklogging.OrFallback(a.logger).ErrorContext(ctx, "password login failed")
 			return nil, errs.Unauthenticated(ctx)
 		}
 		if pcResult == nil || !pcResult.OK {
@@ -1037,7 +1017,7 @@ func (a *KnownAdminAPI) enrichOAuthEndpoints(ctx context.Context, oc *adminv1.OA
 
 	provider, err := oidc.NewProvider(discoverCtx, oc.Issuer)
 	if err != nil {
-		a.logger.Warnf("OIDC discovery failed for issuer %s: %v", oc.Issuer, err)
+		pklogging.OrFallback(a.logger).WarnContext(ctx, "OIDC discovery failed")
 		return
 	}
 

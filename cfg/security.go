@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -15,8 +16,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
+	pklogging "github.com/grpc-kit/pkg/logging"
 	"github.com/grpc-kit/pkg/rpc"
-	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -44,7 +45,11 @@ type OPAEnvoyPlugin struct {
 }
 
 // initSecurity 初始化认证
-func (c *LocalConfig) initSecurity() error {
+func (c *LocalConfig) initSecurity(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	if c.Security == nil {
 		c.Security = &SecurityConfig{Enable: false}
 	}
@@ -87,8 +92,6 @@ func (c *LocalConfig) initSecurity() error {
 			return fmt.Errorf("security authentication not found oidc issuer")
 		}
 
-		ctx := context.TODO()
-
 		initVerifierFn := func() (done bool, err error) {
 			oidcConfig := &oidc.Config{}
 			if c.Security.Authentication.OIDCProvider.Config != nil {
@@ -110,8 +113,8 @@ func (c *LocalConfig) initSecurity() error {
 
 			provider, err := oidc.NewProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer)
 			if err != nil {
-				c.logger.Debugf("oidc new provider failed will be retry: %v", err)
-				// 这里返回错误后，就不会触发后续的重试
+				pklogging.OrFallback(c.logger).DebugContext(ctx, "OIDC provider discovery failed; retrying")
+				// 返回 false 且 error 为 nil，交由外层 backoff 继续重试。
 				return false, nil
 			}
 			verifier := provider.Verifier(oidcConfig)
@@ -134,10 +137,11 @@ func (c *LocalConfig) initSecurity() error {
 
 				return initVerifierFn()
 			}); err != nil {
-				c.logger.Errorf("oidc new provider verifier failed, initializing plugin exit err: %v", err)
+				pklogging.OrFallback(c.logger).ErrorContext(ctx, "OIDC verifier initialization stopped")
+				return
 			}
 
-			c.logger.Infof("oid verifier is ready and polling for /.well-known/openid-configuration has been stopped")
+			pklogging.OrFallback(c.logger).InfoContext(ctx, "OIDC verifier is ready")
 		}(initVerifierFn)
 	}
 
@@ -346,7 +350,7 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 }
 
 // initAuthClient 用于初始化 opa 客户端
-func (s *SecurityConfig) initAuthClient(ctx context.Context, logger *logrus.Entry, pkgName string, regoBody, dataBody []byte) error {
+func (s *SecurityConfig) initAuthClient(ctx context.Context, logger *slog.Logger, pkgName string, regoBody, dataBody []byte) error {
 	ac := &auth.Config{
 		PackageName: pkgName,
 	}
@@ -416,7 +420,7 @@ func (s *SecurityConfig) addHTTPHandler(handler http.Handler) http.Handler {
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.TODO()
+		ctx := r.Context()
 		ctx = s.injectAuthHTTPHeader(ctx, r)
 
 		ok, err := s.policyAllow(ctx)
@@ -425,7 +429,7 @@ func (s *SecurityConfig) addHTTPHandler(handler http.Handler) http.Handler {
 			return
 		}
 
-		handler.ServeHTTP(w, r)
+		handler.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
@@ -494,8 +498,7 @@ func (s *SecurityConfig) VerifyHTTPRequest(r *http.Request) error {
 			return fmt.Errorf("empty bearer token")
 		}
 
-		ctx := context.TODO()
-		_, err := s.verifyBearerToken(ctx, bearerToken)
+		_, err := s.verifyBearerToken(r.Context(), bearerToken)
 		if err != nil {
 			return fmt.Errorf("invalid bearer token: %w", err)
 		}

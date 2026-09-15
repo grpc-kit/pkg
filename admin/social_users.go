@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"regexp"
@@ -20,8 +21,9 @@ import (
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
-	"github.com/sirupsen/logrus"
+	pklogging "github.com/grpc-kit/pkg/logging"
 	"golang.org/x/oauth2"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion"
@@ -29,7 +31,7 @@ import (
 )
 
 type socialUsers struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 	db     *lion.Client
 
 	aesKey     []byte
@@ -50,7 +52,7 @@ type socialUsers struct {
 	issuanceContext AccessTokenIssuanceContext
 }
 
-func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
+func newSocialUsers(ctx context.Context, logger *slog.Logger, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
 	ap, err := db.AuthProviders.Query().
 		Select(
 			authproviders.FieldID,
@@ -419,27 +421,37 @@ func (s *socialUsers) PasswordCheckLocal(ctx context.Context, username, password
 }
 
 func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordPlain string) (*passwordCheckResult, error) {
+	logger := pklogging.OrFallback(s.logger)
 	if strings.TrimSpace(username) == "" || passwordPlain == "" {
-		s.logger.Warnf("ldap login skipped: empty username or password, provider=%s", s.ProviderName)
+		logger.LogAttrs(ctx, slog.LevelWarn, "LDAP login rejected",
+			slog.String("event", "ldap_login_rejected"),
+			slog.String("provider", s.ProviderName),
+			slog.String("reason", "missing_credentials"),
+			slog.Bool("username_present", strings.TrimSpace(username) != ""),
+			slog.Bool("password_present", passwordPlain != ""),
+		)
 		return &passwordCheckResult{}, nil
 	}
 	if s.ldapCfg == nil {
-		s.logger.Errorf("ldap login failed: ldap config not initialized, provider=%s", s.ProviderName)
+		logger.LogAttrs(ctx, slog.LevelError, "LDAP login configuration is unavailable",
+			slog.String("event", "ldap_login_configuration_unavailable"),
+			slog.String("provider", s.ProviderName),
+		)
 		return nil, fmt.Errorf("ldap config not initialized")
 	}
-	s.logger.Infof(
-		"ldap login start: provider=%s username=%s host=%s port=%d use_tls=%t start_tls=%t",
-		s.ProviderName,
-		username,
-		strings.TrimSpace(s.ldapCfg.Host),
-		s.ldapCfg.Port,
-		s.ldapCfg.UseTLS,
-		s.ldapCfg.StartTLS,
+	logger.LogAttrs(ctx, slog.LevelInfo, "LDAP login started",
+		slog.String("event", "ldap_login_started"),
+		slog.String("provider", s.ProviderName),
+		slog.Bool("tls_enabled", s.ldapCfg.UseTLS),
+		slog.Bool("start_tls_enabled", s.ldapCfg.StartTLS),
 	)
 
 	conn, err := s.newLDAPConn()
 	if err != nil {
-		s.logger.Errorf("ldap login failed: connect failed, provider=%s err=%v", s.ProviderName, err)
+		logger.LogAttrs(ctx, slog.LevelError, "LDAP connection failed",
+			slog.String("event", "ldap_connection_failed"),
+			slog.String("provider", s.ProviderName),
+		)
 		return nil, err
 	}
 	defer conn.Close()
@@ -448,47 +460,54 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	bindDN := strings.TrimSpace(s.ldapCfg.BindDN)
 	if bindDN != "" || s.secret != "" {
 		if err := conn.Bind(bindDN, s.secret); err != nil {
-			s.logger.Errorf(
-				"ldap login failed: service bind failed, provider=%s bind_dn=%s err=%v",
-				s.ProviderName,
-				maskLDAPDN(bindDN),
-				err,
+			logger.LogAttrs(ctx, slog.LevelError, "LDAP service bind failed",
+				slog.String("event", "ldap_service_bind_failed"),
+				slog.String("provider", s.ProviderName),
 			)
 			return nil, fmt.Errorf("ldap bind service account failed")
 		}
-		s.logger.Infof("ldap login debug: service bind success, provider=%s bind_dn=%s", s.ProviderName, maskLDAPDN(bindDN))
+		logger.LogAttrs(ctx, slog.LevelInfo, "LDAP service bind succeeded",
+			slog.String("event", "ldap_service_bind_succeeded"),
+			slog.String("provider", s.ProviderName),
+		)
 	}
 
-	resolvedUser, err := s.findLDAPUser(conn, username)
+	resolvedUser, err := s.findLDAPUser(ctx, conn, username)
 	if err != nil {
-		s.logger.Errorf("ldap login failed: user search failed, provider=%s username=%s err=%v", s.ProviderName, username, err)
+		logger.LogAttrs(ctx, slog.LevelError, "LDAP user search failed",
+			slog.String("event", "ldap_user_search_failed"),
+			slog.String("provider", s.ProviderName),
+		)
 		return nil, err
 	}
 	if resolvedUser == nil || resolvedUser.DN == "" {
-		s.logger.Warnf("ldap login failed: user not found in ldap, provider=%s username=%s", s.ProviderName, username)
+		logger.LogAttrs(ctx, slog.LevelWarn, "LDAP login rejected",
+			slog.String("event", "ldap_login_rejected"),
+			slog.String("provider", s.ProviderName),
+			slog.String("reason", "directory_user_not_found"),
+		)
 		return &passwordCheckResult{}, nil
 	}
 	userDN := resolvedUser.DN
-	s.logger.Infof(
-		"ldap login debug: user found, provider=%s username=%s resolved_username=%s user_dn=%s",
-		s.ProviderName,
-		username,
-		resolvedUser.Username,
-		maskLDAPDN(userDN),
+	logger.LogAttrs(ctx, slog.LevelInfo, "LDAP user resolved",
+		slog.String("event", "ldap_user_resolved"),
+		slog.String("provider", s.ProviderName),
 	)
 
 	// 用户口令校验：二次 bind。
 	if err := conn.Bind(userDN, passwordPlain); err != nil {
-		s.logger.Warnf(
-			"ldap login failed: user bind failed, provider=%s username=%s user_dn=%s err=%v",
-			s.ProviderName,
-			username,
-			maskLDAPDN(userDN),
-			err,
+		logger.LogAttrs(ctx, slog.LevelWarn, "LDAP login rejected",
+			slog.String("event", "ldap_login_rejected"),
+			slog.String("provider", s.ProviderName),
+			slog.String("reason", "invalid_directory_credentials"),
 		)
 		return &passwordCheckResult{}, nil
 	}
-	s.logger.Infof("ldap login debug: user bind success, provider=%s username=%s user_dn=%s", s.ProviderName, username, maskLDAPDN(userDN))
+	logger.LogAttrs(ctx, slog.LevelInfo, "LDAP user bind succeeded",
+		slog.String("event", "ldap_user_bind_succeeded"),
+		slog.String("provider", s.ProviderName),
+	)
+	normalizedPhone := s.normalizeLDAPUserPhone(ctx, resolvedUser.Attrs)
 
 	ldapIdentity, err := s.db.UserIdentities.Query().
 		Select(
@@ -501,11 +520,9 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		).
 		Only(ctx)
 	if err != nil && !lion.IsNotFound(err) {
-		s.logger.Errorf(
-			"ldap login failed: query identity error, provider=%s user_dn=%s err=%v",
-			s.ProviderName,
-			maskLDAPDN(userDN),
-			err,
+		logger.LogAttrs(ctx, slog.LevelError, "LDAP identity query failed",
+			slog.String("event", "ldap_identity_query_failed"),
+			slog.String("provider", s.ProviderName),
 		)
 		return nil, err
 	}
@@ -513,41 +530,32 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	var localUserID int
 	if ldapIdentity != nil {
 		localUserID = ldapIdentity.UserID
-		s.logger.Infof(
-			"ldap login debug: identity hit, provider=%s user_dn=%s local_user_id=%d",
-			s.ProviderName,
-			maskLDAPDN(userDN),
-			localUserID,
+		logger.LogAttrs(ctx, slog.LevelInfo, "LDAP identity resolved",
+			slog.String("event", "ldap_identity_resolved"),
+			slog.String("provider", s.ProviderName),
+			slog.Int("user_id", localUserID),
 		)
-		// 已有用户二次登录：用最新 LDAP 属性刷新本地用户表。
-		s.syncLDAPUserAttrs(ctx, localUserID, resolvedUser.Attrs)
 	} else {
-		s.logger.Warnf(
-			"ldap login debug: identity miss, start verified email resolve or provision, provider=%s username=%s resolved_username=%s user_dn=%s",
-			s.ProviderName,
-			username,
-			resolvedUser.Username,
-			maskLDAPDN(userDN),
+		logger.LogAttrs(ctx, slog.LevelWarn, "LDAP identity not found",
+			slog.String("event", "ldap_identity_missing"),
+			slog.String("provider", s.ProviderName),
 		)
-		localUserID, err = s.provisionLDAPUserOnFirstLogin(ctx, resolvedUser.ProviderUserID, resolvedUser.Username, resolvedUser.Attrs)
+		localUserID, err = s.provisionLDAPUserOnFirstLogin(ctx, resolvedUser.ProviderUserID, resolvedUser.Username, resolvedUser.Attrs, normalizedPhone)
 		if err != nil {
-			s.logger.Errorf(
-				"ldap login failed: auto provision error, provider=%s username=%s resolved_username=%s user_dn=%s err=%v",
-				s.ProviderName,
-				username,
-				resolvedUser.Username,
-				maskLDAPDN(userDN),
-				err,
+			logger.LogAttrs(ctx, slog.LevelError, "LDAP user provisioning failed",
+				slog.String("event", "ldap_user_provisioning_failed"),
+				slog.String("provider", s.ProviderName),
 			)
 			return nil, err
 		}
-		s.logger.Infof(
-			"ldap login debug: identity resolve or provision success, provider=%s user_dn=%s local_user_id=%d",
-			s.ProviderName,
-			maskLDAPDN(userDN),
-			localUserID,
+		logger.LogAttrs(ctx, slog.LevelInfo, "LDAP user provisioned",
+			slog.String("event", "ldap_user_provisioned"),
+			slog.String("provider", s.ProviderName),
+			slog.Int("user_id", localUserID),
 		)
 	}
+	// 无论 identity 是已有、自动关联还是首次创建，都从同一入口同步最新的非空 LDAP 属性。
+	s.syncLDAPUserAttrs(ctx, localUserID, resolvedUser.Attrs, normalizedPhone)
 
 	userEntity, err := s.db.Users.Query().
 		Select(
@@ -563,19 +571,18 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		Only(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
-			s.logger.Warnf(
-				"ldap login failed: local user not active or not found, provider=%s local_user_id=%d user_dn=%s",
-				s.ProviderName,
-				localUserID,
-				maskLDAPDN(userDN),
+			logger.LogAttrs(ctx, slog.LevelWarn, "LDAP login rejected",
+				slog.String("event", "ldap_login_rejected"),
+				slog.String("provider", s.ProviderName),
+				slog.String("reason", "local_user_unavailable"),
+				slog.Int("user_id", localUserID),
 			)
 			return &passwordCheckResult{}, nil
 		}
-		s.logger.Errorf(
-			"ldap login failed: local user query error, provider=%s local_user_id=%d err=%v",
-			s.ProviderName,
-			localUserID,
-			err,
+		logger.LogAttrs(ctx, slog.LevelError, "LDAP local user query failed",
+			slog.String("event", "ldap_local_user_query_failed"),
+			slog.String("provider", s.ProviderName),
+			slog.Int("user_id", localUserID),
 		)
 		return nil, err
 	}
@@ -605,9 +612,15 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	}, nil
 }
 
-func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, providerUserID, ldapUsername string, attrs *ldapUserAttrs) (int, error) {
+func (s *socialUsers) provisionLDAPUserOnFirstLogin(
+	ctx context.Context,
+	providerUserID string,
+	ldapUsername string,
+	attrs *ldapUserAttrs,
+	phone *normalizedPhoneNumber,
+) (int, error) {
 	autoLinkEnabled := false
-	if attrs != nil && strings.TrimSpace(attrs.Email) != "" {
+	if (attrs != nil && strings.TrimSpace(attrs.Email) != "") || phone != nil {
 		var settingErr error
 		autoLinkEnabled, settingErr = s.identityAutoLinkEnabled(ctx)
 		if settingErr != nil {
@@ -625,11 +638,20 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 	if attrs != nil {
 		assertedEmail = attrs.Email
 	}
+	var assertedPhone string
+	if phone != nil {
+		assertedPhone = phone.Identifier.StoredValue
+	}
 	linkedUserID, linked, err := s.linkExternalIdentityByVerifiedIdentifiers(
 		ctx,
 		tx,
 		providerUserID,
-		verifiedIdentityClaims{Email: assertedEmail, EmailVerified: true},
+		verifiedIdentityClaims{
+			Email:               assertedEmail,
+			EmailVerified:       assertedEmail != "",
+			PhoneNumber:         assertedPhone,
+			PhoneNumberVerified: assertedPhone != "",
+		},
 		autoLinkEnabled,
 		nil,
 	)
@@ -638,7 +660,7 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 	}
 	if linked {
 		if err := tx.Commit(); err != nil {
-			return 0, fmt.Errorf("commit LDAP verified email binding: %w", err)
+			return 0, fmt.Errorf("commit LDAP verified identifier binding: %w", err)
 		}
 		return linkedUserID, nil
 	}
@@ -668,7 +690,11 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 		var identifierErr error
 		emailIdentifier, identifierErr = canonicalizeEmailIdentifier(attrs.Email)
 		if identifierErr != nil {
-			s.logger.Warnf("ignore invalid LDAP email: provider=%s err=%v", s.ProviderName, identifierErr)
+			pklogging.OrFallback(s.logger).LogAttrs(ctx, slog.LevelWarn, "LDAP email ignored",
+				slog.String("event", "ldap_email_ignored"),
+				slog.String("provider", s.ProviderName),
+				slog.String("reason", "invalid_value"),
+			)
 		} else {
 			emailEnc, encErr := crypto.EncryptAES(s.aesKey, []byte(emailIdentifier.StoredValue))
 			if encErr != nil {
@@ -680,6 +706,16 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 			userCreate.SetEmailVerified(true)
 		}
 	}
+	if phone != nil {
+		phoneEnc, encErr := s.encryptPhoneNumber(phone.Proto)
+		if encErr != nil {
+			_ = tx.Rollback()
+			return 0, fmt.Errorf("encrypt ldap phone number: %w", encErr)
+		}
+		userCreate.SetPhoneNumberEncrypted(phoneEnc)
+		userCreate.SetPhoneNumberHash(phone.Identifier.Hash)
+		userCreate.SetPhoneNumberVerified(true)
+	}
 
 	newUser, err := userCreate.Save(ctx)
 	if err != nil {
@@ -689,6 +725,13 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 				Where(users.EmailHashEQ(emailIdentifier.Hash)).
 				OnlyID(ctx); queryErr == nil {
 				return 0, errExternalEmailAlreadyExists
+			}
+		}
+		if phone != nil && lion.IsConstraintError(err) {
+			if _, queryErr := s.db.Users.Query().
+				Where(users.PhoneNumberHashEQ(phone.Identifier.Hash)).
+				OnlyID(ctx); queryErr == nil {
+				return 0, errExternalPhoneAlreadyExists
 			}
 		}
 		return 0, err
@@ -733,10 +776,11 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, provide
 
 // syncLDAPUserAttrs 在已有用户二次登录时，用最新 LDAP 属性刷新本地用户表。
 // 仅当 LDAP 侧返回了非空值时才覆盖对应字段，避免用空值清掉已有数据。
-func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *ldapUserAttrs) {
+func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *ldapUserAttrs, phone *normalizedPhoneNumber) {
 	if attrs == nil {
 		return
 	}
+	logger := pklogging.OrFallback(s.logger)
 
 	userUpdate := s.db.Users.Update().Where(users.IDEQ(userID), users.UserStatusEQ(int(adminv1.User_ACTIVE.Number())), users.DeletedAtIsNil())
 
@@ -748,11 +792,21 @@ func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *
 	if attrs.Email != "" {
 		identifier, err := canonicalizeEmailIdentifier(attrs.Email)
 		if err != nil {
-			s.logger.Warnf("ldap sync attrs: ignore invalid email, provider=%s user_id=%d err=%v", s.ProviderName, userID, err)
+			logger.LogAttrs(ctx, slog.LevelWarn, "LDAP email synchronization skipped",
+				slog.String("event", "ldap_email_sync_skipped"),
+				slog.String("provider", s.ProviderName),
+				slog.String("reason", "invalid_value"),
+				slog.Int("user_id", userID),
+			)
 		} else {
 			emailEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(identifier.StoredValue))
 			if encryptErr != nil {
-				s.logger.Warnf("ldap sync attrs: encrypt email failed, provider=%s user_id=%d err=%v", s.ProviderName, userID, encryptErr)
+				logger.LogAttrs(ctx, slog.LevelWarn, "LDAP email synchronization failed",
+					slog.String("event", "ldap_email_sync_failed"),
+					slog.String("provider", s.ProviderName),
+					slog.String("stage", "encrypt"),
+					slog.Int("user_id", userID),
+				)
 			} else {
 				userUpdate.SetEmailEncrypted(emailEnc)
 				userUpdate.SetEmailHash(identifier.Hash)
@@ -762,15 +816,101 @@ func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *
 		}
 	}
 
-	if !updated {
+	if updated {
+		if affected, err := userUpdate.Save(ctx); err != nil {
+			logger.LogAttrs(ctx, slog.LevelWarn, "LDAP user attribute synchronization failed",
+				slog.String("event", "ldap_user_attributes_sync_failed"),
+				slog.String("provider", s.ProviderName),
+				slog.Int("user_id", userID),
+				slog.Int("affected_count", affected),
+			)
+		} else {
+			logger.LogAttrs(ctx, slog.LevelInfo, "LDAP user attributes synchronized",
+				slog.String("event", "ldap_user_attributes_sync_succeeded"),
+				slog.String("provider", s.ProviderName),
+				slog.Int("user_id", userID),
+				slog.Int("affected_count", affected),
+			)
+		}
+	}
+
+	if phone != nil {
+		s.syncLDAPUserPhone(ctx, userID, phone)
+	}
+}
+
+func (s *socialUsers) syncLDAPUserPhone(ctx context.Context, userID int, phone *normalizedPhoneNumber) {
+	logger := pklogging.OrFallback(s.logger)
+	phoneEnc, err := s.encryptPhoneNumber(phone.Proto)
+	if err != nil {
+		logger.LogAttrs(ctx, slog.LevelWarn, "LDAP phone synchronization failed",
+			slog.String("event", "ldap_phone_sync_failed"),
+			slog.String("provider", s.ProviderName),
+			slog.String("stage", "encrypt"),
+			slog.Int("user_id", userID),
+		)
 		return
 	}
 
-	if n, err := userUpdate.Save(ctx); err != nil {
-		s.logger.Warnf("ldap sync attrs: update user failed, provider=%s user_id=%d affected=%d err=%v", s.ProviderName, userID, n, err)
-	} else {
-		s.logger.Infof("ldap sync attrs: update user success, provider=%s user_id=%d affected=%d", s.ProviderName, userID, n)
+	affected, err := s.db.Users.Update().
+		Where(
+			users.IDEQ(userID),
+			users.UserStatusEQ(int(adminv1.User_ACTIVE.Number())),
+			users.DeletedAtIsNil(),
+		).
+		SetPhoneNumberEncrypted(phoneEnc).
+		SetPhoneNumberHash(phone.Identifier.Hash).
+		SetPhoneNumberVerified(true).
+		Save(ctx)
+	if err != nil {
+		if lion.IsConstraintError(err) {
+			logger.LogAttrs(ctx, slog.LevelWarn, "LDAP phone synchronization skipped",
+				slog.String("event", "ldap_phone_sync_skipped"),
+				slog.String("provider", s.ProviderName),
+				slog.String("reason", "conflict"),
+				slog.Int("user_id", userID),
+			)
+			return
+		}
+		logger.LogAttrs(ctx, slog.LevelWarn, "LDAP phone synchronization failed",
+			slog.String("event", "ldap_phone_sync_failed"),
+			slog.String("provider", s.ProviderName),
+			slog.String("stage", "update"),
+			slog.Int("user_id", userID),
+			slog.Int("affected_count", affected),
+		)
+		return
 	}
+	logger.LogAttrs(ctx, slog.LevelInfo, "LDAP phone synchronized",
+		slog.String("event", "ldap_phone_sync_succeeded"),
+		slog.String("provider", s.ProviderName),
+		slog.Int("user_id", userID),
+		slog.Int("affected_count", affected),
+	)
+}
+
+func (s *socialUsers) encryptPhoneNumber(phone *adminv1.PhoneNumber) ([]byte, error) {
+	raw, err := proto.Marshal(phone)
+	if err != nil {
+		return nil, fmt.Errorf("marshal phone number: %w", err)
+	}
+	return crypto.EncryptAES(s.aesKey, raw)
+}
+
+func (s *socialUsers) normalizeLDAPUserPhone(ctx context.Context, attrs *ldapUserAttrs) *normalizedPhoneNumber {
+	if attrs == nil || strings.TrimSpace(attrs.PhoneNumber) == "" {
+		return nil
+	}
+	phone, err := normalizeExternalPhoneNumber(attrs.PhoneNumber, s.ldapCfg.PhoneNumberDefaultRegion)
+	if err != nil {
+		pklogging.OrFallback(s.logger).LogAttrs(ctx, slog.LevelWarn, "LDAP phone ignored",
+			slog.String("event", "ldap_phone_ignored"),
+			slog.String("provider", s.ProviderName),
+			slog.String("reason", "invalid_value"),
+		)
+		return nil
+	}
+	return &phone
 }
 
 func buildLDAPLocalUsernameBase(providerCode, ldapUsername string) string {
@@ -893,6 +1033,7 @@ func (s *socialUsers) newLDAPConn() (*ldap.Conn, error) {
 type ldapUserAttrs struct {
 	Email       string
 	DisplayName string
+	PhoneNumber string
 }
 
 type ldapResolvedUser struct {
@@ -902,10 +1043,14 @@ type ldapResolvedUser struct {
 	Attrs          *ldapUserAttrs
 }
 
-func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResolvedUser, error) {
+func (s *socialUsers) findLDAPUser(ctx context.Context, conn *ldap.Conn, username string) (*ldapResolvedUser, error) {
+	logger := pklogging.OrFallback(s.logger)
 	searchBase := strings.TrimSpace(s.ldapCfg.UserSearchBase)
 	if searchBase == "" {
-		s.logger.Errorf("ldap search failed: empty user_search_base, provider=%s username=%s", s.ProviderName, username)
+		logger.LogAttrs(ctx, slog.LevelError, "LDAP user search configuration is unavailable",
+			slog.String("event", "ldap_user_search_configuration_unavailable"),
+			slog.String("provider", s.ProviderName),
+		)
 		return nil, fmt.Errorf("ldap user_search_base is required")
 	}
 
@@ -919,8 +1064,8 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 		return nil, err
 	}
 
-	// 构建请求属性列表：始终包含 username 属性，按配置追加主体、email、display_name。
-	attributes := make([]string, 0, 4)
+	// 构建请求属性列表：始终包含 username 属性，按配置追加主体和资料属性。
+	attributes := make([]string, 0, 5)
 	appendAttribute := func(attribute string) {
 		attribute = strings.TrimSpace(attribute)
 		if attribute == "" || strings.EqualFold(attribute, legacyLDAPUserIDAttribute) {
@@ -937,8 +1082,13 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 	appendAttribute(userIDAttribute)
 	emailAttribute := strings.TrimSpace(s.ldapCfg.EmailAttribute)
 	displayNameAttribute := strings.TrimSpace(s.ldapCfg.DisplayNameAttribute)
+	phoneNumberAttribute, err := normalizeLDAPPhoneNumberAttributeName(s.ldapCfg.PhoneNumberAttribute)
+	if err != nil {
+		return nil, err
+	}
 	appendAttribute(emailAttribute)
 	appendAttribute(displayNameAttribute)
+	appendAttribute(phoneNumberAttribute)
 
 	escapedUsername := ldap.EscapeFilter(username)
 	filterTemplate := strings.TrimSpace(s.ldapCfg.UserSearchFilter)
@@ -953,13 +1103,10 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 	default:
 		filter = fmt.Sprintf("(&%s(%s=%s))", filterTemplate, usernameAttribute, escapedUsername)
 	}
-	s.logger.Infof(
-		"ldap search debug: provider=%s username=%s search_base=%s username_attr=%s user_id_attr=%s",
-		s.ProviderName,
-		username,
-		maskLDAPDN(searchBase),
-		usernameAttribute,
-		userIDAttribute,
+	logger.LogAttrs(ctx, slog.LevelInfo, "LDAP directory search started",
+		slog.String("event", "ldap_directory_search_started"),
+		slog.String("provider", s.ProviderName),
+		slog.Int("attribute_count", len(attributes)),
 	)
 
 	searchReq := ldap.NewSearchRequest(
@@ -975,20 +1122,26 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 	)
 	searchResp, err := conn.Search(searchReq)
 	if err != nil {
-		s.logger.Errorf("ldap search failed: provider=%s username=%s err=%v", s.ProviderName, username, err)
+		logger.LogAttrs(ctx, slog.LevelError, "LDAP directory search failed",
+			slog.String("event", "ldap_directory_search_failed"),
+			slog.String("provider", s.ProviderName),
+		)
 		return nil, err
 	}
-	s.logger.Infof(
-		"ldap search debug: provider=%s username=%s entry_count=%d",
-		s.ProviderName,
-		username,
-		len(searchResp.Entries),
+	logger.LogAttrs(ctx, slog.LevelInfo, "LDAP directory search completed",
+		slog.String("event", "ldap_directory_search_completed"),
+		slog.String("provider", s.ProviderName),
+		slog.Int("entry_count", len(searchResp.Entries)),
 	)
 	if len(searchResp.Entries) == 0 {
 		return nil, nil
 	}
 	if len(searchResp.Entries) > 1 {
-		s.logger.Warnf("ldap search failed: multiple entries, provider=%s username=%s entry_count=%d", s.ProviderName, username, len(searchResp.Entries))
+		logger.LogAttrs(ctx, slog.LevelWarn, "LDAP directory search returned multiple entries",
+			slog.String("event", "ldap_directory_search_ambiguous"),
+			slog.String("provider", s.ProviderName),
+			slog.Int("entry_count", len(searchResp.Entries)),
+		)
 		return nil, fmt.Errorf("ldap user search returned multiple entries")
 	}
 
@@ -1009,6 +1162,18 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 	if displayNameAttribute != "" {
 		attrs.DisplayName = strings.TrimSpace(entry.GetEqualFoldAttributeValue(displayNameAttribute))
 	}
+	if phoneNumberAttribute != "" {
+		phoneNumber, phoneErr := singleLDAPAttributeValue(entry, phoneNumberAttribute)
+		if phoneErr != nil {
+			logger.LogAttrs(ctx, slog.LevelWarn, "LDAP phone ignored",
+				slog.String("event", "ldap_phone_ignored"),
+				slog.String("provider", s.ProviderName),
+				slog.String("reason", "multiple_values"),
+			)
+		} else {
+			attrs.PhoneNumber = phoneNumber
+		}
+	}
 
 	return &ldapResolvedUser{
 		DN:             entry.DN,
@@ -1018,18 +1183,27 @@ func (s *socialUsers) findLDAPUser(conn *ldap.Conn, username string) (*ldapResol
 	}, nil
 }
 
-func maskLDAPDN(dn string) string {
-	dn = strings.TrimSpace(dn)
-	if dn == "" {
-		return ""
+func singleLDAPAttributeValue(entry *ldap.Entry, attribute string) (string, error) {
+	if entry == nil || strings.TrimSpace(attribute) == "" {
+		return "", nil
 	}
-	if len(dn) <= 16 {
-		return dn
+
+	var result string
+	for _, value := range entry.GetEqualFoldAttributeValues(attribute) {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		if result != "" {
+			return "", fmt.Errorf("ldap attribute must contain at most one non-empty value")
+		}
+		result = trimmed
 	}
-	return dn[:8] + "...(masked)"
+	return result, nil
 }
 
 func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, profile externalUserClaims) (int, error) {
+	logger := pklogging.OrFallback(s.logger)
 	existIdentity, err := s.db.UserIdentities.Query().
 		Where(
 			useridentities.ProviderID(s.AuthProvider.ID),
@@ -1058,7 +1232,10 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 
 		tx, err := s.db.Tx(ctx)
 		if err != nil {
-			s.logger.Errorf("create external user: provider=%s err=%v", s.ProviderName, err)
+			logger.LogAttrs(ctx, slog.LevelError, "External user transaction creation failed",
+				slog.String("event", "external_user_transaction_creation_failed"),
+				slog.String("provider", s.ProviderName),
+			)
 			return 0, fmt.Errorf("create user failed")
 		}
 		defer func() { _ = tx.Rollback() }()
@@ -1092,7 +1269,10 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		}
 		username, err := findAvailableUsername(ctx, tx, buildLDAPLocalUsernameBase(s.ProviderName, usernameSource))
 		if err != nil {
-			s.logger.Errorf("allocate external username: provider=%s err=%v", s.ProviderName, err)
+			logger.LogAttrs(ctx, slog.LevelError, "External username allocation failed",
+				slog.String("event", "external_username_allocation_failed"),
+				slog.String("provider", s.ProviderName),
+			)
 			return 0, fmt.Errorf("create user failed")
 		}
 
@@ -1102,7 +1282,11 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			var identifierErr error
 			emailIdentifier, identifierErr = canonicalizeEmailIdentifier(profile.Email)
 			if identifierErr != nil {
-				s.logger.Warnf("ignore invalid external email: provider=%s err=%v", s.ProviderName, identifierErr)
+				logger.LogAttrs(ctx, slog.LevelWarn, "External email ignored",
+					slog.String("event", "external_email_ignored"),
+					slog.String("provider", s.ProviderName),
+					slog.String("reason", "invalid_value"),
+				)
 			} else {
 				emailEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(emailIdentifier.StoredValue))
 				if encryptErr != nil {
@@ -1125,7 +1309,10 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 				}
 			}
 
-			s.logger.Errorf("create user: %v, to save err: %v", username, err)
+			logger.LogAttrs(ctx, slog.LevelError, "External user creation failed",
+				slog.String("event", "external_user_creation_failed"),
+				slog.String("provider", s.ProviderName),
+			)
 			return 0, fmt.Errorf("create user failed")
 		}
 
@@ -1155,7 +1342,11 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		if err != nil {
 			_ = tx.Rollback()
 
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			logger.LogAttrs(ctx, slog.LevelError, "External identity creation failed",
+				slog.String("event", "external_identity_creation_failed"),
+				slog.String("provider", s.ProviderName),
+				slog.Int("user_id", newUser.ID),
+			)
 			return 0, fmt.Errorf("create user failed")
 		}
 
@@ -1367,10 +1558,11 @@ func (s *socialUsers) weixinExchange(ctx context.Context, code string) (*wechatC
 	}
 
 	wx := newWechatOpen(s.logger, s.oauthCfg.ClientID, s.secret)
-	return wx.code2Session(s.oauthCfg.AuthorizationEndpoint, code)
+	return wx.code2Session(ctx, s.oauthCfg.AuthorizationEndpoint, code)
 }
 
 func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2SessionResponse) (int, error) {
+	logger := pklogging.OrFallback(s.logger)
 	existIdentity, err := s.db.UserIdentities.Query().
 		Where(
 			useridentities.ProviderIDEQ(s.AuthProvider.ID),
@@ -1394,10 +1586,10 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		if conflict {
 			// UnionID 不参与当前登录匹配。发生冲突时保留已存值，避免在尚未建模
 			// 微信开放平台账号信任域之前错误覆盖跨应用身份标识。
-			s.logger.Warnf(
-				"wechat unionid mismatch: provider=%s identity_id=%d; keeping stored value",
-				s.ProviderName,
-				existIdentity.ID,
+			logger.LogAttrs(ctx, slog.LevelWarn, "WeChat UnionID mismatch; keeping stored value",
+				slog.String("event", "wechat_union_id_mismatch"),
+				slog.String("provider", s.ProviderName),
+				slog.Int("identity_id", existIdentity.ID),
 			)
 		}
 		if shouldPersist {
@@ -1417,13 +1609,20 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		// 首先确保 "lion_users" 不存在这个用户，开启一个事务
 		tx, err := s.db.Tx(ctx)
 		if err != nil {
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			logger.LogAttrs(ctx, slog.LevelError, "WeChat user transaction creation failed",
+				slog.String("event", "wechat_user_transaction_creation_failed"),
+				slog.String("provider", s.ProviderName),
+			)
 			return 0, fmt.Errorf("create user failed")
 		}
 
 		_, err = tx.Users.Query().Where(users.UsernameEQ(username)).OnlyID(ctx)
 		if !lion.IsNotFound(err) {
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			logger.LogAttrs(ctx, slog.LevelError, "WeChat username availability check failed",
+				slog.String("event", "wechat_username_availability_check_failed"),
+				slog.String("provider", s.ProviderName),
+				slog.Bool("username_exists", err == nil),
+			)
 			return 0, fmt.Errorf("create user failed")
 		}
 
@@ -1433,7 +1632,10 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		if err != nil {
 			_ = tx.Rollback()
 
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			logger.LogAttrs(ctx, slog.LevelError, "WeChat user creation failed",
+				slog.String("event", "wechat_user_creation_failed"),
+				slog.String("provider", s.ProviderName),
+			)
 			return 0, fmt.Errorf("create user failed")
 		}
 
@@ -1458,7 +1660,11 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		if err != nil {
 			_ = tx.Rollback()
 
-			s.logger.Errorf("create user: %v, err: %v", username, err)
+			logger.LogAttrs(ctx, slog.LevelError, "WeChat identity creation failed",
+				slog.String("event", "wechat_identity_creation_failed"),
+				slog.String("provider", s.ProviderName),
+				slog.Int("user_id", newUser.ID),
+			)
 			return 0, fmt.Errorf("create user failed")
 		}
 

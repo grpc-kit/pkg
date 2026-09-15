@@ -3,11 +3,13 @@ package admin
 import (
 	"fmt"
 	"net/mail"
+	"strconv"
 	"strings"
 	"unicode"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
+	"github.com/nyaruka/phonenumbers/v2"
 )
 
 const maxE164Digits = 15
@@ -18,6 +20,11 @@ type canonicalIdentifier struct {
 	StoredValue    string
 	CanonicalValue string
 	Hash           string
+}
+
+type normalizedPhoneNumber struct {
+	Proto      *adminv1.PhoneNumber
+	Identifier canonicalIdentifier
 }
 
 func canonicalizeEmailIdentifier(raw string) (canonicalIdentifier, error) {
@@ -69,6 +76,70 @@ func canonicalizeE164PhoneIdentifier(raw string) (canonicalIdentifier, error) {
 		CanonicalValue: canonical,
 		Hash:           crypto.SHA256([]byte(canonical)),
 	}, nil
+}
+
+func normalizeExternalPhoneNumber(raw, defaultRegion string) (normalizedPhoneNumber, error) {
+	value := strings.TrimSpace(raw)
+	if value == "" {
+		return normalizedPhoneNumber{}, fmt.Errorf("phone number is empty")
+	}
+
+	region := strings.ToUpper(strings.TrimSpace(defaultRegion))
+	if !strings.HasPrefix(value, "+") && region == "" {
+		return normalizedPhoneNumber{}, fmt.Errorf("phone number must use E.164 format when default region is empty")
+	}
+	if region != "" && !phonenumbers.GetSupportedRegions()[region] {
+		return normalizedPhoneNumber{}, fmt.Errorf("phone number default region is invalid")
+	}
+
+	parsed, err := phonenumbers.Parse(value, region)
+	if err != nil {
+		return normalizedPhoneNumber{}, fmt.Errorf("parse phone number: %w", err)
+	}
+	if parsed.GetExtension() != "" {
+		return normalizedPhoneNumber{}, fmt.Errorf("phone number extensions are not supported")
+	}
+	if !phonenumbers.IsValidNumber(parsed) {
+		return normalizedPhoneNumber{}, fmt.Errorf("phone number is invalid")
+	}
+	numberType := phonenumbers.GetNumberType(parsed)
+	if numberType != phonenumbers.MOBILE && numberType != phonenumbers.FIXED_LINE_OR_MOBILE {
+		return normalizedPhoneNumber{}, fmt.Errorf("phone number is not a mobile number")
+	}
+
+	e164 := phonenumbers.Format(parsed, phonenumbers.E164)
+	countryCode := strconv.FormatInt(int64(parsed.GetCountryCode()), 10)
+	nationalNumber, ok := strings.CutPrefix(e164, "+"+countryCode)
+	if !ok || nationalNumber == "" {
+		return normalizedPhoneNumber{}, fmt.Errorf("phone number cannot be represented in E.164 format")
+	}
+
+	phoneNumber := &adminv1.PhoneNumber{
+		CountryCode:    countryCode,
+		NationalNumber: nationalNumber,
+	}
+	identifier, err := canonicalizePhoneNumberIdentifier(phoneNumber)
+	if err != nil {
+		return normalizedPhoneNumber{}, err
+	}
+	if identifier.CanonicalValue != e164 {
+		return normalizedPhoneNumber{}, fmt.Errorf("phone number canonicalization mismatch")
+	}
+	return normalizedPhoneNumber{
+		Proto:      phoneNumber,
+		Identifier: identifier,
+	}, nil
+}
+
+func normalizePhoneNumberDefaultRegion(raw string) (string, error) {
+	region := strings.ToUpper(strings.TrimSpace(raw))
+	if region == "" {
+		return "", nil
+	}
+	if !phonenumbers.GetSupportedRegions()[region] {
+		return "", fmt.Errorf("phone_number_default_region must be a supported ISO 3166-1 alpha-2 region")
+	}
+	return region, nil
 }
 
 func canonicalizePhoneParts(countryCode, nationalNumber string) (canonicalIdentifier, error) {

@@ -1,5 +1,7 @@
 package cfg
 
+import "context"
+
 // AIConnectorConfig 智能连接配置
 // 一期仅包含 MCP Server 配置；LLM Client 配置将在第二阶段添加
 type AIConnectorConfig struct {
@@ -44,7 +46,11 @@ func DefaultAIConnectorConfig() *AIConnectorConfig {
 
 // initAIConnector 初始化智能连接配置
 // 放在 Init 链最后，因为智能连接可能需要引用其他子系统配置
-func (c *LocalConfig) initAIConnector() error {
+func (c *LocalConfig) initAIConnector(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	if c.AIConnector == nil {
 		c.AIConnector = DefaultAIConnectorConfig()
 		return nil

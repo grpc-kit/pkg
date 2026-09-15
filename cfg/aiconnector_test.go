@@ -13,7 +13,7 @@ func TestInitAIConnector(t *testing.T) {
 
 func testInitAIConnectorNil(t *testing.T) {
 	c := &LocalConfig{}
-	if err := c.initAIConnector(); err != nil {
+	if err := c.initAIConnector(t.Context()); err != nil {
 		t.Fatalf("initAIConnector() error: %v", err)
 	}
 	if c.AIConnector == nil {
@@ -45,7 +45,7 @@ func testInitAIConnectorDefaults(t *testing.T) {
 			},
 		},
 	}
-	if err := c.initAIConnector(); err != nil {
+	if err := c.initAIConnector(t.Context()); err != nil {
 		t.Fatalf("initAIConnector() error: %v", err)
 	}
 	if !c.AIConnector.Enable {
@@ -77,7 +77,7 @@ func testInitAIConnectorPreserved(t *testing.T) {
 			},
 		},
 	}
-	if err := c.initAIConnector(); err != nil {
+	if err := c.initAIConnector(t.Context()); err != nil {
 		t.Fatalf("initAIConnector() error: %v", err)
 	}
 	if c.AIConnector.MCPServer.Path != "/custom-mcp" {
@@ -100,7 +100,7 @@ func testInitAIConnectorDisabled(t *testing.T) {
 			},
 		},
 	}
-	if err := c.initAIConnector(); err != nil {
+	if err := c.initAIConnector(t.Context()); err != nil {
 		t.Fatalf("initAIConnector() error: %v", err)
 	}
 	// Even when disabled, defaults should be filled (not short-circuited)

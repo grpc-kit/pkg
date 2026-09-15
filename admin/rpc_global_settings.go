@@ -73,13 +73,13 @@ func (a *KnownAdminAPI) CreateGlobalSetting(ctx context.Context, req *adminv1.Cr
 	}
 	created, err := create.Save(ctx)
 	if err != nil {
-		a.auditGlobalSettingMutation("create", category, settingKey, actor, "failed")
+		a.auditGlobalSettingMutation(ctx, "create", category, settingKey, actor, "failed")
 		if lion.IsConstraintError(err) {
 			return nil, errs.AlreadyExists(ctx).WithMessage(fmt.Sprintf("global setting %q already exists", settingKey))
 		}
 		return nil, errs.Internal(ctx).WithMessage("failed to create global setting")
 	}
-	a.auditGlobalSettingMutation("create", category, settingKey, actor, "success")
+	a.auditGlobalSettingMutation(ctx, "create", category, settingKey, actor, "success")
 	return toProtoGlobalSetting(created, false), nil
 }
 
@@ -226,12 +226,12 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 
 	if err := tx.Commit(); err != nil {
 		for _, item := range req.GetUpdates() {
-			a.auditGlobalSettingMutation("update", category, strings.TrimSpace(item.GetSettingKey()), actor, "failed")
+			a.auditGlobalSettingMutation(ctx, "update", category, strings.TrimSpace(item.GetSettingKey()), actor, "failed")
 		}
 		return nil, errs.Internal(ctx).WithMessage("failed to commit global settings update")
 	}
 	for _, item := range req.GetUpdates() {
-		a.auditGlobalSettingMutation("update", category, strings.TrimSpace(item.GetSettingKey()), actor, "success")
+		a.auditGlobalSettingMutation(ctx, "update", category, strings.TrimSpace(item.GetSettingKey()), actor, "success")
 	}
 
 	categoryResp, err := a.buildGlobalSettingCategory(ctx, category)
@@ -272,10 +272,10 @@ func (a *KnownAdminAPI) DeleteGlobalSetting(ctx context.Context, req *adminv1.De
 	}
 	actor := globalSettingActor(ctx)
 	if _, err := db.GlobalSettings.Delete().Where(globalsettings.IDEQ(existing.ID)).Exec(ctx); err != nil {
-		a.auditGlobalSettingMutation("delete", category, settingKey, actor, "failed")
+		a.auditGlobalSettingMutation(ctx, "delete", category, settingKey, actor, "failed")
 		return nil, errs.Internal(ctx).WithMessage("failed to delete global setting")
 	}
-	a.auditGlobalSettingMutation("delete", category, settingKey, actor, "success")
+	a.auditGlobalSettingMutation(ctx, "delete", category, settingKey, actor, "success")
 	return &emptypb.Empty{}, nil
 }
 
@@ -393,9 +393,9 @@ func (a *KnownAdminAPI) buildGlobalSettingCategory(ctx context.Context, category
 		row := rowByKey[settingKey]
 		valueType := globalSettingValueType(row.ValueType)
 		if !isSupportedGlobalSettingValueType(valueType) {
-			a.logCorruptGlobalSetting(category, settingKey, "unsupported value_type")
+			a.logCorruptGlobalSetting(ctx, category, settingKey, "unsupported value_type")
 		} else if _, validationErr := normalizeGlobalSettingValue(ctx, settingKey, row.SettingValue, globalSettingSpec{ValueType: valueType}); validationErr != nil {
-			a.logCorruptGlobalSetting(category, settingKey, "invalid stored value")
+			a.logCorruptGlobalSetting(ctx, category, settingKey, "invalid stored value")
 		}
 		result.Settings = append(result.Settings, toProtoGlobalSetting(row, false))
 	}
@@ -431,26 +431,28 @@ func globalSettingActor(ctx context.Context) int64 {
 	return actor
 }
 
-func (a *KnownAdminAPI) auditGlobalSettingMutation(action, category, settingKey string, actor int64, result string) {
+func (a *KnownAdminAPI) auditGlobalSettingMutation(ctx context.Context, action, category, settingKey string, actor int64, result string) {
 	if a == nil || a.logger == nil {
 		return
 	}
-	a.logger.
-		WithField("action", action).
-		WithField("category", category).
-		WithField("setting_key", settingKey).
-		WithField("actor", actor).
-		WithField("result", result).
-		Info("global setting mutation")
+	a.logger.InfoContext(ctx,
+		"global setting mutation",
+		"action", action,
+		"category", category,
+		"setting_key", settingKey,
+		"actor", actor,
+		"result", result,
+	)
 }
 
-func (a *KnownAdminAPI) logCorruptGlobalSetting(category, settingKey, reason string) {
+func (a *KnownAdminAPI) logCorruptGlobalSetting(ctx context.Context, category, settingKey, reason string) {
 	if a == nil || a.logger == nil {
 		return
 	}
-	a.logger.
-		WithField("category", category).
-		WithField("setting_key", settingKey).
-		WithField("reason", reason).
-		Warn("invalid stored global setting")
+	a.logger.WarnContext(ctx,
+		"invalid stored global setting",
+		"category", category,
+		"setting_key", settingKey,
+		"reason", reason,
+	)
 }
