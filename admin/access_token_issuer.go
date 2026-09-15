@@ -61,7 +61,7 @@ type AccessTokenIssuanceContext struct {
 	// OmitIdentityFields 为 true 时，PreferredUsername/Email 留空即不写入令牌（不回退
 	// 到调用方自身值）；仅 CreateAuthToken superadmin 路径置 true，其余签发路径保持 false。
 	OmitIdentityFields bool
-	TTL               time.Duration
+	TTL                time.Duration
 }
 
 type accessTokenUserProfile struct {
