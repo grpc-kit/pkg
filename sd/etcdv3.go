@@ -98,7 +98,10 @@ func (e *etcdv3Client) Register(ctx context.Context, name, addr, val string, ttl
 				return
 			}
 
-			logRegistrationRetry(ctx, e.logger, err)
+			e.logger.LogAttrs(ctx, slog.LevelError, "service registration failed; retrying",
+				slog.String("event", "sd_registration_retry"),
+				slog.Any("error", err),
+			)
 
 			// TODO; 是否提取为变量
 			select {
@@ -147,12 +150,18 @@ func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opt
 	endpointKey := fmt.Sprintf("%v/%v/endpoints", e.basePath(), target.Endpoint())
 	resp, err := e.getKey(lookupCtx, endpointKey)
 	if err != nil {
-		logResolverLookupFailed(lookupCtx, e.logger, err)
+		e.logger.LogAttrs(lookupCtx, slog.LevelError, "failed to resolve service; using last known addresses",
+			slog.String("event", "sd_resolver_lookup_failed"),
+			slog.Any("error", err),
+		)
 
 		// 如果查询超时，则返回内存中最近一次可用的地址
 		err = r.updateState(lookupCtx, resolver.State{})
 		if err != nil {
-			logResolverStateRestoreFailed(lookupCtx, e.logger, err)
+			e.logger.LogAttrs(lookupCtx, slog.LevelError, "failed to restore last resolver state",
+				slog.String("event", "sd_resolver_state_restore_failed"),
+				slog.Any("error", err),
+			)
 		}
 
 		return r, nil
@@ -168,7 +177,11 @@ func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opt
 	err = r.updateState(lookupCtx, state)
 	if err != nil {
 		r.Close()
-		logResolverStateUpdateFailed(lookupCtx, e.logger, len(state.Addresses), err)
+		e.logger.LogAttrs(lookupCtx, slog.LevelError, "failed to update resolver state",
+			slog.String("event", "sd_resolver_state_update_failed"),
+			slog.Int("address_count", len(state.Addresses)),
+			slog.Any("error", err),
+		)
 		return nil, err
 	}
 
@@ -230,7 +243,11 @@ func (e *etcdv3Client) register(ctx context.Context, val string, ttl int64) (<-c
 		return nil, err
 	}
 
-	logRegistrationSucceeded(ctx, e.logger, ttl, int64(resp.ID))
+	e.logger.LogAttrs(ctx, slog.LevelDebug, "registered service endpoint",
+		slog.String("event", "sd_registration_succeeded"),
+		slog.Int64("ttl_seconds", ttl),
+		slog.Int64("lease_id", int64(resp.ID)),
+	)
 
 	kap, err := e.client.KeepAlive(ctx, resp.ID)
 	if err != nil {
@@ -252,7 +269,11 @@ func (e *etcdv3Client) eatKeepAliveMessage(ctx context.Context, kap <-chan *clie
 			if x == nil {
 				return fmt.Errorf("keepalive channel is closed")
 			}
-			logKeepaliveReceived(ctx, e.logger, x.TTL, int64(x.ID))
+			e.logger.LogAttrs(ctx, slog.LevelDebug, "received service lease keepalive",
+				slog.String("event", "sd_keepalive_received"),
+				slog.Int64("ttl_seconds", x.TTL),
+				slog.Int64("lease_id", int64(x.ID)),
+			)
 		case <-ctx.Done():
 			// 接收到被取消的信号
 			return fmt.Errorf("keepalive receiver cancel")
@@ -285,7 +306,10 @@ func (r *etcdv3Resolver) updateState(ctx context.Context, state resolver.State) 
 	e.targetState[r.endpoint] = state
 	e.mutexState.Unlock()
 
-	logResolverStateUpdated(ctx, e.logger, len(state.Addresses))
+	e.logger.LogAttrs(ctx, slog.LevelDebug, "updated resolver state",
+		slog.String("event", "sd_resolver_state_updated"),
+		slog.Int("address_count", len(state.Addresses)),
+	)
 	return r.cc.UpdateState(state)
 }
 
