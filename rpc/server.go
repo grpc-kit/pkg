@@ -131,8 +131,13 @@ func (s *Server) RegisterGateway(mux *http.ServeMux) error {
 	return nil
 }
 
-// StartBackground xx
-func (s *Server) StartBackground() error {
+// StartBackground 在后台启动 gRPC 和 HTTP 服务。
+// ctx 仅控制启动过程；启动完成后仍应调用 Shutdown 关闭服务。
+func (s *Server) StartBackground(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	// TODO; check GRPCAddress
 
 	// start grpc
@@ -141,27 +146,49 @@ func (s *Server) StartBackground() error {
 		return err
 	}
 
-	go func() {
-		if s.config.DisableGRPCServer {
-			s.logger.Warn("Disable gRPC server")
-			return
-		}
+	if err := ctx.Err(); err != nil {
+		_ = lis.Close()
+		return err
+	}
 
-		if err := s.server.Serve(lis); err != nil {
-			panic(err)
-		}
-	}()
+	var grpcServer *grpc.Server
+	if s.config.DisableGRPCServer {
+		s.logger.WarnContext(ctx, "Disable gRPC server")
+		_ = lis.Close()
+	} else {
+		grpcServer = s.Server()
+		go func() {
+			if err := grpcServer.Serve(lis); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+				panic(err)
+			}
+		}()
+	}
 
 	if s.gateway == nil {
 		return nil
 	}
 
 	// TODO; 如果有启动 grpc，则通过健康检测，启动之后在开启 http gateway
-	time.Sleep(2 * time.Second)
+	timer := time.NewTimer(2 * time.Second)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		if grpcServer != nil {
+			grpcServer.Stop()
+		}
+		return ctx.Err()
+	case <-timer.C:
+	}
+	if err := ctx.Err(); err != nil {
+		if grpcServer != nil {
+			grpcServer.Stop()
+		}
+		return err
+	}
 
 	go func() {
 		if s.config.DisableHTTPServer {
-			s.logger.Warn("Disable gateway server")
+			s.logger.WarnContext(ctx, "Disable gateway server")
 			return
 		}
 
@@ -170,16 +197,17 @@ func (s *Server) StartBackground() error {
 
 		// 这里可以通过替换为ListenAndServeTLS，开启HTTP2
 
+		var serveErr error
 		if s.gateway.TLSConfig != nil {
-			err = s.gateway.ListenAndServeTLS("", "")
+			serveErr = s.gateway.ListenAndServeTLS("", "")
 		} else if certFile != "" && keyFile != "" {
-			err = s.gateway.ListenAndServeTLS(certFile, keyFile)
+			serveErr = s.gateway.ListenAndServeTLS(certFile, keyFile)
 		} else {
-			err = s.gateway.ListenAndServe()
+			serveErr = s.gateway.ListenAndServe()
 		}
 
-		if !errors.Is(err, http.ErrServerClosed) {
-			panic(err)
+		if !errors.Is(serveErr, http.ErrServerClosed) {
+			panic(serveErr)
 		}
 	}()
 

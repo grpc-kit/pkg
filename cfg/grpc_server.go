@@ -170,7 +170,7 @@ func (c *LocalConfig) runAutoBridge(ctx context.Context) {
 		return
 	}
 	// 检测 HTTP 网关是否启用了 TLS（手动证书或 ACME 自动证书）。
-	// 与 pkg/rpc/server.go StartBackground() 中的 TLS 启动判断条件保持一致。
+	// 与 pkg/rpc/server.go StartBackground(ctx) 中的 TLS 启动判断条件保持一致。
 	httpTLSEnabled := c.rpcConfig.TLS.HTTPCertFile != "" ||
 		len(c.rpcConfig.TLS.ACMEDomains) > 0
 
