@@ -79,12 +79,10 @@ func TestNewRedisCacheInvalidTLSLogsThenPanics(t *testing.T) {
 
 	record := decodeCacheLog(t, &output)
 	for key, want := range map[string]string{
-		"level":      "panic",
-		"msg":        "redis TLS configuration failed",
-		"event":      eventRedisTLSConfigurationFailed,
-		"error_kind": "other",
-		"trace_id":   spanContext.TraceID().String(),
-		"span_id":    spanContext.SpanID().String(),
+		"level":    "panic",
+		"msg":      "redis TLS configuration failed",
+		"trace_id": spanContext.TraceID().String(),
+		"span_id":  spanContext.SpanID().String(),
 	} {
 		if got := record[key]; got != want {
 			t.Errorf("%s = %v, want %q", key, got, want)
@@ -95,9 +93,14 @@ func TestNewRedisCacheInvalidTLSLogsThenPanics(t *testing.T) {
 			t.Fatalf("sensitive value %q leaked into panic log: %q", forbidden, output.String())
 		}
 	}
+	for _, key := range []string{"event", "error_kind"} {
+		if _, exists := record[key]; exists {
+			t.Errorf("unexpected structured field %q in panic log", key)
+		}
+	}
 }
 
-func TestRedisCacheStructuredLogsDoNotExposeKeysOrErrors(t *testing.T) {
+func TestRedisCacheLogsDoNotExposeKeysOrErrors(t *testing.T) {
 	const cacheKey = "tenant:credential:cache-key-sensitive"
 	writeErr := errors.New("redis://user:password@cache-sensitive.example:6379")
 
@@ -105,10 +108,7 @@ func TestRedisCacheStructuredLogsDoNotExposeKeysOrErrors(t *testing.T) {
 		name        string
 		client      *redisCacheFake
 		run         func(context.Context, *redisCache) bool
-		wantEvent   string
 		wantMessage string
-		wantStage   string
-		wantTTL     *bool
 		forbidden   []string
 	}{
 		{
@@ -118,9 +118,7 @@ func TestRedisCacheStructuredLogsDoNotExposeKeysOrErrors(t *testing.T) {
 				var value string
 				return cache.GetStructValue(ctx, cacheKey, &value)
 			},
-			wantEvent:   eventRedisCacheValueDecodeFailed,
-			wantMessage: "redis cache value decoding failed",
-			wantStage:   "base64",
+			wantMessage: "redis cache base64 decoding failed",
 		},
 		{
 			name:   "gob decode",
@@ -129,26 +127,20 @@ func TestRedisCacheStructuredLogsDoNotExposeKeysOrErrors(t *testing.T) {
 				var value string
 				return cache.GetStructValue(ctx, cacheKey, &value)
 			},
-			wantEvent:   eventRedisCacheValueDecodeFailed,
-			wantMessage: "redis cache value decoding failed",
-			wantStage:   "gob",
+			wantMessage: "redis cache gob decoding failed",
 			forbidden:   []string{"invalid-gob-sensitive"},
 		},
 		{
 			name:        "encode without TTL",
 			client:      &redisCacheFake{},
 			run:         func(ctx context.Context, cache *redisCache) bool { return cache.SetValue(ctx, cacheKey, func() {}) },
-			wantEvent:   eventRedisCacheValueEncodeFailed,
 			wantMessage: "redis cache value encoding failed",
-			wantTTL:     boolPointer(false),
 		},
 		{
 			name:        "write without TTL",
 			client:      &redisCacheFake{setErr: writeErr},
 			run:         func(ctx context.Context, cache *redisCache) bool { return cache.SetValue(ctx, cacheKey, "value") },
-			wantEvent:   eventRedisCacheWriteFailed,
 			wantMessage: "redis cache write failed",
-			wantTTL:     boolPointer(false),
 			forbidden:   []string{writeErr.Error()},
 		},
 		{
@@ -157,9 +149,7 @@ func TestRedisCacheStructuredLogsDoNotExposeKeysOrErrors(t *testing.T) {
 			run: func(ctx context.Context, cache *redisCache) bool {
 				return cache.SetValueWithTTL(ctx, cacheKey, func() {}, time.Minute)
 			},
-			wantEvent:   eventRedisCacheValueEncodeFailed,
 			wantMessage: "redis cache value encoding failed",
-			wantTTL:     boolPointer(true),
 		},
 		{
 			name:   "write with TTL",
@@ -167,9 +157,7 @@ func TestRedisCacheStructuredLogsDoNotExposeKeysOrErrors(t *testing.T) {
 			run: func(ctx context.Context, cache *redisCache) bool {
 				return cache.SetValueWithTTL(ctx, cacheKey, "value", time.Minute)
 			},
-			wantEvent:   eventRedisCacheWriteFailed,
 			wantMessage: "redis cache write failed",
-			wantTTL:     boolPointer(true),
 			forbidden:   []string{writeErr.Error()},
 		},
 	}
@@ -185,20 +173,17 @@ func TestRedisCacheStructuredLogsDoNotExposeKeysOrErrors(t *testing.T) {
 
 			record := decodeCacheLog(t, &output)
 			for key, want := range map[string]string{
-				"level":      "error",
-				"msg":        tt.wantMessage,
-				"event":      tt.wantEvent,
-				"error_kind": "other",
+				"level": "error",
+				"msg":   tt.wantMessage,
 			} {
 				if got := record[key]; got != want {
 					t.Errorf("%s = %v, want %q", key, got, want)
 				}
 			}
-			if tt.wantStage != "" && record["stage"] != tt.wantStage {
-				t.Errorf("stage = %v, want %q", record["stage"], tt.wantStage)
-			}
-			if tt.wantTTL != nil && record["ttl_enabled"] != *tt.wantTTL {
-				t.Errorf("ttl_enabled = %v, want %v", record["ttl_enabled"], *tt.wantTTL)
+			for _, key := range []string{"event", "error_kind", "stage", "ttl_enabled"} {
+				if _, exists := record[key]; exists {
+					t.Errorf("unexpected structured field %q in cache log", key)
+				}
 			}
 			for _, forbidden := range append([]string{cacheKey}, tt.forbidden...) {
 				if strings.Contains(output.String(), forbidden) {
@@ -207,10 +192,6 @@ func TestRedisCacheStructuredLogsDoNotExposeKeysOrErrors(t *testing.T) {
 			}
 		})
 	}
-}
-
-func boolPointer(value bool) *bool {
-	return &value
 }
 
 func TestMemoryCache_SetValue_NeverExpires(t *testing.T) {

@@ -17,13 +17,6 @@ import (
 	"k8s.io/utils/lru"
 )
 
-const (
-	eventRedisTLSConfigurationFailed = "cfg_redis_tls_configuration_failed"
-	eventRedisCacheValueDecodeFailed = "cfg_redis_cache_value_decode_failed"
-	eventRedisCacheValueEncodeFailed = "cfg_redis_cache_value_encode_failed"
-	eventRedisCacheWriteFailed       = "cfg_redis_cache_write_failed"
-)
-
 // LRUCachebox 缓存实现 LRU 效果
 type LRUCachebox interface {
 	// Remove 重内存缓存移除值
@@ -83,10 +76,7 @@ func newRedisCache(ctx context.Context, logger *slog.Logger, config RedisCachebo
 		tlsConfig, err := NewTLSConfig(config.TLSClientConfig)
 		if err != nil {
 			message := fmt.Sprintf("redis tls config error: %v\n", err)
-			logger.LogAttrs(ctx, pklogging.LevelPanic, "redis TLS configuration failed",
-				slog.String("event", eventRedisTLSConfigurationFailed),
-				slog.String("error_kind", classifySafeError(err)),
-			)
+			logger.Log(ctx, pklogging.LevelPanic, "redis TLS configuration failed")
 			panic(message)
 		}
 
@@ -168,22 +158,14 @@ func (c *redisCache) GetStructValue(ctx context.Context, key string, ptr any) bo
 
 	data, err := base64.StdEncoding.DecodeString(val)
 	if err != nil {
-		c.logger.LogAttrs(ctx, slog.LevelError, "redis cache value decoding failed",
-			slog.String("event", eventRedisCacheValueDecodeFailed),
-			slog.String("stage", "base64"),
-			slog.String("error_kind", classifySafeError(err)),
-		)
+		c.logger.ErrorContext(ctx, "redis cache base64 decoding failed")
 		return false
 	}
 
 	// gob.Register(reflect.TypeOf(ptr).Elem())
 	decoder := gob.NewDecoder(bytes.NewReader(data))
 	if err := decoder.Decode(ptr); err != nil {
-		c.logger.LogAttrs(ctx, slog.LevelError, "redis cache value decoding failed",
-			slog.String("event", eventRedisCacheValueDecodeFailed),
-			slog.String("stage", "gob"),
-			slog.String("error_kind", classifySafeError(err)),
-		)
+		c.logger.ErrorContext(ctx, "redis cache gob decoding failed")
 		return false
 	}
 
@@ -195,22 +177,14 @@ func (c *redisCache) SetValue(ctx context.Context, key string, value any) bool {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 	if err := encoder.Encode(value); err != nil {
-		c.logger.LogAttrs(ctx, slog.LevelError, "redis cache value encoding failed",
-			slog.String("event", eventRedisCacheValueEncodeFailed),
-			slog.Bool("ttl_enabled", false),
-			slog.String("error_kind", classifySafeError(err)),
-		)
+		c.logger.ErrorContext(ctx, "redis cache value encoding failed")
 		return false
 	}
 
 	encoded := base64.StdEncoding.EncodeToString(buffer.Bytes())
 	err := c.cache.Set(ctx, getCacheKey(key), encoded, 0).Err()
 	if err != nil {
-		c.logger.LogAttrs(ctx, slog.LevelError, "redis cache write failed",
-			slog.String("event", eventRedisCacheWriteFailed),
-			slog.Bool("ttl_enabled", false),
-			slog.String("error_kind", classifySafeError(err)),
-		)
+		c.logger.ErrorContext(ctx, "redis cache write failed")
 		return false
 	}
 
@@ -222,21 +196,13 @@ func (c *redisCache) SetValueWithTTL(ctx context.Context, key string, value any,
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 	if err := encoder.Encode(value); err != nil {
-		c.logger.LogAttrs(ctx, slog.LevelError, "redis cache value encoding failed",
-			slog.String("event", eventRedisCacheValueEncodeFailed),
-			slog.Bool("ttl_enabled", true),
-			slog.String("error_kind", classifySafeError(err)),
-		)
+		c.logger.ErrorContext(ctx, "redis cache value encoding failed")
 		return false
 	}
 
 	encoded := base64.StdEncoding.EncodeToString(buffer.Bytes())
 	if err := c.cache.Set(ctx, getCacheKey(key), encoded, ttl).Err(); err != nil {
-		c.logger.LogAttrs(ctx, slog.LevelError, "redis cache write failed",
-			slog.String("event", eventRedisCacheWriteFailed),
-			slog.Bool("ttl_enabled", true),
-			slog.String("error_kind", classifySafeError(err)),
-		)
+		c.logger.ErrorContext(ctx, "redis cache write failed")
 		return false
 	}
 

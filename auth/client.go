@@ -87,7 +87,7 @@ func (c *Client) initOPARego(ctx context.Context) error {
 	if c.config.OPARego.DataProviderFunc != nil {
 		dynData, provErr := c.config.OPARego.DataProviderFunc(ctx)
 		if provErr != nil {
-			c.logger.WarnContext(ctx, fmt.Sprintf("opa dynamic data provider error, fallback to static config: %v", provErr))
+			c.logger.WarnContext(ctx, "OPA dynamic data provider failed; using fallback data")
 		} else {
 			dynNCL, _ := c.nonCommentLineLength(dynData)
 			if dynNCL > 0 {
@@ -212,8 +212,6 @@ func (c *Client) Allow(ctx context.Context) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
-	c.logger.DebugContext(ctx, fmt.Sprintf("opa auth input: %s", string(util.MustMarshalJSON(input))))
 
 	if c.config.OPARego != nil {
 		var rs rego.ResultSet

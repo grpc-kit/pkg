@@ -76,15 +76,18 @@ func TestS3UploadSizeDetectionLogDoesNotExposeObjectKeyOrError(t *testing.T) {
 		t.Fatalf("decode JSON log: %v", err)
 	}
 	for key, want := range map[string]string{
-		"level":      "error",
-		"msg":        "object store multipart size detection failed",
-		"event":      eventObjstoreMultipartSizeDetectionFailed,
-		"error_kind": "other",
-		"trace_id":   spanContext.TraceID().String(),
-		"span_id":    spanContext.SpanID().String(),
+		"level":    "error",
+		"msg":      "object store multipart size detection failed",
+		"trace_id": spanContext.TraceID().String(),
+		"span_id":  spanContext.SpanID().String(),
 	} {
 		if got := record[key]; got != want {
 			t.Errorf("%s = %v, want %q", key, got, want)
+		}
+	}
+	for _, key := range []string{"event", "error_kind"} {
+		if _, exists := record[key]; exists {
+			t.Errorf("unexpected structured field %q in object store log", key)
 		}
 	}
 }

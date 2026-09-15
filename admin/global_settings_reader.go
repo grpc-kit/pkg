@@ -37,7 +37,7 @@ func (r *globalSettingsReader) GetBool(ctx context.Context, category, settingKey
 	if !builtIn {
 		return false, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
 	}
-	r.warnParseFallback(ctx, category, settingKey, parseErr)
+	r.warnParseFallback(ctx)
 	parsed, _ = strconv.ParseBool(spec.DefaultValue)
 	return parsed, false, nil
 }
@@ -57,7 +57,7 @@ func (r *globalSettingsReader) GetInt(ctx context.Context, category, settingKey 
 	if !builtIn {
 		return 0, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
 	}
-	r.warnParseFallback(ctx, category, settingKey, parseErr)
+	r.warnParseFallback(ctx)
 	parsed, _ = strconv.Atoi(spec.DefaultValue)
 	return parsed, false, nil
 }
@@ -77,7 +77,7 @@ func (r *globalSettingsReader) GetFloat(ctx context.Context, category, settingKe
 	if !builtIn {
 		return 0, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
 	}
-	r.warnParseFallback(ctx, category, settingKey, parseErr)
+	r.warnParseFallback(ctx)
 	parsed, _ = strconv.ParseFloat(spec.DefaultValue, 64)
 	return parsed, false, nil
 }
@@ -97,7 +97,7 @@ func (r *globalSettingsReader) GetDuration(ctx context.Context, category, settin
 	if !builtIn {
 		return 0, false, fmt.Errorf("invalid stored global setting: %s/%s", category, settingKey)
 	}
-	r.warnParseFallback(ctx, category, settingKey, parseErr)
+	r.warnParseFallback(ctx)
 	parsed, _ = time.ParseDuration(spec.DefaultValue)
 	return parsed, false, nil
 }
@@ -179,16 +179,11 @@ func globalSettingTypeMismatch(category, settingKey string, expected, actual glo
 	return fmt.Errorf("global setting type mismatch for %s/%s: expected %s, got %s", category, settingKey, expected, actual)
 }
 
-func (r *globalSettingsReader) warnParseFallback(ctx context.Context, category, settingKey string, parseErr error) {
+func (r *globalSettingsReader) warnParseFallback(ctx context.Context) {
 	if r == nil || r.logger == nil {
 		return
 	}
-	logWarnf(ctx, r.logger,
-		"global setting parse fallback: category=%s setting_key=%s err=%v",
-		category,
-		settingKey,
-		parseErr,
-	)
+	r.logger.WarnContext(ctx, "global setting parsing failed; using built-in fallback")
 }
 
 func (a *KnownAdminAPI) globalSettingsReader() *globalSettingsReader {
@@ -202,7 +197,7 @@ func loginAccessTokenTTLFrom(ctx context.Context, logger *slog.Logger, db *lion.
 	ttl, _, err := newGlobalSettingsReader(logger, db).GetDuration(ctx, globalSettingsCategorySecurity, globalSettingKeyLoginAccessTokenTTL)
 	if err != nil {
 		if logger != nil {
-			logWarnf(ctx, logger, "failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyLoginAccessTokenTTL, err)
+			logger.WarnContext(ctx, "global setting read failed; using fallback")
 		}
 		return 24 * time.Hour
 	}
@@ -217,7 +212,7 @@ func (a *KnownAdminAPI) getMFAChallengeTTL(ctx context.Context) time.Duration {
 	ttl, _, err := a.globalSettingsReader().GetDuration(ctx, globalSettingsCategorySecurity, globalSettingKeyMFAChallengeTTL)
 	if err != nil {
 		if a != nil && a.logger != nil {
-			logWarnf(ctx, a.logger, "failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFAChallengeTTL, err)
+			a.logger.WarnContext(ctx, "global setting read failed; using fallback")
 		}
 		return 5 * time.Minute
 	}
@@ -228,7 +223,7 @@ func (a *KnownAdminAPI) getMFAMaxVerifyAttempts(ctx context.Context) int {
 	value, _, err := a.globalSettingsReader().GetInt(ctx, globalSettingsCategorySecurity, globalSettingKeyMFAMaxVerifyAttempts)
 	if err != nil {
 		if a != nil && a.logger != nil {
-			logWarnf(ctx, a.logger, "failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFAMaxVerifyAttempts, err)
+			a.logger.WarnContext(ctx, "global setting read failed; using fallback")
 		}
 		return 5
 	}
@@ -239,7 +234,7 @@ func (a *KnownAdminAPI) getMFARecoveryCodesCount(ctx context.Context) int {
 	value, _, err := a.globalSettingsReader().GetInt(ctx, globalSettingsCategorySecurity, globalSettingKeyMFARecoveryCodesCount)
 	if err != nil {
 		if a != nil && a.logger != nil {
-			logWarnf(ctx, a.logger, "failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFARecoveryCodesCount, err)
+			a.logger.WarnContext(ctx, "global setting read failed; using fallback")
 		}
 		return 8
 	}
@@ -250,7 +245,7 @@ func (a *KnownAdminAPI) getMFATOTPIssuer(ctx context.Context) string {
 	value, _, err := a.globalSettingsReader().GetString(ctx, globalSettingsCategorySecurity, globalSettingKeyMFATOTPIssuer)
 	if err != nil {
 		if a != nil && a.logger != nil {
-			logWarnf(ctx, a.logger, "failed to read %s/%s: %v", globalSettingsCategorySecurity, globalSettingKeyMFATOTPIssuer, err)
+			a.logger.WarnContext(ctx, "global setting read failed; using fallback")
 		}
 		return "KnownAdmin"
 	}
