@@ -30,6 +30,7 @@ var (
 	_ func(*cfg.ObjstoreConfig, *slog.Logger) (cfg.ObjstoreBucket, error)                      = (*cfg.ObjstoreConfig).BucketClient
 	_ func(*slog.Logger) admin.Options                                                         = admin.WithLogger
 	_ func(*slog.Logger) *rpc.Config                                                           = rpc.NewConfig
+	_ func(*rpc.Server, context.Context) error                                                 = (*rpc.Server).StartBackground
 	_ func(*slog.Logger) audit.Option                                                          = audit.WithLogger
 	_ func(*auth.Client, *slog.Logger) *auth.Client                                            = (*auth.Client).WithLoggerOption
 	_ func(*slog.Logger, int, string) (*sd.Connector, error)                                   = sd.NewConnector
