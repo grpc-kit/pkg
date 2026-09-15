@@ -70,7 +70,7 @@ func Register(ctx context.Context, conn *Connector, name, addr, val string, ttl 
 
 	switch conn.Driver {
 	case ETCDV3:
-		client, err := newEtcdv3Client(Prefix, Namespace, conn)
+		client, err := newEtcdv3Client(ctx, Prefix, Namespace, conn)
 		if err != nil {
 			return client, err
 		}

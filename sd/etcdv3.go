@@ -16,27 +16,35 @@ import (
 )
 
 type etcdv3Client struct {
-	logger      *slog.Logger
-	prefix      string // 注册的前缀
-	namespace   string // 所属的命名空间
-	serviceName string // 服务名称
-	serviceAddr string // 服务地址
-	client      *clientv3.Client
-	cc          resolver.ClientConn
-	mutexState  *sync.RWMutex
-	mutexWatch  *sync.RWMutex
-	targetState map[string]resolver.State // 存放目标服务的后端地址
-	targetWatch map[string]bool           // 存放目标服务后端是否开启watch更新
+	logger          *slog.Logger
+	prefix          string // 注册的前缀
+	namespace       string // 所属的命名空间
+	serviceName     string // 服务名称
+	serviceAddr     string // 服务地址
+	client          *clientv3.Client
+	lifecycleCtx    context.Context
+	lifecycleCancel func()
+	mutexState      *sync.RWMutex
+	targetState     map[string]resolver.State // 存放目标服务的后端地址
 }
 
-func newEtcdv3Client(prefix, namespace string, conn *Connector) (*etcdv3Client, error) {
+// etcdv3Resolver owns the lifecycle of one resolver.Build result. A builder can
+// serve multiple gRPC ClientConns, so the ClientConn and watcher must not be
+// stored on the shared etcdv3Client.
+type etcdv3Resolver struct {
+	client   *etcdv3Client
+	ctx      context.Context
+	cancel   func()
+	cc       resolver.ClientConn
+	endpoint string
+}
+
+func newEtcdv3Client(ctx context.Context, prefix, namespace string, conn *Connector) (*etcdv3Client, error) {
 	e := &etcdv3Client{prefix: prefix,
 		namespace:   namespace,
 		logger:      conn.logger,
 		mutexState:  new(sync.RWMutex),
-		mutexWatch:  new(sync.RWMutex),
-		targetState: make(map[string]resolver.State),
-		targetWatch: make(map[string]bool)}
+		targetState: make(map[string]resolver.State)}
 
 	conf := clientv3.Config{
 		Endpoints:   strings.Split(conn.Hosts, ","),
@@ -65,6 +73,9 @@ func newEtcdv3Client(prefix, namespace string, conn *Connector) (*etcdv3Client, 
 	}
 
 	e.client = cli
+	lifecycleCtx, lifecycleCancel := context.WithCancel(ctx)
+	e.lifecycleCtx = lifecycleCtx
+	e.lifecycleCancel = sync.OnceFunc(lifecycleCancel)
 	return e, nil
 }
 
@@ -103,6 +114,8 @@ func (e *etcdv3Client) Register(ctx context.Context, name, addr, val string, ttl
 
 // Deregister 取消注册
 func (e *etcdv3Client) Deregister(ctx context.Context) error {
+	defer e.lifecycleCancel()
+
 	_, err := e.client.Delete(ctx, e.regEndpointPath())
 	if err != nil {
 		return err
@@ -122,24 +135,27 @@ func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opt
 		return nil, errSchemeInvalid
 	}
 
-	e.cc = cc
+	r, err := e.newResolver(target.Endpoint(), cc)
+	if err != nil {
+		return nil, err
+	}
 
 	// TODO; 从etcd目录获取数据超时时间应该小于2s内
-	ctx, cancel := context.WithTimeout(context.TODO(), 2*time.Second)
-	defer cancel()
+	lookupCtx, cancelLookup := context.WithTimeout(r.ctx, 2*time.Second)
+	defer cancelLookup()
 
 	endpointKey := fmt.Sprintf("%v/%v/endpoints", e.basePath(), target.Endpoint())
-	resp, err := e.getKey(ctx, endpointKey)
+	resp, err := e.getKey(lookupCtx, endpointKey)
 	if err != nil {
-		logResolverLookupFailed(ctx, e.logger, err)
+		logResolverLookupFailed(lookupCtx, e.logger, err)
 
 		// 如果查询超时，则返回内存中最近一次可用的地址
-		err = e.updateState(target.Endpoint(), resolver.State{})
+		err = r.updateState(lookupCtx, resolver.State{})
 		if err != nil {
-			logResolverStateRestoreFailed(ctx, e.logger, err)
+			logResolverStateRestoreFailed(lookupCtx, e.logger, err)
 		}
 
-		return e, nil
+		return r, nil
 	}
 
 	adders := make([]resolver.Address, 0)
@@ -149,21 +165,31 @@ func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opt
 	state := resolver.State{Addresses: adders}
 
 	// 最近一次解析服务地址存入内存以便获取失败时使用
-	err = e.updateState(target.Endpoint(), state)
+	err = r.updateState(lookupCtx, state)
 	if err != nil {
-		logResolverStateUpdateFailed(ctx, e.logger, len(state.Addresses), err)
+		r.Close()
+		logResolverStateUpdateFailed(lookupCtx, e.logger, len(state.Addresses), err)
 		return nil, err
 	}
 
-	e.mutexWatch.Lock()
-	defer e.mutexWatch.Unlock()
-	if !e.targetWatch[target.Endpoint()] {
-		// 确保每个服务全局仅有一个"watch"组件
-		go e.watcher(target.Endpoint(), adders)
-		e.targetWatch[target.Endpoint()] = true
+	go r.watcher(adders)
+
+	return r, nil
+}
+
+func (e *etcdv3Client) newResolver(endpoint string, cc resolver.ClientConn) (*etcdv3Resolver, error) {
+	if err := e.lifecycleCtx.Err(); err != nil {
+		return nil, err
 	}
 
-	return e, nil
+	ctx, cancel := context.WithCancel(e.lifecycleCtx)
+	return &etcdv3Resolver{
+		client:   e,
+		ctx:      ctx,
+		cancel:   sync.OnceFunc(cancel),
+		cc:       cc,
+		endpoint: endpoint,
+	}, nil
 }
 
 // Scheme 实现"resolver.Scheme"
@@ -171,14 +197,13 @@ func (e *etcdv3Client) Scheme() string {
 	return Scheme
 }
 
-// Close 实现"resolver.Close"
-// 仅当执行"grpc.ClientConn.Close"时调用
-func (e *etcdv3Client) Close() {
-	// 没有资源需要释放
+// Close 实现"resolver.Close"，只取消当前 Build 创建的 watcher。
+func (r *etcdv3Resolver) Close() {
+	r.cancel()
 }
 
 // ResolveNow 实现"resolver.Resolver"
-func (e *etcdv3Client) ResolveNow(o resolver.ResolveNowOptions) {}
+func (r *etcdv3Resolver) ResolveNow(o resolver.ResolveNowOptions) {}
 
 func (e *etcdv3Client) basePath() string {
 	return fmt.Sprintf("/%v/%v", e.prefix, e.namespace)
@@ -248,27 +273,27 @@ func (e *etcdv3Client) getKey(ctx context.Context, key string) (*clientv3.GetRes
 }
 
 // updateState 更新grpc服务后端地址
-func (e *etcdv3Client) updateState(endpoint string, state resolver.State) error {
+func (r *etcdv3Resolver) updateState(ctx context.Context, state resolver.State) error {
+	e := r.client
 	e.mutexState.Lock()
-	defer e.mutexState.Unlock()
 
-	memState, foundState := e.targetState[endpoint]
+	memState, foundState := e.targetState[r.endpoint]
 	if len(state.Addresses) == 0 && foundState {
 		state = memState
 	}
 
-	logResolverStateUpdated(e.logger, len(state.Addresses))
+	e.targetState[r.endpoint] = state
+	e.mutexState.Unlock()
 
-	e.targetState[endpoint] = state
-	return e.cc.UpdateState(state)
+	logResolverStateUpdated(ctx, e.logger, len(state.Addresses))
+	return r.cc.UpdateState(state)
 }
 
-func (e *etcdv3Client) watcher(endpoint string, addrs []resolver.Address) {
-	endpointKey := fmt.Sprintf("%v/%v/endpoints", e.basePath(), endpoint)
+func (r *etcdv3Resolver) watcher(addrs []resolver.Address) {
+	e := r.client
+	endpointKey := fmt.Sprintf("%v/%v/endpoints", e.basePath(), r.endpoint)
 
-	// 这里context不能被取消或超时
-	ctx := context.Background()
-	for n := range e.client.Watch(ctx, endpointKey, clientv3.WithPrefix()) {
+	for n := range e.client.Watch(r.ctx, endpointKey, clientv3.WithPrefix()) {
 		for _, v := range n.Events {
 			addr := path.Base(string(v.Kv.Key))
 
@@ -277,7 +302,7 @@ func (e *etcdv3Client) watcher(endpoint string, addrs []resolver.Address) {
 				// 更新地址
 				if !existAddr(addrs, addr) {
 					addrs = append(addrs, resolver.Address{Addr: addr})
-					err := e.updateState(endpoint, resolver.State{Addresses: addrs})
+					err := r.updateState(r.ctx, resolver.State{Addresses: addrs})
 					if err != nil {
 						return
 					}
@@ -286,7 +311,7 @@ func (e *etcdv3Client) watcher(endpoint string, addrs []resolver.Address) {
 				// 删除地址
 				if s, ok := removeAddr(addrs, addr); ok {
 					addrs = s
-					err := e.updateState(endpoint, resolver.State{Addresses: addrs})
+					err := r.updateState(r.ctx, resolver.State{Addresses: addrs})
 					if err != nil {
 						return
 					}

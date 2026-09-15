@@ -9,9 +9,13 @@ import (
 	"testing"
 
 	pklogging "github.com/grpc-kit/pkg/logging"
+	"google.golang.org/grpc/resolver"
 )
 
-var _ Registry = (*etcdv3Client)(nil)
+var (
+	_ Registry          = (*etcdv3Client)(nil)
+	_ resolver.Resolver = (*etcdv3Resolver)(nil)
+)
 
 func TestNewConnector(t *testing.T) {
 	var output bytes.Buffer
@@ -57,6 +61,9 @@ func TestRegisterRejectsCanceledContext(t *testing.T) {
 		t.Fatalf("Register() error = %v, want context.Canceled", err)
 	}
 	if client, ok := registry.(*etcdv3Client); ok {
+		if !errors.Is(client.lifecycleCtx.Err(), context.Canceled) {
+			t.Errorf("lifecycle context error = %v, want context.Canceled", client.lifecycleCtx.Err())
+		}
 		if closeErr := client.client.Close(); closeErr != nil {
 			t.Errorf("close etcd client: %v", closeErr)
 		}
@@ -68,7 +75,7 @@ func TestEtcdv3DeregisterUsesCanceledContext(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewConnector() error = %v", err)
 	}
-	client, err := newEtcdv3Client("service", "default", connector)
+	client, err := newEtcdv3Client(t.Context(), "service", "default", connector)
 	if err != nil {
 		t.Fatalf("newEtcdv3Client() error = %v", err)
 	}
@@ -84,5 +91,8 @@ func TestEtcdv3DeregisterUsesCanceledContext(t *testing.T) {
 
 	if err := client.Deregister(ctx); !errors.Is(err, context.Canceled) {
 		t.Fatalf("Deregister() error = %v, want context.Canceled", err)
+	}
+	if !errors.Is(client.lifecycleCtx.Err(), context.Canceled) {
+		t.Fatalf("lifecycle context error = %v, want context.Canceled", client.lifecycleCtx.Err())
 	}
 }
