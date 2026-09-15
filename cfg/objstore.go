@@ -214,7 +214,6 @@ func (o *ObjstoreConfig) getS3Bucket() (*S3Bucket, error) {
 			}
 			sse, err = encrypt.NewSSEKMS(o.Config.SSEConfig.KMSKeyID, o.Config.SSEConfig.KMSEncryptionContext)
 			if err != nil {
-				o.logger.Error(fmt.Sprintln(err))
 				return nil, fmt.Errorf("initialize s3 client SSE-KMS error")
 			}
 		case "SSE-C":
@@ -224,7 +223,6 @@ func (o *ObjstoreConfig) getS3Bucket() (*S3Bucket, error) {
 			}
 			sse, err = encrypt.NewSSEC(key)
 			if err != nil {
-				o.logger.Error(fmt.Sprintln(err))
 				return nil, fmt.Errorf("initialize s3 client SSE-C")
 			}
 		case "SSE-S3":

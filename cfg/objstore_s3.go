@@ -15,6 +15,8 @@ import (
 	"github.com/minio/minio-go/v7/pkg/encrypt"
 )
 
+const eventObjstoreMultipartSizeDetectionFailed = "cfg_objstore_multipart_size_detection_failed"
+
 // SSEConfig 用于配置对象存储服务端加密
 // https://docs.aws.amazon.com/kms/latest/developerguide/services-s3.html#s3-encryption-context
 type SSEConfig struct {
@@ -164,7 +166,10 @@ func (b *S3Bucket) Exists(ctx context.Context, objectKey string) (bool, error) {
 func (b *S3Bucket) Upload(ctx context.Context, objectKey string, r io.Reader) (ObjstoreAttributes, error) {
 	size, err := b.tryToGetSize(r)
 	if err != nil {
-		logErrorf(ctx, b.logger, "could not guess file size for multipart upload; upload might be not optimized, name: %v, err: %v", objectKey, err)
+		b.logger.LogAttrs(ctx, slog.LevelError, "object store multipart size detection failed",
+			slog.String("event", eventObjstoreMultipartSizeDetectionFailed),
+			slog.String("error_kind", classifySafeError(err)),
+		)
 		size = -1
 	}
 
