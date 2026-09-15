@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"log/slog"
 	"testing"
 
@@ -84,6 +85,28 @@ func TestTraceContextHandlerPreservesExplicitFields(t *testing.T) {
 			}
 		})
 	}
+}
+
+func BenchmarkTraceContextHandler(b *testing.B) {
+	logger := New(io.Discard, FormatJSON, &slog.HandlerOptions{Level: slog.LevelInfo}).With(
+		slog.String("service_name", "service.api"),
+	)
+
+	b.Run("without span context", func(b *testing.B) {
+		ctx := b.Context()
+		b.ReportAllocs()
+		for b.Loop() {
+			logger.InfoContext(ctx, "baseline message", slog.String("request_id", "request-test"))
+		}
+	})
+
+	b.Run("with span context", func(b *testing.B) {
+		ctx, _, _ := validTraceContext(b.Context())
+		b.ReportAllocs()
+		for b.Loop() {
+			logger.InfoContext(ctx, "baseline message", slog.String("request_id", "request-test"))
+		}
+	})
 }
 
 func validTraceContext(ctx context.Context) (context.Context, trace.TraceID, trace.SpanID) {

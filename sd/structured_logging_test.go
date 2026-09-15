@@ -136,7 +136,7 @@ func TestSDStructuredLifecycleLogs(t *testing.T) {
 
 	logRegistrationSucceeded(ctx, logger, 30, 101)
 	logKeepaliveReceived(ctx, logger, 29, 101)
-	logResolverStateUpdated(logger, 2)
+	logResolverStateUpdated(ctx, logger, 2)
 
 	if len(records) != 3 {
 		t.Fatalf("record count = %d, want 3", len(records))
@@ -148,7 +148,7 @@ func TestSDStructuredLifecycleLogs(t *testing.T) {
 	}{
 		{"registered service endpoint", eventRegistrationSucceeded, "lifecycle"},
 		{"received service lease keepalive", eventKeepaliveReceived, "lifecycle"},
-		{"updated resolver state", eventResolverStateUpdated, nil},
+		{"updated resolver state", eventResolverStateUpdated, "lifecycle"},
 	}
 	for index, want := range wants {
 		record := records[index]
@@ -230,17 +230,26 @@ func TestUpdateStateLogOmitsEndpointAndAddresses(t *testing.T) {
 	clientConn := &sdTestClientConn{}
 	client := &etcdv3Client{
 		logger:      logger,
-		cc:          clientConn,
 		mutexState:  new(sync.RWMutex),
 		targetState: make(map[string]resolver.State),
 	}
 	endpoint := "payments?token=endpoint-secret"
+	resolverClient := &etcdv3Resolver{
+		client:   client,
+		cc:       clientConn,
+		endpoint: endpoint,
+	}
 	state := resolver.State{Addresses: []resolver.Address{
 		{Addr: "user:password@10.0.0.1:443"},
 		{Addr: "10.0.0.2:443"},
 	}}
+	spanContext := trace.NewSpanContext(trace.SpanContextConfig{
+		TraceID: trace.TraceID{1, 2, 3},
+		SpanID:  trace.SpanID{4, 5, 6},
+	})
+	ctx := trace.ContextWithSpanContext(t.Context(), spanContext)
 
-	if err := client.updateState(endpoint, state); err != nil {
+	if err := resolverClient.updateState(ctx, state); err != nil {
 		t.Fatalf("updateState() error = %v", err)
 	}
 	if strings.Contains(output.String(), endpoint) || strings.Contains(output.String(), state.Addresses[0].Addr) {
@@ -256,8 +265,68 @@ func TestUpdateStateLogOmitsEndpointAndAddresses(t *testing.T) {
 	if got := record["address_count"]; got != float64(2) {
 		t.Errorf("address_count = %v, want 2", got)
 	}
+	if got := record["trace_id"]; got != spanContext.TraceID().String() {
+		t.Errorf("trace_id = %v, want %q", got, spanContext.TraceID())
+	}
 	if len(clientConn.state.Addresses) != 2 {
 		t.Errorf("updated address count = %d, want 2", len(clientConn.state.Addresses))
+	}
+}
+
+func TestResolverCloseCancelsOnlyItsOwnLifecycle(t *testing.T) {
+	parentCtx, cancelParent := context.WithCancel(t.Context())
+	client := &etcdv3Client{lifecycleCtx: parentCtx}
+	first, err := client.newResolver("first", &sdTestClientConn{})
+	if err != nil {
+		t.Fatalf("newResolver(first) error = %v", err)
+	}
+	second, err := client.newResolver("second", &sdTestClientConn{})
+	if err != nil {
+		t.Fatalf("newResolver(second) error = %v", err)
+	}
+
+	first.Close()
+	first.Close()
+
+	if !errors.Is(first.ctx.Err(), context.Canceled) {
+		t.Fatalf("first resolver context error = %v, want context.Canceled", first.ctx.Err())
+	}
+	if err := second.ctx.Err(); err != nil {
+		t.Fatalf("second resolver context error = %v, want nil", err)
+	}
+
+	cancelParent()
+	if !errors.Is(second.ctx.Err(), context.Canceled) {
+		t.Fatalf("second resolver context error = %v, want context.Canceled", second.ctx.Err())
+	}
+	if _, err := client.newResolver("third", &sdTestClientConn{}); !errors.Is(err, context.Canceled) {
+		t.Fatalf("newResolver(third) error = %v, want context.Canceled", err)
+	}
+}
+
+func TestResolversUpdateIndependentClientConnections(t *testing.T) {
+	client := &etcdv3Client{
+		logger:      slog.New(slog.DiscardHandler),
+		mutexState:  new(sync.RWMutex),
+		targetState: make(map[string]resolver.State),
+	}
+	firstConn := &sdTestClientConn{}
+	secondConn := &sdTestClientConn{}
+	first := &etcdv3Resolver{client: client, cc: firstConn, endpoint: "first"}
+	second := &etcdv3Resolver{client: client, cc: secondConn, endpoint: "second"}
+
+	if err := first.updateState(t.Context(), resolver.State{Addresses: []resolver.Address{{Addr: "first:443"}}}); err != nil {
+		t.Fatalf("first updateState() error = %v", err)
+	}
+	if err := second.updateState(t.Context(), resolver.State{Addresses: []resolver.Address{{Addr: "second:443"}}}); err != nil {
+		t.Fatalf("second updateState() error = %v", err)
+	}
+
+	if got := firstConn.state.Addresses[0].Addr; got != "first:443" {
+		t.Errorf("first resolver address = %q, want first:443", got)
+	}
+	if got := secondConn.state.Addresses[0].Addr; got != "second:443" {
+		t.Errorf("second resolver address = %q, want second:443", got)
 	}
 }
 

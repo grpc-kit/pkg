@@ -304,7 +304,7 @@ func (a *KnownAdminAPI) ChangeCurrentUserPassword(ctx context.Context, req *admi
 		return nil, errs.Internal(ctx).WithMessage("change current user password failed").Err()
 	}
 	if a.logger != nil {
-		logInfof(ctx, a.logger, "current user password changed: user_id=%d", userID)
+		a.logger.InfoContext(ctx, "current user password changed")
 	}
 	return &emptypb.Empty{}, nil
 }

@@ -50,8 +50,8 @@ func TestWithLoggerWritesOnceAndAddsDebugInfo(t *testing.T) {
 	if got := record["msg"]; got != "operation failed: boom" {
 		t.Fatalf("formatted message = %v, want operation failed: boom", got)
 	}
-	if got := record["error"]; got != testErr.Error() {
-		t.Fatalf("error attr = %v, want %q", got, testErr.Error())
+	if _, ok := record["error"]; ok {
+		t.Fatalf("unexpected error attr in log: %v", record["error"])
 	}
 	assertDebugInfo(t, status, "operation failed: boom")
 }
@@ -92,27 +92,10 @@ func TestWithLoggerPropagatesContext(t *testing.T) {
 	if len(handler.records) != 1 {
 		t.Fatalf("record count = %d, want 1", len(handler.records))
 	}
-	assertTypedErrorAttr(t, handler.records[0], testErr)
-	assertDebugInfo(t, status, "operation failed: boom")
-}
-
-func assertTypedErrorAttr(t *testing.T, record slog.Record, want error) {
-	t.Helper()
-	found := false
-	record.Attrs(func(attr slog.Attr) bool {
-		if attr.Key != "error" {
-			return true
-		}
-		found = true
-		got, ok := attr.Value.Any().(error)
-		if !ok || !errors.Is(got, want) {
-			t.Errorf("error attr = %#v, want typed error %v", attr.Value.Any(), want)
-		}
-		return false
-	})
-	if !found {
-		t.Error("error attr not found")
+	if got := handler.records[0].NumAttrs(); got != 0 {
+		t.Fatalf("attr count = %d, want 0", got)
 	}
+	assertDebugInfo(t, status, "operation failed: boom")
 }
 
 func assertDebugInfo(t *testing.T, status *Status, want string) {

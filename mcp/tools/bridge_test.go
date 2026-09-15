@@ -374,7 +374,6 @@ func TestBridgeHandlerNestedPathParamMissing(t *testing.T) {
 			"/api/models/{model.id}",
 			"*",
 			nil,
-			"update_model",
 			logger,
 		)
 		if err != nil {

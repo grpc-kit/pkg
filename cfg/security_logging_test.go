@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -77,38 +76,6 @@ func (h *securityChannelHandler) Handle(ctx context.Context, record slog.Record)
 func (h *securityChannelHandler) WithAttrs([]slog.Attr) slog.Handler { return h }
 func (h *securityChannelHandler) WithGroup(string) slog.Handler      { return h }
 
-func TestClassifySecurityError(t *testing.T) {
-	tests := []struct {
-		name string
-		err  error
-		want string
-	}{
-		{name: "malformed", err: jwt.ErrTokenMalformed, want: "token_malformed"},
-		{name: "signature", err: jwt.ErrTokenSignatureInvalid, want: "token_signature_invalid"},
-		{name: "unverifiable", err: jwt.ErrTokenUnverifiable, want: "token_unverifiable"},
-		{name: "expired", err: jwt.ErrTokenExpired, want: "token_expired"},
-		{name: "not valid yet", err: jwt.ErrTokenNotValidYet, want: "token_not_valid_yet"},
-		{name: "used before issued", err: jwt.ErrTokenUsedBeforeIssued, want: "token_used_before_issued"},
-		{name: "missing claim", err: jwt.ErrTokenRequiredClaimMissing, want: "token_required_claim_missing"},
-		{name: "audience", err: jwt.ErrTokenInvalidAudience, want: "token_invalid_audience"},
-		{name: "issuer", err: jwt.ErrTokenInvalidIssuer, want: "token_invalid_issuer"},
-		{name: "subject", err: jwt.ErrTokenInvalidSubject, want: "token_invalid_subject"},
-		{name: "id", err: jwt.ErrTokenInvalidId, want: "token_invalid_id"},
-		{name: "claims", err: jwt.ErrTokenInvalidClaims, want: "token_invalid_claims"},
-		{name: "key", err: jwt.ErrInvalidKey, want: "token_invalid_key"},
-		{name: "context", err: context.Canceled, want: "canceled"},
-		{name: "other", err: errors.New("sensitive provider response"), want: "other"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := classifySecurityError(tt.err); got != tt.want {
-				t.Errorf("classifySecurityError() = %q, want %q", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestInitSecurityLogsOIDCDiscoveryRetry(t *testing.T) {
 	const issuerPath = "/issuer-sensitive"
 
@@ -147,22 +114,11 @@ func TestInitSecurityLogsOIDCDiscoveryRetry(t *testing.T) {
 		if record.message != "OIDC provider discovery failed; retrying" {
 			t.Errorf("message = %q", record.message)
 		}
-		if got := record.attrs["event"].String(); got != eventOIDCProviderDiscoveryRetry {
-			t.Errorf("event = %q, want %q", got, eventOIDCProviderDiscoveryRetry)
-		}
-		if got := record.attrs["error_kind"].String(); got != "other" {
-			t.Errorf("error_kind = %q, want other", got)
-		}
-		if len(record.attrs) != 2 {
-			t.Errorf("attr count = %d, want 2; attrs = %#v", len(record.attrs), record.attrs)
+		if len(record.attrs) != 0 {
+			t.Errorf("attrs = %#v, want none", record.attrs)
 		}
 		if strings.Contains(record.message, issuerPath) {
 			t.Errorf("issuer path leaked into message: %q", record.message)
-		}
-		for key, value := range record.attrs {
-			if strings.Contains(value.String(), issuerPath) {
-				t.Errorf("issuer path leaked into %s: %q", key, value.String())
-			}
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("OIDC discovery retry log was not emitted")
@@ -177,14 +133,8 @@ func TestInitSecurityLogsOIDCDiscoveryRetry(t *testing.T) {
 		if record.message != "OIDC verifier initialization stopped" {
 			t.Errorf("final message = %q", record.message)
 		}
-		if got := record.attrs["event"].String(); got != eventOIDCVerifierInitializationFailed {
-			t.Errorf("final event = %q, want %q", got, eventOIDCVerifierInitializationFailed)
-		}
-		if got := record.attrs["error_kind"].String(); got != "canceled" {
-			t.Errorf("final error_kind = %q, want canceled", got)
-		}
-		if len(record.attrs) != 2 {
-			t.Errorf("final attr count = %d, want 2; attrs = %#v", len(record.attrs), record.attrs)
+		if len(record.attrs) != 0 {
+			t.Errorf("final attrs = %#v, want none", record.attrs)
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("OIDC initialization failure log was not emitted")
@@ -233,11 +183,8 @@ func TestInitSecurityLogsOIDCVerifierReady(t *testing.T) {
 		if record.message != "OIDC verifier is ready" {
 			t.Errorf("message = %q", record.message)
 		}
-		if got := record.attrs["event"].String(); got != eventOIDCVerifierReady {
-			t.Errorf("event = %q, want %q", got, eventOIDCVerifierReady)
-		}
-		if len(record.attrs) != 1 {
-			t.Errorf("attr count = %d, want 1; attrs = %#v", len(record.attrs), record.attrs)
+		if len(record.attrs) != 0 {
+			t.Errorf("attrs = %#v, want none", record.attrs)
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("OIDC verifier ready log was not emitted")
@@ -314,17 +261,8 @@ func TestAuthValidateLogsBearerVerificationFailure(t *testing.T) {
 	if record.message != "bearer token verification failed" {
 		t.Errorf("message = %q", record.message)
 	}
-	if got := record.attrs["event"].String(); got != eventBearerTokenVerificationFailed {
-		t.Errorf("event = %q, want %q", got, eventBearerTokenVerificationFailed)
-	}
-	if got := record.attrs["error_kind"].String(); got != "token_expired" {
-		t.Errorf("error_kind = %q, want token_expired", got)
-	}
-	if !record.attrs["subject_present"].Bool() || !record.attrs["email_present"].Bool() {
-		t.Errorf("claim presence attrs = %#v, want both true", record.attrs)
-	}
-	if len(record.attrs) != 4 {
-		t.Errorf("attr count = %d, want 4; attrs = %#v", len(record.attrs), record.attrs)
+	if len(record.attrs) != 0 {
+		t.Errorf("attrs = %#v, want none", record.attrs)
 	}
 }
 
@@ -355,20 +293,8 @@ func TestCheckPermissionLogsAllowListConflict(t *testing.T) {
 	if record.message != "authorization role allow-lists conflict" {
 		t.Errorf("message = %q", record.message)
 	}
-	if got := record.attrs["event"].String(); got != eventAuthorizationRoleAllowListsConflict {
-		t.Errorf("event = %q, want %q", got, eventAuthorizationRoleAllowListsConflict)
-	}
-	if got := record.attrs["grpc.method"].String(); got != method {
-		t.Errorf("grpc.method = %q, want %q", got, method)
-	}
-	if got := record.attrs["allowed_groups_count"].Int64(); got != 1 {
-		t.Errorf("allowed_groups_count = %d, want 1", got)
-	}
-	if got := record.attrs["allowed_roles_count"].Int64(); got != 1 {
-		t.Errorf("allowed_roles_count = %d, want 1", got)
-	}
-	if len(record.attrs) != 4 {
-		t.Errorf("attr count = %d, want 4; attrs = %#v", len(record.attrs), record.attrs)
+	if len(record.attrs) != 0 {
+		t.Errorf("attrs = %#v, want none", record.attrs)
 	}
 }
 
@@ -420,21 +346,12 @@ func TestCheckPermissionLogsOPAPolicyEvaluationFailure(t *testing.T) {
 	if record.message != "OPA policy evaluation failed" {
 		t.Errorf("message = %q", record.message)
 	}
-	if got := record.attrs["event"].String(); got != eventOPAPolicyEvaluationFailed {
-		t.Errorf("event = %q, want %q", got, eventOPAPolicyEvaluationFailed)
-	}
-	if got := record.attrs["grpc.method"].String(); got != method {
-		t.Errorf("grpc.method = %q, want %q", got, method)
-	}
-	if got := record.attrs["error_kind"].String(); got != "other" {
-		t.Errorf("error_kind = %q, want other", got)
-	}
-	if len(record.attrs) != 3 {
-		t.Errorf("attr count = %d, want 3; attrs = %#v", len(record.attrs), record.attrs)
+	if len(record.attrs) != 0 {
+		t.Errorf("attrs = %#v, want none", record.attrs)
 	}
 }
 
-func TestSecurityStructuredLogsDoNotExposeSensitiveValues(t *testing.T) {
+func TestSecurityLogsDoNotExposeSensitiveValues(t *testing.T) {
 	const (
 		subject = "subject-sensitive"
 		email   = "person-sensitive@example.com"

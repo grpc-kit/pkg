@@ -133,26 +133,6 @@ func TestInterceptorLoggerMapsUnknownLevelToError(t *testing.T) {
 	}
 }
 
-func BenchmarkSlogJSON(b *testing.B) {
-	logger := pklogging.New(io.Discard, pklogging.FormatJSON, &slog.HandlerOptions{Level: slog.LevelInfo}).With(
-		slog.String("service_name", "service.api"),
-	)
-	b.ReportAllocs()
-	for b.Loop() {
-		logger.Info("message", slog.String("request_id", "request-test"))
-	}
-}
-
-func BenchmarkSlogDisabledDebug(b *testing.B) {
-	logger := pklogging.New(io.Discard, pklogging.FormatText, &slog.HandlerOptions{Level: slog.LevelInfo}).With(
-		slog.String("service_name", "service.api"),
-	)
-	b.ReportAllocs()
-	for b.Loop() {
-		logger.Debug("disabled message")
-	}
-}
-
 func loggerTestConfig(debugger *DebuggerConfig) *LocalConfig {
 	return &LocalConfig{
 		Services: &ServicesConfig{ServiceCode: "service", APIEndpoint: "api"},
