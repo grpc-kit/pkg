@@ -1051,12 +1051,9 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 			x.SetUpdatedBy(userID)
 		}
 
-		save, err := x.Where(roles.ID(int(req.Role.Id))).Save(ctx)
-		if err != nil {
+		if _, err := x.Where(roles.ID(int(req.Role.Id))).Save(ctx); err != nil {
 			return nil, err
 		}
-
-		logInfof(ctx, a.logger, "update role save: %v, req id: %v", save, req.Role.Id)
 
 		// 查询更新后的角色信息，包含 parent_id
 		q, err := db.Roles.Query().Select(

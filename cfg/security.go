@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -20,12 +19,6 @@ import (
 	pklogging "github.com/grpc-kit/pkg/logging"
 	"github.com/grpc-kit/pkg/rpc"
 	"k8s.io/apimachinery/pkg/util/wait"
-)
-
-const (
-	eventOIDCProviderDiscoveryRetry       = "cfg_oidc_provider_discovery_retry"
-	eventOIDCVerifierInitializationFailed = "cfg_oidc_verifier_initialization_failed"
-	eventOIDCVerifierReady                = "cfg_oidc_verifier_ready"
 )
 
 // OPANative 内嵌的 opa 组件
@@ -120,10 +113,7 @@ func (c *LocalConfig) initSecurity(ctx context.Context) error {
 
 			provider, err := oidc.NewProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer)
 			if err != nil {
-				pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelDebug, "OIDC provider discovery failed; retrying",
-					slog.String("event", eventOIDCProviderDiscoveryRetry),
-					slog.String("error_kind", classifySecurityError(err)),
-				)
+				pklogging.OrFallback(c.logger).DebugContext(ctx, "OIDC provider discovery failed; retrying")
 				// 返回 false 且 error 为 nil，交由外层 backoff 继续重试。
 				return false, nil
 			}
@@ -147,53 +137,15 @@ func (c *LocalConfig) initSecurity(ctx context.Context) error {
 
 				return initVerifierFn()
 			}); err != nil {
-				pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelError, "OIDC verifier initialization stopped",
-					slog.String("event", eventOIDCVerifierInitializationFailed),
-					slog.String("error_kind", classifySecurityError(err)),
-				)
+				pklogging.OrFallback(c.logger).ErrorContext(ctx, "OIDC verifier initialization stopped")
 				return
 			}
 
-			pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelInfo, "OIDC verifier is ready",
-				slog.String("event", eventOIDCVerifierReady),
-			)
+			pklogging.OrFallback(c.logger).InfoContext(ctx, "OIDC verifier is ready")
 		}(initVerifierFn)
 	}
 
 	return nil
-}
-
-func classifySecurityError(err error) string {
-	switch {
-	case errors.Is(err, jwt.ErrTokenMalformed):
-		return "token_malformed"
-	case errors.Is(err, jwt.ErrTokenSignatureInvalid):
-		return "token_signature_invalid"
-	case errors.Is(err, jwt.ErrTokenUnverifiable):
-		return "token_unverifiable"
-	case errors.Is(err, jwt.ErrTokenExpired):
-		return "token_expired"
-	case errors.Is(err, jwt.ErrTokenNotValidYet):
-		return "token_not_valid_yet"
-	case errors.Is(err, jwt.ErrTokenUsedBeforeIssued):
-		return "token_used_before_issued"
-	case errors.Is(err, jwt.ErrTokenRequiredClaimMissing):
-		return "token_required_claim_missing"
-	case errors.Is(err, jwt.ErrTokenInvalidAudience):
-		return "token_invalid_audience"
-	case errors.Is(err, jwt.ErrTokenInvalidIssuer):
-		return "token_invalid_issuer"
-	case errors.Is(err, jwt.ErrTokenInvalidSubject):
-		return "token_invalid_subject"
-	case errors.Is(err, jwt.ErrTokenInvalidId):
-		return "token_invalid_id"
-	case errors.Is(err, jwt.ErrTokenInvalidClaims):
-		return "token_invalid_claims"
-	case errors.Is(err, jwt.ErrInvalidKey), errors.Is(err, jwt.ErrInvalidKeyType):
-		return "token_invalid_key"
-	default:
-		return classifySafeError(err)
-	}
 }
 
 // withAccessTokenClaims 将已验证的 access token claims 写入当前会话。

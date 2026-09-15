@@ -11,7 +11,6 @@ import (
 	"io"
 	"io/fs"
 	"io/ioutil"
-	"log/slog"
 	"net"
 	"net/http"
 	"net/http/pprof"
@@ -49,12 +48,6 @@ import (
 	mcptools "github.com/grpc-kit/pkg/mcp/tools"
 	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
 	"github.com/grpc-kit/pkg/vars"
-)
-
-const (
-	eventBearerTokenVerificationFailed       = "cfg_bearer_token_verification_failed"
-	eventAuthorizationRoleAllowListsConflict = "cfg_authorization_role_allow_lists_conflict"
-	eventOPAPolicyEvaluationFailed           = "cfg_opa_policy_evaluation_failed"
 )
 
 // registerGateway 注册 microservice.pb.gw
@@ -774,12 +767,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 
 			idToken, err := c.Security.verifyBearerToken(ctx, bearerToken)
 			if err != nil {
-				pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelWarn, "bearer token verification failed",
-					slog.String("event", eventBearerTokenVerificationFailed),
-					slog.String("error_kind", classifySecurityError(err)),
-					slog.Bool("subject_present", idToken.Subject != ""),
-					slog.Bool("email_present", idToken.Email != ""),
-				)
+				pklogging.OrFallback(c.logger).WarnContext(ctx, "bearer token verification failed")
 
 				return ctx, errs.Unauthenticated(ctx).Err()
 			}
@@ -819,12 +807,7 @@ func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles 
 	// allowed_groups is retained for compatibility; both names contain role codes.
 	allowedRoles, consistent := c.Security.Authorization.effectiveAllowedRoles()
 	if !consistent {
-		pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelError, "authorization role allow-lists conflict",
-			slog.String("event", eventAuthorizationRoleAllowListsConflict),
-			slog.String("grpc.method", method),
-			slog.Int("allowed_groups_count", len(c.Security.Authorization.AllowedGroups)),
-			slog.Int("allowed_roles_count", len(c.Security.Authorization.AllowedRoles)),
-		)
+		pklogging.OrFallback(c.logger).ErrorContext(ctx, "authorization role allow-lists conflict")
 		return errs.PermissionDenied(ctx).WithMessage("authorization role allow-lists conflict").Err()
 	}
 	if len(allowedRoles) > 0 && !isSelfService {
@@ -847,11 +830,7 @@ func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles 
 	// 基于 opa 项目进行鉴权
 	allow, err := c.Security.policyAllow(ctx)
 	if err != nil {
-		pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelError, "OPA policy evaluation failed",
-			slog.String("event", eventOPAPolicyEvaluationFailed),
-			slog.String("grpc.method", method),
-			slog.String("error_kind", classifySecurityError(err)),
-		)
+		pklogging.OrFallback(c.logger).ErrorContext(ctx, "OPA policy evaluation failed")
 		return errs.PermissionDenied(ctx).Err()
 	}
 	if !allow {

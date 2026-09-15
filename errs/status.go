@@ -109,7 +109,7 @@ func (s *Status) WithLogger(ctx context.Context, logger *slog.Logger, format str
 	logger = logging.OrFallback(logger)
 	message := fmt.Sprintf(format, err)
 	// 仅在后端服务输出错误信息
-	logger.LogAttrs(ctx, slog.LevelError, message, slog.Any("error", err))
+	logger.ErrorContext(ctx, message)
 
 	// 判断是否为开启 debug 模式，如是则填充至 anyType 中
 	if logger.Enabled(ctx, slog.LevelDebug) {

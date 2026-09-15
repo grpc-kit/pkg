@@ -60,14 +60,6 @@ const (
 	ScopeNameGRPCKit = "github.com/grpc-kit/pkg"
 )
 
-const (
-	eventAdminDatabaseUnavailable            = "cfg_admin_database_unavailable"
-	eventRegistryHealthCheckFailed           = "cfg_registry_health_check_failed"
-	eventRegistryHealthCheckSucceeded        = "cfg_registry_health_check_succeeded"
-	eventRegistryHealthCheckRetriesExhausted = "cfg_registry_health_check_retries_exhausted"
-	eventServiceRegistrationFailed           = "cfg_service_registration_failed"
-)
-
 // LocalConfig 本地配置，全局微服务配置结构
 type LocalConfig struct {
 	Services    *ServicesConfig    `json:",omitempty"` // 基础服务配置
@@ -399,9 +391,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 	if c.Services.hasEnableIntegrationAdminServer() {
 		client, err := c.getAdminDatabaseLion(ctx)
 		if err != nil {
-			pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelInfo, "admin service database unavailable",
-				slog.String("event", eventAdminDatabaseUnavailable),
-			)
+			pklogging.OrFallback(c.logger).InfoContext(ctx, "admin service database unavailable")
 		}
 
 		admOpts := []admin.Options{
@@ -829,32 +819,19 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 			}
 
 			if err := tryConnect(c.Services.PublicAddress); err != nil {
-				pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelError, "service registry health check failed",
-					slog.String("event", eventRegistryHealthCheckFailed),
-					slog.String("error_kind", classifySafeError(err)),
-					slog.Int("retry_count", retryCount),
-					slog.Int("retry_max", retryMax),
-				)
+				pklogging.OrFallback(c.logger).ErrorContext(ctx, "service registry health check failed")
 
 				continue
 			}
 
-			pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelInfo, "service registry health check succeeded",
-				slog.String("event", eventRegistryHealthCheckSucceeded),
-				slog.Int("retry_count", retryCount),
-				slog.Int("retry_max", retryMax),
-			)
+			pklogging.OrFallback(c.logger).InfoContext(ctx, "service registry health check succeeded")
 			break
 		}
 
 		if retryCount >= retryMax {
 			allowRegistry = false
 
-			pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelError, "service registry health check retries exhausted",
-				slog.String("event", eventRegistryHealthCheckRetriesExhausted),
-				slog.Int("retry_count", retryCount),
-				slog.Int("retry_max", retryMax),
-			)
+			pklogging.OrFallback(c.logger).ErrorContext(ctx, "service registry health check retries exhausted")
 
 			// TODO; 达到最大检测次数，但后端服务端口还未正常，此时应该发送信号退出应用，不允许注册
 		}
@@ -863,10 +840,7 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 		if allowRegistry {
 			reg, err := sd.Register(ctx, connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
 			if err != nil {
-				pklogging.OrFallback(c.logger).LogAttrs(ctx, slog.LevelError, "service registration failed",
-					slog.String("event", eventServiceRegistrationFailed),
-					slog.String("error_kind", classifySafeError(err)),
-				)
+				pklogging.OrFallback(c.logger).ErrorContext(ctx, "service registration failed")
 			}
 
 			c.srvdis = reg

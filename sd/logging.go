@@ -60,8 +60,8 @@ func logKeepaliveReceived(ctx context.Context, logger *slog.Logger, ttl, leaseID
 	)
 }
 
-func logResolverStateUpdated(logger *slog.Logger, addressCount int) {
-	logger.Debug("updated resolver state",
+func logResolverStateUpdated(ctx context.Context, logger *slog.Logger, addressCount int) {
+	logger.LogAttrs(ctx, slog.LevelDebug, "updated resolver state",
 		slog.String("event", eventResolverStateUpdated),
 		slog.Int("address_count", addressCount),
 	)
