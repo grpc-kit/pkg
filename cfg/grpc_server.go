@@ -631,6 +631,11 @@ func (c *LocalConfig) GetClientDialOption(customOpts ...grpc.DialOption) []grpc.
 	const grpcServiceConfig = `{"loadBalancingPolicy":"round_robin"}`
 	var defaultOpts []grpc.DialOption
 	defaultOpts = append(defaultOpts, grpc.WithDefaultServiceConfig(grpcServiceConfig))
+	if c.Observables != nil && c.Observables.Enable != nil && c.Observables.hasEnable() {
+		defaultOpts = append(defaultOpts, grpc.WithStatsHandler(
+			otelgrpc.NewClientHandler(otelgrpc.WithFilter(c.Observables.grpcTracingEnableFilter)),
+		))
+	}
 	defaultOpts = append(defaultOpts, customOpts...)
 	return defaultOpts
 }
@@ -638,7 +643,6 @@ func (c *LocalConfig) GetClientDialOption(customOpts ...grpc.DialOption) []grpc.
 // GetClientUnaryInterceptor 获取客户端默认一元拦截器
 func (c *LocalConfig) GetClientUnaryInterceptor() []grpc.UnaryClientInterceptor {
 	var opts []grpc.UnaryClientInterceptor
-	// opts = append(opts, otelgrpc.UnaryClientInterceptor())
 	//opts = append(opts, grpcprometheus.UnaryClientInterceptor)
 	// opts = append(opts, grpcopentracing.UnaryClientInterceptor())
 	return opts
@@ -647,7 +651,6 @@ func (c *LocalConfig) GetClientUnaryInterceptor() []grpc.UnaryClientInterceptor 
 // GetClientStreamInterceptor 获取客户端默认流拦截器
 func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientInterceptor {
 	var opts []grpc.StreamClientInterceptor
-	opts = append(opts, otelgrpc.StreamClientInterceptor())
 	//opts = append(opts, grpcprometheus.StreamClientInterceptor)
 	// opts = append(opts, grpcopentracing.StreamClientInterceptor())
 	return opts
