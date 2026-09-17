@@ -698,7 +698,7 @@ func (c *ObservablesConfig) httpTracingEnableFilter(r *http.Request) bool {
 	return true
 }
 
-// grpcTracingEnableFilter 哪些 http 请求开启链路跟踪
+// grpcTracingEnableFilter 判断哪些 gRPC 请求开启链路跟踪
 func (c *ObservablesConfig) grpcTracingEnableFilter(i *stats.RPCTagInfo) bool {
 	if i == nil {
 		return false
