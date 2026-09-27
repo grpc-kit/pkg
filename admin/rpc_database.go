@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"log/slog"
 	"strconv"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -1015,6 +1016,41 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	if err != nil {
 		rollback()
 		return nil, err
+	}
+
+	// 幂等补全：为没有任何部门归属的存量用户（含外部登录早期建档）补建
+	// 「待分配部门」成员关系；已有任一部门归属（含 admin 种子用户）的用户保持不变。
+	orphanUserIDs, err := tx.Users.Query().
+		Where(
+			users.DeletedAtIsNil(),
+			users.Not(users.HasLionUserMembershipsWith(
+				usermemberships.TargetTypeEQ(membershipTargetDepartment),
+			)),
+		).
+		IDs(ctx)
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+	if len(orphanUserIDs) > 0 {
+		creates := make([]*lion.UserMembershipsCreate, 0, len(orphanUserIDs))
+		for _, uid := range orphanUserIDs {
+			creates = append(creates, tx.UserMemberships.Create().
+				SetUserID(uid).
+				SetTargetType(membershipTargetDepartment).
+				SetTargetID(unassignedDept.ID).
+				SetMemberRole(int(adminv1.Membership_MEMBER)).
+				SetMemberStatus(int(adminv1.Membership_ACTIVE)).
+				SetMemberType(int(adminv1.Membership_PRIMARY)))
+		}
+		if err := tx.UserMemberships.CreateBulk(creates...).Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
+		a.logger.LogAttrs(ctx, slog.LevelInfo, "Backfilled unassigned department memberships",
+			slog.String("event", "unassigned_department_backfill"),
+			slog.Int("count", len(orphanUserIDs)),
+		)
 	}
 
 	credCode := seedCredentialCode(adminv1.CredentialCode_CREDENTIAL_CODE_JWT_SIGNING_V1)

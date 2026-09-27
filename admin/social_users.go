@@ -768,6 +768,11 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(
 		return 0, err
 	}
 
+	if err := s.ensureUnassignedDepartmentMembership(ctx, tx, newUser.ID); err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
@@ -1350,6 +1355,17 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			return 0, fmt.Errorf("create user failed")
 		}
 
+		if err := s.ensureUnassignedDepartmentMembership(ctx, tx, newUser.ID); err != nil {
+			_ = tx.Rollback()
+
+			logger.LogAttrs(ctx, slog.LevelError, "External default membership creation failed",
+				slog.String("event", "external_default_membership_creation_failed"),
+				slog.String("provider", s.ProviderName),
+				slog.Int("user_id", newUser.ID),
+			)
+			return 0, fmt.Errorf("create user failed")
+		}
+
 		if err := tx.Commit(); err != nil {
 			return 0, fmt.Errorf("commit external user creation: %w", err)
 		}
@@ -1668,9 +1684,22 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 			return 0, fmt.Errorf("create user failed")
 		}
 
+		if err := s.ensureUnassignedDepartmentMembership(ctx, tx, newUser.ID); err != nil {
+			_ = tx.Rollback()
+
+			logger.LogAttrs(ctx, slog.LevelError, "WeChat default membership creation failed",
+				slog.String("event", "wechat_default_membership_creation_failed"),
+				slog.String("provider", s.ProviderName),
+				slog.Int("user_id", newUser.ID),
+			)
+			return 0, fmt.Errorf("create user failed")
+		}
+
 		existUserID = newUser.ID
 
-		_ = tx.Commit()
+		if err := tx.Commit(); err != nil {
+			return 0, fmt.Errorf("commit wechat user creation: %w", err)
+		}
 	}
 
 	return existUserID, nil
