@@ -123,8 +123,14 @@ func TestExternalUserClaimsFromIDToken(t *testing.T) {
 	claims.PhoneNumber = "+8613900001234"
 	claims.PhoneNumberVerified = true
 	profile := externalUserClaimsFromIDToken(claims)
-	if profile.ProviderSubject != "provider-subject" || profile.Username != "preferred-user" || profile.PhoneNumber != claims.PhoneNumber || !profile.PhoneNumberVerified {
+	if profile.ProviderSubject != "provider-subject" || profile.Username != "preferred-user" || profile.UsernameIsFallback || profile.RawUsername != "preferred-user" || profile.PhoneNumber != claims.PhoneNumber || !profile.PhoneNumberVerified {
 		t.Fatalf("profile mapping mismatch: %#v", profile)
+	}
+	profile = externalUserClaimsFromIDToken(&auth.IDTokenClaims{CommonClaims: auth.CommonClaims{
+		RegisteredClaims: jwt.RegisteredClaims{Subject: "provider-subject"},
+	}})
+	if !profile.UsernameIsFallback || profile.ProviderSubject != "provider-subject" {
+		t.Fatalf("subject promoted to username: %#v", profile)
 	}
 }
 

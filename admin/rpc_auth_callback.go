@@ -27,13 +27,15 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 	// 根据不同的 provider_name 选择个性处理方式
 	su, err := newSocialUsers(ctx, a.logger, a.config.aesKey, db, req.GetProviderName())
 	if err != nil {
-		return nil, err
+		a.logAuthenticationFailure(ctx, req.GetProviderName(), "callback_provider_init", err)
+		return nil, errs.Unauthenticated(ctx).WithMessage("external authentication failed")
 	}
 	issuance, err := a.newAccessTokenIssuanceContext("", "", ttl)
 	if err != nil {
 		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
 	}
 	su.issuanceContext = issuance
+	su.staticUsers = a.config.staticUsers
 
 	accessToken, err := su.Exchange(ctx, req.GetCode())
 	if err != nil {
@@ -49,7 +51,8 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		if errors.Is(err, errExternalIdentityAlreadyBound) {
 			return nil, externalIdentityAlreadyBoundPublicError(ctx)
 		}
-		return nil, err
+		a.logAuthenticationFailure(ctx, su.ProviderName, "callback_exchange", err)
+		return nil, errs.Unauthenticated(ctx).WithMessage("external authentication failed")
 	}
 
 	userID, username, err := extractUserFromAccessToken(accessToken)

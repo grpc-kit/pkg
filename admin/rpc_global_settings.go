@@ -2,6 +2,8 @@ package admin
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -10,6 +12,7 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/globalsettings"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -133,33 +136,75 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
 	}
 	actor := globalSettingActor(ctx)
-	tx, err := db.Tx(ctx)
+	identityChange := category == globalSettingsCategorySecurity && slices.ContainsFunc(req.GetUpdates(), func(item *adminv1.UpdateGlobalSetting) bool {
+		return slices.Contains(identitySettingKeys, strings.TrimSpace(item.GetSettingKey()))
+	})
+	var writeErr error
+	for attempt := range identityTransactionAttempts {
+		writeErr = writeGlobalSettingUpdates(ctx, db, category, req.GetUpdates(), actor, identityChange)
+		if writeErr == nil || !identityChange || (!retryableDatabaseError(writeErr) && !lion.IsConstraintError(writeErr)) {
+			break
+		}
+		if attempt+1 == identityTransactionAttempts || ctx.Err() != nil {
+			break
+		}
+	}
+	for _, item := range req.GetUpdates() {
+		outcome := "success"
+		if writeErr != nil {
+			outcome = "failed"
+		}
+		a.auditGlobalSettingMutation(ctx, "update", category, strings.TrimSpace(item.GetSettingKey()), actor, outcome)
+	}
+	if writeErr != nil {
+		if !retryableDatabaseError(writeErr) && !lion.IsConstraintError(writeErr) {
+			if _, ok := status.FromError(writeErr); ok {
+				return nil, writeErr
+			}
+		}
+		return nil, errs.Internal(ctx).WithMessage("failed to update global settings")
+	}
+
+	categoryResp, err := a.buildGlobalSettingCategory(ctx, category)
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to begin transaction")
+		return nil, err
+	}
+	return &adminv1.UpdateGlobalSettingsResponse{Category: categoryResp}, nil
+}
+
+func writeGlobalSettingUpdates(ctx context.Context, db *lion.Client, category string, updates []*adminv1.UpdateGlobalSetting, actor int64, identityChange bool) error {
+	var tx *lion.Tx
+	var err error
+	if identityChange {
+		tx, err = db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	} else {
+		tx, err = db.Tx(ctx)
+	}
+	if err != nil {
+		return fmt.Errorf("begin settings transaction: %w", err)
 	}
 	defer func() { _ = tx.Rollback() }()
-
-	for _, item := range req.GetUpdates() {
+	for _, item := range updates {
 		settingKey := strings.TrimSpace(item.GetSettingKey())
 		updateValue, updateDescription, maskErr := globalSettingUpdateFields(ctx, item)
 		if maskErr != nil {
-			return nil, maskErr
+			return maskErr
 		}
 		existing, queryErr := tx.GlobalSettings.Query().
 			Where(globalsettings.CategoryEQ(category), globalsettings.SettingKeyEQ(settingKey)).
 			Only(ctx)
 		if queryErr != nil && !lion.IsNotFound(queryErr) {
-			return nil, errs.Internal(ctx).WithMessage("failed to query global setting")
+			return fmt.Errorf("failed to query global setting: %w", queryErr)
 		}
 
 		spec, builtIn := lookupGlobalSettingSpec(category, settingKey)
 		if builtIn {
 			if updateDescription {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("description is immutable for built-in setting %s", settingKey))
+				return errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("description is immutable for built-in setting %s", settingKey))
 			}
 			normalizedValue, normalizeErr := normalizeGlobalSettingValue(ctx, settingKey, item.GetSettingValue(), spec)
 			if normalizeErr != nil {
-				return nil, normalizeErr
+				return normalizeErr
 			}
 			if lion.IsNotFound(queryErr) {
 				create := tx.GlobalSettings.Create().
@@ -173,7 +218,7 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 					create = create.SetCreatedBy(actor).SetUpdatedBy(actor)
 				}
 				if _, createErr := create.Save(ctx); createErr != nil {
-					return nil, errs.Internal(ctx).WithMessage("failed to create built-in global setting")
+					return fmt.Errorf("failed to create built-in global setting: %w", createErr)
 				}
 				continue
 			}
@@ -187,17 +232,17 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 				update = update.SetUpdatedBy(actor)
 			}
 			if _, updateErr := update.Save(ctx); updateErr != nil {
-				return nil, errs.Internal(ctx).WithMessage("failed to update built-in global setting")
+				return fmt.Errorf("failed to update built-in global setting: %w", updateErr)
 			}
 			continue
 		}
 
 		if lion.IsNotFound(queryErr) {
-			return nil, errs.NotFound(ctx).WithMessage(fmt.Sprintf("global setting %q not found", settingKey))
+			return errs.NotFound(ctx).WithMessage(fmt.Sprintf("global setting %q not found", settingKey))
 		}
 		valueType := globalSettingValueType(existing.ValueType)
 		if !isSupportedGlobalSettingValueType(valueType) {
-			return nil, errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("global setting %q has an unsupported value_type and can only be deleted", settingKey))
+			return errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("global setting %q has an unsupported value_type and can only be deleted", settingKey))
 		}
 		update := tx.GlobalSettings.Update().
 			Where(globalsettings.IDEQ(existing.ID)).
@@ -205,14 +250,14 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 		if updateValue {
 			normalizedValue, normalizeErr := normalizeGlobalSettingValue(ctx, settingKey, item.GetSettingValue(), globalSettingSpec{ValueType: valueType})
 			if normalizeErr != nil {
-				return nil, normalizeErr
+				return normalizeErr
 			}
 			update = update.SetSettingValue(normalizedValue)
 		}
 		if updateDescription {
 			description := strings.TrimSpace(item.GetDescription())
 			if descriptionErr := validateGlobalSettingDescription(ctx, description); descriptionErr != nil {
-				return nil, descriptionErr
+				return descriptionErr
 			}
 			update = update.SetDescription(description)
 		}
@@ -220,25 +265,19 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 			update = update.SetUpdatedBy(actor)
 		}
 		if _, updateErr := update.Save(ctx); updateErr != nil {
-			return nil, errs.Internal(ctx).WithMessage("failed to update custom global setting")
+			return fmt.Errorf("failed to update custom global setting: %w", updateErr)
 		}
 	}
 
-	if err := tx.Commit(); err != nil {
-		for _, item := range req.GetUpdates() {
-			a.auditGlobalSettingMutation(ctx, "update", category, strings.TrimSpace(item.GetSettingKey()), actor, "failed")
+	if identityChange {
+		if _, err := readIdentityPolicy(ctx, tx.GlobalSettings.Query()); err != nil {
+			if errors.Is(err, errInvalidIdentityPolicy) {
+				return errs.InvalidArgument(ctx).WithMessage("invalid identity policy combination or stored value")
+			}
+			return err
 		}
-		return nil, errs.Internal(ctx).WithMessage("failed to commit global settings update")
 	}
-	for _, item := range req.GetUpdates() {
-		a.auditGlobalSettingMutation(ctx, "update", category, strings.TrimSpace(item.GetSettingKey()), actor, "success")
-	}
-
-	categoryResp, err := a.buildGlobalSettingCategory(ctx, category)
-	if err != nil {
-		return nil, err
-	}
-	return &adminv1.UpdateGlobalSettingsResponse{Category: categoryResp}, nil
+	return tx.Commit()
 }
 
 func (a *KnownAdminAPI) DeleteGlobalSetting(ctx context.Context, req *adminv1.DeleteGlobalSettingRequest) (*emptypb.Empty, error) {

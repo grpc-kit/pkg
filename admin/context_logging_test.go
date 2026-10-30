@@ -28,6 +28,12 @@ func TestAdminHelpersPropagateContextToLogs(t *testing.T) {
 		call func(context.Context, *slog.Logger)
 	}{
 		{
+			name: "authentication failure",
+			call: func(ctx context.Context, logger *slog.Logger) {
+				(&KnownAdminAPI{logger: logger}).logAuthenticationFailure(ctx, "oidc", "callback_exchange", errExternalLoginRejected)
+			},
+		},
+		{
 			name: "global setting audit",
 			call: func(ctx context.Context, logger *slog.Logger) {
 				(&KnownAdminAPI{logger: logger}).auditGlobalSettingMutation(ctx, "update", "security", "key", 1, "success")
