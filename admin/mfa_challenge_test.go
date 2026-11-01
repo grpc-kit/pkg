@@ -15,11 +15,13 @@ func TestMFAChallengePreservesAndCopiesIssuanceContext(t *testing.T) {
 		Tenant:   "default",
 		TTL:      time.Hour,
 	}
-	challenge, err := store.CreateLoginWithTTL(time.Minute, mfaChallengeTypeLoginVerify, 42, "alice", issuance)
+	primary := mfaPrimaryAuth{ProviderID: 7, IdentityID: 9}
+	challenge, err := store.CreateLoginWithTTL(time.Minute, mfaChallengeTypeLoginVerify, 42, "alice", issuance, primary)
 	if err != nil {
 		t.Fatal(err)
 	}
 	challenge.IssuanceContext.ClientID = "mutated-return-value"
+	challenge.PrimaryAuth.IdentityID = 99
 
 	stored, ok := store.Get(challenge.ChallengeID)
 	if !ok {
@@ -30,6 +32,9 @@ func TestMFAChallengePreservesAndCopiesIssuanceContext(t *testing.T) {
 	}
 	if stored.IssuanceContext.ClientID != "admin-web" || stored.IssuanceContext.TTL != time.Hour {
 		t.Fatalf("issuance context mismatch: %+v", stored.IssuanceContext)
+	}
+	if stored.PrimaryAuth != primary {
+		t.Fatalf("primary authentication was not copied: %+v", stored.PrimaryAuth)
 	}
 
 	stored.IssuanceContext.ClientID = "mutated-get"

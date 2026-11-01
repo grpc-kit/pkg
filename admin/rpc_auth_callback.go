@@ -65,7 +65,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		return nil, errs.Internal(ctx).WithMessage("failed to query user MFA status")
 	}
 
-	authToken, err := a.applyMFAGateAfterPrimaryAuth(ctx, db, userID, username, userMFAEnabled, accessToken, issuance)
+	authToken, err := a.applyMFAGateAfterPrimaryAuth(ctx, db, userID, username, userMFAEnabled, accessToken, issuance, su.AuthProvider.ID)
 	if err != nil {
 		return nil, err
 	}

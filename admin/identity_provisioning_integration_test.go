@@ -337,7 +337,7 @@ func runExternalIdentityIntegration(t *testing.T, db *lion.Client, backend strin
 		}
 		api := New(WithLionClient(db))
 		issuance := AccessTokenIssuanceContext{ClientID: "test-client", TTL: time.Hour}
-		gate, err := api.applyMFAGateAfterPrimaryAuth(t.Context(), db, id, name, enabled, "test-provisional-token", issuance)
+		gate, err := api.applyMFAGateAfterPrimaryAuth(t.Context(), db, id, name, enabled, "test-provisional-token", issuance, s.AuthProvider.ID)
 		if err != nil || !gate.GetMfaRequired() || gate.GetAccessToken() != "" || gate.GetChallengeId() == "" {
 			t.Fatalf("MFA gate bypassed: %+v err=%v", gate, err)
 		}

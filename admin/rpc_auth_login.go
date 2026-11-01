@@ -149,6 +149,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			pcResult.MfaEnabled,
 			pcResult.AccessToken,
 			issuance,
+			su.AuthProvider.ID,
 		)
 		if gateErr != nil {
 			return nil, gateErr

@@ -20,6 +20,13 @@ const (
 	mfaChallengeTypeAdminSetup
 )
 
+// mfaPrimaryAuth identifies the server-resolved identity used for primary
+// authentication, independently of the identity storing the TOTP secret.
+type mfaPrimaryAuth struct {
+	ProviderID int
+	IdentityID int
+}
+
 type mfaChallenge struct {
 	ChallengeID   string
 	ChallengeType mfaChallengeType
@@ -31,6 +38,7 @@ type mfaChallenge struct {
 	InUse         bool
 
 	IssuanceContext *AccessTokenIssuanceContext
+	PrimaryAuth     mfaPrimaryAuth
 
 	// setup 场景：暂存 Base32 TOTP secret（未确认，尚未写入数据库）
 	TempSecret string
@@ -105,18 +113,18 @@ func (s *mfaChallengeStore) Create(ct mfaChallengeType, userID int, username str
 }
 
 func (s *mfaChallengeStore) CreateWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username string) (*mfaChallenge, error) {
-	return s.createWithTTL(ttl, ct, userID, username, "", nil)
+	return s.createWithTTL(ttl, ct, userID, username, "", nil, mfaPrimaryAuth{})
 }
 
 func (s *mfaChallengeStore) CreateBoundWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username, sessionID string) (*mfaChallenge, error) {
-	return s.createWithTTL(ttl, ct, userID, username, sessionID, nil)
+	return s.createWithTTL(ttl, ct, userID, username, sessionID, nil, mfaPrimaryAuth{})
 }
 
-func (s *mfaChallengeStore) CreateLoginWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username string, issuance AccessTokenIssuanceContext) (*mfaChallenge, error) {
-	return s.createWithTTL(ttl, ct, userID, username, "", &issuance)
+func (s *mfaChallengeStore) CreateLoginWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username string, issuance AccessTokenIssuanceContext, primary mfaPrimaryAuth) (*mfaChallenge, error) {
+	return s.createWithTTL(ttl, ct, userID, username, "", &issuance, primary)
 }
 
-func (s *mfaChallengeStore) createWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username, sessionID string, issuance *AccessTokenIssuanceContext) (*mfaChallenge, error) {
+func (s *mfaChallengeStore) createWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username, sessionID string, issuance *AccessTokenIssuanceContext, primary mfaPrimaryAuth) (*mfaChallenge, error) {
 	id, err := generateChallengeID()
 	if err != nil {
 		return nil, err
@@ -129,6 +137,7 @@ func (s *mfaChallengeStore) createWithTTL(ttl time.Duration, ct mfaChallengeType
 		ExpiresAt:       time.Now().Add(ttl),
 		SessionID:       sessionID,
 		IssuanceContext: issuance,
+		PrimaryAuth:     primary,
 	}
 	s.mu.Lock()
 	s.entries[id] = c

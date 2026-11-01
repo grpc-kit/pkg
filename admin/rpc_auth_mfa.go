@@ -83,17 +83,8 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 	defer func() {
 		_ = tx.Rollback()
 	}()
-	active, err := tx.Users.Query().Where(
-		users.IDEQ(challenge.UserID),
-		users.UserStatusEQ(int(adminv1.User_ACTIVE)),
-		users.DeletedAtIsNil(),
-	).Exist(ctx)
-	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to query MFA user")
-	}
-	if !active {
-		a.mfaChallenges.Delete(req.ChallengeId)
-		return nil, errs.Unauthenticated(ctx).WithMessage("MFA user is unavailable")
+	if err := a.validateMFAPrimaryAuth(ctx, tx.Client(), challenge); err != nil {
+		return nil, err
 	}
 
 	query := tx.UserIdentities.Query().
@@ -160,6 +151,9 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 
 	if challenge.IssuanceContext == nil {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA challenge missing access token issuance context")
+	}
+	if err := a.validateMFAPrimaryAuth(ctx, db, challenge); err != nil {
+		return nil, err
 	}
 	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID, *challenge.IssuanceContext)
 	if err != nil {
@@ -496,6 +490,13 @@ func (a *KnownAdminAPI) StartAuthMFASetup(ctx context.Context, req *adminv1.Star
 	if challenge.ChallengeType != mfaChallengeTypeLoginSetup {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("invalid challenge type")
 	}
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("database unavailable")
+	}
+	if err := a.validateMFAPrimaryAuth(ctx, db, challenge); err != nil {
+		return nil, err
+	}
 
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      a.getMFATOTPIssuer(ctx),
@@ -508,7 +509,7 @@ func (a *KnownAdminAPI) StartAuthMFASetup(ctx context.Context, req *adminv1.Star
 	if challenge.IssuanceContext == nil {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA challenge missing access token issuance context")
 	}
-	setupChallenge, err := a.mfaChallenges.CreateLoginWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeLoginSetupConfirm, challenge.UserID, challenge.Username, *challenge.IssuanceContext)
+	setupChallenge, err := a.mfaChallenges.CreateLoginWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeLoginSetupConfirm, challenge.UserID, challenge.Username, *challenge.IssuanceContext, challenge.PrimaryAuth)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create setup challenge")
 	}
@@ -557,19 +558,16 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("database unavailable")
 	}
-	active, err := db.Users.Query().Where(
-		users.IDEQ(challenge.UserID),
-		users.UserStatusEQ(int(adminv1.User_ACTIVE)),
-		users.DeletedAtIsNil(),
-	).Exist(ctx)
+	tx, err := db.Tx(ctx)
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to query user")
+		return nil, errs.Internal(ctx).WithMessage("failed to begin transaction")
 	}
-	if !active {
-		a.mfaChallenges.Delete(req.SetupChallengeId)
-		return nil, errs.Unauthenticated(ctx).WithMessage("MFA user is unavailable")
+	defer func() { _ = tx.Rollback() }()
+	transactionDB := tx.Client()
+	if err := a.validateMFAPrimaryAuth(ctx, transactionDB, challenge); err != nil {
+		return nil, err
 	}
-	_, localProviderID, pErr := a.getLocalMFAPolicy(ctx, db)
+	_, localProviderID, pErr := a.getLocalMFAPolicy(ctx, transactionDB)
 	if pErr != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to query local MFA policy")
 	}
@@ -577,7 +575,7 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 		return nil, errs.FailedPrecondition(ctx).WithMessage("local auth provider not found")
 	}
 
-	if err := a.ensureLocalIdentity(ctx, db, challenge.UserID, challenge.Username, localProviderID); err != nil {
+	if err := a.ensureLocalIdentity(ctx, transactionDB, challenge.UserID, challenge.Username, localProviderID); err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to ensure local identity")
 	}
 
@@ -586,7 +584,7 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 		return nil, errs.Internal(ctx).WithMessage("failed to encrypt MFA secret")
 	}
 
-	_, err = db.UserIdentities.Update().
+	_, err = transactionDB.UserIdentities.Update().
 		Where(
 			useridentities.UserIDEQ(challenge.UserID),
 			useridentities.ProviderIDEQ(localProviderID),
@@ -599,15 +597,21 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 		return nil, errs.Internal(ctx).WithMessage("failed to enable MFA for local identity")
 	}
 
-	a.mfaChallenges.Delete(req.SetupChallengeId)
-
 	if challenge.IssuanceContext == nil {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA challenge missing access token issuance context")
+	}
+	if err := a.validateMFAPrimaryAuth(ctx, db, challenge); err != nil {
+		return nil, err
 	}
 	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID, *challenge.IssuanceContext)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to finalize MFA setup")
+	}
+	a.mfaChallenges.Delete(req.SetupChallengeId)
 
 	return &adminv1.AuthToken{
 		AccessToken: accessToken,

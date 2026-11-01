@@ -2,9 +2,6 @@ package admin
 
 import (
 	"bytes"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"log/slog"
@@ -14,7 +11,6 @@ import (
 	"testing"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
-	"github.com/grpc-kit/pkg/crypto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -23,22 +19,7 @@ import (
 // still exercises both backends in TestExternalIdentityProvisioningIntegration.
 func TestAuthenticationFailureLoggingIntegration(t *testing.T) {
 	db := adminIntegrationClient(t)
-	key, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatal(err)
-	}
-	encrypted, err := crypto.EncryptAES([]byte(adminTestAESKey), x509.MarshalPKCS1PrivateKey(key))
-	if err != nil {
-		t.Fatal(err)
-	}
-	db.Credentials.Create().SetCode("auth-log-test-key").
-		SetCredentialType(int(adminv1.Credential_KEY_PAIR)).
-		SetCredentialAlgorithm(int(adminv1.Credential_RSA)).
-		SetCredentialUsage(int(adminv1.Credential_JWKS)).
-		SetCredentialVisibility(int(adminv1.Visibility_VISIBILITY_RESTRICTED)).
-		SetCredentialStatus(int(adminv1.Credential_ACTIVE)).
-		SetCredentialSource(int(adminv1.Credential_SYSTEM)).
-		SetPrivateKeyEncrypted(encrypted).SaveX(t.Context())
+	createTestLoginSigningKey(t, db)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
