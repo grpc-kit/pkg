@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"cmp"
 	"context"
 	"crypto/rsa"
 	"crypto/tls"
@@ -50,6 +51,7 @@ type socialUsers struct {
 	secret string
 
 	issuanceContext AccessTokenIssuanceContext
+	staticUsers     *StaticUsers
 }
 
 func newSocialUsers(ctx context.Context, logger *slog.Logger, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
@@ -129,6 +131,9 @@ func newSocialUsers(ctx context.Context, logger *slog.Logger, aesKey []byte, db 
 
 // Exchange 根据客户端上报的 code 进行二次验证返回 access_token
 func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error) {
+	if err := s.requireActiveProvider(ctx, s.db); err != nil {
+		return "", err
+	}
 	accessToken := ""
 
 	switch adminv1.AuthProvider_Type(s.AuthProvider.ProviderType) {
@@ -228,6 +233,8 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		profile := externalUserClaims{
 			ProviderSubject:     providerUserID,
 			Username:            username,
+			UsernameIsFallback:  !oauthUsernameIsUsable(s.AuthProvider.ProviderType, s.oauthCfg, userinfo, nameField),
+			RawUsername:         rawMapUsername(userinfo, nameField),
 			PreferredUsername:   username,
 			Nickname:            username,
 			Email:               email,
@@ -253,6 +260,8 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 type externalUserClaims struct {
 	ProviderSubject     string
 	Username            string
+	UsernameIsFallback  bool
+	RawUsername         string
 	PreferredUsername   string
 	Nickname            string
 	Email               string
@@ -262,6 +271,7 @@ type externalUserClaims struct {
 }
 
 func externalUserClaimsFromIDToken(claims *auth.IDTokenClaims) externalUserClaims {
+	rawUsername := cmp.Or(claims.PreferredUsername, claims.Username)
 	preferredUsername := strings.TrimSpace(claims.PreferredUsername)
 	username := preferredUsername
 	if username == "" {
@@ -274,6 +284,8 @@ func externalUserClaimsFromIDToken(claims *auth.IDTokenClaims) externalUserClaim
 
 	return externalUserClaims{
 		ProviderSubject:     claims.Subject,
+		UsernameIsFallback:  rawUsername == "",
+		RawUsername:         rawUsername,
 		Username:            username,
 		PreferredUsername:   preferredUsername,
 		Nickname:            claims.Nickname,
@@ -540,7 +552,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			slog.String("event", "ldap_identity_missing"),
 			slog.String("provider", s.ProviderName),
 		)
-		localUserID, err = s.provisionLDAPUserOnFirstLogin(ctx, resolvedUser.ProviderUserID, resolvedUser.Username, resolvedUser.Attrs, normalizedPhone)
+		localUserID, err = s.provisionLDAPUserOnFirstLogin(ctx, resolvedUser.ProviderUserID, resolvedUser.Username, resolvedUser.UsernameIsFallback, resolvedUser.Attrs, normalizedPhone)
 		if err != nil {
 			logger.LogAttrs(ctx, slog.LevelError, "LDAP user provisioning failed",
 				slog.String("event", "ldap_user_provisioning_failed"),
@@ -612,66 +624,30 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	}, nil
 }
 
-func (s *socialUsers) provisionLDAPUserOnFirstLogin(
-	ctx context.Context,
-	providerUserID string,
-	ldapUsername string,
-	attrs *ldapUserAttrs,
-	phone *normalizedPhoneNumber,
-) (int, error) {
-	autoLinkEnabled := false
-	if (attrs != nil && strings.TrimSpace(attrs.Email) != "") || phone != nil {
-		var settingErr error
-		autoLinkEnabled, settingErr = s.identityAutoLinkEnabled(ctx)
-		if settingErr != nil {
-			return 0, settingErr
-		}
-	}
-
-	tx, err := s.db.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	defer func() { _ = tx.Rollback() }()
-
-	var assertedEmail string
+func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, providerUserID, ldapUsername string, usernameIsFallback bool, attrs *ldapUserAttrs, phone *normalizedPhoneNumber) (int, error) {
+	var contacts verifiedIdentityClaims
 	if attrs != nil {
-		assertedEmail = attrs.Email
+		contacts.Email = attrs.Email
+		contacts.EmailVerified = attrs.Email != ""
 	}
-	var assertedPhone string
 	if phone != nil {
-		assertedPhone = phone.Identifier.StoredValue
+		contacts.PhoneNumber = phone.Identifier.StoredValue
+		contacts.PhoneNumberVerified = true
 	}
-	linkedUserID, linked, err := s.linkExternalIdentityByVerifiedIdentifiers(
-		ctx,
-		tx,
-		providerUserID,
-		verifiedIdentityClaims{
-			Email:               assertedEmail,
-			EmailVerified:       assertedEmail != "",
-			PhoneNumber:         assertedPhone,
-			PhoneNumberVerified: assertedPhone != "",
+	username := ldapUsername
+	if usernameIsFallback {
+		username = ""
+	}
+	return s.resolveExternalUser(ctx, externalProvisioningInput{
+		Subject: providerUserID, Username: username, CanLinkUsername: !usernameIsFallback, LegacyUsername: ldapUsername,
+		Contacts: contacts,
+		CreateUser: func(ctx context.Context, tx *lion.Tx, username string) (*lion.Users, error) {
+			return s.createLDAPUser(ctx, tx, username, ldapUsername, attrs, phone)
 		},
-		autoLinkEnabled,
-		nil,
-	)
-	if err != nil {
-		return 0, err
-	}
-	if linked {
-		if err := tx.Commit(); err != nil {
-			return 0, fmt.Errorf("commit LDAP verified identifier binding: %w", err)
-		}
-		return linkedUserID, nil
-	}
+	})
+}
 
-	baseUsername := buildLDAPLocalUsernameBase(s.ProviderName, ldapUsername)
-	localUsername, err := findAvailableUsername(ctx, tx, baseUsername)
-	if err != nil {
-		_ = tx.Rollback()
-		return 0, err
-	}
-
+func (s *socialUsers) createLDAPUser(ctx context.Context, tx *lion.Tx, localUsername, ldapUsername string, attrs *ldapUserAttrs, phone *normalizedPhoneNumber) (*lion.Users, error) {
 	userCreate := tx.Users.Create().
 		SetUsername(localUsername).
 		SetUserStatus(int(adminv1.User_ACTIVE.Number()))
@@ -698,8 +674,7 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(
 		} else {
 			emailEnc, encErr := crypto.EncryptAES(s.aesKey, []byte(emailIdentifier.StoredValue))
 			if encErr != nil {
-				_ = tx.Rollback()
-				return 0, fmt.Errorf("encrypt ldap email: %w", encErr)
+				return nil, fmt.Errorf("encrypt ldap email: %w", encErr)
 			}
 			userCreate.SetEmailEncrypted(emailEnc)
 			userCreate.SetEmailHash(emailIdentifier.Hash)
@@ -709,74 +684,14 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(
 	if phone != nil {
 		phoneEnc, encErr := s.encryptPhoneNumber(phone.Proto)
 		if encErr != nil {
-			_ = tx.Rollback()
-			return 0, fmt.Errorf("encrypt ldap phone number: %w", encErr)
+			return nil, fmt.Errorf("encrypt ldap phone number: %w", encErr)
 		}
 		userCreate.SetPhoneNumberEncrypted(phoneEnc)
 		userCreate.SetPhoneNumberHash(phone.Identifier.Hash)
 		userCreate.SetPhoneNumberVerified(true)
 	}
 
-	newUser, err := userCreate.Save(ctx)
-	if err != nil {
-		_ = tx.Rollback()
-		if emailIdentifier.Hash != "" && lion.IsConstraintError(err) {
-			if _, queryErr := s.db.Users.Query().
-				Where(users.EmailHashEQ(emailIdentifier.Hash)).
-				OnlyID(ctx); queryErr == nil {
-				return 0, errExternalEmailAlreadyExists
-			}
-		}
-		if phone != nil && lion.IsConstraintError(err) {
-			if _, queryErr := s.db.Users.Query().
-				Where(users.PhoneNumberHashEQ(phone.Identifier.Hash)).
-				OnlyID(ctx); queryErr == nil {
-				return 0, errExternalPhoneAlreadyExists
-			}
-		}
-		return 0, err
-	}
-
-	_, err = tx.UserIdentities.Create().
-		SetUserID(newUser.ID).
-		SetProviderID(s.AuthProvider.ID).
-		SetProviderUserID(providerUserID).
-		Save(ctx)
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			return 0, fmt.Errorf("create LDAP identity: %w (rollback: %v)", err, rollbackErr)
-		}
-		if lion.IsConstraintError(err) {
-			// Another first-login request may have created the authoritative
-			// identity after our initial miss. The failed transaction is already
-			// rolled back; reread from the root client and converge on that user.
-			existing, queryErr := s.db.UserIdentities.Query().
-				Select(useridentities.FieldUserID).
-				Where(
-					useridentities.ProviderIDEQ(s.AuthProvider.ID),
-					useridentities.ProviderUserIDEQ(providerUserID),
-				).
-				Only(ctx)
-			if queryErr == nil {
-				return existing.UserID, nil
-			}
-			if !lion.IsNotFound(queryErr) {
-				return 0, fmt.Errorf("reread LDAP identity after constraint failure: %w", queryErr)
-			}
-		}
-		return 0, err
-	}
-
-	if err := s.ensureUnassignedDepartmentMembership(ctx, tx, newUser.ID); err != nil {
-		_ = tx.Rollback()
-		return 0, err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return 0, err
-	}
-	return newUser.ID, nil
+	return userCreate.Save(ctx)
 }
 
 // syncLDAPUserAttrs 在已有用户二次登录时，用最新 LDAP 属性刷新本地用户表。
@@ -941,12 +856,18 @@ func sanitizeUsernamePart(raw string) string {
 	return v
 }
 
-func findAvailableUsername(ctx context.Context, tx *lion.Tx, base string) (string, error) {
+func findAvailableUsername(ctx context.Context, tx *lion.Tx, base string, reserved func(string) bool) (string, error) {
 	const maxTry = 100
-	for i := 0; i < maxTry; i++ {
+	for i := range maxTry {
 		candidate := base
 		if i > 0 {
 			candidate = fmt.Sprintf("%s_%d", base, i+1)
+		}
+		if len(candidate) > 255 || !localUsernamePattern.MatchString(candidate) {
+			return "", errExternalUsernameConflict
+		}
+		if reserved != nil && reserved(candidate) {
+			continue
 		}
 		_, err := tx.Users.Query().Where(users.UsernameEQ(candidate)).OnlyID(ctx)
 		if lion.IsNotFound(err) {
@@ -964,6 +885,9 @@ func (s *socialUsers) issueAccessTokenForUser(ctx context.Context, u *lion.Users
 }
 
 func (s *socialUsers) issueAccessTokenForUserID(ctx context.Context, userID int) (string, bool, error) {
+	if err := s.requireActiveExternalUser(ctx, s.db, userID); err != nil {
+		return "", false, err
+	}
 	profile, err := loadAccessTokenUserProfile(ctx, s.db, s.aesKey, userID)
 	if err != nil {
 		return "", false, err
@@ -1042,10 +966,11 @@ type ldapUserAttrs struct {
 }
 
 type ldapResolvedUser struct {
-	DN             string
-	Username       string
-	ProviderUserID string
-	Attrs          *ldapUserAttrs
+	DN                 string
+	Username           string
+	UsernameIsFallback bool
+	ProviderUserID     string
+	Attrs              *ldapUserAttrs
 }
 
 func (s *socialUsers) findLDAPUser(ctx context.Context, conn *ldap.Conn, username string) (*ldapResolvedUser, error) {
@@ -1151,7 +1076,8 @@ func (s *socialUsers) findLDAPUser(ctx context.Context, conn *ldap.Conn, usernam
 	}
 
 	entry := searchResp.Entries[0]
-	resolvedUsername := strings.TrimSpace(entry.GetEqualFoldAttributeValue(usernameAttribute))
+	resolvedUsername := entry.GetEqualFoldAttributeValue(usernameAttribute)
+	usernameIsFallback := resolvedUsername == ""
 	if resolvedUsername == "" {
 		resolvedUsername = username
 	}
@@ -1181,10 +1107,11 @@ func (s *socialUsers) findLDAPUser(ctx context.Context, conn *ldap.Conn, usernam
 	}
 
 	return &ldapResolvedUser{
-		DN:             entry.DN,
-		Username:       resolvedUsername,
-		ProviderUserID: providerUserID,
-		Attrs:          attrs,
+		DN:                 entry.DN,
+		Username:           resolvedUsername,
+		UsernameIsFallback: usernameIsFallback,
+		ProviderUserID:     providerUserID,
+		Attrs:              attrs,
 	}, nil
 }
 
@@ -1208,201 +1135,45 @@ func singleLDAPAttributeValue(entry *ldap.Entry, attribute string) (string, erro
 }
 
 func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, profile externalUserClaims) (int, error) {
-	logger := pklogging.OrFallback(s.logger)
-	existIdentity, err := s.db.UserIdentities.Query().
-		Where(
-			useridentities.ProviderID(s.AuthProvider.ID),
-			useridentities.ProviderUserIDEQ(profile.ProviderSubject),
-		).
-		Select(useridentities.FieldID, useridentities.FieldUserID).
-		Only(ctx)
-	if err != nil && !lion.IsNotFound(err) {
-		return 0, err
+	username := cmp.Or(profile.RawUsername, profile.Username)
+	legacyUsername := cmp.Or(profile.Username, profile.ProviderSubject)
+	if profile.UsernameIsFallback {
+		username = ""
 	}
-
-	var existUserID int
-	if existIdentity != nil {
-		existUserID = existIdentity.UserID
-	}
-
-	if existUserID == 0 && lion.IsNotFound(err) {
-		autoLinkEnabled := false
-		if (profile.EmailVerified && strings.TrimSpace(profile.Email) != "") ||
-			(profile.PhoneNumberVerified && strings.TrimSpace(profile.PhoneNumber) != "") {
-			autoLinkEnabled, err = s.identityAutoLinkEnabled(ctx)
-			if err != nil {
-				return 0, err
-			}
-		}
-
-		tx, err := s.db.Tx(ctx)
-		if err != nil {
-			logger.LogAttrs(ctx, slog.LevelError, "External user transaction creation failed",
-				slog.String("event", "external_user_transaction_creation_failed"),
-				slog.String("provider", s.ProviderName),
-			)
-			return 0, fmt.Errorf("create user failed")
-		}
-		defer func() { _ = tx.Rollback() }()
-
-		linkedUserID, linked, err := s.linkExternalIdentityByVerifiedIdentifiers(
-			ctx,
-			tx,
-			profile.ProviderSubject,
-			verifiedIdentityClaims{
-				Email:               profile.Email,
-				EmailVerified:       profile.EmailVerified,
-				PhoneNumber:         profile.PhoneNumber,
-				PhoneNumberVerified: profile.PhoneNumberVerified,
-			},
-			autoLinkEnabled,
-			oauth2Token,
-		)
-		if err != nil {
-			return 0, err
-		}
-		if linked {
-			if err := tx.Commit(); err != nil {
-				return 0, fmt.Errorf("commit verified identifier identity binding: %w", err)
-			}
-			return linkedUserID, nil
-		}
-
-		usernameSource := profile.Username
-		if strings.TrimSpace(usernameSource) == "" {
-			usernameSource = profile.ProviderSubject
-		}
-		username, err := findAvailableUsername(ctx, tx, buildLDAPLocalUsernameBase(s.ProviderName, usernameSource))
-		if err != nil {
-			logger.LogAttrs(ctx, slog.LevelError, "External username allocation failed",
-				slog.String("event", "external_username_allocation_failed"),
-				slog.String("provider", s.ProviderName),
-			)
-			return 0, fmt.Errorf("create user failed")
-		}
-
-		userCreate := tx.Users.Create().SetUsername(username)
-		var emailIdentifier canonicalIdentifier
-		if profile.Email != "" {
-			var identifierErr error
-			emailIdentifier, identifierErr = canonicalizeEmailIdentifier(profile.Email)
-			if identifierErr != nil {
-				logger.LogAttrs(ctx, slog.LevelWarn, "External email ignored",
-					slog.String("event", "external_email_ignored"),
-					slog.String("provider", s.ProviderName),
-					slog.String("reason", "invalid_value"),
-				)
-			} else {
-				emailEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(emailIdentifier.StoredValue))
-				if encryptErr != nil {
-					return 0, fmt.Errorf("encrypt external user email: %w", encryptErr)
-				}
-				userCreate.SetEmailEncrypted(emailEnc).
-					SetEmailHash(emailIdentifier.Hash).
-					SetEmailVerified(profile.EmailVerified)
-			}
-		}
-
-		newUser, err := userCreate.Save(ctx)
-		if err != nil {
-			_ = tx.Rollback()
-			if profile.EmailVerified && emailIdentifier.Hash != "" && lion.IsConstraintError(err) {
-				if _, queryErr := s.db.Users.Query().
-					Where(users.EmailHashEQ(emailIdentifier.Hash)).
-					OnlyID(ctx); queryErr == nil {
-					return 0, errExternalEmailAlreadyExists
+	return s.resolveExternalUser(ctx, externalProvisioningInput{
+		Subject: profile.ProviderSubject, Username: username, CanLinkUsername: !profile.UsernameIsFallback,
+		LegacyUsername: legacyUsername, Token: oauth2Token,
+		Contacts: verifiedIdentityClaims{
+			Email: profile.Email, EmailVerified: profile.EmailVerified,
+			PhoneNumber: profile.PhoneNumber, PhoneNumberVerified: profile.PhoneNumberVerified,
+		},
+		CreateUser: func(ctx context.Context, tx *lion.Tx, username string) (*lion.Users, error) {
+			logger := pklogging.OrFallback(s.logger)
+			userCreate := tx.Users.Create().SetUsername(username).SetUserStatus(int(adminv1.User_ACTIVE))
+			var emailIdentifier canonicalIdentifier
+			if profile.Email != "" {
+				var identifierErr error
+				emailIdentifier, identifierErr = canonicalizeEmailIdentifier(profile.Email)
+				if identifierErr != nil {
+					logger.LogAttrs(ctx, slog.LevelWarn, "External email ignored",
+						slog.String("event", "external_email_ignored"),
+						slog.String("provider", s.ProviderName),
+						slog.String("reason", "invalid_value"),
+					)
+				} else {
+					emailEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(emailIdentifier.StoredValue))
+					if encryptErr != nil {
+						return nil, fmt.Errorf("encrypt external user email: %w", encryptErr)
+					}
+					userCreate.SetEmailEncrypted(emailEnc).
+						SetEmailHash(emailIdentifier.Hash).
+						SetEmailVerified(profile.EmailVerified)
 				}
 			}
 
-			logger.LogAttrs(ctx, slog.LevelError, "External user creation failed",
-				slog.String("event", "external_user_creation_failed"),
-				slog.String("provider", s.ProviderName),
-			)
-			return 0, fmt.Errorf("create user failed")
-		}
-
-		identityCreate := tx.UserIdentities.Create().
-			SetUserID(newUser.ID).
-			SetProviderID(s.AuthProvider.ID).
-			SetProviderUserID(profile.ProviderSubject)
-		if oauth2Token.AccessToken != "" {
-			accessTokenEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(oauth2Token.AccessToken))
-			if encryptErr != nil {
-				return 0, fmt.Errorf("encrypt external access token: %w", encryptErr)
-			}
-			identityCreate.SetAccessTokenEncrypted(accessTokenEnc)
-		}
-		if oauth2Token.RefreshToken != "" {
-			refreshTokenEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(oauth2Token.RefreshToken))
-			if encryptErr != nil {
-				return 0, fmt.Errorf("encrypt external refresh token: %w", encryptErr)
-			}
-			identityCreate.SetRefreshTokenEncrypted(refreshTokenEnc)
-		}
-		if !oauth2Token.Expiry.IsZero() {
-			identityCreate.SetTokenExpiresAt(oauth2Token.Expiry)
-		}
-
-		_, err = identityCreate.Save(ctx)
-		if err != nil {
-			_ = tx.Rollback()
-
-			logger.LogAttrs(ctx, slog.LevelError, "External identity creation failed",
-				slog.String("event", "external_identity_creation_failed"),
-				slog.String("provider", s.ProviderName),
-				slog.Int("user_id", newUser.ID),
-			)
-			return 0, fmt.Errorf("create user failed")
-		}
-
-		if err := s.ensureUnassignedDepartmentMembership(ctx, tx, newUser.ID); err != nil {
-			_ = tx.Rollback()
-
-			logger.LogAttrs(ctx, slog.LevelError, "External default membership creation failed",
-				slog.String("event", "external_default_membership_creation_failed"),
-				slog.String("provider", s.ProviderName),
-				slog.Int("user_id", newUser.ID),
-			)
-			return 0, fmt.Errorf("create user failed")
-		}
-
-		if err := tx.Commit(); err != nil {
-			return 0, fmt.Errorf("commit external user creation: %w", err)
-		}
-		existUserID = newUser.ID
-	} else {
-		identityUpdate := s.db.UserIdentities.Update().Where(useridentities.IDEQ(existIdentity.ID))
-		hasUpdate := false
-		if oauth2Token.AccessToken != "" {
-			accessTokenEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(oauth2Token.AccessToken))
-			if encryptErr != nil {
-				return 0, fmt.Errorf("encrypt external access token: %w", encryptErr)
-			}
-			identityUpdate.SetAccessTokenEncrypted(accessTokenEnc)
-			hasUpdate = true
-		}
-		if oauth2Token.RefreshToken != "" {
-			refreshTokenEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(oauth2Token.RefreshToken))
-			if encryptErr != nil {
-				return 0, fmt.Errorf("encrypt external refresh token: %w", encryptErr)
-			}
-			identityUpdate.SetRefreshTokenEncrypted(refreshTokenEnc)
-			hasUpdate = true
-		}
-		if !oauth2Token.Expiry.IsZero() {
-			identityUpdate.SetTokenExpiresAt(oauth2Token.Expiry)
-			hasUpdate = true
-		}
-		if hasUpdate {
-			if _, err := identityUpdate.Save(ctx); err != nil {
-				return 0, fmt.Errorf("update external identity token: %w", err)
-			}
-		}
-
-		// 设置用户组
-	}
-
-	return existUserID, nil
+			return userCreate.Save(ctx)
+		},
+	})
 }
 
 func (s *socialUsers) oauth2Exchange(ctx context.Context, code string) (*oauth2.Token, error) {
@@ -1578,131 +1349,17 @@ func (s *socialUsers) weixinExchange(ctx context.Context, code string) (*wechatC
 }
 
 func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2SessionResponse) (int, error) {
-	logger := pklogging.OrFallback(s.logger)
-	existIdentity, err := s.db.UserIdentities.Query().
-		Where(
-			useridentities.ProviderIDEQ(s.AuthProvider.ID),
-			useridentities.ProviderUserIDEQ(resp.Openid),
-		).
-		Select(
-			useridentities.FieldID,
-			useridentities.FieldUserID,
-			useridentities.FieldProviderUnionID,
-		).
-		Only(ctx)
-	if err != nil && !lion.IsNotFound(err) {
-		return 0, err
+	if resp == nil || resp.Errcode != 0 {
+		return 0, errExternalLoginRejected
 	}
-
-	var existUserID int
-	if existIdentity != nil {
-		existUserID = existIdentity.UserID
-
-		unionID, shouldPersist, conflict := reconcileWechatUnionID(existIdentity.ProviderUnionID, resp.Unionid)
-		if conflict {
-			// UnionID 不参与当前登录匹配。发生冲突时保留已存值，避免在尚未建模
-			// 微信开放平台账号信任域之前错误覆盖跨应用身份标识。
-			logger.LogAttrs(ctx, slog.LevelWarn, "WeChat UnionID mismatch; keeping stored value",
-				slog.String("event", "wechat_union_id_mismatch"),
-				slog.String("provider", s.ProviderName),
-				slog.Int("identity_id", existIdentity.ID),
-			)
-		}
-		if shouldPersist {
-			if _, updateErr := s.db.UserIdentities.UpdateOneID(existIdentity.ID).
-				SetProviderUnionID(unionID).
-				Save(ctx); updateErr != nil {
-				return 0, fmt.Errorf("backfill wechat unionid: %w", updateErr)
-			}
-		}
-	}
-
-	if existUserID == 0 && lion.IsNotFound(err) {
-		// TODO; 新增用户，preferred username 如何定义，开启事务
-		// 规范：provider_name_email_prefix
-		username := strings.ToLower(fmt.Sprintf("%v_%v", s.ProviderName, resp.Openid))
-
-		// 首先确保 "lion_users" 不存在这个用户，开启一个事务
-		tx, err := s.db.Tx(ctx)
-		if err != nil {
-			logger.LogAttrs(ctx, slog.LevelError, "WeChat user transaction creation failed",
-				slog.String("event", "wechat_user_transaction_creation_failed"),
-				slog.String("provider", s.ProviderName),
-			)
-			return 0, fmt.Errorf("create user failed")
-		}
-
-		_, err = tx.Users.Query().Where(users.UsernameEQ(username)).OnlyID(ctx)
-		if !lion.IsNotFound(err) {
-			logger.LogAttrs(ctx, slog.LevelError, "WeChat username availability check failed",
-				slog.String("event", "wechat_username_availability_check_failed"),
-				slog.String("provider", s.ProviderName),
-				slog.Bool("username_exists", err == nil),
-			)
-			return 0, fmt.Errorf("create user failed")
-		}
-
-		newUser, err := tx.Users.Create().
-			SetUsername(username).
-			Save(ctx)
-		if err != nil {
-			_ = tx.Rollback()
-
-			logger.LogAttrs(ctx, slog.LevelError, "WeChat user creation failed",
-				slog.String("event", "wechat_user_creation_failed"),
-				slog.String("provider", s.ProviderName),
-			)
-			return 0, fmt.Errorf("create user failed")
-		}
-
-		var accessTokenEnc, refreshTokenEnc []byte
-		if resp.SessionKey != "" {
-			accessTokenEnc, err = crypto.EncryptAES(s.aesKey, []byte(resp.SessionKey))
-			refreshTokenEnc = accessTokenEnc
-		}
-
-		identityCreate := tx.UserIdentities.Create().
-			SetUserID(newUser.ID).
-			SetProviderID(s.AuthProvider.ID).
-			SetProviderUserID(resp.Openid).
-			SetAccessTokenEncrypted(accessTokenEnc).
-			SetRefreshTokenEncrypted(refreshTokenEnc)
-		if unionID := strings.TrimSpace(resp.Unionid); unionID != "" {
-			identityCreate.SetProviderUnionID(unionID)
-		}
-		_, err = identityCreate.
-			//SetTokenExpiresAt(oauth2Token.Expiry).
-			Save(ctx)
-		if err != nil {
-			_ = tx.Rollback()
-
-			logger.LogAttrs(ctx, slog.LevelError, "WeChat identity creation failed",
-				slog.String("event", "wechat_identity_creation_failed"),
-				slog.String("provider", s.ProviderName),
-				slog.Int("user_id", newUser.ID),
-			)
-			return 0, fmt.Errorf("create user failed")
-		}
-
-		if err := s.ensureUnassignedDepartmentMembership(ctx, tx, newUser.ID); err != nil {
-			_ = tx.Rollback()
-
-			logger.LogAttrs(ctx, slog.LevelError, "WeChat default membership creation failed",
-				slog.String("event", "wechat_default_membership_creation_failed"),
-				slog.String("provider", s.ProviderName),
-				slog.Int("user_id", newUser.ID),
-			)
-			return 0, fmt.Errorf("create user failed")
-		}
-
-		existUserID = newUser.ID
-
-		if err := tx.Commit(); err != nil {
-			return 0, fmt.Errorf("commit wechat user creation: %w", err)
-		}
-	}
-
-	return existUserID, nil
+	return s.resolveExternalUser(ctx, externalProvisioningInput{
+		Subject: resp.Openid, Username: resp.Openid, LegacyUsername: resp.Openid,
+		Wechat: true, UnionID: resp.Unionid,
+		Token: &oauth2.Token{AccessToken: resp.SessionKey, RefreshToken: resp.SessionKey},
+		CreateUser: func(ctx context.Context, tx *lion.Tx, username string) (*lion.Users, error) {
+			return tx.Users.Create().SetUsername(username).SetUserStatus(int(adminv1.User_ACTIVE)).Save(ctx)
+		},
+	})
 }
 
 // reconcileWechatUnionID 决定微信登录返回的 UnionID 是否需要持久化。
@@ -1721,4 +1378,19 @@ func reconcileWechatUnionID(stored, incoming string) (value string, shouldPersis
 	default:
 		return stored, false, true
 	}
+}
+
+func oauthUsernameIsUsable(providerType int, config *oauthConfigData, userinfo map[string]any, field string) bool {
+	if providerType != int(adminv1.AuthProvider_GITHUB) {
+		if config == nil || config.UserinfoNameField == "" || field == "name" || field == "nickname" {
+			return false
+		}
+	}
+	value, ok := userinfo[field].(string)
+	return ok && value != ""
+}
+
+func rawMapUsername(userinfo map[string]any, field string) string {
+	value, _ := userinfo[field].(string)
+	return value
 }

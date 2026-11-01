@@ -362,6 +362,12 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									RoutePath:   "/observability/traces",
 									SortOrder:   200,
 								},
+								{
+									Code:        "admin.observability.pprof",
+									DisplayName: "性能分析",
+									RoutePath:   "/observability/pprof",
+									SortOrder:   300,
+								},
 							},
 						},
 					},
@@ -473,6 +479,7 @@ func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items 
 var builtinMenuObsoletes = []string{
 	"admin.setting.auth.tokens",     // 令牌管理已并入凭证管理（/setting/auth/credentials）
 	"admin.setting.global-settings", // 全局设置已并入配置管理 > 认证鉴权（/setting/config/security）
+	"admin.devtools.pprof",          // 性能分析已归入可观测性（/observability/pprof）
 }
 
 // deleteObsoleteBuiltinMenus 删除已下线的内置菜单。

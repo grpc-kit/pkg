@@ -93,6 +93,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			return nil, err
 		}
 		su.issuanceContext = issuance
+		su.staticUsers = a.config.staticUsers
 
 		if su.AuthProvider.ProviderStatus != int(adminv1.AuthProvider_ACTIVE.Number()) {
 			return nil, errs.FailedPrecondition(ctx).WithMessage("auth provider is not active")
@@ -132,7 +133,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			if lion.IsNotFound(err) {
 				return nil, errs.Unauthenticated(ctx)
 			}
-			pklogging.OrFallback(a.logger).ErrorContext(ctx, "password login failed")
+			a.logAuthenticationFailure(ctx, su.ProviderName, "password_check", err)
 			return nil, errs.Unauthenticated(ctx)
 		}
 		if pcResult == nil || !pcResult.OK {

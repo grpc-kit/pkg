@@ -191,7 +191,7 @@ func TestUnassignedMembershipProvisioningIntegration(t *testing.T) {
 	ldapAP := createTestAuthProvider(t, db, "testldap", adminv1.AuthProvider_LDAP)
 	ldapS := newTestSocialUsers(db, ldapAP)
 	ldapUserID, err := ldapS.provisionLDAPUserOnFirstLogin(
-		ctx, "1001", "mingqing", &ldapUserAttrs{DisplayName: "Integration LDAP"}, nil)
+		ctx, "1001", "mingqing", false, &ldapUserAttrs{DisplayName: "Integration LDAP"}, nil)
 	if err != nil {
 		t.Fatalf("provision ldap user err: %v", err)
 	}
@@ -261,7 +261,7 @@ func TestUnassignedMembershipSkippedWithoutSeedIntegration(t *testing.T) {
 	s := newTestSocialUsers(db, ap)
 
 	userID, err := s.provisionLDAPUserOnFirstLogin(
-		ctx, "uid-1", "noseed", &ldapUserAttrs{DisplayName: "No Seed"}, nil)
+		ctx, "uid-1", "noseed", false, &ldapUserAttrs{DisplayName: "No Seed"}, nil)
 	if err != nil {
 		t.Fatalf("provision should not fail when builtin departments are missing, err: %v", err)
 	}

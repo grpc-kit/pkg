@@ -53,6 +53,7 @@ func TestBuiltinMenuSeeds_Observability(t *testing.T) {
 		{code: "admin.observability", name: "可观测性", route: "/observability", sort: adminMenuSortObservability},
 		{code: "admin.observability.metrics", name: "指标监控", route: "/observability/metrics", sort: 100},
 		{code: "admin.observability.traces", name: "链路追踪", route: "/observability/traces", sort: 200},
+		{code: "admin.observability.pprof", name: "性能分析", route: "/observability/pprof", sort: 300},
 		{code: "admin.setting.config.observables", name: "遥测配置", route: "/setting/config/observables", sort: 900},
 	}
 	for _, check := range checks {
