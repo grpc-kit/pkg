@@ -87,10 +87,11 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 		// 根据 provider_code 选择 local/ldap 登录路径
 		su, err := newSocialUsers(ctx, a.logger, a.config.aesKey, db, providerCode)
 		if err != nil {
+			a.logAuthenticationFailure(ctx, providerCode, "password_provider_init", err)
 			if lion.IsNotFound(err) {
 				return nil, errs.NotFound(ctx).WithMessage("auth provider not found")
 			}
-			return nil, err
+			return nil, errs.Unauthenticated(ctx).WithMessage("authentication failed")
 		}
 		su.issuanceContext = issuance
 		su.staticUsers = a.config.staticUsers

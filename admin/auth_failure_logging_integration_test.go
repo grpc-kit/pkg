@@ -55,6 +55,8 @@ func TestAuthenticationFailureLoggingIntegration(t *testing.T) {
 	bad := createTestAuthProvider(t, db, "auth-log-bad-secret", adminv1.AuthProvider_OAUTH2)
 	bad.Update().SetSecretEncrypted([]byte(authFailureSensitiveValue)).SaveX(t.Context())
 	ldap := createTestAuthProvider(t, db, "auth-log-ldap", adminv1.AuthProvider_LDAP)
+	badLDAP := createTestAuthProvider(t, db, "auth-log-ldap-init", adminv1.AuthProvider_LDAP)
+	badLDAP.Update().SetSecretEncrypted([]byte(authFailureSensitiveValue)).SaveX(t.Context())
 
 	for _, tc := range []struct {
 		name, provider, stage, reason, level string
@@ -63,6 +65,7 @@ func TestAuthenticationFailureLoggingIntegration(t *testing.T) {
 		{"invalid encrypted secret", bad.Code, "callback_provider_init", "internal_error", "ERROR", false},
 		{"token exchange", provider.Code, "callback_exchange", "oauth_token_error", "ERROR", false},
 		{"password check", ldap.Code, "password_check", "internal_error", "ERROR", true},
+		{"password provider init", badLDAP.Code, "password_provider_init", "internal_error", "ERROR", true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var output bytes.Buffer
@@ -75,6 +78,9 @@ func TestAuthenticationFailureLoggingIntegration(t *testing.T) {
 					PasswordHash: base64.StdEncoding.EncodeToString([]byte(authFailureSensitiveValue))})
 				if response != nil {
 					t.Fatal("failed password login returned a token response")
+				}
+				if tc.stage == "password_provider_init" && status.Convert(err).Message() != "authentication failed" {
+					t.Fatalf("password initialization public message changed: %v", err)
 				}
 			} else {
 				var response *adminv1.GetAuthCallbackResponse
