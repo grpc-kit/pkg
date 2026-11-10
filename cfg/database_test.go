@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -132,39 +131,19 @@ func TestInitDatabaseHonorsCanceledContext(t *testing.T) {
 	}
 }
 
-func TestLionUsersIDStartStmt(t *testing.T) {
-	pg, err := lionUsersIDStartStmt(DatabaseDriverPostgresql)
-	if err != nil {
-		t.Fatalf("postgres stmt err: %v", err)
-	}
-	// setval(seq, 123455, true) → 下一次 nextval = 123456
-	wantPG := "SELECT setval('lion_users_id_seq', GREATEST((" +
-		"SELECT last_value FROM lion_users_id_seq), 123455), true)"
-	if pg != wantPG {
-		t.Fatalf("postgres stmt = %q, want %q", pg, wantPG)
-	}
-	if !containsAll(pg, "GREATEST", "123455") {
-		t.Fatal("postgres stmt must be idempotent (GREATEST keep-ahead) and target 123456")
-	}
-
-	my, err := lionUsersIDStartStmt(DatabaseDriverMysql)
-	if err != nil {
-		t.Fatalf("mysql stmt err: %v", err)
-	}
-	if my != "ALTER TABLE lion_users AUTO_INCREMENT = 123456" {
-		t.Fatalf("mysql stmt = %q", my)
-	}
-
-	if _, err := lionUsersIDStartStmt("sqlite3"); !errors.Is(err, ErrDatabaseNotSupportDriver) {
-		t.Fatalf("unsupported driver err = %v, want ErrDatabaseNotSupportDriver", err)
+func TestLionUsersIDStartUnsupportedDriver(t *testing.T) {
+	c := &LocalConfig{Database: &DatabaseConfig{Driver: "sqlite3"}}
+	if err := c.ensureLionUsersIDStart(t.Context(), nil); !errors.Is(err, ErrDatabaseNotSupportDriver) {
+		t.Fatalf("unsupported driver error = %v", err)
 	}
 }
 
-func containsAll(s string, subs ...string) bool {
-	for _, sub := range subs {
-		if !strings.Contains(s, sub) {
-			return false
-		}
+func TestRegisterPropagatesAdminDatabaseFailure(t *testing.T) {
+	enabled := true
+	services := &ServicesConfig{}
+	services.Integrations.GRPC.Admin = &enabled
+	c := &LocalConfig{Services: services, Database: &DatabaseConfig{Enable: true}}
+	if _, err := c.Register(t.Context(), nil); !errors.Is(err, ErrDatabaseNotInit) {
+		t.Fatalf("Register() error = %v, want ErrDatabaseNotInit", err)
 	}
-	return true
 }

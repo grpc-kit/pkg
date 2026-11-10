@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"strconv"
 	"testing"
 	"time"
 
@@ -47,7 +48,7 @@ func TestStaticUsersValid(t *testing.T) {
 func TestStaticUserAccessTokenUsesConfiguredPasswordHashAsHMACKey(t *testing.T) {
 	const passwordHash = "already-derived-password-hash"
 	user := StaticUser{
-		UserID:       42,
+		UserID:       crypto.Username2UserID("static-user"),
 		Username:     "static-user",
 		PasswordHash: passwordHash,
 		Groups:       []string{"admin"},
@@ -68,7 +69,7 @@ func TestStaticUserAccessTokenUsesConfiguredPasswordHashAsHMACKey(t *testing.T) 
 	if !token.Valid {
 		t.Fatal("token is not valid")
 	}
-	if claims.Subject != "42" || claims.ClientID != "legacy-app" || claims.Appid != "" {
+	if claims.Subject != strconv.FormatInt(crypto.Username2UserID("static-user"), 10) || claims.ClientID != "legacy-app" || claims.Appid != "" {
 		t.Fatalf("claims mismatch: sub=%q client_id=%q appid=%q", claims.Subject, claims.ClientID, claims.Appid)
 	}
 	if claims.Issuer != "" || len(claims.Audience) != 0 {
@@ -84,8 +85,8 @@ func TestStaticUserAccessTokenUsesConfiguredPasswordHashAsHMACKey(t *testing.T) 
 
 func TestStaticUserAccessTokenSeparatesRolesAndGroups(t *testing.T) {
 	const passwordHash = "password-hash"
-	newUser := StaticUser{UserID: 1, Username: "new", PasswordHash: passwordHash, Roles: []string{"admin"}, Groups: []string{"engineering"}}
-	groupsOnlyUser := StaticUser{UserID: 2, Username: "groups-only", PasswordHash: passwordHash, Groups: []string{"engineering"}}
+	newUser := StaticUser{Username: "new", PasswordHash: passwordHash, Roles: []string{"admin"}, Groups: []string{"engineering"}}
+	groupsOnlyUser := StaticUser{Username: "groups-only", PasswordHash: passwordHash, Groups: []string{"engineering"}}
 	for _, tc := range []struct {
 		name                  string
 		user                  StaticUser
@@ -125,7 +126,7 @@ func TestStaticUserAccessTokenSeparatesRolesAndGroups(t *testing.T) {
 func TestStaticUserIssueAccessTokenOmitsEmptyClaims(t *testing.T) {
 	const passwordHash = "omit-password-hash"
 	user := StaticUser{
-		UserID:       7,
+		UserID:       crypto.Username2UserID("omit-user"),
 		Username:     "omit-user",
 		PasswordHash: passwordHash,
 		Roles:        []string{"static-role"},
@@ -149,7 +150,7 @@ func TestStaticUserIssueAccessTokenOmitsEmptyClaims(t *testing.T) {
 	if claims.Tenant != "" || len(claims.Roles) != 0 || len(claims.Groups) != 0 {
 		t.Fatalf("expected omitted tenant/roles/groups, got tenant=%q roles=%v groups=%v", claims.Tenant, claims.Roles, claims.Groups)
 	}
-	if claims.ClientID != "client-x" || claims.Subject != "7" {
+	if claims.ClientID != "client-x" || claims.Subject != strconv.FormatInt(crypto.Username2UserID("omit-user"), 10) {
 		t.Fatalf("client_id/subject mismatch: client_id=%q sub=%q", claims.ClientID, claims.Subject)
 	}
 }

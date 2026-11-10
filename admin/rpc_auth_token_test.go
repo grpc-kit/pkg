@@ -8,6 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/rpc"
 )
@@ -40,9 +41,10 @@ func assertStatusCode(t *testing.T, err error, want int) {
 
 const (
 	testStaticUsername = "alice"
-	testStaticUserID   = int64(10)
 	testStaticPassword = "alice-password-hash"
 )
+
+var testStaticUserID = crypto.Username2UserID(testStaticUsername)
 
 func staticUserAPI() *KnownAdminAPI {
 	users := &StaticUsers{
@@ -272,10 +274,10 @@ func TestCreateAuthTokenSuperadminEmailVerified(t *testing.T) {
 // 委托签发：指定目标 user_id 后，令牌使用目标静态用户的密钥签名，sub=目标 user_id。
 func TestCreateAuthTokenSuperadminDelegatedSubject(t *testing.T) {
 	const (
-		targetUserID   = int64(77)
 		targetUsername = "bob"
 		targetPassword = "bob-password-hash"
 	)
+	targetUserID := crypto.Username2UserID(targetUsername)
 	users := &StaticUsers{
 		&StaticUser{UserID: testStaticUserID, Username: testStaticUsername, PasswordHash: testStaticPassword},
 		&StaticUser{UserID: targetUserID, Username: targetUsername, PasswordHash: targetPassword},
@@ -324,7 +326,7 @@ func TestCreateAuthTokenSuperadminInvalidSubject(t *testing.T) {
 // TestCreateAuthTokenNonSuperadminSubjectIgnored 验证非 superadmin 传入 subject
 // 被忽略，令牌仍签发给调用方自身（sub=调用方 userID，用调用方密钥签名）。
 func TestCreateAuthTokenNonSuperadminSubjectIgnored(t *testing.T) {
-	const targetUserID = int64(77)
+	targetUserID := crypto.Username2UserID("bob")
 	users := &StaticUsers{
 		&StaticUser{UserID: testStaticUserID, Username: testStaticUsername, PasswordHash: testStaticPassword},
 		&StaticUser{UserID: targetUserID, Username: "bob", PasswordHash: "bob-password-hash"},

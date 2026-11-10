@@ -144,3 +144,57 @@ func TestGetMapBoolRequiresExplicitBoolean(t *testing.T) {
 		}
 	}
 }
+
+func TestOAuthUserinfoSubject(t *testing.T) {
+	for _, tc := range []struct {
+		name, body, want string
+	}{
+		{"integer", `{"id":42}`, "42"},
+		{"zero", `{"id":0}`, "0"},
+		{"upper-bound", `{"id":9007199254740991}`, "9007199254740991"},
+		{"lower-bound", `{"id":-9007199254740991}`, "-9007199254740991"},
+		{"large-string", `{"id":"9007199254740993"}`, "9007199254740993"},
+		{"opaque-string", `{"id":"00042.part"}`, "00042.part"},
+		{"missing-field-fallback", `{"sub":"original-subject"}`, "original-subject"},
+		{"above-limit", `{"id":9007199254740992}`, ""},
+		{"below-limit", `{"id":-9007199254740992}`, ""},
+		{"integer-overflow", `{"id":9223372036854775808}`, ""},
+		{"fraction", `{"id":42.9}`, ""},
+		{"fraction-that-rounds-to-integer", `{"id":42.0000000000000001}`, ""},
+		{"exponent", `{"id":4.2e1}`, ""},
+		{"boolean", `{"id":true}`, ""},
+		{"object", `{"id":{"value":42}}`, ""},
+		{"array", `{"id":[42]}`, ""},
+		{"whitespace-string", `{"id":" 42 ","sub":"fallback"}`, ""},
+		{"empty-string-no-fallback", `{"id":"","sub":"fallback"}`, ""},
+		{"null-no-fallback", `{"id":null,"sub":"fallback"}`, ""},
+		{"missing-subject", `{}`, ""},
+		{"null-document", `null`, ""},
+		{"trailing-value", `{"id":42} {"id":43}`, ""},
+		{"trailing-garbage", `{"id":42}garbage`, ""},
+		{"trailing-whitespace", "{\"id\":42}\n\t", "42"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			userinfo, err := decodeOAuthUserinfo([]byte(tc.body))
+			var got string
+			if err == nil {
+				got, err = oauthUserinfoSubject(userinfo, "id")
+			}
+			if tc.want == "" {
+				if err == nil || got != "" {
+					t.Fatal("invalid userinfo produced a subject")
+				}
+			} else if err != nil || got != tc.want {
+				t.Fatalf("subject=%q err=%v, want %q", got, err, tc.want)
+			}
+		})
+	}
+	// The subject parser must never trust an already lossy numeric map value.
+	if _, err := oauthUserinfoSubject(map[string]any{"id": float64(42)}, "id"); err == nil {
+		t.Fatal("pre-decoded float64 accepted as an external subject")
+	}
+	profile, err := decodeOAuthUserinfo([]byte(`{"id":42,"display":42.9,"name":" Alice "}`))
+	if err != nil || getMapString(profile, "display") != "42" || getMapString(profile, "name") != "Alice" {
+		t.Fatal("subject decoding changed legacy profile formatting")
+	}
+}

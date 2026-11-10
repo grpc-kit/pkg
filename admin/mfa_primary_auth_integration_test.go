@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/pquerna/otp/totp"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -181,6 +183,205 @@ func TestMFAPrimaryAuthenticationIntegration(t *testing.T) {
 					}
 					if _, ok := api.mfaChallenges.Get(challengeID); ok {
 						t.Fatal("completed or revoked challenge remains reusable")
+					}
+				})
+			}
+		})
+	}
+}
+
+// Cover both setup entry points without duplicating their existing source-
+// revocation fixtures. Separate API instances model distinct pending sessions.
+func TestMFASetupStateIntegration(t *testing.T) {
+	for _, backend := range []string{"postgres", "mysql"} {
+		t.Run(backend, func(t *testing.T) {
+			var db *lion.Client
+			if backend == "postgres" {
+				db = adminIntegrationClient(t)
+			} else {
+				db = identityMySQLClient(t)
+			}
+			createTestLoginSigningKey(t, db)
+			local := createTestAuthProvider(t, db, "local", adminv1.AuthProvider_LOCAL)
+			provider := createTestAuthProvider(t, db, "setup-source", adminv1.AuthProvider_OIDC)
+			if err := writeGlobalSettingUpdates(t.Context(), db, globalSettingsCategorySecurity, []*adminv1.UpdateGlobalSetting{{SettingKey: globalSettingKeyLoginEnforceMFA, SettingValue: "true"}}, 0, false); err != nil {
+				t.Fatal(err)
+			}
+			type attempt struct {
+				api        *KnownAdminAPI
+				id, secret string
+				login      bool
+			}
+			for _, tc := range []struct {
+				name                                string
+				firstLogin, secondLogin, concurrent bool
+			}{
+				{"login-stale", true, true, false},
+				{"self-stale", false, false, false},
+				{"mixed-concurrent", true, false, true},
+				{"single-consumer", true, false, false},
+				{"missing-identity", true, false, false},
+			} {
+				t.Run(tc.name, func(t *testing.T) {
+					user := activeIdentityTestUser(t, db, "setup_"+strings.ReplaceAll(tc.name, "-", "_"))
+					db.UserIdentities.Create().SetProviderID(provider.ID).SetUserID(user.ID).SetProviderUserID(tc.name).SaveX(t.Context())
+					credential := db.UserIdentities.Create().SetProviderID(local.ID).SetUserID(user.ID).SetProviderUserID(user.Username).SetPasswordHash("test-preserved-password").SaveX(t.Context())
+					issuance := AccessTokenIssuanceContext{ClientID: "test-client", TTL: 5 * time.Minute}
+					newAPI := func() *KnownAdminAPI {
+						api := New(WithLionClient(db), WithAESKey([]byte(adminTestAESKey)), WithOIDCProvider("", "test-client", ""))
+						t.Cleanup(func() { close(api.mfaChallenges.stopGC) })
+						return api
+					}
+					firstAPI := newAPI()
+					gate := func(api *KnownAdminAPI) *adminv1.AuthToken {
+						enabled, err := hasUserMFAEnabledIdentity(t.Context(), db, user.ID)
+						if err != nil {
+							t.Fatal(err)
+						}
+						token, err := api.applyMFAGateAfterPrimaryAuth(t.Context(), db, user.ID, user.Username, enabled, "", issuance, provider.ID)
+						if err != nil || !token.GetMfaRequired() {
+							t.Fatalf("MFA gate: %v", err)
+						}
+						return token
+					}
+					start := func(api *KnownAdminAPI, login bool) attempt {
+						if !login {
+							response, err := api.SetupCurrentUserMFA(mfaSessionContext(int64(user.ID), "setup-session"), &adminv1.SetupCurrentUserMFARequest{})
+							if err != nil {
+								t.Fatal(err)
+							}
+							return attempt{api, response.ChallengeId, response.Secret, false}
+						}
+						primary := gate(api)
+						if tc.name == "single-consumer" {
+							if _, ok := api.mfaChallenges.Acquire(primary.ChallengeId); !ok {
+								t.Fatal("cannot reserve challenge")
+							}
+							if _, err := api.StartAuthMFASetup(t.Context(), &adminv1.StartAuthMFASetupRequest{ChallengeId: primary.ChallengeId}); status.Code(err) != codes.FailedPrecondition {
+								t.Fatalf("setup start ignored active consumer: %v", err)
+							}
+							api.mfaChallenges.Release(primary.ChallengeId)
+						}
+						response, err := api.StartAuthMFASetup(t.Context(), &adminv1.StartAuthMFASetupRequest{ChallengeId: primary.ChallengeId})
+						if err != nil {
+							t.Fatal(err)
+						}
+						return attempt{api, response.SetupChallengeId, response.Secret, true}
+					}
+					confirm := func(a attempt) error {
+						code, err := totp.GenerateCode(a.secret, time.Now())
+						if err != nil {
+							return err
+						}
+						if a.login {
+							token, err := a.api.ConfirmAuthMFASetup(t.Context(), &adminv1.ConfirmAuthMFASetupRequest{SetupChallengeId: a.id, TotpCode: code})
+							if err == nil && token.GetAccessToken() == "" {
+								return fmt.Errorf("setup succeeded without a token")
+							}
+							return err
+						}
+						response, err := a.api.ConfirmCurrentUserMFA(mfaSessionContext(int64(user.ID), "setup-session"), &adminv1.ConfirmCurrentUserMFARequest{ChallengeId: a.id, TotpCode: code})
+						if err == nil && len(response.GetRecoveryCodes()) == 0 {
+							return fmt.Errorf("setup succeeded without recovery codes")
+						}
+						return err
+					}
+					first := start(firstAPI, tc.firstLogin)
+					if tc.name == "missing-identity" {
+						db.UserIdentities.DeleteOneID(credential.ID).ExecX(t.Context())
+						if err := confirm(first); status.Code(err) != codes.FailedPrecondition {
+							t.Fatalf("missing identity accepted: %v", err)
+						}
+						if db.UserIdentities.Query().Where(useridentities.UserIDEQ(user.ID), useridentities.ProviderIDEQ(local.ID)).ExistX(t.Context()) {
+							t.Fatal("confirmation recreated the removed identity")
+						}
+						if _, ok := firstAPI.mfaChallenges.Get(first.id); ok {
+							t.Fatal("invalid setup challenge remains usable")
+						}
+						return
+					}
+					if tc.name == "single-consumer" {
+						if _, ok := firstAPI.mfaChallenges.Acquire(first.id); !ok {
+							t.Fatal("cannot reserve confirmation")
+						}
+						if err := confirm(first); status.Code(err) != codes.FailedPrecondition {
+							t.Fatalf("confirmation ignored active consumer: %v", err)
+						}
+						firstAPI.mfaChallenges.Release(first.id)
+						if _, err := firstAPI.ConfirmAuthMFASetup(t.Context(), &adminv1.ConfirmAuthMFASetupRequest{SetupChallengeId: first.id, TotpCode: "invalid"}); status.Code(err) != codes.Unauthenticated {
+							t.Fatalf("invalid code accepted: %v", err)
+						}
+						if err := confirm(first); err != nil {
+							t.Fatal(err)
+						}
+						verify := gate(firstAPI)
+						code, err := totp.GenerateCode(first.secret, time.Now())
+						if err != nil {
+							t.Fatal(err)
+						}
+						if _, ok := firstAPI.mfaChallenges.Acquire(verify.ChallengeId); !ok {
+							t.Fatal("cannot reserve verification")
+						}
+						request := &adminv1.VerifyAuthMFARequest{ChallengeId: verify.ChallengeId, TotpCode: code}
+						if _, err := firstAPI.VerifyAuthMFA(t.Context(), request); status.Code(err) != codes.FailedPrecondition {
+							t.Fatalf("verification ignored active consumer: %v", err)
+						}
+						firstAPI.mfaChallenges.Release(verify.ChallengeId)
+						if token, err := firstAPI.VerifyAuthMFA(t.Context(), request); err != nil || token.GetAccessToken() == "" {
+							t.Fatalf("verification did not release its challenge: %v", err)
+						}
+						if _, err := firstAPI.VerifyAuthMFA(t.Context(), request); status.Code(err) != codes.FailedPrecondition {
+							t.Fatalf("verification challenge reused: %v", err)
+						}
+					} else {
+						second := start(newAPI(), tc.secondLogin)
+						attempts := []attempt{first, second}
+						results := make([]error, 2)
+						var committed *lion.UserIdentities
+						if tc.concurrent {
+							ready := make(chan struct{})
+							var wg sync.WaitGroup
+							for i := range 2 {
+								wg.Go(func() { <-ready; results[i] = confirm(attempts[i]) })
+							}
+							close(ready)
+							wg.Wait()
+						} else {
+							results[0] = confirm(first)
+							committed = db.UserIdentities.GetX(t.Context(), credential.ID)
+							results[1] = confirm(second)
+						}
+						winner := -1
+						for i, err := range results {
+							if err == nil {
+								if winner != -1 {
+									t.Fatal("two setup challenges both succeeded")
+								}
+								winner = i
+							} else if status.Code(err) != codes.FailedPrecondition {
+								t.Fatalf("unexpected competing setup error: %v", err)
+							}
+						}
+						if winner == -1 {
+							t.Fatal("neither setup challenge succeeded")
+						}
+						stored := db.UserIdentities.GetX(t.Context(), credential.ID)
+						secret, err := crypto.DecryptAES([]byte(adminTestAESKey), stored.MfaSecretEncrypted)
+						if err != nil || string(secret) != attempts[winner].secret {
+							t.Fatal("stored authenticator differs from winning setup")
+						}
+						if committed != nil && (!bytes.Equal(committed.MfaSecretEncrypted, stored.MfaSecretEncrypted) || !bytes.Equal(committed.MfaRecoveryCodesEncrypted, stored.MfaRecoveryCodesEncrypted)) {
+							t.Fatal("stale setup changed the enabled authenticator or recovery codes")
+						}
+						for _, a := range attempts {
+							if _, ok := a.api.mfaChallenges.Get(a.id); ok {
+								t.Fatal("completed or rejected setup remains reusable")
+							}
+						}
+					}
+					stored := db.UserIdentities.GetX(t.Context(), credential.ID)
+					if !stored.MfaEnabled || stored.PasswordHash != credential.PasswordHash {
+						t.Fatal("setup changed password or did not enable MFA")
 					}
 				})
 			}

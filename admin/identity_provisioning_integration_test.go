@@ -1,15 +1,19 @@
 package admin
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"database/sql"
+	"encoding/json"
 	"entgo.io/ent"
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/grpc-kit/pkg/auth"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"strconv"
 	"strings"
@@ -24,6 +28,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/globalsettings"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"golang.org/x/oauth2"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var identityFixtureSequence atomic.Uint64
@@ -31,6 +37,11 @@ var identityFixtureSequence atomic.Uint64
 // PostgreSQL uses the existing temporary-database fixture. MySQL opts in with
 // GRPC_KIT_IDENTITY_MYSQL_DSN and likewise creates/drops only a fresh database.
 func identityMySQLClient(t *testing.T) *lion.Client {
+	t.Helper()
+	return identityMySQLClientWithSubjectCollation(t, "utf8mb4_bin")
+}
+
+func identityMySQLClientWithSubjectCollation(t *testing.T, subjectCollation string) *lion.Client {
 	t.Helper()
 	dsn := os.Getenv("GRPC_KIT_IDENTITY_MYSQL_DSN")
 	if dsn == "" {
@@ -68,6 +79,9 @@ func identityMySQLClient(t *testing.T) *lion.Client {
 		t.Fatal(err)
 	}
 	_, err = connection.ExecContext(t.Context(), "ALTER TABLE lion_users MODIFY username VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL")
+	if err == nil && subjectCollation != "utf8mb4_bin" {
+		_, err = connection.ExecContext(t.Context(), "ALTER TABLE lion_user_identities MODIFY provider_user_id VARCHAR(255) CHARACTER SET utf8mb4 COLLATE "+subjectCollation+" NOT NULL")
+	}
 	_ = connection.Close()
 	if err != nil {
 		t.Fatal(err)
@@ -244,8 +258,8 @@ func runExternalIdentityIntegration(t *testing.T, db *lion.Client, backend strin
 	t.Run("static-names-reserved-even-without-database-user", func(t *testing.T) {
 		s, name := identityFixture(t, db)
 		reserved := StaticUsers{
-			&StaticUser{Username: name, UserID: 999999},
-			&StaticUser{Username: s.ProviderName + "_" + name, UserID: 999998},
+			&StaticUser{Username: name},
+			&StaticUser{Username: s.ProviderName + "_" + name},
 		}
 		s.staticUsers = &reserved
 		id, err := identityTestLogin(t.Context(), s, "unbound-static-name", name)
@@ -410,7 +424,7 @@ func runExternalIdentityIntegration(t *testing.T, db *lion.Client, backend strin
 					role := db.Roles.Create().SetCode(code).SetDisplayName(code).SetRoleStatus(int(adminv1.Role_ACTIVE)).SaveX(t.Context())
 					db.PrincipalRoles.Create().SetPrincipalType(1).SetPrincipalID(target.ID).SetRoleID(role.ID).SaveX(t.Context())
 				case "static-name":
-					static := StaticUsers{&StaticUser{Username: name, UserID: 999999}}
+					static := StaticUsers{&StaticUser{Username: name}}
 					s.staticUsers = &static
 				case "static-id":
 					static := StaticUsers{&StaticUser{Username: name + ".static", UserID: int64(target.ID)}}
@@ -646,4 +660,171 @@ func runExternalIdentityIntegration(t *testing.T, db *lion.Client, backend strin
 			t.Fatal(err)
 		}
 	})
+}
+
+// Exercise all authoritative binding reads, including the post-rollback read,
+// with database-equivalent subjects that must not prove identity equality.
+func TestExternalIdentitySubjectComparisonIntegration(t *testing.T) {
+	for _, collation := range []string{"utf8mb4_bin", "utf8mb4_0900_ai_ci"} {
+		t.Run(collation, func(t *testing.T) {
+			db := identityMySQLClientWithSubjectCollation(t, collation)
+			for _, path := range []string{"initial", "transaction", "retry"} {
+				t.Run(path, func(t *testing.T) {
+					s, name := identityFixture(t, db)
+					user := activeIdentityTestUser(t, db, name)
+					const subject = "AuditSubject"
+					identity := db.UserIdentities.Create().SetProviderID(s.AuthProvider.ID).SetUserID(user.ID).SetProviderUserID(subject).
+						SetAccessTokenEncrypted([]byte("test-original-access")).SetRefreshTokenEncrypted([]byte("test-original-refresh")).SaveX(t.Context())
+					other := subject + " "
+					if collation == "utf8mb4_0900_ai_ci" {
+						other = strings.ToLower(subject)
+					}
+					hiddenReads := 0
+					if path == "retry" {
+						// Hide the two early reads to force a real unique-constraint
+						// failure, rollback, and authoritative root-client reread.
+						hiddenReads = 2
+						db.UserIdentities.Intercept(ent.InterceptFunc(func(next ent.Querier) ent.Querier {
+							return ent.QuerierFunc(func(ctx context.Context, query ent.Query) (ent.Value, error) {
+								value, err := next.Query(ctx, query)
+								if rows, ok := value.([]*lion.UserIdentities); err == nil && ok && hiddenReads > 0 && len(rows) == 1 && rows[0].ID == identity.ID {
+									hiddenReads--
+									return []*lion.UserIdentities{}, nil
+								}
+								return value, err
+							})
+						}))
+					}
+					input := externalProvisioningInput{
+						Subject: other, Username: name + "_other", Token: &oauth2.Token{AccessToken: "test-replacement-access", RefreshToken: "test-replacement-refresh"},
+						CreateUser: func(ctx context.Context, tx *lion.Tx, username string) (*lion.Users, error) {
+							return tx.Users.Create().SetUsername(username).SetUserStatus(int(adminv1.User_ACTIVE)).Save(ctx)
+						},
+					}
+					beforeUsers, beforeIdentities := db.Users.Query().CountX(t.Context()), db.UserIdentities.Query().CountX(t.Context())
+					beforeMemberships := db.UserMemberships.Query().CountX(t.Context())
+					var id int
+					var err error
+					if path == "transaction" {
+						id, err = s.provisionExternalIdentity(t.Context(), input, defaultIdentityPolicy(), externalCredentials{Access: []byte("test-replacement-access")})
+					} else {
+						id, err = s.resolveExternalUser(t.Context(), input)
+					}
+					if !errors.Is(err, errExternalLoginRejected) || id != 0 || hiddenReads != 0 {
+						t.Fatalf("database-equivalent subject accepted: id=%d err=%v hidden_reads=%d", id, err, hiddenReads)
+					}
+					stored := db.UserIdentities.GetX(t.Context(), identity.ID)
+					if !bytes.Equal(stored.AccessTokenEncrypted, identity.AccessTokenEncrypted) || !bytes.Equal(stored.RefreshTokenEncrypted, identity.RefreshTokenEncrypted) {
+						t.Fatal("rejected subject replaced the original account credentials")
+					}
+					if db.Users.Query().CountX(t.Context()) != beforeUsers || db.UserIdentities.Query().CountX(t.Context()) != beforeIdentities || db.UserMemberships.Query().CountX(t.Context()) != beforeMemberships {
+						t.Fatal("rejected subject left partial provisioning data")
+					}
+					if id, err := identityTestLogin(t.Context(), s, subject, name); err != nil || id != user.ID {
+						t.Fatalf("exact original subject cannot log in: id=%d err=%v", id, err)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestOAuthUserinfoSubjectIntegration(t *testing.T) {
+	responses := map[string]string{
+		"existing-number":     `{"id":42,"login":"changed_name"}`,
+		"existing-string":     `{"id":"9007199254740993","login":"changed_name"}`,
+		"safe-maximum":        `{"id":9007199254740991,"login":"safe_maximum"}`,
+		"absent-id":           `{"sub":"42","login":"changed_name"}`,
+		"rounded-first":       `{"id":9007199254740992,"login":"legacy_rounded"}`,
+		"rounded-second":      `{"id":9007199254740993,"login":"legacy_rounded"}`,
+		"rounded-fraction":    `{"id":42.0000000000000001,"login":"legacy_small"}`,
+		"whitespace-id":       `{"id":" 42 ","login":"legacy_small"}`,
+		"invalid-id-with-sub": `{"id":null,"sub":"42","login":"legacy_small"}`,
+	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/token" {
+			_ = r.ParseForm()
+			_ = json.NewEncoder(w).Encode(map[string]string{"access_token": r.Form.Get("code"), "token_type": "Bearer"})
+			return
+		}
+		_, _ = w.Write([]byte(responses[strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")]))
+	}))
+	t.Cleanup(server.Close)
+	for _, backend := range []string{"postgres", "mysql"} {
+		t.Run(backend, func(t *testing.T) {
+			var db *lion.Client
+			if backend == "postgres" {
+				db = adminIntegrationClient(t)
+			} else {
+				db = identityMySQLClient(t)
+			}
+			createTestLoginSigningKey(t, db)
+			provider := createTestAuthProvider(t, db, "subject-parser", adminv1.AuthProvider_OAUTH2)
+			config, err := json.Marshal(oauthConfigData{ClientID: "test-client", AuthorizationEndpoint: server.URL + "/authorize", TokenEndpoint: server.URL + "/token", UserinfoEndpoint: server.URL + "/userinfo", UserinfoIdField: "id", UserinfoNameField: "login"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			provider.Update().SetConfig(config).SaveX(t.Context())
+			setIdentityTestPolicy(t, db, usernameExternalThenPrefixed, true, true)
+			existing := map[string]int{}
+			for _, item := range []struct{ subject, name string }{{"42", "legacy_small"}, {"9007199254740993", "legacy_string"}, {"9007199254740992", "legacy_rounded"}} {
+				user := activeIdentityTestUser(t, db, item.name)
+				db.UserIdentities.Create().SetProviderID(provider.ID).SetUserID(user.ID).SetProviderUserID(item.subject).SetAccessTokenEncrypted([]byte("test-existing-credential")).SaveX(t.Context())
+				existing[item.name] = user.ID
+			}
+			api := New(WithLionClient(db), WithAESKey([]byte(adminTestAESKey)), WithOIDCProvider("", "test-client", ""))
+			t.Cleanup(func() { close(api.mfaChallenges.stopGC) })
+			for _, tc := range []struct{ name, username, subject string }{
+				{"existing-number", "legacy_small", "42"},
+				{"existing-string", "legacy_string", "9007199254740993"},
+				{"safe-maximum", "safe_maximum", "9007199254740991"},
+				{"absent-id", "legacy_small", "42"},
+				{"rounded-first", "", ""},
+				{"rounded-second", "", ""},
+				{"rounded-fraction", "", ""},
+				{"whitespace-id", "", ""},
+				{"invalid-id-with-sub", "", ""},
+			} {
+				t.Run(tc.name, func(t *testing.T) {
+					before := db.UserIdentities.Query().AllX(t.Context())
+					beforeUsers, beforeMemberships := db.Users.Query().CountX(t.Context()), db.UserMemberships.Query().CountX(t.Context())
+					response, err := api.GetAuthCallback(t.Context(), &adminv1.GetAuthCallbackRequest{ProviderName: provider.Code, Code: tc.name})
+					if tc.username == "" {
+						if status.Code(err) != codes.Unauthenticated || response.GetAccessToken() != "" || status.Convert(err).Message() != "external authentication failed" {
+							t.Fatalf("invalid subject authenticated or exposed details: %v", err)
+						}
+						if db.Users.Query().CountX(t.Context()) != beforeUsers || db.UserIdentities.Query().CountX(t.Context()) != len(before) || db.UserMemberships.Query().CountX(t.Context()) != beforeMemberships {
+							t.Fatal("invalid subject entered provisioning")
+						}
+						for _, identity := range before {
+							stored := db.UserIdentities.GetX(t.Context(), identity.ID)
+							if !bytes.Equal(stored.AccessTokenEncrypted, identity.AccessTokenEncrypted) || !bytes.Equal(stored.RefreshTokenEncrypted, identity.RefreshTokenEncrypted) {
+								t.Fatal("invalid subject changed existing credentials")
+							}
+						}
+						return
+					}
+					if err != nil || response.GetAccessToken() == "" {
+						t.Fatalf("valid subject rejected: %v", err)
+					}
+					id, name, err := extractUserFromAccessToken(response.AccessToken)
+					if err != nil || name != tc.username {
+						t.Fatal("valid subject changed username")
+					}
+					if expected := existing[tc.username]; expected != 0 {
+						if id != expected || db.Users.Query().CountX(t.Context()) != beforeUsers {
+							t.Fatal("existing binding recreated or moved")
+						}
+					} else if db.Users.GetX(t.Context(), id).UserStatus != int(adminv1.User_ACTIVE) {
+						t.Fatal("new user is inactive")
+					}
+					identity := db.UserIdentities.Query().Where(useridentities.ProviderIDEQ(provider.ID), useridentities.UserIDEQ(id)).OnlyX(t.Context())
+					if identity.ProviderUserID != tc.subject {
+						t.Fatal("persisted subject lost precision")
+					}
+				})
+			}
+		})
+	}
 }
