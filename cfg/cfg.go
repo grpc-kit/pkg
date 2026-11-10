@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -363,6 +364,9 @@ func (c *LocalConfig) Init(ctx context.Context) error {
 func (c *LocalConfig) Register(ctx context.Context,
 	gw func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) (err error),
 	opts ...runtime.ServeMuxOption) (*http.ServeMux, error) {
+	if err := c.Security.validateStaticUserIDs(); err != nil {
+		return nil, err
+	}
 
 	if err := c.registerConfig(ctx); err != nil {
 		return nil, err
@@ -391,6 +395,9 @@ func (c *LocalConfig) Register(ctx context.Context,
 	if c.Services.hasEnableIntegrationAdminServer() {
 		client, err := c.getAdminDatabaseLion(ctx)
 		if err != nil {
+			if !errors.Is(err, ErrDatabaseNotEnable) {
+				return nil, fmt.Errorf("initialize admin database: %w", err)
+			}
 			pklogging.OrFallback(c.logger).InfoContext(ctx, "admin service database unavailable")
 		}
 

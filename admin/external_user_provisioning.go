@@ -104,9 +104,7 @@ func (s *socialUsers) resolveExternalUser(ctx context.Context, input externalPro
 	if err := s.requireActiveProvider(ctx, s.db); err != nil {
 		return 0, err
 	}
-	identity, err := s.db.UserIdentities.Query().Where(
-		useridentities.ProviderIDEQ(s.AuthProvider.ID), useridentities.ProviderUserIDEQ(input.Subject),
-	).Only(ctx)
+	identity, err := s.externalIdentityBySubject(ctx, s.db, input.Subject)
 	if err != nil && !lion.IsNotFound(err) {
 		return 0, err
 	}
@@ -142,9 +140,7 @@ func (s *socialUsers) resolveExternalUser(ctx context.Context, input externalPro
 		}
 		// A competing request may already have committed the subject. Reread
 		// outside the rolled-back transaction, never attach by a guessed name.
-		identity, queryErr := s.db.UserIdentities.Query().Where(
-			useridentities.ProviderIDEQ(s.AuthProvider.ID), useridentities.ProviderUserIDEQ(input.Subject),
-		).Only(ctx)
+		identity, queryErr := s.externalIdentityBySubject(ctx, s.db, input.Subject)
 		if queryErr == nil {
 			if err := s.requireActiveExternalUser(ctx, s.db, identity.UserID); err != nil {
 				return 0, err
@@ -167,6 +163,21 @@ func (s *socialUsers) resolveExternalUser(ctx context.Context, input externalPro
 		}
 	}
 	return 0, errExternalLoginRejected
+}
+
+// externalIdentityBySubject treats database collation equality only as a lookup
+// result, never as proof that two opaque external subjects are identical.
+func (s *socialUsers) externalIdentityBySubject(ctx context.Context, db *lion.Client, subject string) (*lion.UserIdentities, error) {
+	identity, err := db.UserIdentities.Query().Where(
+		useridentities.ProviderIDEQ(s.AuthProvider.ID), useridentities.ProviderUserIDEQ(subject),
+	).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if identity.ProviderUserID != subject {
+		return nil, errExternalLoginRejected
+	}
+	return identity, nil
 }
 
 func validateExternalUsername(input externalProvisioningInput, policy identityPolicy) error {
@@ -195,9 +206,7 @@ func (s *socialUsers) provisionExternalIdentity(ctx context.Context, input exter
 	if err := s.requireActiveProvider(ctx, db); err != nil {
 		return 0, err
 	}
-	identity, err := tx.UserIdentities.Query().Where(
-		useridentities.ProviderIDEQ(s.AuthProvider.ID), useridentities.ProviderUserIDEQ(input.Subject),
-	).Only(ctx)
+	identity, err := s.externalIdentityBySubject(ctx, db, input.Subject)
 	if err == nil {
 		if err := s.requireActiveExternalUser(ctx, db, identity.UserID); err != nil {
 			return 0, err
@@ -268,6 +277,11 @@ func (s *socialUsers) provisionExternalIdentity(ctx context.Context, input exter
 }
 
 func (s *socialUsers) collectExternalIdentityTarget(ctx context.Context, tx *lion.Tx, input externalProvisioningInput, policy identityPolicy) (int, bool, error) {
+	// Direct library callers may bypass cfg initialization. An invalid static
+	// list must not make its reserved identities available for auto-linking.
+	if s.staticUsers != nil && s.staticUsers.Validate() != nil {
+		return 0, false, errExternalUsernameConflict
+	}
 	contactID, contactFound, err := s.verifiedIdentifierTarget(ctx, tx, input.Contacts, policy.LinkByContact)
 	if err != nil {
 		return 0, false, err

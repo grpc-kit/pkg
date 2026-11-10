@@ -35,6 +35,11 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	if req.PasswordHash == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("password_hash is required")
 	}
+	if a.config.staticUsers != nil {
+		if err := a.config.staticUsers.Validate(); err != nil {
+			return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+		}
+	}
 
 	// TODO; 不允许创建过长过期的 token
 	expiresIn := req.ExpiresIn
@@ -184,6 +189,11 @@ func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.Create
 		return nil, errs.Unauthenticated(ctx).WithMessage("access token is required to mint a new token")
 	}
 	callerUserID := caller.GetMustUserID()
+	if a.config.staticUsers != nil {
+		if err := a.config.staticUsers.Validate(); err != nil {
+			return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+		}
+	}
 
 	expiresIn := req.ExpiresIn
 	if expiresIn <= 0 {

@@ -52,10 +52,11 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 		return nil, errs.InvalidArgument(ctx).WithMessage("totp_code is required")
 	}
 
-	challenge, ok := a.mfaChallenges.Get(req.ChallengeId)
+	challenge, ok := a.mfaChallenges.Acquire(req.ChallengeId)
 	if !ok {
-		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired or not found")
+		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired, unavailable, or already in use")
 	}
+	defer a.mfaChallenges.Release(req.ChallengeId)
 	if challenge.ChallengeType != mfaChallengeTypeLoginVerify {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("invalid challenge type")
 	}
@@ -285,12 +286,7 @@ func (a *KnownAdminAPI) ConfirmCurrentUserMFA(ctx context.Context, req *adminv1.
 	if !ok {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge is already being confirmed or expired")
 	}
-	confirmed := false
-	defer func() {
-		if !confirmed {
-			a.mfaChallenges.Release(req.ChallengeId)
-		}
-	}()
+	defer a.mfaChallenges.Release(req.ChallengeId)
 
 	db, err := a.GetLionClient()
 	if err != nil {
@@ -308,7 +304,6 @@ func (a *KnownAdminAPI) ConfirmCurrentUserMFA(ctx context.Context, req *adminv1.
 		a.mfaChallenges.Delete(req.ChallengeId)
 		return nil, errs.NotFound(ctx).WithMessage("user not found")
 	}
-
 	secretEnc, err := crypto.EncryptAES(a.config.aesKey, []byte(challenge.TempSecret))
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to encrypt MFA secret")
@@ -330,25 +325,11 @@ func (a *KnownAdminAPI) ConfirmCurrentUserMFA(ctx context.Context, req *adminv1.
 		return nil, errs.FailedPrecondition(ctx).WithMessage("local auth provider not found")
 	}
 
-	if err := a.ensureLocalIdentity(ctx, db, challenge.UserID, challenge.Username, localProviderID); err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to ensure local identity")
-	}
-
-	_, err = db.UserIdentities.Update().
-		Where(
-			useridentities.UserIDEQ(challenge.UserID),
-			useridentities.ProviderIDEQ(localProviderID),
-		).
-		SetMfaEnabled(true).
-		SetMfaSecretEncrypted(secretEnc).
-		SetMfaRecoveryCodesEncrypted(recoveryCodesEnc).
-		Save(ctx)
-	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to enable MFA")
+	if err := a.enableMFAForSetup(ctx, db, challenge, localProviderID, secretEnc, recoveryCodesEnc); err != nil {
+		return nil, err
 	}
 
 	a.mfaChallenges.Delete(req.ChallengeId)
-	confirmed = true
 
 	return &adminv1.ConfirmCurrentUserMFAResponse{
 		RecoveryCodes: recoveryCodes,
@@ -483,10 +464,11 @@ func (a *KnownAdminAPI) StartAuthMFASetup(ctx context.Context, req *adminv1.Star
 		return nil, errs.InvalidArgument(ctx).WithMessage("challenge_id is required")
 	}
 
-	challenge, ok := a.mfaChallenges.Get(req.ChallengeId)
+	challenge, ok := a.mfaChallenges.Acquire(req.ChallengeId)
 	if !ok {
-		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired or not found")
+		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired, unavailable, or already in use")
 	}
+	defer a.mfaChallenges.Release(req.ChallengeId)
 	if challenge.ChallengeType != mfaChallengeTypeLoginSetup {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("invalid challenge type")
 	}
@@ -534,10 +516,11 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 		return nil, errs.InvalidArgument(ctx).WithMessage("totp_code is required")
 	}
 
-	challenge, ok := a.mfaChallenges.Get(req.SetupChallengeId)
+	challenge, ok := a.mfaChallenges.Acquire(req.SetupChallengeId)
 	if !ok {
-		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired or not found")
+		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired, unavailable, or already in use")
 	}
+	defer a.mfaChallenges.Release(req.SetupChallengeId)
 	if challenge.ChallengeType != mfaChallengeTypeLoginSetupConfirm {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("invalid challenge type")
 	}
@@ -574,27 +557,13 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 	if localProviderID == 0 {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("local auth provider not found")
 	}
-
-	if err := a.ensureLocalIdentity(ctx, transactionDB, challenge.UserID, challenge.Username, localProviderID); err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to ensure local identity")
-	}
-
 	secretEnc, err := crypto.EncryptAES(a.config.aesKey, []byte(challenge.TempSecret))
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to encrypt MFA secret")
 	}
 
-	_, err = transactionDB.UserIdentities.Update().
-		Where(
-			useridentities.UserIDEQ(challenge.UserID),
-			useridentities.ProviderIDEQ(localProviderID),
-		).
-		SetMfaEnabled(true).
-		SetMfaSecretEncrypted(secretEnc).
-		SetMfaRecoveryCodesEncrypted([]byte("")).
-		Save(ctx)
-	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to enable MFA for local identity")
+	if err := a.enableMFAForSetup(ctx, transactionDB, challenge, localProviderID, secretEnc, []byte("")); err != nil {
+		return nil, err
 	}
 
 	if challenge.IssuanceContext == nil {
@@ -618,6 +587,30 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 		TokenType:   "Bearer",
 		ExpiresIn:   durationSecondsInt32(challenge.IssuanceContext.TTL),
 	}, nil
+}
+
+// enableMFAForSetup atomically completes first-time setup. The condition is
+// shared by login and self-service so different challenges cannot replace an
+// authenticator that another request has already enabled.
+func (a *KnownAdminAPI) enableMFAForSetup(ctx context.Context, db *lion.Client, challenge *mfaChallenge, providerID int, secret, recoveryCodes []byte) error {
+	affected, err := db.UserIdentities.Update().
+		Where(
+			useridentities.UserIDEQ(challenge.UserID),
+			useridentities.ProviderIDEQ(providerID),
+			useridentities.MfaEnabledEQ(false),
+		).
+		SetMfaEnabled(true).
+		SetMfaSecretEncrypted(secret).
+		SetMfaRecoveryCodesEncrypted(recoveryCodes).
+		Save(ctx)
+	if err != nil {
+		return errs.Internal(ctx).WithMessage("failed to enable MFA")
+	}
+	if affected != 1 {
+		a.mfaChallenges.Delete(challenge.ChallengeID)
+		return errs.FailedPrecondition(ctx).WithMessage("MFA setup state changed; please restart authentication")
+	}
+	return nil
 }
 
 // issueTokenForUser 为指定用户签发 JWT access_token（MFA 验证通过后调用）

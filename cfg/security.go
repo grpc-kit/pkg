@@ -14,6 +14,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/grpc-kit/pkg/admin"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	pklogging "github.com/grpc-kit/pkg/logging"
@@ -76,6 +77,10 @@ func (c *LocalConfig) initSecurity(ctx context.Context) error {
 	}
 	if c.Security.Authorization.OPAEnvoyPlugin.Enabled == nil {
 		c.Security.Authorization.OPAEnvoyPlugin.Enabled = &falseVal
+	}
+
+	if err := c.Security.validateStaticUserIDs(); err != nil {
+		return err
 	}
 
 	if !c.Security.Enable {
@@ -148,6 +153,25 @@ func (c *LocalConfig) initSecurity(ctx context.Context) error {
 	return nil
 }
 
+// Validate the original list before Append can hide duplicate usernames.
+func (s *SecurityConfig) validateStaticUserIDs() error {
+	if s == nil || s.Authentication == nil {
+		return nil
+	}
+	users := make(admin.StaticUsers, 0, len(s.Authentication.HTTPUsers))
+	for _, user := range s.Authentication.HTTPUsers {
+		if user == nil {
+			users = append(users, nil)
+			continue
+		}
+		users = append(users, &admin.StaticUser{Username: user.Username, UserID: user.UserID})
+	}
+	if err := users.Validate(); err != nil {
+		return fmt.Errorf("http_users: %w", err)
+	}
+	return nil
+}
+
 // withAccessTokenClaims 将已验证的 access token claims 写入当前会话。
 func (c *SecurityConfig) withAccessTokenClaims(parent context.Context, token auth.AccessTokenClaims) context.Context {
 	return rpc.ContextWithTokenClaims(parent, token)
@@ -216,18 +240,14 @@ func (s *SecurityConfig) supportedHS256Alg() bool {
 
 // foundUserPassword 查找用户
 func (s *SecurityConfig) foundUserID(userID int64) (bool, *BasicAuth) {
-	if s.Authentication.HTTPUsers == nil {
+	if s == nil || s.Authentication == nil || s.validateStaticUserIDs() != nil {
 		return false, nil
 	}
 
 	for _, v := range s.Authentication.HTTPUsers {
-		if userID == v.UserID {
+		id, err := crypto.ResolveStaticUserID(v.Username, v.UserID)
+		if err == nil && userID == id {
 			return true, v
-		} else if v.UserID == 0 {
-			// 兼容无 user_id 的用户
-			if crypto.Username2UserID(v.Username) == userID {
-				return true, v
-			}
 		}
 	}
 

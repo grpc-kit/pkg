@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"bytes"
 	"cmp"
 	"context"
 	"crypto/rsa"
@@ -216,12 +217,9 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			emailField = "email"
 		}
 
-		providerUserID := getMapString(userinfo, idField)
-		if providerUserID == "" {
-			providerUserID = getMapString(userinfo, "sub")
-		}
-		if providerUserID == "" {
-			return accessToken, fmt.Errorf("oauth userinfo missing id field: %s", idField)
+		providerUserID, err := oauthUserinfoSubject(userinfo, idField)
+		if err != nil {
+			return accessToken, err
 		}
 
 		username := getMapString(userinfo, nameField)
@@ -323,6 +321,37 @@ func (s *socialUsers) verifyOIDCIDToken(ctx context.Context, rawIDToken string) 
 	return claims, nil
 }
 
+// JSON numeric subjects are limited symmetrically to exact safe integers.
+// Opaque string subjects can represent larger IDs without numeric conversion.
+const maxOAuthNumericSubject = 1<<53 - 1
+
+func oauthUserinfoSubject(userinfo map[string]any, idField string) (string, error) {
+	value, found := userinfo[idField]
+	if !found && idField != "sub" {
+		value, found = userinfo["sub"]
+	}
+	if !found {
+		return "", errExternalLoginRejected
+	}
+	switch subject := value.(type) {
+	case string:
+		if subject == "" || strings.TrimSpace(subject) != subject {
+			return "", errExternalLoginRejected
+		}
+		return subject, nil
+	case json.Number:
+		id, err := subject.Int64()
+		if err != nil || id < -maxOAuthNumericSubject || id > maxOAuthNumericSubject {
+			return "", errExternalLoginRejected
+		}
+		return strconv.FormatInt(id, 10), nil
+	default:
+		return "", errExternalLoginRejected
+	}
+}
+
+// getMapString is for profile fields; external subjects must use the strict
+// oauthUserinfoSubject parser instead of its display-value conversions.
 func getMapString(m map[string]interface{}, key string) string {
 	if m == nil || key == "" {
 		return ""
@@ -337,7 +366,13 @@ func getMapString(m map[string]interface{}, key string) string {
 	case float64:
 		return strconv.FormatInt(int64(vv), 10)
 	case json.Number:
-		return vv.String()
+		// Preserve legacy profile formatting after UseNumber; subjects never
+		// pass through this deliberately lossy display-value conversion.
+		value, err := vv.Float64()
+		if err != nil {
+			return ""
+		}
+		return strconv.FormatInt(int64(value), 10)
 	default:
 		return fmt.Sprintf("%v", vv)
 	}
@@ -1266,9 +1301,9 @@ func (s *socialUsers) oauth2Userinfo(ctx context.Context, oauth2Token *oauth2.To
 		return nil, fmt.Errorf("userinfo request failed: %d %s", resp.StatusCode, strings.TrimSpace(string(body)))
 	}
 
-	userinfo := map[string]interface{}{}
-	if err = json.Unmarshal(body, &userinfo); err != nil {
-		return nil, fmt.Errorf("unmarshal userinfo: %w", err)
+	userinfo, err := decodeOAuthUserinfo(body)
+	if err != nil {
+		return nil, err
 	}
 
 	// GitHub 在 /user 可能拿不到公开邮箱，补查 /user/emails。
@@ -1279,6 +1314,25 @@ func (s *socialUsers) oauth2Userinfo(ctx context.Context, oauth2Token *oauth2.To
 		}
 	}
 
+	return userinfo, nil
+}
+
+func decodeOAuthUserinfo(body []byte) (map[string]any, error) {
+	decoder := json.NewDecoder(bytes.NewReader(body))
+	decoder.UseNumber()
+	var userinfo map[string]any
+	if err := decoder.Decode(&userinfo); err != nil {
+		return nil, fmt.Errorf("unmarshal userinfo: %w", err)
+	}
+	if userinfo == nil {
+		return nil, errExternalLoginRejected
+	}
+	// Preserve json.Unmarshal's whole-document validation: Decode alone would
+	// accept a valid object followed by garbage or a second JSON value.
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		return nil, errExternalLoginRejected
+	}
 	return userinfo, nil
 }
 
