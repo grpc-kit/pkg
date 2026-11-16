@@ -45,13 +45,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -102,13 +102,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -141,13 +141,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         }
@@ -175,13 +175,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -222,13 +222,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -269,13 +269,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -327,13 +327,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -428,13 +428,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -480,13 +480,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -521,13 +521,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -570,13 +570,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -624,13 +624,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -681,13 +681,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -789,13 +789,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -841,13 +841,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -882,13 +882,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -926,13 +926,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -949,17 +949,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "credential": {
-                  "$ref": "#/definitions/v1Credential"
-                },
-                "update_mask": {
-                  "type": "string",
-                  "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：code / type / algorithm / key_material / fingerprint 不可修改；尝试变更时返回参数错误。\n示例: paths: [\"display_name\", \"status\", \"expires_at\"]"
-                }
-              },
-              "title": "UpdateCredentialRequest 更新凭证"
+              "$ref": "#/definitions/KnownAdminUpdateCredentialBody"
             }
           }
         ],
@@ -989,13 +979,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1013,14 +1003,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "password_hash": {
-                  "type": "string",
-                  "title": "当前用户密码的 SHA256 hex，用于二次身份验证"
-                }
-              },
-              "title": "RevealCredentialSecretRequest 揭示凭证密钥\n通过当前用户密码二次验证后，返回解密后的敏感字段。"
+              "$ref": "#/definitions/KnownAdminRevealCredentialSecretBody"
             }
           }
         ],
@@ -1048,13 +1031,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1122,13 +1105,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1263,13 +1246,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1319,13 +1302,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1343,132 +1326,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "department": {
-                  "type": "object",
-                  "properties": {
-                    "parent_id": {
-                      "type": "string",
-                      "format": "int64",
-                      "title": "ParentID 父部门ID，构建树形组织结构\n值为 0 表示顶级部门（如：总公司、集团总部）\n支持多级嵌套，建议层级深度不超过 6 级以保证查询性能"
-                    },
-                    "code": {
-                      "type": "string",
-                      "title": "Code 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号，不允许连续分隔符，以字母或数字结尾\n长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：手动 \"tech.dept\"、\"hr\"；自动 \"a7k2m3x9b5f1\""
-                    },
-                    "display_name": {
-                      "type": "string",
-                      "title": "DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明\n用于部门名称的多语言显示，提升用户体验和国际化支持"
-                    },
-                    "type": {
-                      "$ref": "#/definitions/v1DepartmentType"
-                    },
-                    "status": {
-                      "$ref": "#/definitions/v1DepartmentStatus"
-                    },
-                    "sort_order": {
-                      "type": "integer",
-                      "format": "int32",
-                      "title": "SortOrder 部门排序顺序，用于同级部门的显示顺序\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
-                    },
-                    "email": {
-                      "type": "string",
-                      "title": "Email 部门公共邮箱地址，用于对外联系和内部通知\n格式：标准邮箱格式，如 \"tech@company.com\"\n用途：部门公告、外部合作、客户联系等"
-                    },
-                    "phone_number": {
-                      "$ref": "#/definitions/v1PhoneNumber",
-                      "title": "PhoneNumber 部门联系电话，支持国际化电话号码格式\n包含国家代码、区号、号码等完整信息\n用于紧急联系、业务咨询等场景"
-                    },
-                    "address": {
-                      "$ref": "#/definitions/v1Address",
-                      "title": "Address 部门办公地址，支持结构化地址信息\n包含国家、省市、详细地址等信息\n用于邮寄、拜访、资产管理等业务场景"
-                    },
-                    "cost_center_code": {
-                      "type": "string",
-                      "title": "CostCenterCode 成本中心编码，用于财务核算和成本控制\n格式：企业自定义编码规则，如 \"CC-TECH-001\"\n用途：预算分配、成本归集、财务报表等\n与 ERP 系统集成时的重要标识字段"
-                    },
-                    "budget_item_code": {
-                      "type": "string",
-                      "title": "BudgetCode 预算编码，用于预算管理和费用控制\n格式：与财务系统对应的预算科目编码\n用途：年度预算、费用审批、财务分析等\n支持多维度预算管理（如：人员预算、设备预算等）"
-                    },
-                    "max_members": {
-                      "type": "integer",
-                      "format": "int32",
-                      "title": "MaxMembers 部门最大成员数限制，用于人员规模控制\n值为 0 表示无限制，正整数表示具体限制\n用途：组织规模控制、人力成本管理、办公空间规划"
-                    },
-                    "external_id": {
-                      "type": "string",
-                      "title": "ExternalID 外部系统标识符，用于第三方系统集成\n如：ERP 系统部门编码、OA 系统部门 ID 等\n支持数据同步和跨系统业务流程"
-                    },
-                    "metadata": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "string"
-                      },
-                      "title": "Metadata 扩展元数据，存储自定义业务属性\n键值对格式，支持灵活的业务扩展需求\n示例：{\"location\": \"北京\", \"floor\": \"15F\", \"capacity\": \"50\"}"
-                    },
-                    "description": {
-                      "type": "string",
-                      "title": "Description 部门描述信息，详细说明部门职责和业务范围\n用于组织介绍、职责说明、业务范围描述等\n建议长度：500 字符以内，支持富文本格式"
-                    },
-                    "visibility": {
-                      "$ref": "#/definitions/v1Visibility",
-                      "title": "Visibility 部门及成员列表的可见性策略（使用公共枚举 Visibility）"
-                    },
-                    "protected": {
-                      "type": "boolean",
-                      "title": "Protected 是否为系统内置/受保护的部门，受保护的部门不可删除"
-                    },
-                    "members": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/definitions/v1Membership"
-                      },
-                      "title": "Members 部门成员列表"
-                    },
-                    "children": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/definitions/v1Department"
-                      },
-                      "title": "Children 直接子部门列表，用于构建完整的组织树\n仅包含直接下级，避免深度递归查询\n建议在需要完整树结构时通过专门的服务接口获取"
-                    },
-                    "created_by": {
-                      "type": "string",
-                      "format": "int64",
-                      "title": "CreatedBy 创建者用户ID，记录部门创建人\n用于审计追踪和权限验证"
-                    },
-                    "updated_by": {
-                      "type": "string",
-                      "format": "int64",
-                      "title": "UpdatedBy 最后更新者用户ID，记录最近修改人\n用于变更追踪和责任确认"
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "title": "CreatedAt 创建时间戳，记录部门建立时间\n使用 UTC 时间，精确到毫秒级别"
-                    },
-                    "updated_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "title": "UpdatedAt 最后更新时间戳，记录最近修改时间\n用于数据同步和缓存失效判断"
-                    },
-                    "deleted_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "title": "DeletedAt 软删除时间戳，支持数据恢复\n非空表示已删除，空值表示正常状态\n实现软删除机制，保护重要组织数据"
-                    }
-                  },
-                  "description": "字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
-                  "title": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能"
-                },
-                "update_mask": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/KnownAdminUpdateDepartmentBody"
             }
           }
         ],
@@ -1495,13 +1353,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1549,13 +1407,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1606,13 +1464,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1662,13 +1520,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1705,13 +1563,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1728,8 +1586,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "description": "ExpungeDepartment permanently removes a soft-deleted department and its core bindings."
+              "$ref": "#/definitions/KnownAdminExpungeDepartmentBody"
             }
           }
         ],
@@ -1760,13 +1617,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1783,8 +1640,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "description": "UndeleteDepartment restores a soft-deleted department in INACTIVE state."
+              "$ref": "#/definitions/KnownAdminUndeleteDepartmentBody"
             }
           }
         ],
@@ -1848,13 +1704,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1927,13 +1783,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -1960,13 +1816,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2006,13 +1862,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2053,13 +1909,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2107,13 +1963,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2170,13 +2026,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2322,13 +2178,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2378,13 +2234,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2520,13 +2376,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2593,13 +2449,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2633,13 +2489,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2656,8 +2512,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "description": "ExpungeGroup permanently removes a soft-deleted group and its core bindings."
+              "$ref": "#/definitions/KnownAdminExpungeGroupBody"
             }
           }
         ],
@@ -2681,13 +2536,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2704,8 +2559,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "description": "UndeleteGroup restores a soft-deleted group in DISABLED state."
+              "$ref": "#/definitions/KnownAdminUndeleteGroupBody"
             }
           }
         ],
@@ -2749,13 +2603,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2826,13 +2680,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2882,13 +2736,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -2941,13 +2795,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3014,13 +2868,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3067,13 +2921,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3108,13 +2962,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3220,13 +3074,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3264,13 +3118,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3306,13 +3160,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3436,13 +3290,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3508,13 +3362,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3604,13 +3458,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3664,13 +3518,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3705,13 +3559,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3760,13 +3614,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3783,21 +3637,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "client": {
-                  "$ref": "#/definitions/v1OAuth2Client"
-                },
-                "update_mask": {
-                  "type": "string",
-                  "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：client_id 不可修改，即使列入 update_mask 也会被忽略。\n示例: paths: [\"display_name\", \"client_status\", \"redirect_uris\"]"
-                },
-                "client_secret": {
-                  "type": "string",
-                  "title": "ClientSecret 新的客户端密钥明文（可选）\n- 如果提供非空值，服务端将 bcrypt 哈希后覆盖现有密钥。\n- 如果未提供或为空，保持现有密钥不变。"
-                }
-              },
-              "title": "UpdateOAuth2ClientRequest 更新 OAuth2 客户端"
+              "$ref": "#/definitions/KnownAdminUpdateOAuth2ClientBody"
             }
           }
         ],
@@ -3833,13 +3673,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3875,13 +3715,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -3922,13 +3762,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4044,13 +3884,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4101,13 +3941,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4151,13 +3991,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4171,7 +4011,7 @@
           },
           {
             "name": "policy",
-            "description": "{\n\"code\": \"admin-policy\",\n\"display_name\": \"管理员策略\",\n\"type\": \"ROLE\",\n\"status\": \"ENABLED\",\n\"value\": \"admin\",\n\"description\": \"管理员权限策略\"\n}\n\n注意：code 为可选字段，如客户端未提供，服务端将自动生成 12 位随机编码。\n如提供，需符合 code 规范：以小写字母开头，仅 [a-z0-9.:-]，长度 2-32，不允许连续分隔符（如 \"--\"、\"..\"、\"::\"）。",
+            "description": "Policy 策略定义，是一组 policy statements 的逻辑容器。\n它负责策略命名、生命周期、版本、发布与投影控制，而不是直接承载具体资源匹配规则。\n推荐约束：\n1. allow / deny 语义放在 statements；\n2. policy 负责聚合、复用、审计、发布与回滚；\n3. attachment 负责把 policy 挂到具体主体上。\n\n{\n\"code\": \"admin-policy\",\n\"display_name\": \"管理员策略\",\n\"type\": \"ROLE\",\n\"status\": \"ENABLED\",\n\"value\": \"admin\",\n\"description\": \"管理员权限策略\"\n}\n\n注意：code 为可选字段，如客户端未提供，服务端将自动生成 12 位随机编码。\n如提供，需符合 code 规范：以小写字母开头，仅 [a-z0-9.:-]，长度 2-32，不允许连续分隔符（如 \"--\"、\"..\"、\"::\"）。",
             "in": "body",
             "required": true,
             "schema": {
@@ -4219,8 +4059,8 @@
                   "format": "date-time"
                 }
               },
-              "description": "注意：code 为可选字段，如客户端未提供，服务端将自动生成 12 位随机编码。\n如提供，需符合 code 规范：以小写字母开头，仅 [a-z0-9.:-]，长度 2-32，不允许连续分隔符（如 \"--\"、\"..\"、\"::\"）。",
-              "title": "{\n\"code\": \"admin-policy\",\n\"display_name\": \"管理员策略\",\n\"type\": \"ROLE\",\n\"status\": \"ENABLED\",\n\"value\": \"admin\",\n\"description\": \"管理员权限策略\"\n}"
+              "description": "{\n\"code\": \"admin-policy\",\n\"display_name\": \"管理员策略\",\n\"type\": \"ROLE\",\n\"status\": \"ENABLED\",\n\"value\": \"admin\",\n\"description\": \"管理员权限策略\"\n}\n\n注意：code 为可选字段，如客户端未提供，服务端将自动生成 12 位随机编码。\n如提供，需符合 code 规范：以小写字母开头，仅 [a-z0-9.:-]，长度 2-32，不允许连续分隔符（如 \"--\"、\"..\"、\"::\"）。",
+              "title": "Policy 策略定义，是一组 policy statements 的逻辑容器。\n它负责策略命名、生命周期、版本、发布与投影控制，而不是直接承载具体资源匹配规则。\n推荐约束：\n1. allow / deny 语义放在 statements；\n2. policy 负责聚合、复用、审计、发布与回滚；\n3. attachment 负责把 policy 挂到具体主体上。"
             }
           }
         ],
@@ -4255,13 +4095,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4375,13 +4215,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4443,7 +4283,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/adminv1Role"
+              "$ref": "#/definitions/adminV1Role"
             },
             "examples": {
               "application/json": {
@@ -4461,13 +4301,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4477,7 +4317,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/adminv1Role"
+              "$ref": "#/definitions/adminV1Role"
             }
           }
         ],
@@ -4495,7 +4335,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/adminv1Role"
+              "$ref": "#/definitions/adminV1Role"
             },
             "examples": {
               "application/json": {
@@ -4513,13 +4353,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4554,13 +4394,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4629,13 +4469,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4734,13 +4574,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4786,13 +4626,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4841,13 +4681,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -4902,13 +4742,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5002,13 +4842,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5054,13 +4894,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5109,13 +4949,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5158,13 +4998,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5244,13 +5084,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5296,13 +5136,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5351,13 +5191,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5391,7 +5231,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/adminv1Role"
+              "$ref": "#/definitions/adminV1Role"
             },
             "examples": {
               "application/json": {
@@ -5409,13 +5249,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5466,7 +5306,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "$ref": "#/definitions/adminv1Role"
+                    "$ref": "#/definitions/adminV1Role"
                   }
                 },
                 "created_by": {
@@ -5534,19 +5374,19 @@
           "401": {
             "description": "缺少有效认证凭证或认证用户标识",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5579,13 +5419,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5626,13 +5466,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5670,13 +5510,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5715,13 +5555,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5760,31 +5600,31 @@
           "403": {
             "description": "访问策略拒绝当前认证用户",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "404": {
             "description": "认证用户在当前数据库中不存在",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "500": {
             "description": "数据库查询或敏感字段解密失败",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5821,13 +5661,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -5922,13 +5762,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6031,13 +5871,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6168,13 +6008,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6228,13 +6068,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6273,13 +6113,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6313,13 +6153,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6336,8 +6176,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "description": "ExpungeUser permanently removes a soft-deleted user and its core\ndependent data. This operation cannot target an active user."
+              "$ref": "#/definitions/KnownAdminExpungeUserBody"
             }
           }
         ],
@@ -6361,13 +6200,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6384,8 +6223,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "description": "UndeleteUser restores a soft-deleted user in DISABLED state."
+              "$ref": "#/definitions/KnownAdminUndeleteUserBody"
             }
           }
         ],
@@ -6423,13 +6261,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6447,141 +6285,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "user": {
-                  "type": "object",
-                  "properties": {
-                    "username": {
-                      "type": "string",
-                      "title": "用户名，系统登录凭证，必须唯一"
-                    },
-                    "nickname": {
-                      "type": "string",
-                      "title": "昵称，用于社交或前端展示"
-                    },
-                    "profile": {
-                      "type": "string",
-                      "title": "个人简介或签名"
-                    },
-                    "picture": {
-                      "type": "string",
-                      "title": "用户头像 URL"
-                    },
-                    "website": {
-                      "type": "string",
-                      "title": "个人网站地址"
-                    },
-                    "timezone": {
-                      "type": "string",
-                      "title": "时区信息（IANA 时区标识，例如 \"Asia/Shanghai\"）"
-                    },
-                    "locale": {
-                      "type": "string",
-                      "title": "用户偏好的语言与地区（例如 \"zh-CN\"、\"en-US\"）"
-                    },
-                    "type": {
-                      "$ref": "#/definitions/v1UserType"
-                    },
-                    "status": {
-                      "$ref": "#/definitions/v1UserStatus"
-                    },
-                    "gender": {
-                      "$ref": "#/definitions/UserGender"
-                    },
-                    "email_verified": {
-                      "type": "boolean",
-                      "title": "邮箱是否已验证"
-                    },
-                    "phone_number_verified": {
-                      "type": "boolean",
-                      "title": "手机号码是否已验证"
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "title": "创建时间"
-                    },
-                    "updated_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "title": "更新时间"
-                    },
-                    "deleted_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "title": "删除时间"
-                    },
-                    "created_by": {
-                      "type": "string",
-                      "format": "int64",
-                      "title": "CreatedBy 创建者用户ID，记录部门创建人"
-                    },
-                    "updated_by": {
-                      "type": "string",
-                      "format": "int64",
-                      "title": "UpdatedBy 最后更新者用户ID，记录最近修改人"
-                    },
-                    "realname": {
-                      "type": "string",
-                      "title": "真实姓名，用于实名认证或后台展示"
-                    },
-                    "national_id": {
-                      "type": "string",
-                      "title": "身份证号，用于身份验证（可选）"
-                    },
-                    "email": {
-                      "type": "string",
-                      "title": "邮箱地址"
-                    },
-                    "birthday": {
-                      "type": "string",
-                      "format": "date-time",
-                      "title": "出生日期"
-                    },
-                    "phone_number": {
-                      "$ref": "#/definitions/v1PhoneNumber",
-                      "title": "手机号码"
-                    },
-                    "address": {
-                      "$ref": "#/definitions/v1Address",
-                      "title": "地址信息"
-                    },
-                    "metadata": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "string"
-                      },
-                      "title": "自定义元数据，用于存储额外的用户信息（如 JSON 字符串）"
-                    },
-                    "mfa_enabled": {
-                      "type": "boolean",
-                      "title": "是否启用 MFA（TOTP）"
-                    },
-                    "department_members": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/definitions/v1Membership"
-                      },
-                      "title": "用户所属部门 membership 关系"
-                    },
-                    "group_members": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/definitions/v1Membership"
-                      },
-                      "title": "用户所属群组 membership 关系"
-                    }
-                  },
-                  "description": "字段布局约定：标识区 → 基础属性区 → 审计区(时间+操作人连续) → 敏感字段区 → 扩展区 → 关系区\n注意：审计区放在敏感字段之前，保持审计字段的连续性\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
-                  "title": "User 用户实体，表示系统中的账号信息"
-                },
-                "update_mask": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/KnownAdminUpdateUserBody"
             }
           }
         ],
@@ -6639,37 +6343,37 @@
           "400": {
             "description": "user_id 不是正整数",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "403": {
             "description": "IAM Policy 拒绝调用此方法或目标资源",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "404": {
             "description": "用户不存在或已被永久删除",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "500": {
             "description": "认证身份或提供方摘要查询失败",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6705,13 +6409,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6729,20 +6433,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "username": {
-                  "type": "string",
-                  "title": "用户名，系统登录凭证，通常唯一"
-                },
-                "new_password_hash": {
-                  "type": "string",
-                  "title": "PasswordHash 用户密码在本地使用 sha256 哈希结果"
-                },
-                "old_password_hash": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/KnownAdminUpdateUserPasswordBody"
             }
           }
         ],
@@ -6771,13 +6462,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
+              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
             }
           }
         },
@@ -6971,6 +6662,351 @@
         }
       }
     },
+    "KnownAdminExpungeDepartmentBody": {
+      "type": "object",
+      "description": "ExpungeDepartment permanently removes a soft-deleted department and its core bindings."
+    },
+    "KnownAdminExpungeGroupBody": {
+      "type": "object",
+      "description": "ExpungeGroup permanently removes a soft-deleted group and its core bindings."
+    },
+    "KnownAdminExpungeUserBody": {
+      "type": "object",
+      "description": "ExpungeUser permanently removes a soft-deleted user and its core\ndependent data. This operation cannot target an active user."
+    },
+    "KnownAdminRevealCredentialSecretBody": {
+      "type": "object",
+      "properties": {
+        "password_hash": {
+          "type": "string",
+          "title": "当前用户密码的 SHA256 hex，用于二次身份验证"
+        }
+      },
+      "title": "RevealCredentialSecretRequest 揭示凭证密钥\n通过当前用户密码二次验证后，返回解密后的敏感字段。"
+    },
+    "KnownAdminUndeleteDepartmentBody": {
+      "type": "object",
+      "description": "UndeleteDepartment restores a soft-deleted department in INACTIVE state."
+    },
+    "KnownAdminUndeleteGroupBody": {
+      "type": "object",
+      "description": "UndeleteGroup restores a soft-deleted group in DISABLED state."
+    },
+    "KnownAdminUndeleteUserBody": {
+      "type": "object",
+      "description": "UndeleteUser restores a soft-deleted user in DISABLED state."
+    },
+    "KnownAdminUpdateCredentialBody": {
+      "type": "object",
+      "properties": {
+        "credential": {
+          "$ref": "#/definitions/v1Credential"
+        },
+        "update_mask": {
+          "type": "string",
+          "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：code / type / algorithm / key_material / fingerprint 不可修改；尝试变更时返回参数错误。\n示例: paths: [\"display_name\", \"status\", \"expires_at\"]"
+        }
+      },
+      "title": "UpdateCredentialRequest 更新凭证"
+    },
+    "KnownAdminUpdateDepartmentBody": {
+      "type": "object",
+      "properties": {
+        "department": {
+          "type": "object",
+          "properties": {
+            "parent_id": {
+              "type": "string",
+              "format": "int64",
+              "title": "ParentID 父部门ID，构建树形组织结构\n值为 0 表示顶级部门（如：总公司、集团总部）\n支持多级嵌套，建议层级深度不超过 6 级以保证查询性能"
+            },
+            "code": {
+              "type": "string",
+              "title": "Code 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号，不允许连续分隔符，以字母或数字结尾\n长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：手动 \"tech.dept\"、\"hr\"；自动 \"a7k2m3x9b5f1\""
+            },
+            "display_name": {
+              "type": "string",
+              "title": "DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明\n用于部门名称的多语言显示，提升用户体验和国际化支持"
+            },
+            "type": {
+              "$ref": "#/definitions/v1DepartmentType"
+            },
+            "status": {
+              "$ref": "#/definitions/v1DepartmentStatus"
+            },
+            "sort_order": {
+              "type": "integer",
+              "format": "int32",
+              "title": "SortOrder 部门排序顺序，用于同级部门的显示顺序\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
+            },
+            "email": {
+              "type": "string",
+              "title": "Email 部门公共邮箱地址，用于对外联系和内部通知\n格式：标准邮箱格式，如 \"tech@company.com\"\n用途：部门公告、外部合作、客户联系等"
+            },
+            "phone_number": {
+              "$ref": "#/definitions/v1PhoneNumber",
+              "title": "PhoneNumber 部门联系电话，支持国际化电话号码格式\n包含国家代码、区号、号码等完整信息\n用于紧急联系、业务咨询等场景"
+            },
+            "address": {
+              "$ref": "#/definitions/v1Address",
+              "title": "Address 部门办公地址，支持结构化地址信息\n包含国家、省市、详细地址等信息\n用于邮寄、拜访、资产管理等业务场景"
+            },
+            "cost_center_code": {
+              "type": "string",
+              "title": "CostCenterCode 成本中心编码，用于财务核算和成本控制\n格式：企业自定义编码规则，如 \"CC-TECH-001\"\n用途：预算分配、成本归集、财务报表等\n与 ERP 系统集成时的重要标识字段"
+            },
+            "budget_item_code": {
+              "type": "string",
+              "title": "BudgetCode 预算编码，用于预算管理和费用控制\n格式：与财务系统对应的预算科目编码\n用途：年度预算、费用审批、财务分析等\n支持多维度预算管理（如：人员预算、设备预算等）"
+            },
+            "max_members": {
+              "type": "integer",
+              "format": "int32",
+              "title": "MaxMembers 部门最大成员数限制，用于人员规模控制\n值为 0 表示无限制，正整数表示具体限制\n用途：组织规模控制、人力成本管理、办公空间规划"
+            },
+            "external_id": {
+              "type": "string",
+              "title": "ExternalID 外部系统标识符，用于第三方系统集成\n如：ERP 系统部门编码、OA 系统部门 ID 等\n支持数据同步和跨系统业务流程"
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "title": "Metadata 扩展元数据，存储自定义业务属性\n键值对格式，支持灵活的业务扩展需求\n示例：{\"location\": \"北京\", \"floor\": \"15F\", \"capacity\": \"50\"}"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description 部门描述信息，详细说明部门职责和业务范围\n用于组织介绍、职责说明、业务范围描述等\n建议长度：500 字符以内，支持富文本格式"
+            },
+            "visibility": {
+              "$ref": "#/definitions/v1Visibility",
+              "title": "Visibility 部门及成员列表的可见性策略（使用公共枚举 Visibility）"
+            },
+            "protected": {
+              "type": "boolean",
+              "title": "Protected 是否为系统内置/受保护的部门，受保护的部门不可删除"
+            },
+            "members": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/v1Membership"
+              },
+              "title": "Members 部门成员列表"
+            },
+            "children": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/v1Department"
+              },
+              "title": "Children 直接子部门列表，用于构建完整的组织树\n仅包含直接下级，避免深度递归查询\n建议在需要完整树结构时通过专门的服务接口获取"
+            },
+            "created_by": {
+              "type": "string",
+              "format": "int64",
+              "title": "CreatedBy 创建者用户ID，记录部门创建人\n用于审计追踪和权限验证"
+            },
+            "updated_by": {
+              "type": "string",
+              "format": "int64",
+              "title": "UpdatedBy 最后更新者用户ID，记录最近修改人\n用于变更追踪和责任确认"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "CreatedAt 创建时间戳，记录部门建立时间\n使用 UTC 时间，精确到毫秒级别"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "UpdatedAt 最后更新时间戳，记录最近修改时间\n用于数据同步和缓存失效判断"
+            },
+            "deleted_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "DeletedAt 软删除时间戳，支持数据恢复\n非空表示已删除，空值表示正常状态\n实现软删除机制，保护重要组织数据"
+            }
+          },
+          "description": "字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
+          "title": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能"
+        },
+        "update_mask": {
+          "type": "string"
+        }
+      }
+    },
+    "KnownAdminUpdateOAuth2ClientBody": {
+      "type": "object",
+      "properties": {
+        "client": {
+          "$ref": "#/definitions/v1OAuth2Client"
+        },
+        "update_mask": {
+          "type": "string",
+          "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：client_id 不可修改，即使列入 update_mask 也会被忽略。\n示例: paths: [\"display_name\", \"client_status\", \"redirect_uris\"]"
+        },
+        "client_secret": {
+          "type": "string",
+          "title": "ClientSecret 新的客户端密钥明文（可选）\n- 如果提供非空值，服务端将 bcrypt 哈希后覆盖现有密钥。\n- 如果未提供或为空，保持现有密钥不变。"
+        }
+      },
+      "title": "UpdateOAuth2ClientRequest 更新 OAuth2 客户端"
+    },
+    "KnownAdminUpdateUserBody": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string",
+              "title": "用户名，系统登录凭证，必须唯一"
+            },
+            "nickname": {
+              "type": "string",
+              "title": "昵称，用于社交或前端展示"
+            },
+            "profile": {
+              "type": "string",
+              "title": "个人简介或签名"
+            },
+            "picture": {
+              "type": "string",
+              "title": "用户头像 URL"
+            },
+            "website": {
+              "type": "string",
+              "title": "个人网站地址"
+            },
+            "timezone": {
+              "type": "string",
+              "title": "时区信息（IANA 时区标识，例如 \"Asia/Shanghai\"）"
+            },
+            "locale": {
+              "type": "string",
+              "title": "用户偏好的语言与地区（例如 \"zh-CN\"、\"en-US\"）"
+            },
+            "type": {
+              "$ref": "#/definitions/v1UserType"
+            },
+            "status": {
+              "$ref": "#/definitions/v1UserStatus"
+            },
+            "gender": {
+              "$ref": "#/definitions/UserGender"
+            },
+            "email_verified": {
+              "type": "boolean",
+              "title": "邮箱是否已验证"
+            },
+            "phone_number_verified": {
+              "type": "boolean",
+              "title": "手机号码是否已验证"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "创建时间"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "更新时间"
+            },
+            "deleted_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "删除时间"
+            },
+            "created_by": {
+              "type": "string",
+              "format": "int64",
+              "title": "CreatedBy 创建者用户ID，记录部门创建人"
+            },
+            "updated_by": {
+              "type": "string",
+              "format": "int64",
+              "title": "UpdatedBy 最后更新者用户ID，记录最近修改人"
+            },
+            "realname": {
+              "type": "string",
+              "title": "真实姓名，用于实名认证或后台展示"
+            },
+            "national_id": {
+              "type": "string",
+              "title": "身份证号，用于身份验证（可选）"
+            },
+            "email": {
+              "type": "string",
+              "title": "邮箱地址"
+            },
+            "birthday": {
+              "type": "string",
+              "format": "date-time",
+              "title": "出生日期"
+            },
+            "phone_number": {
+              "$ref": "#/definitions/v1PhoneNumber",
+              "title": "手机号码"
+            },
+            "address": {
+              "$ref": "#/definitions/v1Address",
+              "title": "地址信息"
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "title": "自定义元数据，用于存储额外的用户信息（如 JSON 字符串）"
+            },
+            "mfa_enabled": {
+              "type": "boolean",
+              "title": "是否启用 MFA（TOTP）"
+            },
+            "department_members": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/v1Membership"
+              },
+              "title": "用户所属部门 membership 关系"
+            },
+            "group_members": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/v1Membership"
+              },
+              "title": "用户所属群组 membership 关系"
+            }
+          },
+          "description": "字段布局约定：标识区 → 基础属性区 → 审计区(时间+操作人连续) → 敏感字段区 → 扩展区 → 关系区\n注意：审计区放在敏感字段之前，保持审计字段的连续性\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
+          "title": "User 用户实体，表示系统中的账号信息"
+        },
+        "update_mask": {
+          "type": "string"
+        }
+      }
+    },
+    "KnownAdminUpdateUserPasswordBody": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "title": "用户名，系统登录凭证，通常唯一"
+        },
+        "new_password_hash": {
+          "type": "string",
+          "title": "PasswordHash 用户密码在本地使用 sha256 哈希结果"
+        },
+        "old_password_hash": {
+          "type": "string"
+        }
+      }
+    },
     "ListUsersRequestUserView": {
       "type": "string",
       "enum": [
@@ -6979,7 +7015,7 @@
         "USER_VIEW_FULL"
       ],
       "default": "USER_VIEW_UNSPECIFIED",
-      "title": "控制资源返回的详细程度。"
+      "description": "控制资源返回的详细程度。"
     },
     "MembershipMemberType": {
       "type": "string",
@@ -7082,7 +7118,7 @@
       "description": "- MALE: 男性\n - FEMALE: 女性\n - OTHER: 其他\n - PRIVATE: 保密，不愿透露",
       "title": "Gender 用户性别"
     },
-    "adminv1Role": {
+    "adminV1Role": {
       "type": "object",
       "properties": {
         "id": {
@@ -7120,7 +7156,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/adminv1Role"
+            "$ref": "#/definitions/adminV1Role"
           }
         },
         "created_by": {
@@ -7142,17 +7178,6 @@
       },
       "title": "Role 角色实体，表示用户在系统上的权限和功能"
     },
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "@type": {
-          "type": "string",
-          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
-        }
-      },
-      "additionalProperties": {},
-      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\nExample 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\nExample 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := \u0026pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
-    },
     "protobufNullValue": {
       "type": "string",
       "enum": [
@@ -7160,29 +7185,6 @@
       ],
       "default": "NULL_VALUE",
       "description": "`NullValue` is a singleton enumeration to represent the null value for the\n`Value` type union.\n\n The JSON representation for `NullValue` is JSON `null`.\n\n - NULL_VALUE: Null value."
-    },
-    "statusv1Status": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "status": {
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        },
-        "details": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/protobufAny"
-          }
-        }
-      },
-      "title": "Status 用于定义统一错误状态码"
     },
     "v1ACMEConfig": {
       "type": "object",
@@ -7396,7 +7398,7 @@
         "WECHAT"
       ],
       "default": "TYPE_UNSPECIFIED",
-      "title": "Type 身份提供商类型"
+      "description": "Type 身份提供商类型"
     },
     "v1AuthToken": {
       "type": "object",
@@ -7516,7 +7518,7 @@
         "DISABLED"
       ],
       "default": "BINDING_STATUS_UNSPECIFIED",
-      "title": "BindingStatus 绑定状态"
+      "description": "BindingStatus 绑定状态"
     },
     "v1CacheboxConfig": {
       "type": "object",
@@ -8256,28 +8258,6 @@
           "format": "int64"
         }
       }
-    },
-    "v1ErrorResponse": {
-      "type": "object",
-      "example": {
-        "error": {
-          "code": 5,
-          "status": "NotFound",
-          "message": "unknown service",
-          "details": [
-            {
-              "@type": "type.googleapis.com/grpc_kit.api.known.status.v1.TracingRequest",
-              "id": "b17f76dc51de4098bc974e5f2009c097"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "error": {
-          "$ref": "#/definitions/statusv1Status"
-        }
-      },
-      "title": "ErrorResponse 用于定义统一错误响应体"
     },
     "v1ExporterEnableConfig": {
       "type": "object",
@@ -9075,7 +9055,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/adminv1Role"
+            "$ref": "#/definitions/adminV1Role"
           }
         },
         "next_page_token": {
@@ -9692,6 +9672,13 @@
         "website": {
           "type": "string",
           "title": "个人网站地址"
+        },
+        "federated_claims": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "按已授权的 federated:id / federated:username scope 返回外部认证来源。"
         }
       },
       "title": "OAuth2Userinfo 对应 OIDC Standard Claims 规范\nhttps://openid.net/specs/openid-connect-core-1_0.html#StandardClaims"
@@ -11072,18 +11059,6 @@
     },
     "v1UpdateUserPasswordResponse": {
       "type": "object"
-    },
-    "v1UpsertAuthProvidersResponse": {
-      "type": "object",
-      "properties": {
-        "providers": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1AuthProvider"
-          }
-        }
-      }
     },
     "v1User": {
       "type": "object",
