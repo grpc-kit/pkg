@@ -256,6 +256,7 @@ func (c *LocalConfig) toAdminSecurityConfig() *adminv1.SecurityConfig {
 			}
 			if c.Security.Authentication.OIDCProvider.Config != nil {
 				out.Authentication.OidcProvider.Config = &adminv1.OIDCConfig{
+					DiscoveryUrl:         c.Security.Authentication.OIDCProvider.Config.DiscoveryURL,
 					ClientId:             c.Security.Authentication.OIDCProvider.Config.ClientID,
 					ClientSecret:         mask(c.Security.Authentication.OIDCProvider.Config.ClientSecret),
 					SupportedSigningAlgs: c.Security.Authentication.OIDCProvider.Config.SupportedSigningAlgs,

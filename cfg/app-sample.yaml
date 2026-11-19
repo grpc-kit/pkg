@@ -83,6 +83,9 @@ security:
     oidc_provider:
       issuer: https://accounts.example.com
       config:
+        # 可选：发现文档的完整 URL（可带查询参数），不再追加 well-known 路径。
+        # 未配置时使用 issuer + /.well-known/openid-configuration；文档 issuer 仍须与上方一致。
+        # discovery_url: https://accounts.example.com/custom/openid-configuration
         # 必须验证token.aud是否与client_id相等
         client_id: example
         # 允许的签名算法类别

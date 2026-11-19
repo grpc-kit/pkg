@@ -258,6 +258,8 @@ type OIDCProvider struct {
 
 // OIDCConfig 用于OIDC验证相关配置
 type OIDCConfig struct {
+	// DiscoveryURL 可选的发现文档完整 URL；为空时按 Issuer 使用标准发现路径。
+	DiscoveryURL         string   `mapstructure:"discovery_url"`
 	ClientID             string   `mapstructure:"client_id"`
 	ClientSecret         string   `mapstructure:"client_secret"`
 	SupportedSigningAlgs []string `mapstructure:"supported_signing_algs"`

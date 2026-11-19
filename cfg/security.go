@@ -96,6 +96,15 @@ func (c *LocalConfig) initSecurity(ctx context.Context) error {
 		if c.Security.Authentication.OIDCProvider.Issuer == "" {
 			return fmt.Errorf("security authentication not found oidc issuer")
 		}
+		discoveryURL := ""
+		if config := c.Security.Authentication.OIDCProvider.Config; config != nil {
+			discoveryURL = config.DiscoveryURL
+		}
+		if discoveryURL != "" {
+			if err := validateOIDCDiscoveryURL(discoveryURL); err != nil {
+				return fmt.Errorf("security authentication oidc discovery_url: %w", err)
+			}
+		}
 
 		initVerifierFn := func() (done bool, err error) {
 			oidcConfig := &oidc.Config{}
@@ -116,7 +125,7 @@ func (c *LocalConfig) initSecurity(ctx context.Context) error {
 				}
 			}
 
-			provider, err := oidc.NewProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer)
+			provider, err := discoverOIDCProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer, discoveryURL)
 			if err != nil {
 				pklogging.OrFallback(c.logger).DebugContext(ctx, "OIDC provider discovery failed; retrying")
 				// 返回 false 且 error 为 nil，交由外层 backoff 继续重试。
