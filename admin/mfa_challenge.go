@@ -51,6 +51,14 @@ func (c *mfaChallenge) clone() *mfaChallenge {
 	cloned := *c
 	if c.IssuanceContext != nil {
 		issuance := *c.IssuanceContext
+		if issuance.source != nil {
+			source := *issuance.source
+			issuance.source = &source
+		}
+		if issuance.authorization != nil {
+			authorization := *issuance.authorization
+			issuance.authorization = &authorization
+		}
 		cloned.IssuanceContext = &issuance
 	}
 	return &cloned

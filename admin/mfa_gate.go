@@ -112,6 +112,9 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 		return nil, errs.Internal(ctx).WithMessage("failed to query local MFA policy")
 	}
 	var primary mfaPrimaryAuth
+	if issuance.source != nil && (issuance.source.userID != userID || issuance.source.providerID != primaryProviderID) {
+		return nil, errs.Unauthenticated(ctx).WithMessage("primary authentication source mismatch")
+	}
 	if enforce || providerMFAEnabled {
 		identityID, err := db.UserIdentities.Query().Where(
 			useridentities.UserIDEQ(userID),
@@ -158,10 +161,15 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 	}
 
 	accessToken := fallbackToken
+	// 携带联邦授权的登录 Token 仅在通过 MFA 门禁后，按本次真实认证结果重新签发。
+	// MFA 前内部生成的 Token 不携带联邦资料，也不返回给调用方。
+	if issuance.authorization != nil {
+		accessToken = ""
+	}
 	if accessToken == "" {
 		accessToken, err = a.issueTokenForUser(ctx, db, userID, issuance)
 		if err != nil {
-			return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
+			return nil, err
 		}
 	}
 

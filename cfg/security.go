@@ -320,6 +320,11 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 			if token == nil || !token.Valid {
 				return accessToken, jwt.ErrInvalidKey
 			}
+			// 静态用户的 HMAC 密钥来自自身口令材料，不能代表服务端证明外部身份。
+			// 携带联邦 scope 但没有外部资料的静态登录仍按原规则验证。
+			if auth.HasFederatedScope(accessToken.Scope) && accessToken.FederatedClaims != nil {
+				return accessToken, jwt.ErrTokenInvalidClaims
+			}
 
 			// 验证 issuer
 			if !s.Authentication.OIDCProvider.Config.SkipIssuerCheck {
@@ -364,6 +369,10 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 	}
 	if err := token.Claims(&accessToken); err != nil {
 		return accessToken, err
+	}
+	// 严格形状检查限定在申请联邦资料的 Access Token，不影响普通上游声明解码。
+	if auth.HasFederatedScope(accessToken.Scope) && !auth.ValidFederatedClaims(accessToken.Scope, accessToken.FederatedClaims) {
+		return accessToken, jwt.ErrTokenInvalidClaims
 	}
 
 	return accessToken, nil

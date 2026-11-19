@@ -19,6 +19,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/pquerna/otp/totp"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -158,7 +159,8 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 	}
 	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID, *challenge.IssuanceContext)
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
+		a.discardRejectedMFALoginChallenge(req.ChallengeId, err)
+		return nil, err
 	}
 	if err := tx.Commit(); err != nil {
 		if recoveryCodeConsumed {
@@ -574,7 +576,8 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 	}
 	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID, *challenge.IssuanceContext)
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
+		a.discardRejectedMFALoginChallenge(req.SetupChallengeId, err)
+		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -613,31 +616,57 @@ func (a *KnownAdminAPI) enableMFAForSetup(ctx context.Context, db *lion.Client, 
 	return nil
 }
 
-// issueTokenForUser 为指定用户签发 JWT access_token（MFA 验证通过后调用）
+// 授权被拒绝时终止本次登录；内部签发故障保留挑战供原有效期内重试。
+// 两种失败均由调用方回滚事务。
+func (a *KnownAdminAPI) discardRejectedMFALoginChallenge(challengeID string, err error) {
+	switch errs.FromError(err).GetCode() {
+	case int32(codes.Unauthenticated), int32(codes.PermissionDenied), int32(codes.InvalidArgument):
+		a.mfaChallenges.Delete(challengeID)
+	}
+}
+
+// issueTokenForUser 保留受控授权拒绝的错误分类；存储、密钥和签名故障
+// 统一返回受控内部错误，避免向登录调用方泄露底层信息。
 func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, userID int, issuance AccessTokenIssuanceContext) (string, error) {
 	profile, err := loadAccessTokenUserProfile(ctx, db, a.config.aesKey, userID)
 	if err != nil {
-		return "", err
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
 	now := time.Now()
 	roleIDs, err := effectiveRoleIDsForUserAt(ctx, db, userID, now)
 	if err != nil {
-		return "", err
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
 	roleCodes, err := roleCodesForIDs(ctx, db, roleIDs)
 	if err != nil {
-		return "", err
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
 	groupCodes, err := effectiveGroupCodesForUserAt(ctx, db, userID, now)
 	if err != nil {
-		return "", err
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
 	privateKey, kid, err := loadAccessTokenRSAKey(ctx, db, a.config.aesKey)
 	if err != nil {
-		return "", err
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
 	input := accessTokenInputFromProfile(profile, issuance, roleCodes, groupCodes)
-	return newAccessTokenIssuer().issueRSA(input, privateKey, kid)
+	claims, err := newAccessTokenIssuer().build(input)
+	if err != nil {
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
+	}
+	if err := a.applyFederatedLoginClaims(ctx, claims, issuance); err != nil {
+		switch errs.FromError(err).GetCode() {
+		case int32(codes.Unauthenticated), int32(codes.PermissionDenied), int32(codes.InvalidArgument):
+			return "", err
+		default:
+			return "", errs.Internal(ctx).WithMessage("failed to issue access token")
+		}
+	}
+	token, err := auth.SignAccessTokenRSA(claims, privateKey, kid)
+	if err != nil {
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
+	}
+	return token, nil
 }
 
 // reissueAccessTokenForUser 为已认证的 DB 用户重签 access token（RS256）。

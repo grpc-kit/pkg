@@ -41,8 +41,10 @@ type CommonClaims struct {
 	// 仅在客户端明确需要角色映射时签发。
 	Roles []string `json:"roles,omitempty"`
 
-	// FederatedClaims 联邦身份声明，如 {"connector_id":"..."}。预留未使用。
-	FederatedClaims map[string]string `json:"federated_claims,omitempty"`
+	// FederatedClaims 按已授权的 federated:id / federated:username
+	// 输出外部身份资料；普通登录 Token 省略此字段。
+	// Refresh Token 可保留同一授权快照，供刷新时延续。
+	FederatedClaims *FederatedClaims `json:"federated_claims,omitempty"`
 	// Deprecated: 历史应用标识字段。
 	// 新签发的 ID Token 使用 azp，新签发的 Access Token 使用 client_id。
 	// 仅用于兼容解析旧 Token，禁止在新 Token 中签发。

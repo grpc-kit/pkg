@@ -12,6 +12,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
@@ -23,8 +24,10 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// CreateAuthLogin 创建登录认证
+// CreateAuthLogin 创建登录认证。
+// 同进程联邦登录可使用 ContextWithFederatedLoginAuthorization 传入已批准的授权参数。
 func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.CreateAuthLoginRequest) (*adminv1.AuthToken, error) {
+	authorization := federatedLoginAuthorizationFromContext(ctx)
 	result := &adminv1.AuthToken{TokenType: "Bearer"}
 
 	var accessToken string
@@ -50,8 +53,11 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	if providerCode == "" {
 		providerCode = "local"
 	}
-	issuance, err := a.newAccessTokenIssuanceContext("", "", time.Duration(expiresIn)*time.Second)
+	issuance, err := a.loginIssuanceContext(ctx, authorization, time.Duration(expiresIn)*time.Second)
 	if err != nil {
+		if authorization != nil {
+			return nil, err
+		}
 		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
 	}
 
@@ -75,6 +81,11 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			loginIssuance.Tenant = u.Tenant
 			loginIssuance.Roles = u.Roles
 			loginIssuance.Groups = u.Groups
+			if loginIssuance.authorization != nil {
+				if err := validateFederatedLoginAuthorization(ctx, db, *loginIssuance.authorization); err != nil {
+					return nil, err
+				}
+			}
 			tk, err := u.issueAccessToken(loginIssuance)
 			if err != nil {
 				return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
@@ -146,6 +157,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			return nil, errs.Unauthenticated(ctx)
 		}
 
+		issuance.source = su.authenticationSource
 		authToken, gateErr := a.applyMFAGateAfterPrimaryAuth(
 			ctx,
 			db,
@@ -176,6 +188,9 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 // CreateAuthToken 创建认证令牌
 func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.CreateAuthTokenRequest) (*adminv1.AuthToken, error) {
 	result := &adminv1.AuthToken{TokenType: "Bearer"}
+	if auth.HasFederatedScope(req.GetScope()) {
+		return nil, errs.InvalidArgument(ctx).WithMessage("federated scopes require an OAuth2 authorization grant")
+	}
 
 	// client_id 作为 access token 的 client_id 声明，必填。
 	clientID := strings.TrimSpace(req.ClientId)

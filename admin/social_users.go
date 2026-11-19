@@ -51,8 +51,9 @@ type socialUsers struct {
 	// 解密后的敏感凭证（LDAP 为 bind_password，OAuth2 系为 client_secret）
 	secret string
 
-	issuanceContext AccessTokenIssuanceContext
-	staticUsers     *StaticUsers
+	issuanceContext      AccessTokenIssuanceContext
+	authenticationSource *federatedSource
+	staticUsers          *StaticUsers
 }
 
 func newSocialUsers(ctx context.Context, logger *slog.Logger, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
@@ -634,6 +635,11 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		return nil, err
 	}
 
+	externalUsername := resolvedUser.Username
+	if resolvedUser.UsernameIsFallback {
+		externalUsername = ""
+	}
+	s.captureFederatedSource(userEntity.ID, resolvedUser.ProviderUserID, externalUsername)
 	mfaEnabled, err := hasUserMFAEnabledIdentity(ctx, s.db, userEntity.ID)
 	if err != nil {
 		return nil, err
@@ -1175,7 +1181,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 	if profile.UsernameIsFallback {
 		username = ""
 	}
-	return s.resolveExternalUser(ctx, externalProvisioningInput{
+	userID, err := s.resolveExternalUser(ctx, externalProvisioningInput{
 		Subject: profile.ProviderSubject, Username: username, CanLinkUsername: !profile.UsernameIsFallback,
 		LegacyUsername: legacyUsername, Token: oauth2Token,
 		Contacts: verifiedIdentityClaims{
@@ -1209,6 +1215,11 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			return userCreate.Save(ctx)
 		},
 	})
+	if err != nil {
+		return 0, err
+	}
+	s.captureFederatedSource(userID, profile.ProviderSubject, username)
+	return userID, nil
 }
 
 func (s *socialUsers) oauth2Exchange(ctx context.Context, code string) (*oauth2.Token, error) {
@@ -1406,7 +1417,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 	if resp == nil || resp.Errcode != 0 {
 		return 0, errExternalLoginRejected
 	}
-	return s.resolveExternalUser(ctx, externalProvisioningInput{
+	userID, err := s.resolveExternalUser(ctx, externalProvisioningInput{
 		Subject: resp.Openid, Username: resp.Openid, LegacyUsername: resp.Openid,
 		Wechat: true, UnionID: resp.Unionid,
 		Token: &oauth2.Token{AccessToken: resp.SessionKey, RefreshToken: resp.SessionKey},
@@ -1414,6 +1425,11 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 			return tx.Users.Create().SetUsername(username).SetUserStatus(int(adminv1.User_ACTIVE)).Save(ctx)
 		},
 	})
+	if err != nil {
+		return 0, err
+	}
+	s.captureFederatedSource(userID, resp.Openid, "")
+	return userID, nil
 }
 
 // reconcileWechatUnionID 决定微信登录返回的 UnionID 是否需要持久化。

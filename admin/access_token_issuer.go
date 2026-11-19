@@ -38,8 +38,8 @@ type AccessTokenInput struct {
 	JWTID             string
 }
 
-// AccessTokenIssuanceContext survives an MFA challenge. It intentionally does
-// not contain tokens, credentials, signing keys, or authorization snapshots.
+// AccessTokenIssuanceContext 在 MFA 挑战期间保留签发所需资料，
+// 不包含原始 Token、凭据或签名密钥。
 type AccessTokenIssuanceContext struct {
 	ClientID string
 	Scope    string
@@ -62,6 +62,11 @@ type AccessTokenIssuanceContext struct {
 	// 到调用方自身值）；仅 CreateAuthToken superadmin 路径置 true，其余签发路径保持 false。
 	OmitIdentityFields bool
 	TTL                time.Duration
+	// 仅在认证提供方完成真实认证后设置来源；保持私有，
+	// 防止 Token 管理接口的调用方自行指定来源。
+	source *federatedSource
+	// 仅由显式的同进程登录集成方法设置。
+	authorization *FederatedLoginAuthorization
 }
 
 type accessTokenUserProfile struct {
