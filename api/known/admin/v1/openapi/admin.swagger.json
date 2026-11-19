@@ -9843,6 +9843,10 @@
         },
         "insecure_skip_verify": {
           "type": "boolean"
+        },
+        "discovery_url": {
+          "type": "string",
+          "description": "Optional absolute discovery document URL; empty uses standard issuer discovery."
         }
       }
     },
