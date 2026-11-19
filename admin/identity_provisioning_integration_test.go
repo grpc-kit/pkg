@@ -823,6 +823,10 @@ func TestOAuthUserinfoSubjectIntegration(t *testing.T) {
 					if identity.ProviderUserID != tc.subject {
 						t.Fatal("persisted subject lost precision")
 					}
+					claims := &auth.AccessTokenClaims{}
+					if _, _, err := jwt.NewParser().ParseUnverified(response.AccessToken, claims); err != nil || claims.FederatedClaims != nil {
+						t.Fatal("普通登录 Token 不应包含外部身份资料")
+					}
 				})
 			}
 		})

@@ -11,6 +11,7 @@ import (
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/rpc"
+	"google.golang.org/grpc/codes"
 )
 
 // callerTokenContext 构造一个携带调用方 access token 声明（username/userID/roles/groups/tenant）
@@ -59,6 +60,18 @@ func TestCreateAuthTokenRequiresClientID(t *testing.T) {
 	ctx := callerTokenContext(testStaticUsername, testStaticUserID, []string{"superadmin"}, nil, "")
 	_, err := api.CreateAuthToken(ctx, &adminv1.CreateAuthTokenRequest{})
 	assertStatusCode(t, err, 400)
+}
+
+func TestCreateAuthTokenRejectsFederatedScopes(t *testing.T) {
+	api := staticUserAPI()
+	t.Cleanup(func() { close(api.mfaChallenges.stopGC) })
+	ctx := callerTokenContext(testStaticUsername, testStaticUserID, []string{"superadmin"}, nil, "")
+	for _, scope := range []string{"openid federated:id", "openid federated:username"} {
+		_, err := api.CreateAuthToken(ctx, &adminv1.CreateAuthTokenRequest{ClientId: "test-client", Scope: scope})
+		if errs.FromError(err).GetCode() != int32(codes.InvalidArgument) {
+			t.Fatalf("手动签发入口应明确拒绝联邦授权范围：%v", err)
+		}
+	}
 }
 
 // TestCreateAuthTokenRequiresAccessToken 验证无调用方 access token（拦截器未注入）返回 401。

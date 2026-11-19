@@ -82,6 +82,34 @@ func TestVerifyOIDCIDToken(t *testing.T) {
 		t.Fatalf("verified claims mismatch: %#v", got)
 	}
 
+	t.Run("上游联邦扩展不影响普通登录", func(t *testing.T) {
+		payload, err := json.Marshal(claims)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var upstream jwt.MapClaims
+		if err := json.Unmarshal(payload, &upstream); err != nil {
+			t.Fatal(err)
+		}
+		upstream["federated_claims"] = map[string]string{
+			"connector_id": "upstream-ldap", "user_id": "another-id", "username": "another-name", "tenant_id": "org-a",
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodRS256, upstream)
+		token.Header["kid"] = "test-key"
+		raw, err := token.SignedString(privateKey)
+		if err != nil {
+			t.Fatal(err)
+		}
+		verified, err := s.verifyOIDCIDToken(t.Context(), raw)
+		if err != nil {
+			t.Fatalf("上游字符串扩展导致普通 OIDC 登录失败：%v", err)
+		}
+		profile := externalUserClaimsFromIDToken(verified)
+		if profile.ProviderSubject != claims.Subject || profile.Username != claims.PreferredUsername {
+			t.Fatal("上游嵌套联邦资料替换了本次认证的主体或用户名")
+		}
+	})
+
 	t.Run("wrong audience", func(t *testing.T) {
 		wrongAudience := *claims
 		wrongAudience.Audience = jwt.ClaimStrings{"another-client"}

@@ -18,6 +18,7 @@ import (
 
 	"entgo.io/ent"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/useridentities"
@@ -56,6 +57,9 @@ func TestMFAPrimaryAuthenticationIntegration(t *testing.T) {
 				db = identityMySQLClient(t)
 			}
 			createTestLoginSigningKey(t, db)
+			client := db.OAuth2Clients.Create().SetClientID("mfa-federated-client").SetClientSecretHash("test-only").
+				SetScopes([]string{"openid", auth.ScopeFederatedID}).SetGrantTypes([]string{"authorization_code"}).
+				SetRedirectUris([]string{"https://client.example.test/callback"}).SaveX(t.Context())
 			local := createTestAuthProvider(t, db, "local", adminv1.AuthProvider_LOCAL)
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
@@ -71,6 +75,7 @@ func TestMFAPrimaryAuthenticationIntegration(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			restoreCtx := t.Context() // 子测试清理期间，父测试的上下文仍然有效。
 			for i, tc := range []struct {
 				name, revoke string
 				setup        bool
@@ -79,10 +84,16 @@ func TestMFAPrimaryAuthenticationIntegration(t *testing.T) {
 				{"verify-disabled", "disabled", false},
 				{"verify-unbound", "unbound", false},
 				{"verify-missing-origin", "missing", false},
+				{"verify-expired-authorization", "expired", false},
+				{"verify-removed-scope", "scope", false},
+				{"verify-signing-failure", "signing", false},
 				{"setup-active", "", true},
 				{"setup-disabled", "disabled", true},
 				{"setup-unbound", "unbound", true},
 				{"setup-revoked-during-write", "late-disabled", true},
+				{"setup-expired-authorization", "expired", true},
+				{"setup-removed-scope", "scope", true},
+				{"setup-signing-failure", "signing", true},
 			} {
 				t.Run(tc.name, func(t *testing.T) {
 					provider := createTestAuthProvider(t, db, fmt.Sprintf("mfa-source-%d", i), adminv1.AuthProvider_OAUTH2)
@@ -106,7 +117,11 @@ func TestMFAPrimaryAuthenticationIntegration(t *testing.T) {
 					}
 					api := New(WithLionClient(db), WithAESKey([]byte(adminTestAESKey)), WithOIDCProvider("", "test-client", ""))
 					t.Cleanup(func() { close(api.mfaChallenges.stopGC) })
-					first, err := api.GetAuthCallback(t.Context(), &adminv1.GetAuthCallbackRequest{ProviderName: provider.Code, Code: tc.name})
+					authorization := FederatedLoginAuthorization{
+						ClientID: client.ClientID, RedirectURI: client.RedirectUris[0], Scope: "openid federated:id",
+						ExpiresAt: time.Now().Add(2 * time.Minute),
+					}
+					first, err := api.GetAuthCallback(ContextWithFederatedLoginAuthorization(t.Context(), authorization), &adminv1.GetAuthCallbackRequest{ProviderName: provider.Code, Code: tc.name})
 					if err != nil || !first.GetMfaRequired() || first.GetAccessToken() != "" {
 						t.Fatalf("primary authentication did not require MFA: %v", err)
 					}
@@ -122,6 +137,11 @@ func TestMFAPrimaryAuthenticationIntegration(t *testing.T) {
 					if !ok || challenge.PrimaryAuth != (mfaPrimaryAuth{ProviderID: provider.ID, IdentityID: source.ID}) {
 						t.Fatal("challenge lost its primary authentication identity")
 					}
+					expectedAuthorization := authorization
+					expectedAuthorization.Scope = canonicalScope(expectedAuthorization.Scope)
+					if challenge.IssuanceContext == nil || challenge.IssuanceContext.authorization == nil || *challenge.IssuanceContext.authorization != expectedAuthorization {
+						t.Fatal("MFA 验证或首次绑定改变了原授权参数或截止时间")
+					}
 					switch tc.revoke {
 					case "disabled":
 						provider.Update().SetProviderStatus(int(adminv1.AuthProvider_DISABLED)).SaveX(t.Context())
@@ -131,6 +151,17 @@ func TestMFAPrimaryAuthenticationIntegration(t *testing.T) {
 						api.mfaChallenges.mu.Lock()
 						api.mfaChallenges.entries[challengeID].PrimaryAuth = mfaPrimaryAuth{}
 						api.mfaChallenges.mu.Unlock()
+					case "expired":
+						api.mfaChallenges.mu.Lock()
+						api.mfaChallenges.entries[challengeID].IssuanceContext.authorization.ExpiresAt = time.Now().Add(-time.Second)
+						api.mfaChallenges.mu.Unlock()
+					case "scope":
+						client.Update().SetScopes([]string{"openid"}).SaveX(t.Context())
+						t.Cleanup(func() { client.Update().SetScopes(client.Scopes).SaveX(restoreCtx) })
+					case "signing":
+						key := db.Credentials.Query().OnlyX(t.Context())
+						key.Update().SetCredentialStatus(int(adminv1.Credential_DISABLED)).SaveX(t.Context())
+						t.Cleanup(func() { key.Update().SetCredentialStatus(key.CredentialStatus).SaveX(restoreCtx) })
 					}
 					code, err := totp.GenerateCode(totpSecret, time.Now())
 					if err != nil {
@@ -156,15 +187,24 @@ func TestMFAPrimaryAuthenticationIntegration(t *testing.T) {
 					if tc.setup {
 						result, err = api.ConfirmAuthMFASetup(t.Context(), &adminv1.ConfirmAuthMFASetupRequest{SetupChallengeId: challengeID, TotpCode: code})
 					} else {
-						if tc.revoke == "disabled" {
-							code = recoveryCode // Revocation must not consume a recovery code.
+						if tc.revoke != "" {
+							code = recoveryCode // 授权拒绝或签发失败时，恢复码消费必须回滚。
 						}
 						result, err = api.VerifyAuthMFA(t.Context(), &adminv1.VerifyAuthMFARequest{ChallengeId: challengeID, TotpCode: code})
 					}
 					stored := db.UserIdentities.GetX(t.Context(), credential.ID)
 					if tc.revoke != "" {
-						if status.Code(err) != codes.Unauthenticated || result.GetAccessToken() != "" {
-							t.Fatalf("revoked authentication issued a token: %v", err)
+						expected := codes.Unauthenticated
+						if tc.revoke == "scope" {
+							expected = codes.PermissionDenied
+						} else if tc.revoke == "signing" {
+							expected = codes.Internal
+							if status.Convert(err).Message() != "failed to issue access token" {
+								t.Fatalf("内部签发错误未隐藏底层信息：%v", err)
+							}
+						}
+						if status.Code(err) != expected || result.GetAccessToken() != "" {
+							t.Fatalf("登录失败时返回了错误的结果：%v", err)
 						}
 						if stored.MfaEnabled != credential.MfaEnabled || !bytes.Equal(stored.MfaSecretEncrypted, credential.MfaSecretEncrypted) || !bytes.Equal(stored.MfaRecoveryCodesEncrypted, credential.MfaRecoveryCodesEncrypted) {
 							t.Fatal("rejected authentication changed MFA or consumed a recovery code")
@@ -177,12 +217,17 @@ func TestMFAPrimaryAuthenticationIntegration(t *testing.T) {
 						if err != nil || id != user.ID || name != user.Username || !stored.MfaEnabled {
 							t.Fatal("successful authentication changed the target user")
 						}
+						claims := verifiedFederatedTestToken(t, api, result.AccessToken)
+						federated := claims.FederatedClaims
+						if federated == nil || federated.ConnectorID != provider.Code || federated.UserID == nil || *federated.UserID != tc.name || federated.Username != nil {
+							t.Fatal("MFA 丢失了实际认证提供方或授权范围")
+						}
 					}
 					if stored.PasswordHash != credential.PasswordHash {
 						t.Fatal("MFA completion replaced the password")
 					}
-					if _, ok := api.mfaChallenges.Get(challengeID); ok {
-						t.Fatal("completed or revoked challenge remains reusable")
+					if _, ok := api.mfaChallenges.Get(challengeID); ok != (tc.revoke == "signing") {
+						t.Fatal("仅可重试的内部故障应保留挑战")
 					}
 				})
 			}

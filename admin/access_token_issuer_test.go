@@ -63,7 +63,7 @@ func TestBuildAccessTokenClaims(t *testing.T) {
 	if err := json.Unmarshal(payload, &fields); err != nil {
 		t.Fatal(err)
 	}
-	for _, omitted := range []string{"iss", "aud", "appid", "nbf", "tenant"} {
+	for _, omitted := range []string{"iss", "aud", "appid", "nbf", "tenant", "authorization_request_id"} {
 		if _, ok := fields[omitted]; ok {
 			t.Fatalf("claim %q must be omitted from payload: %s", omitted, payload)
 		}
