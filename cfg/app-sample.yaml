@@ -88,6 +88,13 @@ security:
         # discovery_url: https://accounts.example.com/custom/openid-configuration
         # 必须验证token.aud是否与client_id相等
         client_id: example
+        # 可选客户端配置，供自定义业务读取；内置 Token 验签不使用这些字段。
+        # client_secret: example-client-secret
+        # redirect_uri: https://app.example.com/auth/callback
+        # scopes:
+        #   - openid
+        #   - profile
+        #   - email
         # 允许的签名算法类别
         supported_signing_algs:
           - RS256

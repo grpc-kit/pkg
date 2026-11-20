@@ -9847,6 +9847,17 @@
         "discovery_url": {
           "type": "string",
           "description": "Optional absolute discovery document URL; empty uses standard issuer discovery."
+        },
+        "redirect_uri": {
+          "type": "string",
+          "description": "Optional callback URI for custom business login flows."
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional scopes for custom business login flows; no defaults are added."
         }
       }
     },

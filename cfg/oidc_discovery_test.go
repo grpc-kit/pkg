@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -36,6 +37,11 @@ security:
         discovery_url: https://discovery.example.test/metadata?tenant=example
         client_id: client-1
         client_secret: test-secret
+        redirect_uri: https://app.example.test/auth/callback
+        scopes:
+          - openid
+          - profile
+          - custom:read
 `)); err != nil {
 		t.Fatal(err)
 	}
@@ -47,12 +53,47 @@ security:
 	if c.Security.Authentication.OIDCProvider.Config.DiscoveryURL != want {
 		t.Fatal("discovery_url was not loaded from YAML")
 	}
+	config := c.Security.Authentication.OIDCProvider.Config
+	wantScopes := []string{"openid", "profile", "custom:read"}
+	if config.ClientSecret != "test-secret" || config.RedirectURI != "https://app.example.test/auth/callback" || !slices.Equal(config.Scopes, wantScopes) {
+		t.Fatal("OIDC client configuration was not loaded from YAML")
+	}
 	provider := c.toAdminSecurityConfig().GetAuthentication().GetOidcProvider()
 	if provider.GetIssuer() != "https://issuer.example.test" || provider.GetConfig().GetDiscoveryUrl() != want {
 		t.Fatalf("OIDC snapshot mismatch: %v", provider)
 	}
 	if provider.GetConfig().GetClientSecret() != maskedValue {
 		t.Fatal("OIDC client secret was not masked")
+	}
+	if provider.GetConfig().GetRedirectUri() != config.RedirectURI || !slices.Equal(provider.GetConfig().GetScopes(), wantScopes) {
+		t.Fatal("OIDC client configuration was not included in the snapshot")
+	}
+}
+
+func TestOIDCClientConfigRemainsOptional(t *testing.T) {
+	v := viper.New()
+	v.SetConfigType("yaml")
+	if err := v.ReadConfig(strings.NewReader(`
+security:
+  authentication:
+    oidc_provider:
+      issuer: https://issuer.example.test
+      config:
+        client_id: client-1
+`)); err != nil {
+		t.Fatal(err)
+	}
+	c, err := New(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config := c.Security.Authentication.OIDCProvider.Config
+	if config.ClientSecret != "" || config.RedirectURI != "" || len(config.Scopes) != 0 {
+		t.Fatal("optional OIDC client configuration acquired defaults")
+	}
+	snapshot := c.toAdminSecurityConfig().GetAuthentication().GetOidcProvider().GetConfig()
+	if snapshot.GetClientSecret() != "" || snapshot.GetRedirectUri() != "" || len(snapshot.GetScopes()) != 0 {
+		t.Fatal("optional OIDC client configuration acquired snapshot defaults")
 	}
 }
 
