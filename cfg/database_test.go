@@ -130,3 +130,20 @@ func TestInitDatabaseHonorsCanceledContext(t *testing.T) {
 		t.Fatal("database retained a client after canceled ping")
 	}
 }
+
+func TestLionUsersIDStartUnsupportedDriver(t *testing.T) {
+	c := &LocalConfig{Database: &DatabaseConfig{Driver: "sqlite3"}}
+	if err := c.ensureLionUsersIDStart(t.Context(), nil); !errors.Is(err, ErrDatabaseNotSupportDriver) {
+		t.Fatalf("unsupported driver error = %v", err)
+	}
+}
+
+func TestRegisterPropagatesAdminDatabaseFailure(t *testing.T) {
+	enabled := true
+	services := &ServicesConfig{}
+	services.Integrations.GRPC.Admin = &enabled
+	c := &LocalConfig{Services: services, Database: &DatabaseConfig{Enable: true}}
+	if _, err := c.Register(t.Context(), nil); !errors.Is(err, ErrDatabaseNotInit) {
+		t.Fatalf("Register() error = %v, want ErrDatabaseNotInit", err)
+	}
+}

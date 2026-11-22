@@ -45,13 +45,37 @@ func TestVerifyBearerTokenRS256WithoutIssuerAudience(t *testing.T) {
 		&oidc.StaticKeySet{PublicKeys: []stdcrypto.PublicKey{&privateKey.PublicKey}},
 		&oidc.Config{SkipIssuerCheck: true, SkipClientIDCheck: true},
 	))
-	verified, err := security.verifyBearerToken(context.Background(), tokenString)
+	verified, err := security.verifyBearerToken(t.Context(), tokenString)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if verified.Subject != "42" || verified.Issuer != "" || len(verified.Audience) != 0 {
 		t.Fatalf("claims mismatch: %+v", verified)
 	}
+
+	t.Run("真实签名也不能绕过联邦字段检查", func(t *testing.T) {
+		for _, scope := range []string{"openid", "openid federated:username"} {
+			t.Run(scope, func(t *testing.T) {
+				untrusted := jwt.MapClaims{
+					"sub": "42", "exp": time.Now().Add(time.Hour).Unix(), "scope": scope,
+					"federated_claims": map[string]string{"connector_id": "ldap", "username": "Alice", "other": "extra"},
+				}
+				token := jwt.NewWithClaims(jwt.SigningMethodRS256, untrusted)
+				raw, err := token.SignedString(privateKey)
+				if err != nil {
+					t.Fatal(err)
+				}
+				_, err = security.verifyBearerToken(t.Context(), raw)
+				if auth.HasFederatedScope(scope) {
+					if !errors.Is(err, jwt.ErrTokenInvalidClaims) {
+						t.Fatalf("联邦授权未拒绝未知字段：%v", err)
+					}
+				} else if err != nil {
+					t.Fatalf("未知字符串扩展影响了普通 Token：%v", err)
+				}
+			})
+		}
+	})
 }
 
 func testSecurityConfig(t *testing.T) {
@@ -139,6 +163,25 @@ func testSecurityTokenHS256(t *testing.T) {
 		claims.ClientID = "unrelated-client"
 		if _, err := buildHS256SecurityConfig(false, true, true).verifyBearerToken(ctx, sign(claims, testUserPassword)); err != nil {
 			t.Fatalf("optional claims must not affect verification: %v", err)
+		}
+	})
+
+	t.Run("静态HMAC不能声明外部身份", func(t *testing.T) {
+		claims := makeClaims()
+		claims.Scope = "openid federated:username"
+		username := "Alice"
+		claims.FederatedClaims = &auth.FederatedClaims{ConnectorID: "ldap", Username: &username}
+		if _, err := buildHS256SecurityConfig(false, true, true).verifyBearerToken(ctx, sign(claims, testUserPassword)); !errors.Is(err, jwt.ErrTokenInvalidClaims) {
+			t.Fatalf("静态 HMAC 不应证明外部身份：%v", err)
+		}
+		claims.Scope = "openid"
+		if _, err := buildHS256SecurityConfig(false, true, true).verifyBearerToken(ctx, sign(claims, testUserPassword)); err != nil {
+			t.Fatalf("普通 HMAC Token 的行为发生变化：%v", err)
+		}
+		claims.Scope = "openid federated:username"
+		claims.FederatedClaims = nil
+		if _, err := buildHS256SecurityConfig(false, true, true).verifyBearerToken(ctx, sign(claims, testUserPassword)); err != nil {
+			t.Fatalf("无外部资料的静态登录被错误拒绝：%v", err)
 		}
 	})
 

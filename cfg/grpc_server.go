@@ -42,6 +42,7 @@ import (
 	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	pklogging "github.com/grpc-kit/pkg/logging"
 	"github.com/grpc-kit/pkg/mcp"
@@ -745,7 +746,11 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 						if okAuth {
 							// 认证成功
 							roles, groups := v.Roles, v.Groups
-							ctx = c.Security.withUserID(ctx, v.UserID)
+							userID, err := crypto.ResolveStaticUserID(v.Username, v.UserID)
+							if err != nil {
+								return ctx, errs.Unauthenticated(ctx).Err()
+							}
+							ctx = c.Security.withUserID(ctx, userID)
 							ctx = c.Security.withUsername(ctx, tmps[0])
 							ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
 							ctx = c.Security.withGroups(ctx, groups)

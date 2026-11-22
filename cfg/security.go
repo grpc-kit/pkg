@@ -14,6 +14,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/grpc-kit/pkg/admin"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	pklogging "github.com/grpc-kit/pkg/logging"
@@ -78,6 +79,10 @@ func (c *LocalConfig) initSecurity(ctx context.Context) error {
 		c.Security.Authorization.OPAEnvoyPlugin.Enabled = &falseVal
 	}
 
+	if err := c.Security.validateStaticUserIDs(); err != nil {
+		return err
+	}
+
 	if !c.Security.Enable {
 		return nil
 	}
@@ -90,6 +95,15 @@ func (c *LocalConfig) initSecurity(ctx context.Context) error {
 	if c.Security.Authentication.OIDCProvider != nil {
 		if c.Security.Authentication.OIDCProvider.Issuer == "" {
 			return fmt.Errorf("security authentication not found oidc issuer")
+		}
+		discoveryURL := ""
+		if config := c.Security.Authentication.OIDCProvider.Config; config != nil {
+			discoveryURL = config.DiscoveryURL
+		}
+		if discoveryURL != "" {
+			if err := validateOIDCDiscoveryURL(discoveryURL); err != nil {
+				return fmt.Errorf("security authentication oidc discovery_url: %w", err)
+			}
 		}
 
 		initVerifierFn := func() (done bool, err error) {
@@ -111,7 +125,7 @@ func (c *LocalConfig) initSecurity(ctx context.Context) error {
 				}
 			}
 
-			provider, err := oidc.NewProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer)
+			provider, err := discoverOIDCProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer, discoveryURL)
 			if err != nil {
 				pklogging.OrFallback(c.logger).DebugContext(ctx, "OIDC provider discovery failed; retrying")
 				// 返回 false 且 error 为 nil，交由外层 backoff 继续重试。
@@ -145,6 +159,25 @@ func (c *LocalConfig) initSecurity(ctx context.Context) error {
 		}(initVerifierFn)
 	}
 
+	return nil
+}
+
+// Validate the original list before Append can hide duplicate usernames.
+func (s *SecurityConfig) validateStaticUserIDs() error {
+	if s == nil || s.Authentication == nil {
+		return nil
+	}
+	users := make(admin.StaticUsers, 0, len(s.Authentication.HTTPUsers))
+	for _, user := range s.Authentication.HTTPUsers {
+		if user == nil {
+			users = append(users, nil)
+			continue
+		}
+		users = append(users, &admin.StaticUser{Username: user.Username, UserID: user.UserID})
+	}
+	if err := users.Validate(); err != nil {
+		return fmt.Errorf("http_users: %w", err)
+	}
 	return nil
 }
 
@@ -216,18 +249,14 @@ func (s *SecurityConfig) supportedHS256Alg() bool {
 
 // foundUserPassword 查找用户
 func (s *SecurityConfig) foundUserID(userID int64) (bool, *BasicAuth) {
-	if s.Authentication.HTTPUsers == nil {
+	if s == nil || s.Authentication == nil || s.validateStaticUserIDs() != nil {
 		return false, nil
 	}
 
 	for _, v := range s.Authentication.HTTPUsers {
-		if userID == v.UserID {
+		id, err := crypto.ResolveStaticUserID(v.Username, v.UserID)
+		if err == nil && userID == id {
 			return true, v
-		} else if v.UserID == 0 {
-			// 兼容无 user_id 的用户
-			if crypto.Username2UserID(v.Username) == userID {
-				return true, v
-			}
 		}
 	}
 
@@ -300,6 +329,11 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 			if token == nil || !token.Valid {
 				return accessToken, jwt.ErrInvalidKey
 			}
+			// 静态用户的 HMAC 密钥来自自身口令材料，不能代表服务端证明外部身份。
+			// 携带联邦 scope 但没有外部资料的静态登录仍按原规则验证。
+			if auth.HasFederatedScope(accessToken.Scope) && accessToken.FederatedClaims != nil {
+				return accessToken, jwt.ErrTokenInvalidClaims
+			}
 
 			// 验证 issuer
 			if !s.Authentication.OIDCProvider.Config.SkipIssuerCheck {
@@ -344,6 +378,10 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 	}
 	if err := token.Claims(&accessToken); err != nil {
 		return accessToken, err
+	}
+	// 严格形状检查限定在申请联邦资料的 Access Token，不影响普通上游声明解码。
+	if auth.HasFederatedScope(accessToken.Scope) && !auth.ValidFederatedClaims(accessToken.Scope, accessToken.FederatedClaims) {
+		return accessToken, jwt.ErrTokenInvalidClaims
 	}
 
 	return accessToken, nil

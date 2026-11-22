@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -255,10 +256,17 @@ type OIDCProvider struct {
 	Config *OIDCConfig `mapstructure:"config"`
 }
 
-// OIDCConfig 用于OIDC验证相关配置
+// OIDCConfig 保存 OIDC 验证配置及供自定义业务读取的客户端配置。
 type OIDCConfig struct {
-	ClientID             string   `mapstructure:"client_id"`
-	ClientSecret         string   `mapstructure:"client_secret"`
+	// DiscoveryURL 可选的发现文档完整 URL；为空时按 Issuer 使用标准发现路径。
+	DiscoveryURL string `mapstructure:"discovery_url"`
+	ClientID     string `mapstructure:"client_id"`
+	// ClientSecret 供自定义业务使用；内置 Token 验签不读取此字段。
+	ClientSecret string `mapstructure:"client_secret"`
+	// RedirectURI 可选的授权回调地址，由自定义业务的登录流程使用。
+	RedirectURI string `mapstructure:"redirect_uri"`
+	// Scopes 可选的授权范围，保留配置原值，不自动补充默认 scope。
+	Scopes               []string `mapstructure:"scopes"`
 	SupportedSigningAlgs []string `mapstructure:"supported_signing_algs"`
 	SkipClientIDCheck    bool     `mapstructure:"skip_client_id_check"`
 	SkipExpiryCheck      bool     `mapstructure:"skip_expiry_check"`
@@ -363,6 +371,9 @@ func (c *LocalConfig) Init(ctx context.Context) error {
 func (c *LocalConfig) Register(ctx context.Context,
 	gw func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) (err error),
 	opts ...runtime.ServeMuxOption) (*http.ServeMux, error) {
+	if err := c.Security.validateStaticUserIDs(); err != nil {
+		return nil, err
+	}
 
 	if err := c.registerConfig(ctx); err != nil {
 		return nil, err
@@ -391,6 +402,9 @@ func (c *LocalConfig) Register(ctx context.Context,
 	if c.Services.hasEnableIntegrationAdminServer() {
 		client, err := c.getAdminDatabaseLion(ctx)
 		if err != nil {
+			if !errors.Is(err, ErrDatabaseNotEnable) {
+				return nil, fmt.Errorf("initialize admin database: %w", err)
+			}
 			pklogging.OrFallback(c.logger).InfoContext(ctx, "admin service database unavailable")
 		}
 

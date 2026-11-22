@@ -10,7 +10,6 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/grpc-kit/pkg/lion"
-	pklogging "github.com/grpc-kit/pkg/logging"
 	_ "github.com/lib/pq"
 )
 
@@ -33,6 +32,9 @@ const (
 	DatabaseDriverMysql      = "mysql"
 	DatabaseDriverPostgresql = "postgres"
 )
+
+// lionUsersIDStart is the lower bound for newly allocated database user IDs.
+const lionUsersIDStart = 123456
 
 // initDatabase 用于初始化数据库
 func (c *LocalConfig) initDatabase(ctx context.Context) error {
@@ -159,6 +161,9 @@ func (c *LocalConfig) GetAdminDatabaseLion() (*lion.Client, error) {
 }
 
 func (c *LocalConfig) getAdminDatabaseLion(ctx context.Context) (*lion.Client, error) {
+	if err := c.Security.validateStaticUserIDs(); err != nil {
+		return nil, err
+	}
 	if c.lionClient != nil {
 		return c.lionClient, nil
 	}
@@ -178,7 +183,11 @@ func (c *LocalConfig) getAdminDatabaseLion(ctx context.Context) (*lion.Client, e
 
 	db := lion.NewClient(lion.Driver(driver))
 	if err = db.Schema.Create(ctx); err != nil {
-		pklogging.OrFallback(c.logger).WarnContext(ctx, "lion migrate error", "error", err)
+		return nil, fmt.Errorf("migrate lion schema: %w", err)
+	}
+
+	if err := c.ensureLionUsersIDStart(ctx, rawDB); err != nil {
+		return nil, fmt.Errorf("ensure lion user IDs: %w", err)
 	}
 
 	return db, nil

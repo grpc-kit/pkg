@@ -8,6 +8,7 @@ import (
 	"io"
 	"math"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -84,6 +85,9 @@ func normalizeGlobalSettingValue(ctx context.Context, settingKey, value string, 
 	}
 
 	if spec.ValueType == globalSettingValueTypeString {
+		if len(spec.AllowedValues) > 0 && !slices.Contains(spec.AllowedValues, value) {
+			return "", invalidGlobalSettingValue(ctx, settingKey, spec.ValueType)
+		}
 		if spec.MaxLen > 0 && utf8.RuneCountInString(value) > spec.MaxLen {
 			return "", errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("%s length must be <= %d", settingKey, spec.MaxLen))
 		}

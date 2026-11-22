@@ -2,12 +2,14 @@ package admin
 
 import (
 	"context"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/rpc"
 )
 
@@ -180,7 +182,7 @@ func TestResolveAuthTokenClaimOverridesNonSuperadminTenantMismatch(t *testing.T)
 func TestStaticUserIssueAccessTokenOverridesClaims(t *testing.T) {
 	const passwordHash = "override-password-hash"
 	user := StaticUser{
-		UserID:       5,
+		UserID:       crypto.Username2UserID("u"),
 		Username:     "u",
 		PasswordHash: passwordHash,
 		Roles:        []string{"static-role"},
@@ -225,7 +227,7 @@ func TestStaticUserIssueAccessTokenOverridesClaims(t *testing.T) {
 func TestStaticUserIssueAccessTokenOverridesIdentityFields(t *testing.T) {
 	const passwordHash = "identity-password-hash"
 	user := StaticUser{
-		UserID:       42,
+		UserID:       crypto.Username2UserID("real-username"),
 		Username:     "real-username",
 		PasswordHash: passwordHash,
 		Email:        "real@example.com",
@@ -255,7 +257,7 @@ func TestStaticUserIssueAccessTokenOverridesIdentityFields(t *testing.T) {
 		t.Fatalf("email = %q, want custom@example.com", claims.Email)
 	}
 	// subject 不受身份字段覆盖影响，仍为静态用户 userID。
-	if claims.Subject != "42" {
-		t.Fatalf("subject = %q, want 42", claims.Subject)
+	if claims.Subject != strconv.FormatInt(crypto.Username2UserID("real-username"), 10) {
+		t.Fatalf("subject = %q, want username-derived ID", claims.Subject)
 	}
 }

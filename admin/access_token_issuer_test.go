@@ -63,7 +63,7 @@ func TestBuildAccessTokenClaims(t *testing.T) {
 	if err := json.Unmarshal(payload, &fields); err != nil {
 		t.Fatal(err)
 	}
-	for _, omitted := range []string{"iss", "aud", "appid", "nbf", "tenant"} {
+	for _, omitted := range []string{"iss", "aud", "appid", "nbf", "tenant", "authorization_request_id"} {
 		if _, ok := fields[omitted]; ok {
 			t.Fatalf("claim %q must be omitted from payload: %s", omitted, payload)
 		}
@@ -117,7 +117,7 @@ func TestStaticIssuerUsesRawHMACKey(t *testing.T) {
 	now := time.Now().UTC()
 	issuer := &accessTokenIssuer{
 		now:      func() time.Time { return now },
-		newJWTID: func() string { return "fixed-jti" },
+		newJWTID: func() (string, error) { return "fixed-jti", nil },
 	}
 	input := AccessTokenInput{
 		Subject:  "42",

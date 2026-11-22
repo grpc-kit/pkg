@@ -8,8 +8,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/rpc"
+	"google.golang.org/grpc/codes"
 )
 
 // callerTokenContext 构造一个携带调用方 access token 声明（username/userID/roles/groups/tenant）
@@ -40,9 +42,10 @@ func assertStatusCode(t *testing.T, err error, want int) {
 
 const (
 	testStaticUsername = "alice"
-	testStaticUserID   = int64(10)
 	testStaticPassword = "alice-password-hash"
 )
+
+var testStaticUserID = crypto.Username2UserID(testStaticUsername)
 
 func staticUserAPI() *KnownAdminAPI {
 	users := &StaticUsers{
@@ -59,6 +62,19 @@ func TestCreateAuthTokenRequiresClientID(t *testing.T) {
 	assertStatusCode(t, err, 400)
 }
 
+func TestCreateAuthTokenRejectsFederatedScopes(t *testing.T) {
+	api := staticUserAPI()
+	t.Cleanup(func() { close(api.mfaChallenges.stopGC) })
+	ctx := callerTokenContext(testStaticUsername, testStaticUserID, []string{"superadmin"}, nil, "")
+	ctx = ContextWithExternalLoginDefaultScopes(ctx, []string{"openid", auth.ScopeFederatedID})
+	for _, scope := range []string{"openid federated:id", "openid federated:username"} {
+		_, err := api.CreateAuthToken(ctx, &adminv1.CreateAuthTokenRequest{ClientId: "test-client", Scope: scope})
+		if errs.FromError(err).GetCode() != int32(codes.InvalidArgument) {
+			t.Fatalf("手动签发入口应明确拒绝联邦授权范围：%v", err)
+		}
+	}
+}
+
 // TestCreateAuthTokenRequiresAccessToken 验证无调用方 access token（拦截器未注入）返回 401。
 func TestCreateAuthTokenRequiresAccessToken(t *testing.T) {
 	api := staticUserAPI()
@@ -71,6 +87,7 @@ func TestCreateAuthTokenRequiresAccessToken(t *testing.T) {
 func TestCreateAuthTokenStaticUserSelfReissue(t *testing.T) {
 	api := staticUserAPI()
 	ctx := callerTokenContext(testStaticUsername, testStaticUserID, []string{"superadmin"}, nil, "")
+	ctx = ContextWithExternalLoginDefaultScopes(ctx, []string{"openid", auth.ScopeFederatedID})
 	req := &adminv1.CreateAuthTokenRequest{
 		ClientId:  "test-client",
 		ExpiresIn: 3600,
@@ -97,6 +114,9 @@ func TestCreateAuthTokenStaticUserSelfReissue(t *testing.T) {
 	}
 	if claims.ClientID != "test-client" {
 		t.Fatalf("client_id = %q, want test-client", claims.ClientID)
+	}
+	if claims.Scope != "" || claims.FederatedClaims != nil {
+		t.Fatal("external login defaults changed token management issuance")
 	}
 	if claims.Tenant != "custom-tenant" {
 		t.Fatalf("tenant = %q, want custom-tenant", claims.Tenant)
@@ -272,10 +292,10 @@ func TestCreateAuthTokenSuperadminEmailVerified(t *testing.T) {
 // 委托签发：指定目标 user_id 后，令牌使用目标静态用户的密钥签名，sub=目标 user_id。
 func TestCreateAuthTokenSuperadminDelegatedSubject(t *testing.T) {
 	const (
-		targetUserID   = int64(77)
 		targetUsername = "bob"
 		targetPassword = "bob-password-hash"
 	)
+	targetUserID := crypto.Username2UserID(targetUsername)
 	users := &StaticUsers{
 		&StaticUser{UserID: testStaticUserID, Username: testStaticUsername, PasswordHash: testStaticPassword},
 		&StaticUser{UserID: targetUserID, Username: targetUsername, PasswordHash: targetPassword},
@@ -324,7 +344,7 @@ func TestCreateAuthTokenSuperadminInvalidSubject(t *testing.T) {
 // TestCreateAuthTokenNonSuperadminSubjectIgnored 验证非 superadmin 传入 subject
 // 被忽略，令牌仍签发给调用方自身（sub=调用方 userID，用调用方密钥签名）。
 func TestCreateAuthTokenNonSuperadminSubjectIgnored(t *testing.T) {
-	const targetUserID = int64(77)
+	targetUserID := crypto.Username2UserID("bob")
 	users := &StaticUsers{
 		&StaticUser{UserID: testStaticUserID, Username: testStaticUsername, PasswordHash: testStaticPassword},
 		&StaticUser{UserID: targetUserID, Username: "bob", PasswordHash: "bob-password-hash"},

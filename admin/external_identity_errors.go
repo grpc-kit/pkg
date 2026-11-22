@@ -32,8 +32,8 @@ func externalPhoneAlreadyExistsPublicError(ctx context.Context) error {
 
 func externalVerifiedIdentifiersConflictPublicError(ctx context.Context) error {
 	return errs.AlreadyExists(ctx).
-		WithMessage("the verified email and phone number returned by this authentication provider belong to different users; contact an administrator").
-		WithMessageZHCN("该认证提供方返回的已验证邮箱和手机号分别属于不同用户，请联系管理员处理").
+		WithMessage("the identifiers returned by this authentication provider belong to different users; contact an administrator").
+		WithMessageZHCN("该认证提供方返回的身份标识分别属于不同用户，请联系管理员处理").
 		Err()
 }
 

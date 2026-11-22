@@ -6,12 +6,9 @@ import (
 	"strings"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
-	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
-	"golang.org/x/oauth2"
 )
 
 type verifiedIdentityClaims struct {
@@ -26,141 +23,21 @@ type verifiedIdentifierHashes struct {
 	phone string
 }
 
-// linkExternalIdentityByVerifiedIdentifiers links an external identity only
-// when all verified identifier matches converge on one active local user. The
-// caller owns the transaction and commits it when linked is true.
-func (s *socialUsers) linkExternalIdentityByVerifiedIdentifiers(
-	ctx context.Context,
-	tx *lion.Tx,
-	providerUserID string,
-	claims verifiedIdentityClaims,
-	autoLinkEnabled bool,
-	token *oauth2.Token,
-) (userID int, linked bool, err error) {
-	if !autoLinkEnabled {
+// verifiedIdentifierTarget resolves candidates without changing any identity.
+func (s *socialUsers) verifiedIdentifierTarget(ctx context.Context, tx *lion.Tx, claims verifiedIdentityClaims, enabled bool) (int, bool, error) {
+	if !enabled {
 		return 0, false, nil
 	}
-
 	hashes := s.canonicalVerifiedIdentifierHashes(ctx, claims)
-	if hashes.email == "" && hashes.phone == "" {
-		return 0, false, nil
-	}
-
-	emailUserID, emailFound, err := queryVerifiedIdentifierOwner(
-		ctx,
-		tx,
-		hashes.email,
-		users.EmailHashEQ,
-		users.EmailVerifiedEQ(true),
-		"email",
-		errExternalEmailAlreadyExists,
-	)
+	emailID, emailFound, err := queryVerifiedIdentifierOwner(ctx, tx, hashes.email, users.EmailHashEQ, users.EmailVerifiedEQ(true), "email", errExternalEmailAlreadyExists)
 	if err != nil {
 		return 0, false, err
 	}
-	phoneUserID, phoneFound, err := queryVerifiedIdentifierOwner(
-		ctx,
-		tx,
-		hashes.phone,
-		users.PhoneNumberHashEQ,
-		users.PhoneNumberVerifiedEQ(true),
-		"phone number",
-		errExternalPhoneAlreadyExists,
-	)
+	phoneID, phoneFound, err := queryVerifiedIdentifierOwner(ctx, tx, hashes.phone, users.PhoneNumberHashEQ, users.PhoneNumberVerifiedEQ(true), "phone number", errExternalPhoneAlreadyExists)
 	if err != nil {
 		return 0, false, err
 	}
-
-	targetUserID, found, err := convergeVerifiedIdentifierOwners(
-		emailUserID,
-		emailFound,
-		phoneUserID,
-		phoneFound,
-	)
-	if err != nil || !found {
-		return 0, false, err
-	}
-
-	bySubject, err := tx.UserIdentities.Query().
-		Select(
-			useridentities.FieldID,
-			useridentities.FieldUserID,
-			useridentities.FieldProviderUserID,
-		).
-		Where(
-			useridentities.ProviderIDEQ(s.AuthProvider.ID),
-			useridentities.ProviderUserIDEQ(providerUserID),
-		).
-		Only(ctx)
-	if err == nil {
-		if bySubject.UserID == targetUserID {
-			return targetUserID, true, nil
-		}
-		return 0, false, errExternalIdentityAlreadyBound
-	}
-	if !lion.IsNotFound(err) {
-		return 0, false, fmt.Errorf("check external subject binding: %w", err)
-	}
-
-	byProvider, err := tx.UserIdentities.Query().
-		Select(
-			useridentities.FieldID,
-			useridentities.FieldUserID,
-			useridentities.FieldProviderUserID,
-		).
-		Where(
-			useridentities.UserIDEQ(targetUserID),
-			useridentities.ProviderIDEQ(s.AuthProvider.ID),
-		).
-		Only(ctx)
-	if err == nil {
-		if byProvider.ProviderUserID == providerUserID {
-			return targetUserID, true, nil
-		}
-		return 0, false, errExternalIdentityAlreadyBound
-	}
-	if !lion.IsNotFound(err) {
-		return 0, false, fmt.Errorf("check user provider binding: %w", err)
-	}
-
-	identityCreate := tx.UserIdentities.Create().
-		SetUserID(targetUserID).
-		SetProviderID(s.AuthProvider.ID).
-		SetProviderUserID(providerUserID)
-	if token != nil {
-		if token.AccessToken != "" {
-			accessTokenEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(token.AccessToken))
-			if encryptErr != nil {
-				return 0, false, fmt.Errorf("encrypt linked access token: %w", encryptErr)
-			}
-			identityCreate.SetAccessTokenEncrypted(accessTokenEnc)
-		}
-		if token.RefreshToken != "" {
-			refreshTokenEnc, encryptErr := crypto.EncryptAES(s.aesKey, []byte(token.RefreshToken))
-			if encryptErr != nil {
-				return 0, false, fmt.Errorf("encrypt linked refresh token: %w", encryptErr)
-			}
-			identityCreate.SetRefreshTokenEncrypted(refreshTokenEnc)
-		}
-		if !token.Expiry.IsZero() {
-			identityCreate.SetTokenExpiresAt(token.Expiry)
-		}
-	}
-
-	if _, err := identityCreate.Save(ctx); err != nil {
-		if lion.IsConstraintError(err) {
-			return 0, false, errExternalIdentityAlreadyBound
-		}
-		return 0, false, fmt.Errorf("create verified identifier identity binding: %w", err)
-	}
-	if s.logger != nil {
-		s.logger.InfoContext(ctx,
-			"external identity verified identifier auto-link success",
-			"provider", s.ProviderName,
-			"user_id", targetUserID,
-		)
-	}
-	return targetUserID, true, nil
+	return convergeVerifiedIdentifierOwners(emailID, emailFound, phoneID, phoneFound)
 }
 
 func (s *socialUsers) canonicalVerifiedIdentifierHashes(ctx context.Context, claims verifiedIdentityClaims) verifiedIdentifierHashes {
@@ -244,16 +121,4 @@ func convergeVerifiedIdentifierOwners(
 	default:
 		return 0, false, nil
 	}
-}
-
-func (s *socialUsers) identityAutoLinkEnabled(ctx context.Context) (bool, error) {
-	enabled, _, err := newGlobalSettingsReader(s.logger, s.db).GetBool(
-		ctx,
-		globalSettingsCategorySecurity,
-		globalSettingKeyIdentityAutoLink,
-	)
-	if err != nil {
-		return false, fmt.Errorf("read identity auto-link setting: %w", err)
-	}
-	return enabled, nil
 }

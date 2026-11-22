@@ -11,15 +11,21 @@ func TestMFAChallengePreservesAndCopiesIssuanceContext(t *testing.T) {
 
 	issuance := AccessTokenIssuanceContext{
 		ClientID: "admin-web",
-		Scope:    "openid profile",
+		Scope:    "federated:id openid",
 		Tenant:   "default",
 		TTL:      time.Hour,
+		source:   &federatedSource{userID: 42, providerID: 7, connectorID: "ldap", subject: "9007199254740993", username: "Alice"},
 	}
-	challenge, err := store.CreateLoginWithTTL(time.Minute, mfaChallengeTypeLoginVerify, 42, "alice", issuance)
+	primary := mfaPrimaryAuth{ProviderID: 7, IdentityID: 9}
+	challenge, err := store.CreateLoginWithTTL(time.Minute, mfaChallengeTypeLoginVerify, 42, "alice", issuance, primary)
 	if err != nil {
 		t.Fatal(err)
 	}
+	issuance.source.subject = "caller-mutated"
 	challenge.IssuanceContext.ClientID = "mutated-return-value"
+	challenge.IssuanceContext.Scope = "federated:username openid"
+	challenge.IssuanceContext.source.subject = "mutated-return-source"
+	challenge.PrimaryAuth.IdentityID = 99
 
 	stored, ok := store.Get(challenge.ChallengeID)
 	if !ok {
@@ -30,6 +36,12 @@ func TestMFAChallengePreservesAndCopiesIssuanceContext(t *testing.T) {
 	}
 	if stored.IssuanceContext.ClientID != "admin-web" || stored.IssuanceContext.TTL != time.Hour {
 		t.Fatalf("issuance context mismatch: %+v", stored.IssuanceContext)
+	}
+	if stored.PrimaryAuth != primary {
+		t.Fatalf("primary authentication was not copied: %+v", stored.PrimaryAuth)
+	}
+	if stored.IssuanceContext.Scope != "federated:id openid" || stored.IssuanceContext.source.subject != "9007199254740993" {
+		t.Fatal("MFA defaults or authentication source were not copied")
 	}
 
 	stored.IssuanceContext.ClientID = "mutated-get"

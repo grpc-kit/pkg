@@ -12,6 +12,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
@@ -23,8 +24,11 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// CreateAuthLogin 创建登录认证
+// CreateAuthLogin 创建登录认证。
+// 同进程联邦登录可使用 ContextWithFederatedLoginAuthorization 传入已批准的授权参数。
+// 普通外部登录可使用 ContextWithExternalLoginDefaultScopes 设置服务端默认范围。
 func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.CreateAuthLoginRequest) (*adminv1.AuthToken, error) {
+	authorization := federatedLoginAuthorizationFromContext(ctx)
 	result := &adminv1.AuthToken{TokenType: "Bearer"}
 
 	var accessToken string
@@ -34,6 +38,11 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	}
 	if req.PasswordHash == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("password_hash is required")
+	}
+	if a.config.staticUsers != nil {
+		if err := a.config.staticUsers.Validate(); err != nil {
+			return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+		}
 	}
 
 	// TODO; 不允许创建过长过期的 token
@@ -45,8 +54,11 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	if providerCode == "" {
 		providerCode = "local"
 	}
-	issuance, err := a.newAccessTokenIssuanceContext("", "", time.Duration(expiresIn)*time.Second)
+	issuance, err := a.loginIssuanceContext(ctx, authorization, time.Duration(expiresIn)*time.Second)
 	if err != nil {
+		if authorization != nil {
+			return nil, err
+		}
 		return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
 	}
 
@@ -70,6 +82,11 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			loginIssuance.Tenant = u.Tenant
 			loginIssuance.Roles = u.Roles
 			loginIssuance.Groups = u.Groups
+			if loginIssuance.authorization != nil {
+				if err := validateFederatedLoginAuthorization(ctx, db, *loginIssuance.authorization); err != nil {
+					return nil, err
+				}
+			}
 			tk, err := u.issueAccessToken(loginIssuance)
 			if err != nil {
 				return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
@@ -87,12 +104,13 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 		// 根据 provider_code 选择 local/ldap 登录路径
 		su, err := newSocialUsers(ctx, a.logger, a.config.aesKey, db, providerCode)
 		if err != nil {
+			a.logAuthenticationFailure(ctx, providerCode, "password_provider_init", err)
 			if lion.IsNotFound(err) {
 				return nil, errs.NotFound(ctx).WithMessage("auth provider not found")
 			}
-			return nil, err
+			return nil, errs.Unauthenticated(ctx).WithMessage("authentication failed")
 		}
-		su.issuanceContext = issuance
+		su.staticUsers = a.config.staticUsers
 
 		if su.AuthProvider.ProviderStatus != int(adminv1.AuthProvider_ACTIVE.Number()) {
 			return nil, errs.FailedPrecondition(ctx).WithMessage("auth provider is not active")
@@ -102,6 +120,13 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 		if providerType != adminv1.AuthProvider_LOCAL && providerType != adminv1.AuthProvider_LDAP {
 			return nil, errs.FailedPrecondition(ctx).WithMessage("only LOCAL and LDAP providers are supported")
 		}
+		if authorization == nil && providerType == adminv1.AuthProvider_LDAP {
+			issuance.Scope, err = externalLoginDefaultScope(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+		su.issuanceContext = issuance
 
 		passwordPayload := req.PasswordHash
 		if providerType == adminv1.AuthProvider_LDAP {
@@ -132,13 +157,14 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			if lion.IsNotFound(err) {
 				return nil, errs.Unauthenticated(ctx)
 			}
-			pklogging.OrFallback(a.logger).ErrorContext(ctx, "password login failed")
+			a.logAuthenticationFailure(ctx, su.ProviderName, "password_check", err)
 			return nil, errs.Unauthenticated(ctx)
 		}
 		if pcResult == nil || !pcResult.OK {
 			return nil, errs.Unauthenticated(ctx)
 		}
 
+		issuance.source = su.authenticationSource
 		authToken, gateErr := a.applyMFAGateAfterPrimaryAuth(
 			ctx,
 			db,
@@ -147,6 +173,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			pcResult.MfaEnabled,
 			pcResult.AccessToken,
 			issuance,
+			su.AuthProvider.ID,
 		)
 		if gateErr != nil {
 			return nil, gateErr
@@ -168,6 +195,9 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 // CreateAuthToken 创建认证令牌
 func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.CreateAuthTokenRequest) (*adminv1.AuthToken, error) {
 	result := &adminv1.AuthToken{TokenType: "Bearer"}
+	if auth.HasFederatedScope(req.GetScope()) {
+		return nil, errs.InvalidArgument(ctx).WithMessage("federated scopes require an OAuth2 authorization grant")
+	}
 
 	// client_id 作为 access token 的 client_id 声明，必填。
 	clientID := strings.TrimSpace(req.ClientId)
@@ -181,6 +211,11 @@ func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.Create
 		return nil, errs.Unauthenticated(ctx).WithMessage("access token is required to mint a new token")
 	}
 	callerUserID := caller.GetMustUserID()
+	if a.config.staticUsers != nil {
+		if err := a.config.staticUsers.Validate(); err != nil {
+			return nil, errs.FailedPrecondition(ctx).WithMessage(err.Error())
+		}
+	}
 
 	expiresIn := req.ExpiresIn
 	if expiresIn <= 0 {

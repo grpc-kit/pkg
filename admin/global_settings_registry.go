@@ -29,13 +29,15 @@ const (
 	globalSettingsCategoryAIConnector = "aiconnector"
 	globalSettingsCategoryIndependent = "independent"
 
-	globalSettingKeyLoginEnforceMFA       = "login.enforce_mfa"
-	globalSettingKeyLoginAccessTokenTTL   = "login.access_token_ttl"
-	globalSettingKeyMFAChallengeTTL       = "mfa.challenge_ttl"
-	globalSettingKeyMFAMaxVerifyAttempts  = "mfa.max_verify_attempts"
-	globalSettingKeyMFARecoveryCodesCount = "mfa.recovery_codes_count"
-	globalSettingKeyMFATOTPIssuer         = "mfa.totp_issuer"
-	globalSettingKeyIdentityAutoLink      = "identity.auto_link"
+	globalSettingKeyLoginEnforceMFA                   = "login.enforce_mfa"
+	globalSettingKeyLoginAccessTokenTTL               = "login.access_token_ttl"
+	globalSettingKeyMFAChallengeTTL                   = "mfa.challenge_ttl"
+	globalSettingKeyMFAMaxVerifyAttempts              = "mfa.max_verify_attempts"
+	globalSettingKeyMFARecoveryCodesCount             = "mfa.recovery_codes_count"
+	globalSettingKeyMFATOTPIssuer                     = "mfa.totp_issuer"
+	globalSettingKeyIdentityUsernameStrategy          = "identity.username_strategy"
+	globalSettingKeyIdentityAutoLinkByUsername        = "identity.auto_link_by_username"
+	globalSettingKeyIdentityAutoLinkByVerifiedContact = "identity.auto_link_by_verified_contact"
 )
 
 var globalSettingsCategories = []string{
@@ -71,15 +73,16 @@ var globalSettingsCategorySet = map[string]struct{}{
 }
 
 type globalSettingSpec struct {
-	ValueType    globalSettingValueType
-	DefaultValue string
-	Description  string
-	Protected    bool
-	MinInt       *int
-	MaxInt       *int
-	MinDuration  *time.Duration
-	MaxDuration  *time.Duration
-	MaxLen       int
+	ValueType     globalSettingValueType
+	DefaultValue  string
+	Description   string
+	Protected     bool
+	MinInt        *int
+	MaxInt        *int
+	MinDuration   *time.Duration
+	MaxDuration   *time.Duration
+	MaxLen        int
+	AllowedValues []string
 }
 
 var globalSettingRegistry = map[string]map[string]globalSettingSpec{
@@ -129,7 +132,20 @@ var globalSettingRegistry = map[string]map[string]globalSettingSpec{
 			Protected:    true,
 			MaxLen:       64,
 		},
-		globalSettingKeyIdentityAutoLink: {
+		globalSettingKeyIdentityUsernameStrategy: {
+			ValueType:     globalSettingValueTypeString,
+			DefaultValue:  string(usernameExternalThenPrefixed),
+			Description:   "Allocate external usernames first, strictly, or with a provider prefix. Applies only to unbound identities.",
+			Protected:     true,
+			AllowedValues: []string{string(usernameExternalThenPrefixed), string(usernameExternalStrict), string(usernameProviderPrefixed)},
+		},
+		globalSettingKeyIdentityAutoLinkByUsername: {
+			ValueType:    globalSettingValueTypeBool,
+			DefaultValue: "false",
+			Description:  "Link unbound external identities by an exact trusted username. Grants access to the target account; does not rename existing users.",
+			Protected:    true,
+		},
+		globalSettingKeyIdentityAutoLinkByVerifiedContact: {
 			ValueType:    globalSettingValueTypeBool,
 			DefaultValue: "true",
 			Description:  "Automatically link external identities to existing users by verified email or phone number.",

@@ -439,7 +439,7 @@ func newRevealTestAPI(t *testing.T) *KnownAdminAPI {
 	aesKey := []byte("0123456789abcdef0123456789abcdef")
 	passwordHash := crypto.SHA256([]byte("test-password"))
 	users := &StaticUsers{
-		&StaticUser{Username: "admin", PasswordHash: passwordHash, UserID: 1},
+		&StaticUser{Username: "admin", PasswordHash: passwordHash, UserID: crypto.Username2UserID("admin")},
 	}
 	return New(WithAESKey(aesKey), WithStaticUsers(users))
 }

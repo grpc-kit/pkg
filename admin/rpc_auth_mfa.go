@@ -19,6 +19,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/pquerna/otp/totp"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -52,10 +53,11 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 		return nil, errs.InvalidArgument(ctx).WithMessage("totp_code is required")
 	}
 
-	challenge, ok := a.mfaChallenges.Get(req.ChallengeId)
+	challenge, ok := a.mfaChallenges.Acquire(req.ChallengeId)
 	if !ok {
-		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired or not found")
+		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired, unavailable, or already in use")
 	}
+	defer a.mfaChallenges.Release(req.ChallengeId)
 	if challenge.ChallengeType != mfaChallengeTypeLoginVerify {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("invalid challenge type")
 	}
@@ -83,17 +85,8 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 	defer func() {
 		_ = tx.Rollback()
 	}()
-	active, err := tx.Users.Query().Where(
-		users.IDEQ(challenge.UserID),
-		users.UserStatusEQ(int(adminv1.User_ACTIVE)),
-		users.DeletedAtIsNil(),
-	).Exist(ctx)
-	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to query MFA user")
-	}
-	if !active {
-		a.mfaChallenges.Delete(req.ChallengeId)
-		return nil, errs.Unauthenticated(ctx).WithMessage("MFA user is unavailable")
+	if err := a.validateMFAPrimaryAuth(ctx, tx.Client(), challenge); err != nil {
+		return nil, err
 	}
 
 	query := tx.UserIdentities.Query().
@@ -161,9 +154,13 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 	if challenge.IssuanceContext == nil {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA challenge missing access token issuance context")
 	}
+	if err := a.validateMFAPrimaryAuth(ctx, db, challenge); err != nil {
+		return nil, err
+	}
 	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID, *challenge.IssuanceContext)
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
+		a.discardRejectedMFALoginChallenge(req.ChallengeId, err)
+		return nil, err
 	}
 	if err := tx.Commit(); err != nil {
 		if recoveryCodeConsumed {
@@ -291,12 +288,7 @@ func (a *KnownAdminAPI) ConfirmCurrentUserMFA(ctx context.Context, req *adminv1.
 	if !ok {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge is already being confirmed or expired")
 	}
-	confirmed := false
-	defer func() {
-		if !confirmed {
-			a.mfaChallenges.Release(req.ChallengeId)
-		}
-	}()
+	defer a.mfaChallenges.Release(req.ChallengeId)
 
 	db, err := a.GetLionClient()
 	if err != nil {
@@ -314,7 +306,6 @@ func (a *KnownAdminAPI) ConfirmCurrentUserMFA(ctx context.Context, req *adminv1.
 		a.mfaChallenges.Delete(req.ChallengeId)
 		return nil, errs.NotFound(ctx).WithMessage("user not found")
 	}
-
 	secretEnc, err := crypto.EncryptAES(a.config.aesKey, []byte(challenge.TempSecret))
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to encrypt MFA secret")
@@ -336,25 +327,11 @@ func (a *KnownAdminAPI) ConfirmCurrentUserMFA(ctx context.Context, req *adminv1.
 		return nil, errs.FailedPrecondition(ctx).WithMessage("local auth provider not found")
 	}
 
-	if err := a.ensureLocalIdentity(ctx, db, challenge.UserID, challenge.Username, localProviderID); err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to ensure local identity")
-	}
-
-	_, err = db.UserIdentities.Update().
-		Where(
-			useridentities.UserIDEQ(challenge.UserID),
-			useridentities.ProviderIDEQ(localProviderID),
-		).
-		SetMfaEnabled(true).
-		SetMfaSecretEncrypted(secretEnc).
-		SetMfaRecoveryCodesEncrypted(recoveryCodesEnc).
-		Save(ctx)
-	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to enable MFA")
+	if err := a.enableMFAForSetup(ctx, db, challenge, localProviderID, secretEnc, recoveryCodesEnc); err != nil {
+		return nil, err
 	}
 
 	a.mfaChallenges.Delete(req.ChallengeId)
-	confirmed = true
 
 	return &adminv1.ConfirmCurrentUserMFAResponse{
 		RecoveryCodes: recoveryCodes,
@@ -489,12 +466,20 @@ func (a *KnownAdminAPI) StartAuthMFASetup(ctx context.Context, req *adminv1.Star
 		return nil, errs.InvalidArgument(ctx).WithMessage("challenge_id is required")
 	}
 
-	challenge, ok := a.mfaChallenges.Get(req.ChallengeId)
+	challenge, ok := a.mfaChallenges.Acquire(req.ChallengeId)
 	if !ok {
-		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired or not found")
+		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired, unavailable, or already in use")
 	}
+	defer a.mfaChallenges.Release(req.ChallengeId)
 	if challenge.ChallengeType != mfaChallengeTypeLoginSetup {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("invalid challenge type")
+	}
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("database unavailable")
+	}
+	if err := a.validateMFAPrimaryAuth(ctx, db, challenge); err != nil {
+		return nil, err
 	}
 
 	key, err := totp.Generate(totp.GenerateOpts{
@@ -508,7 +493,7 @@ func (a *KnownAdminAPI) StartAuthMFASetup(ctx context.Context, req *adminv1.Star
 	if challenge.IssuanceContext == nil {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA challenge missing access token issuance context")
 	}
-	setupChallenge, err := a.mfaChallenges.CreateLoginWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeLoginSetupConfirm, challenge.UserID, challenge.Username, *challenge.IssuanceContext)
+	setupChallenge, err := a.mfaChallenges.createWithDeadline(challenge.ExpiresAt, mfaChallengeTypeLoginSetupConfirm, challenge.UserID, challenge.Username, "", challenge.IssuanceContext, challenge.PrimaryAuth)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create setup challenge")
 	}
@@ -533,10 +518,11 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 		return nil, errs.InvalidArgument(ctx).WithMessage("totp_code is required")
 	}
 
-	challenge, ok := a.mfaChallenges.Get(req.SetupChallengeId)
+	challenge, ok := a.mfaChallenges.Acquire(req.SetupChallengeId)
 	if !ok {
-		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired or not found")
+		return nil, errs.FailedPrecondition(ctx).WithMessage("challenge expired, unavailable, or already in use")
 	}
+	defer a.mfaChallenges.Release(req.SetupChallengeId)
 	if challenge.ChallengeType != mfaChallengeTypeLoginSetupConfirm {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("invalid challenge type")
 	}
@@ -557,57 +543,47 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("database unavailable")
 	}
-	active, err := db.Users.Query().Where(
-		users.IDEQ(challenge.UserID),
-		users.UserStatusEQ(int(adminv1.User_ACTIVE)),
-		users.DeletedAtIsNil(),
-	).Exist(ctx)
+	tx, err := db.Tx(ctx)
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to query user")
+		return nil, errs.Internal(ctx).WithMessage("failed to begin transaction")
 	}
-	if !active {
-		a.mfaChallenges.Delete(req.SetupChallengeId)
-		return nil, errs.Unauthenticated(ctx).WithMessage("MFA user is unavailable")
+	defer func() { _ = tx.Rollback() }()
+	transactionDB := tx.Client()
+	if err := a.validateMFAPrimaryAuth(ctx, transactionDB, challenge); err != nil {
+		return nil, err
 	}
-	_, localProviderID, pErr := a.getLocalMFAPolicy(ctx, db)
+	_, localProviderID, pErr := a.getLocalMFAPolicy(ctx, transactionDB)
 	if pErr != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to query local MFA policy")
 	}
 	if localProviderID == 0 {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("local auth provider not found")
 	}
-
-	if err := a.ensureLocalIdentity(ctx, db, challenge.UserID, challenge.Username, localProviderID); err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to ensure local identity")
-	}
-
 	secretEnc, err := crypto.EncryptAES(a.config.aesKey, []byte(challenge.TempSecret))
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to encrypt MFA secret")
 	}
 
-	_, err = db.UserIdentities.Update().
-		Where(
-			useridentities.UserIDEQ(challenge.UserID),
-			useridentities.ProviderIDEQ(localProviderID),
-		).
-		SetMfaEnabled(true).
-		SetMfaSecretEncrypted(secretEnc).
-		SetMfaRecoveryCodesEncrypted([]byte("")).
-		Save(ctx)
-	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to enable MFA for local identity")
+	if err := a.enableMFAForSetup(ctx, transactionDB, challenge, localProviderID, secretEnc, []byte("")); err != nil {
+		return nil, err
 	}
-
-	a.mfaChallenges.Delete(req.SetupChallengeId)
 
 	if challenge.IssuanceContext == nil {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA challenge missing access token issuance context")
 	}
+	if err := a.validateMFAPrimaryAuth(ctx, db, challenge); err != nil {
+		return nil, err
+	}
 	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID, *challenge.IssuanceContext)
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
+		a.discardRejectedMFALoginChallenge(req.SetupChallengeId, err)
+		return nil, err
 	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to finalize MFA setup")
+	}
+	a.mfaChallenges.Delete(req.SetupChallengeId)
 
 	return &adminv1.AuthToken{
 		AccessToken: accessToken,
@@ -616,31 +592,81 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 	}, nil
 }
 
-// issueTokenForUser 为指定用户签发 JWT access_token（MFA 验证通过后调用）
+// enableMFAForSetup atomically completes first-time setup. The condition is
+// shared by login and self-service so different challenges cannot replace an
+// authenticator that another request has already enabled.
+func (a *KnownAdminAPI) enableMFAForSetup(ctx context.Context, db *lion.Client, challenge *mfaChallenge, providerID int, secret, recoveryCodes []byte) error {
+	affected, err := db.UserIdentities.Update().
+		Where(
+			useridentities.UserIDEQ(challenge.UserID),
+			useridentities.ProviderIDEQ(providerID),
+			useridentities.MfaEnabledEQ(false),
+		).
+		SetMfaEnabled(true).
+		SetMfaSecretEncrypted(secret).
+		SetMfaRecoveryCodesEncrypted(recoveryCodes).
+		Save(ctx)
+	if err != nil {
+		return errs.Internal(ctx).WithMessage("failed to enable MFA")
+	}
+	if affected != 1 {
+		a.mfaChallenges.Delete(challenge.ChallengeID)
+		return errs.FailedPrecondition(ctx).WithMessage("MFA setup state changed; please restart authentication")
+	}
+	return nil
+}
+
+// 授权被拒绝时终止本次登录；内部签发故障保留挑战供原有效期内重试。
+// 两种失败均由调用方回滚事务。
+func (a *KnownAdminAPI) discardRejectedMFALoginChallenge(challengeID string, err error) {
+	switch errs.FromError(err).GetCode() {
+	case int32(codes.Unauthenticated), int32(codes.PermissionDenied), int32(codes.InvalidArgument):
+		a.mfaChallenges.Delete(challengeID)
+	}
+}
+
+// issueTokenForUser 保留受控授权拒绝的错误分类；存储、密钥和签名故障
+// 统一返回受控内部错误，避免向登录调用方泄露底层信息。
 func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, userID int, issuance AccessTokenIssuanceContext) (string, error) {
 	profile, err := loadAccessTokenUserProfile(ctx, db, a.config.aesKey, userID)
 	if err != nil {
-		return "", err
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
 	now := time.Now()
 	roleIDs, err := effectiveRoleIDsForUserAt(ctx, db, userID, now)
 	if err != nil {
-		return "", err
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
 	roleCodes, err := roleCodesForIDs(ctx, db, roleIDs)
 	if err != nil {
-		return "", err
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
 	groupCodes, err := effectiveGroupCodesForUserAt(ctx, db, userID, now)
 	if err != nil {
-		return "", err
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
 	privateKey, kid, err := loadAccessTokenRSAKey(ctx, db, a.config.aesKey)
 	if err != nil {
-		return "", err
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
 	input := accessTokenInputFromProfile(profile, issuance, roleCodes, groupCodes)
-	return newAccessTokenIssuer().issueRSA(input, privateKey, kid)
+	claims, err := newAccessTokenIssuer().build(input)
+	if err != nil {
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
+	}
+	if err := a.applyFederatedLoginClaims(ctx, claims, issuance); err != nil {
+		switch errs.FromError(err).GetCode() {
+		case int32(codes.Unauthenticated), int32(codes.PermissionDenied), int32(codes.InvalidArgument):
+			return "", err
+		default:
+			return "", errs.Internal(ctx).WithMessage("failed to issue access token")
+		}
+	}
+	token, err := auth.SignAccessTokenRSA(claims, privateKey, kid)
+	if err != nil {
+		return "", errs.Internal(ctx).WithMessage("failed to issue access token")
+	}
+	return token, nil
 }
 
 // reissueAccessTokenForUser 为已认证的 DB 用户重签 access token（RS256）。

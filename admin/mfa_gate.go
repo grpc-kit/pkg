@@ -5,10 +5,12 @@ import (
 	"fmt"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 const (
@@ -83,8 +85,8 @@ func (a *KnownAdminAPI) ensureLocalIdentity(ctx context.Context, db *lion.Client
 	return err
 }
 
-func (a *KnownAdminAPI) createMFALoginChallenge(ctx context.Context, challengeType mfaChallengeType, userID int, username string, responseType string, issuance AccessTokenIssuanceContext) (*adminv1.AuthToken, error) {
-	challenge, err := a.mfaChallenges.CreateLoginWithTTL(a.getMFAChallengeTTL(ctx), challengeType, userID, username, issuance)
+func (a *KnownAdminAPI) createMFALoginChallenge(ctx context.Context, challengeType mfaChallengeType, userID int, username string, responseType string, issuance AccessTokenIssuanceContext, primary mfaPrimaryAuth) (*adminv1.AuthToken, error) {
+	challenge, err := a.mfaChallenges.CreateLoginWithTTL(a.getMFAChallengeTTL(ctx), challengeType, userID, username, issuance, primary)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create MFA challenge")
 	}
@@ -104,10 +106,30 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 	providerMFAEnabled bool,
 	fallbackToken string,
 	issuance AccessTokenIssuanceContext,
+	primaryProviderID int,
 ) (*adminv1.AuthToken, error) {
 	enforce, localProviderID, err := a.getLocalMFAPolicy(ctx, db)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to query local MFA policy")
+	}
+	var primary mfaPrimaryAuth
+	if issuance.source != nil && (issuance.source.userID != userID || issuance.source.providerID != primaryProviderID) {
+		return nil, errs.Unauthenticated(ctx).WithMessage("primary authentication source mismatch")
+	}
+	if enforce || providerMFAEnabled {
+		identityID, err := db.UserIdentities.Query().Where(
+			useridentities.UserIDEQ(userID),
+			useridentities.ProviderIDEQ(primaryProviderID),
+			useridentities.HasLionAuthProvidersWith(authproviders.ProviderStatusEQ(int(adminv1.AuthProvider_ACTIVE)), authproviders.DeletedAtIsNil()),
+			useridentities.HasLionUsersWith(users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()),
+		).OnlyID(ctx)
+		if lion.IsNotFound(err) {
+			return nil, errs.Unauthenticated(ctx).WithMessage("primary authentication is unavailable; please log in again")
+		}
+		if err != nil {
+			return nil, errs.Internal(ctx).WithMessage("failed to query primary authentication identity")
+		}
+		primary = mfaPrimaryAuth{ProviderID: primaryProviderID, IdentityID: identityID}
 	}
 
 	if enforce {
@@ -129,21 +151,26 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 		}
 
 		if localIdentity.MfaEnabled {
-			return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginVerify, userID, username, mfaChallengeTypeTotpVerify, issuance)
+			return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginVerify, userID, username, mfaChallengeTypeTotpVerify, issuance, primary)
 		}
-		return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginSetup, userID, username, mfaChallengeTypeTotpSetup, issuance)
+		return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginSetup, userID, username, mfaChallengeTypeTotpSetup, issuance, primary)
 	}
 
 	// 非强制策略，保留原有“用户已开启 MFA 则验证”的行为
 	if providerMFAEnabled {
-		return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginVerify, userID, username, mfaChallengeTypeTotpVerify, issuance)
+		return a.createMFALoginChallenge(ctx, mfaChallengeTypeLoginVerify, userID, username, mfaChallengeTypeTotpVerify, issuance, primary)
 	}
 
 	accessToken := fallbackToken
+	// 显式联邦授权或普通外部登录默认策略均在通过 MFA 门禁后，按真实认证结果重新签发。
+	// MFA 前内部生成的 Token 不携带联邦资料，也不返回给调用方。
+	if issuance.authorization != nil || auth.HasFederatedScope(issuance.Scope) {
+		accessToken = ""
+	}
 	if accessToken == "" {
 		accessToken, err = a.issueTokenForUser(ctx, db, userID, issuance)
 		if err != nil {
-			return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
+			return nil, err
 		}
 	}
 
@@ -152,6 +179,31 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 		TokenType:   "Bearer",
 		ExpiresIn:   durationSecondsInt32(issuance.TTL),
 	}, nil
+}
+
+// validateMFAPrimaryAuth also accepts a transaction client. A final check using
+// the root client observes revocations made since the transaction snapshot.
+func (a *KnownAdminAPI) validateMFAPrimaryAuth(ctx context.Context, db *lion.Client, challenge *mfaChallenge) error {
+	primary := challenge.PrimaryAuth
+	available := false
+	if primary.ProviderID > 0 && primary.IdentityID > 0 {
+		var err error
+		available, err = db.UserIdentities.Query().Where(
+			useridentities.IDEQ(primary.IdentityID),
+			useridentities.ProviderIDEQ(primary.ProviderID),
+			useridentities.UserIDEQ(challenge.UserID),
+			useridentities.HasLionAuthProvidersWith(authproviders.ProviderStatusEQ(int(adminv1.AuthProvider_ACTIVE)), authproviders.DeletedAtIsNil()),
+			useridentities.HasLionUsersWith(users.UserStatusEQ(int(adminv1.User_ACTIVE)), users.DeletedAtIsNil()),
+		).Exist(ctx)
+		if err != nil {
+			return errs.Internal(ctx).WithMessage("failed to verify primary authentication")
+		}
+	}
+	if !available {
+		a.mfaChallenges.Delete(challenge.ChallengeID)
+		return errs.Unauthenticated(ctx).WithMessage("primary authentication is unavailable; please log in again")
+	}
+	return nil
 }
 
 func hasUserMFAEnabledIdentity(ctx context.Context, db *lion.Client, userID int) (bool, error) {

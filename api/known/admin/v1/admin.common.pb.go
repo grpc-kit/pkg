@@ -722,25 +722,34 @@ const (
 	Group_TYPE_UNSPECIFIED Group_Type = 0 // 默认值/未指定：系统默认值，通常不直接使用
 	// 1. 组织架构型 (Administrative/Organizational)
 	// 逻辑：反映公司真实的行政隶属关系。通常与组织架构同步。
+	// 用户经 CreateGroup 显式创建；部门隶属推导的成员进入 JWT groups claim。
 	Group_DEPARTMENT Group_Type = 1
 	// 2. 角色/权限型 (Role/Permission)
 	// 逻辑：纯粹为了授权而存在。例如 "财务审批组"、"代码库管理员组"。
 	// 这种组不一定对应行政部门，而是跨部门的权限集合。
+	// 用户经 CreateGroup 显式创建；角色绑定投影的成员进入 JWT groups claim。
 	Group_ROLE Group_Type = 2
 	// 3. 自动化/动态规则型 (Dynamic/Attribute-based)
 	// 逻辑：成员不是手动添加的，而是根据 user 的属性（如 "JobTitle == 'Manager' AND City == 'Shanghai'"）自动维护。
+	// 规则命中的组进入 JWT groups claim。
 	Group_DYNAMIC Group_Type = 3
 	// 4. 系统内置型 (System/Built-in)
 	// 逻辑：系统预设，不可删除。例如 "Everyone" (全员组)、"Authenticated Users"。
+	// 平台内置恒真组，无身份区分信息，不进入 JWT groups claim。
+	// 平台种子组必须归类本类型（经 ensureBuiltinGroup，protected=true），
+	// 禁止以其他类型种子建组。
 	Group_SYSTEM Group_Type = 4
 	// 5. 项目/任务型 (Project/Workstream)
 	// 逻辑：为了完成特定目标而临时或长期建立的协同组织。有明确的生命周期（结束后归档）。
+	// 直接成员关系进入 JWT groups claim。
 	Group_PROJECT Group_Type = 5
 	// 6. 外部协作型 (External/Guest)
 	// 逻辑：用于管理外部供应商、合作伙伴、客户。在权限审计时通常需要特殊标记。
+	// 直接成员关系进入 JWT groups claim。
 	Group_EXTERNAL Group_Type = 6
 	// 7. 虚拟/兴趣小组 (Virtual/Community)
 	// 逻辑：非正式组织，如“技术委员会”、“羽毛球协会”，通常用于非核心业务的通知和交流。
+	// 直接成员关系进入 JWT groups claim。
 	Group_COMMUNITY Group_Type = 7
 )
 

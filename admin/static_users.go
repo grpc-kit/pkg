@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -29,6 +30,10 @@ func (s StaticUser) GetAccessToken(expiresIn int32, clientID string) (string, er
 }
 
 func (s StaticUser) issueAccessToken(issuance AccessTokenIssuanceContext) (string, error) {
+	userID, err := crypto.ResolveStaticUserID(s.Username, s.UserID)
+	if err != nil {
+		return "", err
+	}
 	// TODO; 生成 jwt token 需要考虑不通用户级别生成 token 的最长有效时间
 
 	// tenant/roles/groups 完全由 issuance 决定：留空（""/nil）则对应声明不写入令牌
@@ -56,11 +61,6 @@ func (s StaticUser) issueAccessToken(issuance AccessTokenIssuanceContext) (strin
 		}
 	}
 
-	userID := s.UserID
-	if userID == 0 {
-		userID = crypto.Username2UserID(s.Username)
-	}
-
 	input := AccessTokenInput{
 		Subject:           strconv.FormatInt(userID, 10),
 		PreferredUsername: preferredUsername,
@@ -78,9 +78,36 @@ func (s StaticUser) issueAccessToken(issuance AccessTokenIssuanceContext) (strin
 
 type StaticUsers []*StaticUser
 
+// Validate rejects ambiguous identities before any user can sign in or mint a token.
+func (s StaticUsers) Validate() error {
+	names := make(map[string]struct{}, len(s))
+	ids := make(map[int64]struct{}, len(s))
+	for i, user := range s {
+		if user == nil {
+			return fmt.Errorf("static user at index %d is nil", i)
+		}
+		id, err := crypto.ResolveStaticUserID(user.Username, user.UserID)
+		if err != nil {
+			return fmt.Errorf("static user at index %d: %w", i, err)
+		}
+		if _, exists := names[user.Username]; exists {
+			return fmt.Errorf("duplicate static username at index %d", i)
+		}
+		if _, exists := ids[id]; exists {
+			return fmt.Errorf("duplicate static user_id %d at index %d", id, i)
+		}
+		names[user.Username] = struct{}{}
+		ids[id] = struct{}{}
+	}
+	return nil
+}
+
 // Valid 验证 LOCAL 登录载荷（CreateAuthLoginRequest.password_hash）是否与静态用户匹配。
 // 存储为 sha256 十六进制时做字符串相等比较；存储为 bcrypt 时（以 “$2” 开头）用 BcryptCompare，与库表 LOCAL 用户约定一致。
 func (s *StaticUsers) Valid(username, passwordHash string) (*StaticUser, bool) {
+	if s == nil || s.Validate() != nil {
+		return nil, false
+	}
 	for _, user := range *s {
 		if user.Username != username {
 			continue
@@ -99,6 +126,9 @@ func (s *StaticUsers) Valid(username, passwordHash string) (*StaticUser, bool) {
 // Find 按 username 反查静态用户（不校验口令）。
 // 供已认证调用方重签自身令牌时定位静态用户及其 HS256 签名密钥。
 func (s *StaticUsers) Find(username string) (*StaticUser, bool) {
+	if s == nil || s.Validate() != nil {
+		return nil, false
+	}
 	for _, user := range *s {
 		if user.Username == username {
 			return user, true
@@ -110,6 +140,9 @@ func (s *StaticUsers) Find(username string) (*StaticUser, bool) {
 // FindByUserID 按 user_id 查找静态用户（兼容 UserID==0 时用 username 折算 user_id）。
 // 供 CreateAuthToken 委托签发按目标 user_id 定位静态用户及其 HS256 签名密钥。
 func (s *StaticUsers) FindByUserID(userID int64) (*StaticUser, bool) {
+	if s == nil || s.Validate() != nil {
+		return nil, false
+	}
 	for _, user := range *s {
 		uid := user.UserID
 		if uid == 0 {
