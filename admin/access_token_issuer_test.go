@@ -117,7 +117,7 @@ func TestStaticIssuerUsesRawHMACKey(t *testing.T) {
 	now := time.Now().UTC()
 	issuer := &accessTokenIssuer{
 		now:      func() time.Time { return now },
-		newJWTID: func() string { return "fixed-jti" },
+		newJWTID: func() (string, error) { return "fixed-jti", nil },
 	}
 	input := AccessTokenInput{
 		Subject:  "42",

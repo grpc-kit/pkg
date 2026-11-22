@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/credentials"
+	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -168,14 +168,26 @@ func normalizeClaimValues(values []string) []string {
 
 type accessTokenIssuer struct {
 	now      func() time.Time
-	newJWTID func() string
+	newJWTID func() (string, error)
 }
 
 func newAccessTokenIssuer() *accessTokenIssuer {
 	return &accessTokenIssuer{
 		now:      time.Now,
-		newJWTID: uuid.NewString,
+		newJWTID: generateJWTID,
 	}
+}
+
+// generateJWTID 生成 Access Token 的 jti（JWT ID）：复用 lion/schema 的
+// GenerateCodeWithLen 编码算法（crypto/rand + 31 字符去易混淆字母表，与
+// roles/departments/groups 等 code 同源）。22 字符有效熵约 108 位
+// （首字符限 23 字母表，模映射有轻微偏差），对令牌唯一性足够
+// （10⁹ 量级令牌的生日碰撞概率 <10⁻¹⁵）；
+// 相比 UUID v4 的 36 字符减少固定开销。首字符限字母、字符集不含 i/l/o/0/1
+// 等约束对 jti 无害；消费方（MFA 会话绑定等）只做相等性比较，不解析格式，
+// 也不适用 ValidateCode 的 code 规则。
+func generateJWTID() (string, error) {
+	return schema.GenerateCodeWithLen(22)
 }
 
 func (i *accessTokenIssuer) build(input AccessTokenInput) (*auth.AccessTokenClaims, error) {
@@ -183,7 +195,11 @@ func (i *accessTokenIssuer) build(input AccessTokenInput) (*auth.AccessTokenClai
 		input.IssuedAt = i.now()
 	}
 	if strings.TrimSpace(input.JWTID) == "" {
-		input.JWTID = i.newJWTID()
+		jti, err := i.newJWTID()
+		if err != nil {
+			return nil, err
+		}
+		input.JWTID = jti
 	}
 	return BuildAccessTokenClaims(input)
 }
