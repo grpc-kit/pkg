@@ -1,19 +1,28 @@
 package admin
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	ber "github.com/go-asn1-ber/asn1-ber"
+	"github.com/go-ldap/ldap/v3"
 	"github.com/golang-jwt/jwt/v5"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/crypto"
+	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/rpc"
+	"github.com/pquerna/otp/totp"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -274,4 +283,314 @@ func TestFederatedLoginIntegration(t *testing.T) {
 			t.Fatalf("最终签发未复核客户端撤权：%v", err)
 		}
 	})
+}
+
+// 使用既有 BER 依赖提供最小 LDAP wire fixture，真实执行搜索及用户密码 bind；
+// 不需要真实目录、额外依赖或 CGO 数据库驱动。
+func externalDefaultsLDAPServer(t *testing.T, username string) (string, int32) {
+	t.Helper()
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var wg sync.WaitGroup
+	wg.Go(func() {
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+			func() {
+				defer conn.Close()
+				_ = conn.SetDeadline(time.Now().Add(5 * time.Second))
+				for {
+					request, err := ber.ReadPacket(conn)
+					if err != nil {
+						return
+					}
+					if len(request.Children) < 2 {
+						t.Error("invalid LDAP request")
+						return
+					}
+					send := func(operation *ber.Packet) bool {
+						packet := ber.NewSequence("LDAPMessage")
+						packet.AppendChild(request.Children[0])
+						packet.AppendChild(operation)
+						_, err := conn.Write(packet.Bytes())
+						return err == nil
+					}
+					result := func(tag ber.Tag, code int) *ber.Packet {
+						packet := ber.Encode(ber.ClassApplication, ber.TypeConstructed, tag, nil, "result")
+						packet.AppendChild(ber.NewInteger(ber.ClassUniversal, ber.TypePrimitive, ber.TagEnumerated, code, "resultCode"))
+						packet.AppendChild(ber.NewString(ber.ClassUniversal, ber.TypePrimitive, ber.TagOctetString, "", "matchedDN"))
+						packet.AppendChild(ber.NewString(ber.ClassUniversal, ber.TypePrimitive, ber.TagOctetString, "", "diagnosticMessage"))
+						return packet
+					}
+					op := request.Children[1]
+					switch op.Tag {
+					case ldap.ApplicationBindRequest:
+						code := ldap.LDAPResultInvalidCredentials
+						if len(op.Children) == 3 && op.Children[1].Value == "uid=Alice,dc=example,dc=test" && string(op.Children[2].Data.Bytes()) == "test-password" {
+							code = ldap.LDAPResultSuccess
+						}
+						if !send(result(ldap.ApplicationBindResponse, int(code))) {
+							return
+						}
+					case ldap.ApplicationSearchRequest:
+						entry := ber.Encode(ber.ClassApplication, ber.TypeConstructed, ldap.ApplicationSearchResultEntry, nil, "entry")
+						entry.AppendChild(ber.NewString(ber.ClassUniversal, ber.TypePrimitive, ber.TagOctetString, "uid=Alice,dc=example,dc=test", "dn"))
+						attributes := ber.NewSequence("attributes")
+						values := map[string]string{"uid": "9007199254740993"}
+						if username != "" {
+							values["cn"] = username
+						}
+						for name, value := range values {
+							attribute := ber.NewSequence("attribute")
+							attribute.AppendChild(ber.NewString(ber.ClassUniversal, ber.TypePrimitive, ber.TagOctetString, name, "name"))
+							set := ber.Encode(ber.ClassUniversal, ber.TypeConstructed, ber.TagSet, nil, "values")
+							set.AppendChild(ber.NewString(ber.ClassUniversal, ber.TypePrimitive, ber.TagOctetString, value, "value"))
+							attribute.AppendChild(set)
+							attributes.AppendChild(attribute)
+						}
+						entry.AppendChild(attributes)
+						if !send(entry) || !send(result(ldap.ApplicationSearchResultDone, ldap.LDAPResultSuccess)) {
+							return
+						}
+					default:
+						return
+					}
+				}
+			}()
+		}
+	})
+	t.Cleanup(func() { _ = listener.Close(); wg.Wait() })
+	address := listener.Addr().(*net.TCPAddr)
+	return address.IP.String(), int32(address.Port)
+}
+
+func externalDefaultsLoginFixture(t *testing.T, db *lion.Client, code, username string) (*lion.AuthProviders, *lion.Users, *adminv1.CreateAuthLoginRequest) {
+	t.Helper()
+	host, port := externalDefaultsLDAPServer(t, username)
+	attribute := "uid"
+	config, err := json.Marshal(ldapConfigData{Host: host, Port: port, UserSearchBase: "dc=example,dc=test", UsernameAttribute: "cn", UserIDAttribute: &attribute})
+	if err != nil {
+		t.Fatal(err)
+	}
+	provider := createTestAuthProvider(t, db, code, adminv1.AuthProvider_LDAP)
+	provider.Update().SetConfig(config).SaveX(t.Context())
+	user := activeIdentityTestUser(t, db, "local_"+code)
+	db.UserIdentities.Create().SetUserID(user.ID).SetProviderID(provider.ID).SetProviderUserID("9007199254740993").SaveX(t.Context())
+	return provider, user, &adminv1.CreateAuthLoginRequest{ProviderCode: code, Username: "input-name", PasswordHash: base64.StdEncoding.EncodeToString([]byte("test-password")), ExpiresIn: 137}
+}
+
+func TestExternalLoginDefaultsIntegration(t *testing.T) {
+	db := adminIntegrationClient(t)
+	createTestLoginSigningKey(t, db)
+	api := New(WithLionClient(db), WithAESKey([]byte(adminTestAESKey)), WithOIDCProvider("", "login-client", ""))
+	t.Cleanup(func() { close(api.mfaChallenges.stopGC) })
+	provider, user, req := externalDefaultsLoginFixture(t, db, "external-defaults", "Alice")
+	for _, tc := range []struct {
+		name   string
+		scopes []string
+	}{
+		{name: "disabled"}, {name: "empty", scopes: []string{}},
+		{name: "id", scopes: []string{"openid", auth.ScopeFederatedID}},
+		{name: "username", scopes: []string{"openid", auth.ScopeFederatedUsername}},
+		{name: "both", scopes: []string{"openid", auth.ScopeFederatedUsername, auth.ScopeFederatedID}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("scope", "openid federated:id", "external-login-default-scopes", "openid federated:id"))
+			if tc.name != "disabled" {
+				ctx = ContextWithExternalLoginDefaultScopes(ctx, tc.scopes)
+			}
+			result, err := api.CreateAuthLogin(ctx, req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			claims := verifiedFederatedTestToken(t, api, result.AccessToken)
+			scope := canonicalScope(strings.Join(tc.scopes, " "))
+			want := auth.ProjectFederatedClaims(scope, provider.Code, "9007199254740993", "Alice")
+			if !reflect.DeepEqual(claims.FederatedClaims, want) || claims.Scope != scope || claims.ClientID != "login-client" || claims.Subject != strconv.Itoa(user.ID) || claims.PreferredUsername != user.Username || claims.ExpiresAt.Sub(claims.IssuedAt.Time) != 137*time.Second || result.ExpiresIn != 137 {
+				t.Fatalf("ordinary LDAP token lost its source, projection or original identity: %+v", claims)
+			}
+			info, err := api.GetOAuth2Userinfo(rpc.ContextWithTokenClaims(t.Context(), claims), &emptypb.Empty{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			encoded, err := protojson.Marshal(info)
+			if err != nil || bytes.Contains(encoded, []byte("federated")) {
+				t.Fatal("UserInfo output expanded")
+			}
+		})
+	}
+	if db.OAuth2Clients.Query().CountX(t.Context()) != 0 {
+		t.Fatal("ordinary login unexpectedly required an OAuth2 client")
+	}
+	for _, scopes := range [][]string{{"openid"}, {auth.ScopeFederatedID}, {"openid", "federated:ids"}, {"openid", auth.ScopeFederatedID, ""}} {
+		if result, err := api.CreateAuthLogin(ContextWithExternalLoginDefaultScopes(t.Context(), scopes), req); status.Code(err) != codes.InvalidArgument || result.GetAccessToken() != "" {
+			t.Fatalf("invalid defaults accepted: %v", err)
+		}
+	}
+	missingProvider, _, missingReq := externalDefaultsLoginFixture(t, db, "missing-username", "")
+	for _, scopes := range [][]string{{"openid", auth.ScopeFederatedUsername}, {"openid", auth.ScopeFederatedID, auth.ScopeFederatedUsername}} {
+		result, err := api.CreateAuthLogin(ContextWithExternalLoginDefaultScopes(t.Context(), scopes), missingReq)
+		if err != nil {
+			t.Fatal(err)
+		}
+		claims := verifiedFederatedTestToken(t, api, result.AccessToken)
+		if !reflect.DeepEqual(claims.FederatedClaims, auth.ProjectFederatedClaims(claims.Scope, missingProvider.Code, "9007199254740993", "")) {
+			t.Fatal("missing upstream username was inferred from local or submitted username")
+		}
+	}
+
+	t.Run("LOCAL actual type including alias", func(t *testing.T) {
+		for _, code := range []string{"local", "alias-local"} {
+			local := createTestAuthProvider(t, db, code, adminv1.AuthProvider_LOCAL)
+			localUser := activeIdentityTestUser(t, db, "user_"+code)
+			db.UserIdentities.Create().SetProviderID(local.ID).SetUserID(localUser.ID).SetProviderUserID(localUser.Username).SetPasswordHash(crypto.BcryptHashMust("test-hash")).SaveX(t.Context())
+			result, err := api.CreateAuthLogin(ContextWithExternalLoginDefaultScopes(t.Context(), []string{"openid", auth.ScopeFederatedID}), &adminv1.CreateAuthLoginRequest{ProviderCode: code, Username: localUser.Username, PasswordHash: "test-hash"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			claims := verifiedFederatedTestToken(t, api, result.AccessToken)
+			if claims.Scope != "" || claims.FederatedClaims != nil {
+				t.Fatal("defaults changed LOCAL login")
+			}
+		}
+	})
+	t.Run("explicit authorization priority and rejection", func(t *testing.T) {
+		client := db.OAuth2Clients.Create().SetClientID("explicit-client").SetClientSecretHash("test-only").SetScopes([]string{"openid", auth.ScopeFederatedUsername}).SetGrantTypes([]string{"authorization_code"}).SetRedirectUris([]string{"https://client.example.test/callback"}).SaveX(t.Context())
+		ctx := ContextWithExternalLoginDefaultScopes(t.Context(), []string{"openid", auth.ScopeFederatedID})
+		approved := FederatedLoginAuthorization{ClientID: client.ClientID, Scope: "openid federated:username", RedirectURI: client.RedirectUris[0], ExpiresAt: time.Now().Add(time.Minute)}
+		result, err := api.CreateAuthLogin(ContextWithFederatedLoginAuthorization(ctx, approved), req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		claims := verifiedFederatedTestToken(t, api, result.AccessToken)
+		if claims.ClientID != client.ClientID || claims.Scope != canonicalScope(approved.Scope) || claims.FederatedClaims == nil || claims.FederatedClaims.UserID != nil || claims.FederatedClaims.Username == nil {
+			t.Fatal("defaults expanded explicit username-only authorization")
+		}
+		for _, invalid := range []FederatedLoginAuthorization{{}, {ClientID: "unknown", Scope: approved.Scope, RedirectURI: approved.RedirectURI, ExpiresAt: approved.ExpiresAt}, {ClientID: approved.ClientID, Scope: approved.Scope, RedirectURI: approved.RedirectURI, ExpiresAt: time.Now().Add(-time.Minute)}} {
+			if result, err := api.CreateAuthLogin(ContextWithFederatedLoginAuthorization(ctx, invalid), req); err == nil || result.GetAccessToken() != "" {
+				t.Fatal("invalid explicit authorization fell back to defaults")
+			}
+		}
+	})
+}
+
+func TestExternalLoginDefaultsMFAIntegration(t *testing.T) {
+	db := adminIntegrationClient(t)
+	createTestLoginSigningKey(t, db)
+	local := createTestAuthProvider(t, db, "local", adminv1.AuthProvider_LOCAL)
+	api := New(WithLionClient(db), WithAESKey([]byte(adminTestAESKey)), WithOIDCProvider("", "login-client", ""))
+	t.Cleanup(func() { close(api.mfaChallenges.stopGC) })
+	for _, setup := range []bool{false, true} {
+		for _, outcome := range []string{"success", "expired", "signing-retry", "provider-disabled"} {
+			t.Run(strconv.FormatBool(setup)+"/"+outcome, func(t *testing.T) {
+				code := "mfa-" + strconv.FormatBool(setup) + "-" + outcome
+				provider, user, req := externalDefaultsLoginFixture(t, db, code, "Alice")
+				const originalSecret = "JBSWY3DPEHPK3PXP"
+				secretEnc, err := crypto.EncryptAES([]byte(adminTestAESKey), []byte(originalSecret))
+				if err != nil {
+					t.Fatal(err)
+				}
+				credential := db.UserIdentities.Create().SetUserID(user.ID).SetProviderID(local.ID).SetProviderUserID(user.Username).SetMfaEnabled(!setup).SetMfaSecretEncrypted(secretEnc).SaveX(t.Context())
+				if err := writeGlobalSettingUpdates(t.Context(), db, globalSettingsCategorySecurity, []*adminv1.UpdateGlobalSetting{{SettingKey: globalSettingKeyLoginEnforceMFA, SettingValue: strconv.FormatBool(setup)}}, 0, false); err != nil {
+					t.Fatal(err)
+				}
+				scopes := []string{"openid", auth.ScopeFederatedID}
+				ctx := ContextWithExternalLoginDefaultScopes(t.Context(), scopes)
+				first, err := api.CreateAuthLogin(ctx, req)
+				if err != nil || !first.GetMfaRequired() || first.GetAccessToken() != "" {
+					t.Fatalf("MFA gate failed: %v", err)
+				}
+				scopes[1] = auth.ScopeFederatedUsername
+				challengeID, secret := first.ChallengeId, originalSecret
+				original, ok := api.mfaChallenges.Get(challengeID)
+				if !ok {
+					t.Fatal("missing challenge")
+				}
+				// 缩短原期限，确认首绑不会按全局 TTL 重新延长。
+				deadline := time.Now().Add(30 * time.Second)
+				api.mfaChallenges.mu.Lock()
+				api.mfaChallenges.entries[challengeID].ExpiresAt = deadline
+				api.mfaChallenges.mu.Unlock()
+				// 后续请求故意注入其他范围；MFA 必须只使用原挑战。
+				mfaCtx := ContextWithExternalLoginDefaultScopes(t.Context(), []string{"openid", auth.ScopeFederatedUsername})
+				if setup {
+					started, err := api.StartAuthMFASetup(mfaCtx, &adminv1.StartAuthMFASetupRequest{ChallengeId: challengeID})
+					if err != nil {
+						t.Fatal(err)
+					}
+					challengeID, secret = started.SetupChallengeId, started.Secret
+				}
+				challenge, ok := api.mfaChallenges.Get(challengeID)
+				if !ok || !challenge.ExpiresAt.Equal(deadline) || challenge.IssuanceContext.Scope != "federated:id openid" || challenge.IssuanceContext.authorization != nil || !reflect.DeepEqual(challenge.IssuanceContext.source, original.IssuanceContext.source) {
+					t.Fatal("MFA lost defaults, deadline or real source")
+				}
+				finish := func(code string) (*adminv1.AuthToken, error) {
+					if setup {
+						return api.ConfirmAuthMFASetup(mfaCtx, &adminv1.ConfirmAuthMFASetupRequest{SetupChallengeId: challengeID, TotpCode: code})
+					}
+					return api.VerifyAuthMFA(mfaCtx, &adminv1.VerifyAuthMFARequest{ChallengeId: challengeID, TotpCode: code})
+				}
+				if result, err := finish("invalid-code"); status.Code(err) != codes.Unauthenticated || result.GetAccessToken() != "" {
+					t.Fatalf("bad MFA code accepted: %v", err)
+				}
+				retry, ok := api.mfaChallenges.Get(challengeID)
+				if !ok || !retry.ExpiresAt.Equal(deadline) || !reflect.DeepEqual(retry.IssuanceContext, challenge.IssuanceContext) {
+					t.Fatal("failed attempt changed challenge")
+				}
+				if outcome == "expired" {
+					api.mfaChallenges.mu.Lock()
+					api.mfaChallenges.entries[challengeID].ExpiresAt = time.Now().Add(-time.Second)
+					api.mfaChallenges.mu.Unlock()
+				}
+				if outcome == "provider-disabled" {
+					provider.Update().SetProviderStatus(int(adminv1.AuthProvider_DISABLED)).SaveX(t.Context())
+				}
+				totpCode, err := totp.GenerateCode(secret, time.Now())
+				if err != nil {
+					t.Fatal(err)
+				}
+				if outcome == "signing-retry" {
+					key := db.Credentials.Query().OnlyX(t.Context())
+					key.Update().SetCredentialStatus(int(adminv1.Credential_DISABLED)).SaveX(t.Context())
+					result, err := finish(totpCode)
+					key.Update().SetCredentialStatus(key.CredentialStatus).SaveX(t.Context())
+					if status.Code(err) != codes.Internal || result.GetAccessToken() != "" {
+						t.Fatalf("unexpected signing failure: %v", err)
+					}
+					stored := db.UserIdentities.GetX(t.Context(), credential.ID)
+					if stored.MfaEnabled != credential.MfaEnabled || !bytes.Equal(stored.MfaSecretEncrypted, credential.MfaSecretEncrypted) {
+						t.Fatal("failed signing did not roll back MFA")
+					}
+					if retry, ok := api.mfaChallenges.Get(challengeID); !ok || !retry.ExpiresAt.Equal(deadline) || !reflect.DeepEqual(retry.IssuanceContext, challenge.IssuanceContext) {
+						t.Fatal("signing failure lost original challenge")
+					}
+				}
+				result, err := finish(totpCode)
+				if outcome == "expired" || outcome == "provider-disabled" {
+					wantCode := codes.Unauthenticated
+					if outcome == "expired" {
+						wantCode = codes.FailedPrecondition
+					}
+					if status.Code(err) != wantCode || result.GetAccessToken() != "" {
+						t.Fatalf("unavailable authentication succeeded: %v", err)
+					}
+					return
+				}
+				if err != nil {
+					t.Fatal(err)
+				}
+				claims := verifiedFederatedTestToken(t, api, result.AccessToken)
+				if !reflect.DeepEqual(claims.FederatedClaims, auth.ProjectFederatedClaims("openid federated:id", provider.Code, "9007199254740993", "Alice")) || claims.ClientID != "login-client" || claims.Subject != strconv.Itoa(user.ID) || claims.Scope != "federated:id openid" || claims.ExpiresAt.Sub(claims.IssuedAt.Time) != 137*time.Second {
+					t.Fatal("MFA final token changed source or original issuance")
+				}
+				if _, ok := api.mfaChallenges.Get(challengeID); ok {
+					t.Fatal("successful MFA left challenge usable")
+				}
+			})
+		}
+	}
 }

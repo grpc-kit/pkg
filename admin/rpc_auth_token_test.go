@@ -66,6 +66,7 @@ func TestCreateAuthTokenRejectsFederatedScopes(t *testing.T) {
 	api := staticUserAPI()
 	t.Cleanup(func() { close(api.mfaChallenges.stopGC) })
 	ctx := callerTokenContext(testStaticUsername, testStaticUserID, []string{"superadmin"}, nil, "")
+	ctx = ContextWithExternalLoginDefaultScopes(ctx, []string{"openid", auth.ScopeFederatedID})
 	for _, scope := range []string{"openid federated:id", "openid federated:username"} {
 		_, err := api.CreateAuthToken(ctx, &adminv1.CreateAuthTokenRequest{ClientId: "test-client", Scope: scope})
 		if errs.FromError(err).GetCode() != int32(codes.InvalidArgument) {
@@ -86,6 +87,7 @@ func TestCreateAuthTokenRequiresAccessToken(t *testing.T) {
 func TestCreateAuthTokenStaticUserSelfReissue(t *testing.T) {
 	api := staticUserAPI()
 	ctx := callerTokenContext(testStaticUsername, testStaticUserID, []string{"superadmin"}, nil, "")
+	ctx = ContextWithExternalLoginDefaultScopes(ctx, []string{"openid", auth.ScopeFederatedID})
 	req := &adminv1.CreateAuthTokenRequest{
 		ClientId:  "test-client",
 		ExpiresIn: 3600,
@@ -112,6 +114,9 @@ func TestCreateAuthTokenStaticUserSelfReissue(t *testing.T) {
 	}
 	if claims.ClientID != "test-client" {
 		t.Fatalf("client_id = %q, want test-client", claims.ClientID)
+	}
+	if claims.Scope != "" || claims.FederatedClaims != nil {
+		t.Fatal("external login defaults changed token management issuance")
 	}
 	if claims.Tenant != "custom-tenant" {
 		t.Fatalf("tenant = %q, want custom-tenant", claims.Tenant)
