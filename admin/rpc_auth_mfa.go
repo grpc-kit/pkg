@@ -493,7 +493,7 @@ func (a *KnownAdminAPI) StartAuthMFASetup(ctx context.Context, req *adminv1.Star
 	if challenge.IssuanceContext == nil {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA challenge missing access token issuance context")
 	}
-	setupChallenge, err := a.mfaChallenges.CreateLoginWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeLoginSetupConfirm, challenge.UserID, challenge.Username, *challenge.IssuanceContext, challenge.PrimaryAuth)
+	setupChallenge, err := a.mfaChallenges.createWithDeadline(challenge.ExpiresAt, mfaChallengeTypeLoginSetupConfirm, challenge.UserID, challenge.Username, "", challenge.IssuanceContext, challenge.PrimaryAuth)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create setup challenge")
 	}

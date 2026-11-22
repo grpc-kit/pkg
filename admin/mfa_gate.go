@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
@@ -161,9 +162,9 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 	}
 
 	accessToken := fallbackToken
-	// 携带联邦授权的登录 Token 仅在通过 MFA 门禁后，按本次真实认证结果重新签发。
+	// 显式联邦授权或普通外部登录默认策略均在通过 MFA 门禁后，按真实认证结果重新签发。
 	// MFA 前内部生成的 Token 不携带联邦资料，也不返回给调用方。
-	if issuance.authorization != nil {
+	if issuance.authorization != nil || auth.HasFederatedScope(issuance.Scope) {
 		accessToken = ""
 	}
 	if accessToken == "" {

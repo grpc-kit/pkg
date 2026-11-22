@@ -27,6 +27,37 @@ type FederatedLoginAuthorization struct {
 
 type federatedLoginAuthorizationKey struct{}
 
+type externalLoginDefaultScopesKey struct{}
+
+// ContextWithExternalLoginDefaultScopes 保存普通外部账号登录默认范围的副本。
+// 仅供可信同进程服务端在 CreateAuthLogin 前使用，不得从浏览器参数、Header、
+// metadata 或登录请求自动注入。空列表不启用；非空列表只允许 openid 加
+// federated:id / federated:username（至少一项），在实际 LDAP 登录前校验。
+// LOCAL / 静态用户不应用此策略；显式 FederatedLoginAuthorization 始终优先。
+// 返回的 context 仅用于本次登录；MFA 后续步骤沿用原挑战，无需再次注入。
+func ContextWithExternalLoginDefaultScopes(parent context.Context, scopes []string) context.Context {
+	return context.WithValue(parent, externalLoginDefaultScopesKey{}, slices.Clone(scopes))
+}
+
+func externalLoginDefaultScope(ctx context.Context) (string, error) {
+	scopes, _ := ctx.Value(externalLoginDefaultScopesKey{}).([]string)
+	if len(scopes) == 0 {
+		return "", nil
+	}
+	for _, scope := range scopes {
+		switch scope {
+		case "openid", auth.ScopeFederatedID, auth.ScopeFederatedUsername:
+		default:
+			return "", errs.InvalidArgument(ctx).WithMessage("invalid_scope: unsupported external login default scope")
+		}
+	}
+	scope := strings.Join(normalizeClaimValues(scopes), " ")
+	if !slices.Contains(scopes, "openid") || !auth.HasFederatedScope(scope) {
+		return "", errs.InvalidArgument(ctx).WithMessage("invalid_scope: external login defaults require openid and a federated scope")
+	}
+	return scope, nil
+}
+
 // ContextWithFederatedLoginAuthorization 为本次同进程登录保存授权参数的值副本。
 // 调用方须先验证浏览器授权流程、上游 state 与所选认证提供方的绑定，
 // 并保留下游用户同意步骤；不得从未验证的请求或 metadata 自动注入。
@@ -54,9 +85,6 @@ type federatedSource struct {
 func (s *socialUsers) captureFederatedSource(userID int, subject, username string) {
 	if !auth.HasFederatedScope(s.issuanceContext.Scope) || s.AuthProvider.ProviderType == int(adminv1.AuthProvider_LOCAL) {
 		return
-	}
-	if !auth.ValidFederatedUsername(username) {
-		username = ""
 	}
 	s.authenticationSource = &federatedSource{userID: userID, providerID: s.AuthProvider.ID,
 		connectorID: s.AuthProvider.Code, subject: subject, username: username}
@@ -137,22 +165,35 @@ func (a *KnownAdminAPI) loginIssuanceContext(ctx context.Context, approved *Fede
 }
 
 func (a *KnownAdminAPI) applyFederatedLoginClaims(ctx context.Context, claims *auth.AccessTokenClaims, issuance AccessTokenIssuanceContext) error {
-	if issuance.authorization == nil {
+	if issuance.authorization == nil && !auth.HasFederatedScope(issuance.Scope) {
 		return nil
 	}
-	db, err := a.federatedDB(ctx)
-	if err != nil {
-		return err
+	clientID, scope := issuance.ClientID, issuance.Scope
+	if issuance.authorization != nil {
+		db, err := a.federatedDB(ctx)
+		if err != nil {
+			return err
+		}
+		if err := validateFederatedLoginAuthorization(ctx, db, *issuance.authorization); err != nil {
+			return err
+		}
+		clientID, scope = issuance.authorization.ClientID, issuance.authorization.Scope
 	}
-	if err := validateFederatedLoginAuthorization(ctx, db, *issuance.authorization); err != nil {
-		return err
-	}
-	if claims.ClientID != issuance.authorization.ClientID || canonicalScope(claims.Scope) != canonicalScope(issuance.authorization.Scope) {
+	if claims.ClientID != clientID || canonicalScope(claims.Scope) != canonicalScope(scope) {
 		return errs.Unauthenticated(ctx).WithMessage("login token does not match its authorization")
 	}
+	// 必须在投影或覆盖前检查原对象，避免未知键和越权字段被裁剪后变成合法资料。
+	if !auth.ValidFederatedClaims(claims.Scope, claims.FederatedClaims) {
+		return errs.Unauthenticated(ctx).WithMessage("invalid federated login claims")
+	}
+	claims.FederatedClaims = nil
 	if source := issuance.source; source != nil {
 		if claims.Subject != strconv.Itoa(source.userID) {
 			return errs.Unauthenticated(ctx).WithMessage("authentication source does not match the user")
+		}
+		if len(source.connectorID) > 32 || !auth.ValidFederatedUsername(source.connectorID) ||
+			(source.username != "" && !auth.ValidFederatedUsername(source.username)) {
+			return errs.Unauthenticated(ctx).WithMessage("invalid federated authentication source")
 		}
 		claims.FederatedClaims = auth.ProjectFederatedClaims(claims.Scope, source.connectorID, source.subject, source.username)
 	}

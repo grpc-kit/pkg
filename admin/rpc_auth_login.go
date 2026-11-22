@@ -26,6 +26,7 @@ import (
 
 // CreateAuthLogin 创建登录认证。
 // 同进程联邦登录可使用 ContextWithFederatedLoginAuthorization 传入已批准的授权参数。
+// 普通外部登录可使用 ContextWithExternalLoginDefaultScopes 设置服务端默认范围。
 func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.CreateAuthLoginRequest) (*adminv1.AuthToken, error) {
 	authorization := federatedLoginAuthorizationFromContext(ctx)
 	result := &adminv1.AuthToken{TokenType: "Bearer"}
@@ -109,7 +110,6 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			}
 			return nil, errs.Unauthenticated(ctx).WithMessage("authentication failed")
 		}
-		su.issuanceContext = issuance
 		su.staticUsers = a.config.staticUsers
 
 		if su.AuthProvider.ProviderStatus != int(adminv1.AuthProvider_ACTIVE.Number()) {
@@ -120,6 +120,13 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 		if providerType != adminv1.AuthProvider_LOCAL && providerType != adminv1.AuthProvider_LDAP {
 			return nil, errs.FailedPrecondition(ctx).WithMessage("only LOCAL and LDAP providers are supported")
 		}
+		if authorization == nil && providerType == adminv1.AuthProvider_LDAP {
+			issuance.Scope, err = externalLoginDefaultScope(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+		su.issuanceContext = issuance
 
 		passwordPayload := req.PasswordHash
 		if providerType == adminv1.AuthProvider_LDAP {

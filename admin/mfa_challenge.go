@@ -133,6 +133,10 @@ func (s *mfaChallengeStore) CreateLoginWithTTL(ttl time.Duration, ct mfaChalleng
 }
 
 func (s *mfaChallengeStore) createWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username, sessionID string, issuance *AccessTokenIssuanceContext, primary mfaPrimaryAuth) (*mfaChallenge, error) {
+	return s.createWithDeadline(time.Now().Add(ttl), ct, userID, username, sessionID, issuance, primary)
+}
+
+func (s *mfaChallengeStore) createWithDeadline(expiresAt time.Time, ct mfaChallengeType, userID int, username, sessionID string, issuance *AccessTokenIssuanceContext, primary mfaPrimaryAuth) (*mfaChallenge, error) {
 	id, err := generateChallengeID()
 	if err != nil {
 		return nil, err
@@ -142,13 +146,13 @@ func (s *mfaChallengeStore) createWithTTL(ttl time.Duration, ct mfaChallengeType
 		ChallengeType:   ct,
 		UserID:          userID,
 		Username:        username,
-		ExpiresAt:       time.Now().Add(ttl),
+		ExpiresAt:       expiresAt,
 		SessionID:       sessionID,
 		IssuanceContext: issuance,
 		PrimaryAuth:     primary,
 	}
 	s.mu.Lock()
-	s.entries[id] = c
+	s.entries[id] = c.clone()
 	s.mu.Unlock()
 	return c.clone(), nil
 }
