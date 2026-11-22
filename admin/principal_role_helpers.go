@@ -677,6 +677,11 @@ func effectiveGroupCodesForUserAt(ctx context.Context, db *lion.Client, userID i
 		return nil
 	}
 
+	// groups claim 准则：按创建来源二分。用户创建的六类组进入 claim——
+	// 直接成员（PROJECT/EXTERNAL/COMMUNITY）、部门隶属推导（DEPARTMENT）、
+	// 角色绑定投影（ROLE）、用户属性规则命中（DYNAMIC）；平台内置的 SYSTEM
+	// 组（如 everyone，恒真规则）不进入 claim。平台种子组必须经
+	// ensureBuiltinGroup 归类 SYSTEM，禁止以其他类型种子建组。
 	// Apply membership and source validity with EXISTS predicates on the bounded
 	// groups query. This preserves the deterministic overflow check without an
 	// unbounded membership pre-query or an arbitrarily truncated ID slice.
@@ -735,7 +740,7 @@ func effectiveGroupCodesForUserAt(ctx context.Context, db *lion.Client, userID i
 	ruleGroups, err := db.Groups.Query().Select(
 		groups.FieldID, groups.FieldCode, groups.FieldGroupType, groups.FieldConfig,
 	).Where(
-		groups.GroupTypeIn(int(adminv1.Group_DYNAMIC), int(adminv1.Group_SYSTEM)),
+		groups.GroupTypeIn(int(adminv1.Group_DYNAMIC)),
 		groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)),
 		groups.DeletedAtIsNil(),
 	).Order(lion.Asc(groups.FieldCode)).Limit(activeRuleGroupMax + 1).All(ctx)

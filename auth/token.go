@@ -34,6 +34,10 @@ type CommonClaims struct {
 	// Tenant 租户标识，对应 lion_tenants 中 code 编码。
 	Tenant string `json:"tenant,omitempty"`
 	// Groups 是可选的用户组编码列表，对应 lion_groups.code。
+	// 准则：按创建来源二分——用户创建的六类组（PROJECT/EXTERNAL/COMMUNITY
+	// 直接成员、DEPARTMENT 部门隶属推导、ROLE 角色绑定投影、DYNAMIC 规则命中）
+	// 进入 claim；平台内置的 SYSTEM 组（如 everyone，恒真规则）不进入。
+	// 服务端角色投影与策略绑定不受影响（走数据库 principal 路径）。
 	// 仅在客户端明确需要组映射时签发。
 	Groups []string `json:"groups,omitempty"`
 	// Roles 是用户在当前 tenant 下的可选角色编码列表，
@@ -42,7 +46,7 @@ type CommonClaims struct {
 	Roles []string `json:"roles,omitempty"`
 
 	// FederatedClaims 按已授权的 federated:id / federated:username
-	// 输出外部身份资料；普通登录 Token 省略此字段。
+	// 输出外部身份资料；未启用显式授权或外部登录默认范围时省略此字段。
 	// Refresh Token 可保留同一授权快照，供刷新时延续。
 	FederatedClaims *FederatedClaims `json:"federated_claims,omitempty"`
 	// Deprecated: 历史应用标识字段。
